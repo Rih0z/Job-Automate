@@ -1,4 +1,4 @@
-# 企画書mdファイルからの16:9比率プレゼンテーションスライド生成プロンプト
+# 企画書mdファイルからの16:9比率プレゼンテーションスライド生成プロンプト（改良版）
 
 以下の指示に従って、提供された企画書のmdファイルから16:9比率のプレゼンテーションスライドをHTMLとCSSで自動生成します。スクロールバーが表示されないよう最適化され、各スライドが1画面におさまるデザインを実現します。
 
@@ -171,13 +171,18 @@
 
     /* 情報量が多いスライド用のスタイル */
     .compact-table th, .compact-table td {
-      padding: 4px;
-      font-size: 12px;
+      padding: 3px;
+      font-size: 11px;
     }
 
     .smaller-text li {
       font-size: 14px;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
+    }
+
+    .very-small-text li {
+      font-size: 12px;
+      margin-bottom: 2px;
     }
 
     .appendix-title {
@@ -195,7 +200,7 @@
 
     /* ロードマップ図用のスタイル */
     .roadmap-container {
-      margin: 15px 0;
+      margin: 10px 0;
       position: relative;
       flex-grow: 1;
       display: flex;
@@ -222,14 +227,14 @@
 
     .roadmap-quarter {
       display: flex;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       position: relative;
       flex: 1;
     }
 
     .roadmap-marker {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       background-color: #0066cc;
       border-radius: 50%;
       display: flex;
@@ -237,7 +242,7 @@
       align-items: center;
       color: white;
       font-weight: bold;
-      margin-right: 15px;
+      margin-right: 12px;
       z-index: 2;
       flex-shrink: 0;
       font-size: 14px;
@@ -247,7 +252,7 @@
       flex: 1;
       background-color: #f0f8ff;
       border-left: 5px solid;
-      padding: 8px;
+      padding: 6px;
       border-radius: 0 8px 8px 0;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       display: flex;
@@ -257,18 +262,19 @@
 
     .roadmap-content h3 {
       margin-top: 0;
-      margin-bottom: 5px;
+      margin-bottom: 3px;
       color: #333;
-      font-size: 17px;
+      font-size: 15px;
     }
 
     .roadmap-content ul {
       margin-bottom: 0;
+      margin-top: 2px;
     }
 
     .roadmap-content li {
-      font-size: 14px;
-      margin-bottom: 4px;
+      font-size: 12px;
+      margin-bottom: 2px;
     }
 
     /* 各四半期のカラー設定 */
@@ -281,6 +287,148 @@
     .q2 .roadmap-marker { background-color: #34a853; }
     .q3 .roadmap-marker { background-color: #fbbc05; }
     .q4 .roadmap-marker { background-color: #ea4335; }
+
+    /* 円グラフ用スタイル - サイズ調整 */
+    .chart-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 240px;
+      margin: 10px 0;
+    }
+
+    .pie-chart {
+      width: 200px;
+      height: 200px;
+      position: relative;
+      border-radius: 50%;
+      background: conic-gradient(
+        #4285f4 0% 20%, 
+        #34a853 20% 65%, 
+        #fbbc05 65% 90%, 
+        #ea4335 90% 100%
+      );
+    }
+
+    .pie-chart::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background-color: white;
+      border-radius: 50%;
+    }
+
+    .chart-labels {
+      display: flex;
+      flex-direction: column;
+      margin-left: 20px;
+    }
+
+    .chart-label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+
+    .color-box {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+
+    .color-1 { background-color: #4285f4; }
+    .color-2 { background-color: #34a853; }
+    .color-3 { background-color: #fbbc05; }
+    .color-4 { background-color: #ea4335; }
+
+    /* 中央揃え */
+    .center-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      text-align: center;
+    }
+
+    .title-text {
+      font-size: 40px;
+      font-weight: bold;
+      color: #0066cc;
+      margin-bottom: 20px;
+    }
+
+    .subtitle-text {
+      font-size: 24px;
+      color: #555;
+    }
+
+    .date-text {
+      font-size: 18px;
+      color: #777;
+      margin-top: 20px;
+    }
+
+    /* 目標一覧表 - コンパクト化 */
+    .goals-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+
+    .goals-table th, .goals-table td {
+      padding: 6px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .goals-table th {
+      background-color: #f0f8ff;
+      font-weight: bold;
+    }
+
+    .weight-cell {
+      text-align: center;
+      font-weight: bold;
+    }
+
+    /* 2カラム用レイアウト */
+    .two-column {
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .column {
+      flex: 1;
+    }
+
+    /* 懸念事項用のコンパクトスタイル */
+    .concern-section {
+      margin-bottom: 10px;
+    }
+
+    .concern-section h3 {
+      font-size: 15px;
+      margin: 5px 0 3px;
+    }
+
+    .concern-section ul {
+      margin-bottom: 5px;
+    }
+    
+    /* 全体計画表用のさらにコンパクトなスタイル */
+    .very-compact-table th, .very-compact-table td {
+      padding: 2px;
+      font-size: 10px;
+    }
   </style>
 </head>
 <body>
@@ -408,17 +556,45 @@
    - overflow: hidden で強制的にスクロールバーを非表示に
    - aspect-ratio: 16 / 9 で正確な比率を維持
    - フォントサイズを全体的に小さめに設定
+   - 情報量の多いスライドではさらにフォントサイズを小さく調整
 
 3. **表示領域の最大活用**
    - 余白を最小限に抑える
    - 行間を適切に設定
    - リスト項目の間隔を調整
+   - 2カラムレイアウトを活用して横幅を最大限に活用
+
+## 改良点
+
+1. **目標概要スライド**
+   - 円グラフのサイズを縮小し、ラベルのフォントサイズを小さく調整
+   - 目標一覧表のフォントサイズと行間を小さく調整
+
+2. **懸念事項および対策スライド**
+   - 2カラムレイアウトを活用し、複数の懸念事項を横に配置
+   - 懸念と対策のセクションをコンパクトに表示
+   - 必要に応じてさらに分割して複数スライドに分散
+
+3. **全体実行計画スライド**
+   - 超コンパクトな表スタイルを適用し、情報を圧縮
+   - 必要に応じて表を縦方向に分割し、目標ごとに別スライドを作成
+
+4. **ロードマップスライド**
+   - ロードマップの各要素の間隔を縮小
+   - フォントサイズを小さく調整
+   - マーカーのサイズを縮小
+
+5. **リストの表示**
+   - 通常のリストよりもさらに小さいフォントサイズのクラスを追加
+   - リストアイテムの間隔をさらに縮小
 
 ## 実装手順
 
 1. 企画書のmdファイルを読み込む
 2. Markdownの構造を解析してスライド構造を決定
 3. 各セクションに適したテンプレートを適用
-4. HTMLファイルとして出力
+4. コンテンツ量に応じて適切なフォントサイズとレイアウトを選択
+5. 情報量が多い箇所は複数スライドに分割
+6. HTMLファイルとして出力
 
-この方法で、企画書のMarkdownコンテンツから自動的に最適化された16:9比率のプレゼンテーションスライドを生成できます。各スライドは1画面にスクロールなしで表示され、見やすく効果的なプレゼンテーションを実現します。
+この改良されたプロンプトを使用することで、すべてのスライドが16:9比率の表示領域にスクロールなしで収まり、視認性と可読性を保った効果的なプレゼンテーションを生成できます。
