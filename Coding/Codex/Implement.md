@@ -1,5 +1,5 @@
 フェーズごとに実装を進めて。ソースコードを書いたらテストも合わせて実装して。ドキュメントやファイルを追加したら、そのことがわかるように対応するドキュメントも更新して。
 
-ソースコードの著者は Koki Riho(https://github.com/Rih0z)
+ソースコードの著者は Koki Riho(https://github.com/Rih0z) and Codex
 
 として。
