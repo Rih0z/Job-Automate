@@ -1,5 +1,8 @@
 カバレッジ率が100%になるまでテスト実装、実行、修正のサイクルを繰り返して。
 Playwrite MCPを利用して手動テストを自動で実施してすることもテストの内容に含めて。
-ultrathink
+Ultrathink.
+Don't hold back. give it your all！
+日本語で回答して。
+
 
 フロントエンドとバックエンドが正しく通信できるようにAPIの設定をして。
