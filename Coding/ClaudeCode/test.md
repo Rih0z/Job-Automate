@@ -3,6 +3,3 @@ Playwrite MCPを利用して手動テストを自動で実施してすること�
 Ultrathink.
 Don't hold back. give it your all！
 日本語で回答して。
-
-
-フロントエンドとバックエンドが正しく通信できるようにAPIの設定をして。
