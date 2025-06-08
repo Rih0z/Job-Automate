@@ -3,11 +3,11 @@
 以下の条件に合致する、AIで自動化可能な収益化ビジネスモデルを10個提案してください。
 
 ## 前提条件：
-- 利用可能ツール：Claude API、ChatGPT API、GitHub Actions、Cloudflare（Workers、Pages、R2、D1、KV）
+- 利用可能ツール：Google Gemini API（無料枠）、Hugging Face API（無料枠）、GitHub Actions、Cloudflare（Workers、Pages、R2、D1、KV）、オープンソースLLM
 - 技術スキル：Web開発、インフラ、Azure（上級者レベル）
 - 作業時間：週10時間（初期構築後は週2-3時間のメンテナンス想定）
 - 目標：2ヶ月で月収10万円の安定収入
-- 初期投資：0円（API無料枠とMacBookのみ使用）
+- 初期投資：完全0円（無料APIとツールのみ使用）
 - **運用方針：bashコマンドによる制作・管理・運営、将来的な全自動化**
 
 ## 各アイデアに含めるべき要素：
@@ -35,7 +35,11 @@
 - crontabでのスケジューリング例
 
 ### 4. 必要な技術スタック
-- 使用するAPI（無料枠の範囲）
+- 使用するAPI（完全無料枠のみ）
+  - Google Gemini API（1500リクエスト/日まで無料）
+  - Hugging Face Inference API（無料枠）
+  - OpenWeatherMap API（無料枠）
+  - NewsAPI（無料枠）
 - Cloudflareサービスの活用方法
 - 必要なプログラミング言語
 - CLIツール（curl、jq、wrangler等）
@@ -67,6 +71,14 @@
 - 現在の自動化率：○%
 - 最終的な自動化率：100%への道筋
 
+## 無料で使えるAIサービス：
+- **Google Gemini API**：1500リクエスト/日まで無料
+- **Hugging Face**：多数の無料モデル（Llama、Mistral等）
+- **Groq API**：無料枠あり（高速推論）
+- **Together AI**：無料クレジット付き
+- **Replicate**：無料枠あり
+- **GitHub Copilot**（GitHub Actionsでの活用）
+
 ## Cloudflare活用のポイント：
 - Workers：10万リクエスト/日まで無料
 - Pages：無制限の静的サイトホスティング
@@ -79,14 +91,15 @@
 - **wrangler CLI**を使用したCloudflare操作
 - **GitHub Actions**との連携によるCI/CD
 - **curl/jq**によるAPI操作
-- **環境変数**による設定管理
+- **環境変数**による設定管理（APIキーは無料枠のもののみ）
 - **ログ出力**とエラーハンドリング
-- **通知システム**（Slack/Discord webhook等）
+- **通知システム**（Discord webhook等の無料サービス）
+- **無料APIの制限管理**（レート制限、日次上限の監視）
 
 ## 評価基準：
-- 実現可能性（技術的・時間的）：30%
+- 実現可能性（技術的・時間的・無料枠内）：35%
 - 収益性（月10万円の現実性）：25%
-- 自動化レベル（bash実装の容易さ）：25%
+- 自動化レベル（bash実装の容易さ）：20%
 - 保守性（エラー耐性・監視）：10%
 - 競合優位性：10%
 
@@ -95,33 +108,8 @@
 - 日本市場に特化したアイデアも含める
 - コンテンツの品質を保ちつつ量産できる仕組みを重視
 - プラットフォームの規約に違反しないモデルのみ提案
+- **完全無料のツールとAPIのみを使用（初期投資ゼロ）**
 - Cloudflareの無料枠を最大限活用する設計
 - **すべての操作がbashスクリプトで完結する設計**
 - **エラー時の自動リトライとフォールバック機構**
 - **定期的な健全性チェックとレポート生成**
-
-## 出力形式の例：
-
-### 1. AI技術記事自動生成ブログ
-プログラミング初心者向けの技術解説記事を毎日自動生成・公開するブログシステム
-
-**自動化の仕組み：**
-- トレンドAPIから話題のキーワード取得
-- Claude APIで記事生成
-- Cloudflare Pagesに自動デプロイ
-- Google AdSenseとアフィリエイト自動挿入
-
-**Bash自動化スクリプト例：**
-```bash
-#!/bin/bash
-# daily-article-generator.sh
-TOPICS=$(curl -s "https://api.example.com/trends" | jq -r '.topics[]')
-for topic in $TOPICS; do
-  ARTICLE=$(curl -X POST https://api.anthropic.com/v1/messages \
-    -H "x-api-key: $CLAUDE_API_KEY" \
-    -d "{\"messages\": [{\"role\": \"user\", \"content\": \"Write article about $topic\"}]}")
-  echo "$ARTICLE" | wrangler pages publish
-done
-```
-
-（以下、残り9個のアイデアも同様の形式で記載）
