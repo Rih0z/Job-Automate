@@ -20,26 +20,8 @@
 - 配信/公開の自動化
 - 収益化の自動化
 
-### 3. Bash自動化スクリプト例
-```bash
-# 初期セットアップ
-./setup.sh
-
-# 日次運用
-./daily-operations.sh
-
-# 月次メンテナンス
-./monthly-maintenance.sh
-```
-- 主要な自動化コマンドとその役割
-- crontabでのスケジューリング例
-
 ### 4. 必要な技術スタック
 - 使用するAPI（完全無料枠のみ）
-  - Google Gemini API（1500リクエスト/日まで無料）
-  - Hugging Face Inference API（無料枠）
-  - OpenWeatherMap API（無料枠）
-  - NewsAPI（無料枠）
 - Cloudflareサービスの活用方法
 - 必要なプログラミング言語
 - CLIツール（curl、jq、wrangler等）
