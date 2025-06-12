@@ -11,6 +11,8 @@ githubへのプッシュ前にセキュリティ上の問題がないか確認�
 
 実装がSOLID原則に従っているか確認して。
 
+デモデータではなく、実際に機能するシステムにして。
+
 Ultrathink.
 Don't hold back. give it your all！
 日本語で回答して。
