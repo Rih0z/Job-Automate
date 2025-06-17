@@ -13,6 +13,10 @@ githubへのプッシュ前にセキュリティ上の問題がないか確認�
 
 デモデータではなく、実際に機能するシステムにして。
 
+Claude-Code-Communicationの内容を読み込み、部下を操っってプロジェクトを進行して。
+ユーザーへ こちらを参考にプロジェクトルートにセットアップして。
+https://qiita.com/akira_papa_AI/items/9f6c6605e925a88b9ac5
+
 Ultrathink.
 Don't hold back. give it your all！
 日本語で回答して。
