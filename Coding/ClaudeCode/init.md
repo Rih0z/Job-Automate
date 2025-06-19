@@ -12,10 +12,8 @@ githubへのプッシュ前にセキュリティ上の問題がないか確認�
 実装がSOLID原則に従っているか確認して。
 
 デモデータではなく、実際に機能するシステムにして。
-
-Claude-Code-Communicationの内容を読み込み、部下を操っってプロジェクトを進行して。
-ユーザーへ こちらを参考にプロジェクトルートにセットアップして。
-https://qiita.com/akira_papa_AI/items/9f6c6605e925a88b9ac5
+ハードコードは一切使用しないで。
+テストを修正する場合、ログをテストに合致するように修正するのではなく、プログラム自体を修正して。
 
 Ultrathink.
 Don't hold back. give it your all！
