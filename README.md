@@ -4,18 +4,9 @@
 
 このアプリケーションは、AIを活用して求人検索から応募までのプロセスを自動化し、求職活動を効率化するシステムです。最新のAI技術を使って、あなたのスキルと経験に最適な求人を見つけ、パーソナライズされた応募を自動で行います。
 
-## 📦 最新版へのアクセス
-
-### ウェブアプリケーション（推奨）
-🌐 **[https://job-automate.vercel.app](https://job-automate.vercel.app)**
-
-- ブラウザからすぐにアクセス可能
-- インストール不要
-- 常に最新版を利用可能
-- モバイル・デスクトップ対応
+## 📦 開発環境のセットアップ
 
 ### ローカル開発環境
-開発者向けのローカル環境構築:
 
 ```bash
 # リポジトリのクローン
@@ -55,7 +46,6 @@ http://localhost:3000 でアクセス可能
 - **AI/ML**: OpenAI GPT-4, Anthropic Claude
 - **データベース**: PostgreSQL, Prisma ORM
 - **認証**: NextAuth.js
-- **デプロイ**: Vercel
 
 ## 📋 必要な環境変数
 
@@ -79,7 +69,7 @@ LINKEDIN_API_KEY=your_linkedin_api_key
 ## 🎯 使い方
 
 ### 1. アカウント作成
-[https://job-automate.vercel.app](https://job-automate.vercel.app) にアクセスし、アカウントを作成
+ローカル環境でアプリケーションを起動し、アカウントを作成
 
 ### 2. プロフィール設定
 - 基本情報（氏名、連絡先）の入力
