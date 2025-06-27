@@ -2,6 +2,20 @@
 
 ベテランITコンサルタントの視点から最適化された、提供された企画書のmdファイルから16:9比率のプレゼンテーションスライドをHTMLとCSSで自動生成するシステム。実際のビジネスプレゼンテーションで求められる要素を網羅し、視認性と操作性を最大化します。
 
+## 重要：スライド生成前の事前処理
+
+**必ず以下の手順を実行してからスライドを生成してください：**
+
+1. **現在の日付を取得**
+   - web_searchツールを使用して「今日の日付」を検索
+   - または「current date today」で検索
+   - 取得した日付をプレゼンテーションの作成日として使用
+
+2. **日付フォーマット**
+   - 日本語表記：2024年12月19日
+   - 英語表記：December 19, 2024
+   - タイトルスライドや最終スライドに自動挿入
+
 ## 基本設定（プロフェッショナル仕様）
 
 ```html
@@ -655,8 +669,318 @@
         margin-bottom: 20px;
       }
       
-      .nav-area, .slide-progress, .help-overlay {
+      .nav-area, .slide-progress, .help-overlay, .pdf-export-btn {
         display: none !important;
+      }
+    }
+
+    /* PDF出力ボタン */
+    .pdf-export-btn {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 48px;
+      height: 48px;
+      background-color: #0066cc;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 102;
+      opacity: 0.8;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .pdf-export-btn:hover {
+      background-color: #0052a3;
+      opacity: 1;
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .pdf-export-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: white;
+    }
+
+    /* ツールチップ */
+    .pdf-export-btn::after {
+      content: 'PDF出力';
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      margin-bottom: 8px;
+    }
+
+    .pdf-export-btn:hover::after {
+      opacity: 1;
+    }
+
+    /* フルスクリーン時は控えめに */
+    .fullscreen .pdf-export-btn {
+      opacity: 0.2;
+      width: 40px;
+      height: 40px;
+    }
+
+    .fullscreen .pdf-export-btn:hover {
+      opacity: 0.9;
+      width: 48px;
+      height: 48px;
+    }
+
+    .fullscreen .pdf-export-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* PDF出力用のスタイル保持 */
+    @media print {
+      /* 基本スタイルの維持 */
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+
+      /* A4横向きの用紙設定 */
+      @page {
+        size: A4 landscape;
+        margin: 0;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: white !important;
+        color: #333 !important;
+        width: 100%;
+        height: 100%;
+      }
+
+      .presentation-container {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        max-height: none;
+        margin: 0;
+        padding: 0;
+        background-color: white !important;
+        box-shadow: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .slides-wrapper {
+        width: 100%;
+        height: 100%;
+        background-color: transparent !important;
+      }
+
+      .slide {
+        /* 16:9の比率を維持しながらA4横に最大サイズで配置 */
+        width: 297mm;
+        height: 167.0625mm; /* 297mm * 9/16 = 167.0625mm */
+        page-break-after: always;
+        page-break-inside: avoid;
+        margin: 0 auto;
+        position: relative !important;
+        background-color: white !important;
+        display: block !important;
+        opacity: 1 !important;
+        transform: none !important;
+        box-shadow: none !important;
+        /* A4の中央に配置 */
+        margin-top: 21.46875mm; /* (210mm - 167.0625mm) / 2 */
+      }
+
+      /* スライドの背景色を確実に適用 */
+      .slide::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: white;
+        z-index: -1;
+      }
+
+      .slide-content {
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 60px 80px 80px;
+        box-sizing: border-box;
+        background-color: transparent !important;
+        color: #333 !important;
+        overflow: hidden;
+      }
+
+      /* タイトルスライドの背景保持 */
+      .title-slide {
+        background: linear-gradient(135deg, #003366 0%, #0066cc 100%) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .title-slide::before {
+        display: none;
+      }
+
+      .title-slide .slide-content,
+      .title-slide h1,
+      .title-slide .subtitle,
+      .title-slide .author,
+      .title-slide .date {
+        color: white !important;
+      }
+
+      /* セクション区切りの背景保持 */
+      .section-divider {
+        background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%) !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .section-divider::before {
+        display: none;
+      }
+
+      /* テキストの色を確実に設定 */
+      h1, h2, h3, h4, h5, h6, p, li, td, span {
+        color: #333 !important;
+      }
+
+      /* グラデーションやシャドウの保持 */
+      .card {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        background-color: #f8f9fa !important;
+        -webkit-print-color-adjust: exact !important;
+      }
+
+      .roadmap-content {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+        background-color: #f8f9fa !important;
+        -webkit-print-color-adjust: exact !important;
+      }
+
+      .key-point {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        -webkit-print-color-adjust: exact !important;
+      }
+
+      /* チャートの色保持 */
+      .pie-chart {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .legend-color {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* 表のスタイル保持 */
+      table {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+        border-radius: 8px !important;
+        background-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+      }
+
+      th {
+        background-color: #003366 !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      td {
+        background-color: white !important;
+        color: #333 !important;
+      }
+
+      tr:nth-child(even) td {
+        background-color: #f8f9fa !important;
+        -webkit-print-color-adjust: exact !important;
+      }
+
+      /* ロードマップの色保持 */
+      .timeline-line {
+        background: linear-gradient(180deg, #0066cc 0%, #003366 100%) !important;
+        -webkit-print-color-adjust: exact !important;
+      }
+
+      .roadmap-marker {
+        background-color: #0066cc !important;
+        border-color: white !important;
+        -webkit-print-color-adjust: exact !important;
+      }
+
+      /* CTA ボックスの保持 */
+      .cta-box {
+        background: linear-gradient(135deg, #0066cc 0%, #003366 100%) !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact !important;
+      }
+
+      .cta-box h2,
+      .cta-box p {
+        color: white !important;
+      }
+
+      /* アニメーション要素の表示 */
+      .animate-item {
+        opacity: 1 !important;
+        transform: none !important;
+      }
+
+      /* すべてのスライドを確実に表示 */
+      .slide.active,
+      .slide.prev,
+      .slide {
+        display: block !important;
+        opacity: 1 !important;
+        transform: none !important;
+        position: relative !important;
+      }
+
+      /* 最後のスライドは改ページしない */
+      .slide:last-child {
+        page-break-after: avoid;
+      }
+
+      /* ナビゲーション要素を非表示 */
+      .nav-area, 
+      .slide-progress, 
+      .help-overlay, 
+      .pdf-export-btn,
+      .slide-number {
+        display: none !important;
+      }
+
+      /* 余白部分を白で塗りつぶし */
+      html {
+        background-color: white !important;
       }
     }
   </style>
@@ -679,6 +1003,13 @@
     
     <!-- スライド番号 -->
     <div class="slide-number" id="slideNumber">1 / X</div>
+    
+    <!-- PDF出力ボタン -->
+    <button class="pdf-export-btn" onclick="exportToPDF()" title="PDFとして出力">
+      <svg viewBox="0 0 24 24">
+        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20M10,17L8,11H10L11.2,15.2L12.5,11H14.3L15.6,15.2L16.8,11H18.5L16.5,17H14.7L13.4,12.6L12.1,17H10Z"/>
+      </svg>
+    </button>
     
     <!-- ヘルプオーバーレイ -->
     <div class="help-overlay" id="helpOverlay">
@@ -854,8 +1185,10 @@
       toggleFullscreen() {
         if (!document.fullscreenElement) {
           document.documentElement.requestFullscreen();
+          document.body.classList.add('fullscreen');
         } else {
           document.exitFullscreen();
+          document.body.classList.remove('fullscreen');
         }
       }
 
@@ -863,6 +1196,11 @@
         const helpOverlay = document.getElementById('helpOverlay');
         helpOverlay.style.display = 
           helpOverlay.style.display === 'flex' ? 'none' : 'flex';
+      }
+
+      exportToPDF() {
+        // ブラウザの印刷機能を使用してPDFとして保存
+        window.print();
       }
     }
 
@@ -872,6 +1210,12 @@
     function navigateSlide(direction) {
       if (presentationManager) {
         presentationManager.navigateSlide(direction);
+      }
+    }
+
+    function exportToPDF() {
+      if (presentationManager) {
+        presentationManager.exportToPDF();
       }
     }
 
