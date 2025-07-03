@@ -5,7 +5,7 @@ README.mdを読み込んで。このアプリを作成するにあたり最適�
 ai_coding_principles:
   meta:
     version: "1.0"
-    last_updated: "2025-06-29"
+    last_updated: "2025-07-04"
     description: "Claude AIコーディング実行原則"
     
   core_principles:
@@ -22,6 +22,8 @@ ai_coding_principles:
     第4条: 
       rule: "エンタープライズレベルの実装を実施し、修正は表面的ではなく、全体のアーキテクチャを意識して実施する"
       related_sections: ["architecture", "quality_standards", "deployment_requirements"]
+    第5条: 
+      rule: "問題に詰まったら、まずCLAUDE.mdやプロジェクトドキュメント内に解決策がないか確認する"
 
   quality_standards:
     security:
