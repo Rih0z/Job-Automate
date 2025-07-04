@@ -24,6 +24,8 @@ ai_coding_principles:
       related_sections: ["architecture", "quality_standards", "deployment_requirements"]
     第5条: 
       rule: "問題に詰まったら、まずCLAUDE.mdやプロジェクトドキュメント内に解決策がないか確認する"
+    第6条: 
+      rule: "push前にアップロードするべきではない情報が含まれていないか確認する。"
 
   quality_standards:
     security:
