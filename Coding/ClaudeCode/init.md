@@ -26,6 +26,10 @@ ai_coding_principles:
       rule: "問題に詰まったら、まずCLAUDE.mdやプロジェクトドキュメント内に解決策がないか確認する"
     第6条: 
       rule: "push前にアップロードするべきではない情報が含まれていないか確認する。"
+    第７条: 
+      rule: "不要なスクリプトは増やさない。スクリプト作成時は常に既存のスクリプトで使用可能なものがないか以下のセクションを確認する、スクリプトを作成したらscriptsフォルダに格納する。"
+      related_sections: ["how_to_use_scripts"]
+
 
   quality_standards:
     security:
