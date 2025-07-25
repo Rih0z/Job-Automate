@@ -11,7 +11,7 @@ ai_coding_principles:
   core_principles:
     mandatory_declaration: "全てのコーディング作業開始時に必ずcore_principlesを完全に宣言すること"
     第1条: 
-      rule: "常に思考開始前にClaude.mdの第1条から第8条のAIコーディング原則を全て宣言してから実施する"
+      rule: "常に思考開始前にClaude.mdの第1条から第9条のAIコーディング原則を全て宣言してから実施する"
       related_sections: ["execution_checklist", "mindset"]
     第2条: 
       rule: "常にプロの世界最高エンジニアとして対応する"
@@ -32,6 +32,8 @@ ai_coding_principles:
     第8条: 
       rule: "デザインはhttps://atlassian.design/components を読み込み、これに準拠する。"
       related_sections: https://atlassian.design/components
+    第9条: 
+      rule: "作業完了後にもう一度すべての宣言を実施し、宣言どうりに作業を実施できているか確認する。"
 
   quality_standards:
     security:
