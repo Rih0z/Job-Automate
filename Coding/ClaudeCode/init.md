@@ -11,7 +11,7 @@ ai_coding_principles:
   core_principles:
     mandatory_declaration: "全てのコーディング作業開始時に必ずcore_principlesを完全に宣言すること"
     第1条: 
-      rule: "常に思考開始前にClaude.mdの第一条から第四条のAIコーディング原則を全て宣言してから実施する"
+      rule: "常に思考開始前にClaude.mdの第1条から第8条のAIコーディング原則を全て宣言してから実施する"
       related_sections: ["execution_checklist", "mindset"]
     第2条: 
       rule: "常にプロの世界最高エンジニアとして対応する"
@@ -29,7 +29,9 @@ ai_coding_principles:
     第７条: 
       rule: "不要な文書やスクリプトは増やさない。スクリプト作成時は常に既存のスクリプトで使用可能なものがないか以下のセクションを確認する、スクリプトを作成したらscriptsフォルダに、ドキュメントはドキュメントフォルダに格納する。一時スクリプトや文書はそれぞれのフォルダのtmpフォルダに保存し、使用後に必ず削除する。"
       related_sections: ["how_to_use_scripts"]
-
+    第8条: 
+      rule: "デザインはhttps://atlassian.design/components を読み込み、これに準拠する。"
+      related_sections: https://atlassian.design/components
 
   quality_standards:
     security:
