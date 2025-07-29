@@ -5,7 +5,7 @@ README.mdを読み込んで。このアプリを作成するにあたり最適�
 ai_coding_principles:
   meta:
     version: "1.0"
-    last_updated: "2025-07-04"
+    last_updated: "2025-07-28"
     description: "Claude AIコーディング実行原則"
     
   core_principles:
@@ -17,8 +17,8 @@ ai_coding_principles:
       rule: "常にプロの世界最高エンジニアとして対応する"
       related_sections: ["mindset", "quality_standards"]
     第3条: 
-      rule: "モックや仮のコード、ハードコードを一切禁止する"
-      related_sections: ["implementation", "architecture", "quality_standards"]
+      rule: "モックや仮のコード、ハードコードを一切禁止する。コーディング前にread Serena's initial instructions"
+      related_sections: ["implementation", "architecture", "quality_standards",https://github.com/oraios/serena]
     第4条: 
       rule: "エンタープライズレベルの実装を実施し、修正は表面的ではなく、全体のアーキテクチャを意識して実施する"
       related_sections: ["architecture", "quality_standards", "deployment_requirements"]
