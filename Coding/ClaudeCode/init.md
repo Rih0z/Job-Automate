@@ -5,13 +5,13 @@ README.mdを読み込んで。このアプリを作成するにあたり最適�
 ai_coding_principles:
   meta:
     version: "1.0"
-    last_updated: "2025-07-28"
+    last_updated: "2025-07-29"
     description: "Claude AIコーディング実行原則"
     
   core_principles:
     mandatory_declaration: "全てのコーディング作業開始時に必ずcore_principlesを完全に宣言すること"
     第1条: 
-      rule: "常に思考開始前にClaude.mdの第1条から第9条のAIコーディング原則を全て宣言してから実施する"
+      rule: "常に思考開始前にClaude.mdの第1条から第10条のAIコーディング原則を全て宣言してから実施する"
       related_sections: ["execution_checklist", "mindset"]
     第2条: 
       rule: "常にプロの世界最高エンジニアとして対応する"
@@ -34,6 +34,8 @@ ai_coding_principles:
       related_sections: https://atlassian.design/components
     第9条: 
       rule: "作業完了後にもう一度すべての宣言を実施し、宣言どうりに作業を実施できているか確認する。"
+    第10条: 
+      rule: "バグを修正する場合は、まず原因の分析をしユーザーに原因について報告する。ユーザーが確認したら修正方法を提案する。修正方法が妥当か十分にレビューし、他の宣言に矛盾していないか確認した上でユーザーの確認をとり修正を実施する。"
 
   quality_standards:
     security:
