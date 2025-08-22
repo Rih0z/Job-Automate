@@ -5,33 +5,37 @@ README.mdを読み込んで。このアプリを作成するにあたり最適�
 ai_coding_principles:
   meta:
     version: "1.0"
-    last_updated: "2025-07-04"
+    last_updated: "2025-07-29"
     description: "Claude AIコーディング実行原則"
     
   core_principles:
     mandatory_declaration: "全てのコーディング作業開始時に必ずcore_principlesを完全に宣言すること"
     第1条: 
-      rule: "常に思考開始前にClaude.mdの第1条から第8条のAIコーディング原則を全て宣言してから実施する"
+      rule: "常に思考開始前にClaude.mdの第1条から第10条のAIコーディング原則を全て宣言してから実施する"
       related_sections: ["execution_checklist", "mindset"]
     第2条: 
       rule: "常にプロの世界最高エンジニアとして対応する"
       related_sections: ["mindset", "quality_standards"]
     第3条: 
-      rule: "モックや仮のコード、ハードコードを一切禁止する"
-      related_sections: ["implementation", "architecture", "quality_standards"]
+      rule: "モックや仮のコード、ハードコードを一切禁止する。コーディング前にread Serena's initial instructions,ユーザーから新規機能の実装支持がを受けたら、まずはtmpフォルダ以下に実装計画を作成して。既存の実装をserena mcpを利用して詳細に分析し、プロとして恥ずかしくない実装を計画して。"
+      related_sections: ["implementation", "architecture", "quality_standards",https://github.com/oraios/serena]
     第4条: 
       rule: "エンタープライズレベルの実装を実施し、修正は表面的ではなく、全体のアーキテクチャを意識して実施する"
       related_sections: ["architecture", "quality_standards", "deployment_requirements"]
     第5条: 
       rule: "問題に詰まったら、まずCLAUDE.mdやプロジェクトドキュメント内に解決策がないか確認する"
     第6条: 
-      rule: "push前にアップロードするべきではない情報が含まれていないか確認する。"
+      rule: "顧客データやセキュリティなど、push前にアップロードするべきではない情報が含まれていないか確認する。作業完了ごとにgithubに状況をpushする。"
     第７条: 
       rule: "不要な文書やスクリプトは増やさない。スクリプト作成時は常に既存のスクリプトで使用可能なものがないか以下のセクションを確認する、スクリプトを作成したらscriptsフォルダに、ドキュメントはドキュメントフォルダに格納する。一時スクリプトや文書はそれぞれのフォルダのtmpフォルダに保存し、使用後に必ず削除する。"
       related_sections: ["how_to_use_scripts"]
     第8条: 
       rule: "デザインはhttps://atlassian.design/components を読み込み、これに準拠する。"
       related_sections: https://atlassian.design/components
+    第9条: 
+      rule: "作業完了後にもう一度すべての宣言を実施し、宣言どうりに作業を実施できているか確認する。"
+    第10条: 
+      rule: "バグを修正する場合は、serena mcp を利用して原因の分析をし、tmpフォルダいかに報告資料を作成して。ユーザーに原因について報告する。すでに同様のバグの報告資料がある場合は、それを更新する。ユーザーが確認したら修正方法を提案する。修正方法が妥当か十分にレビューし、他の宣言に矛盾していないか確認した上でユーザーの確認をとり修正を実施する。バグ報告はドキュメントを作成し、tmpフォルダ以下に保存する。ユーザーがバグが解決したと言うまでドキュメントを残し、バグが解決したらドキュメントは削除する。"
 
   quality_standards:
     security:
