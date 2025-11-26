@@ -367,8 +367,8 @@ https://github.com/Rih0z/Job-Automate/blob/main/Coding/Base/%E3%83%AA%E3%83%BC%E
 
 次に、前回の成果物（---OUTPUT DOCUMENT---）をコピーしてください。
 
-最後に、以下の実行プロンプトを貼り付けてください：
-https://github.com/Rih0z/Job-Automate/blob/main/Coding/Base/%E5%AE%9F%E8%A1%8C%E3%83%97%E3%83%AD%E3%83%B3%E3%83%97%E3%83%88.md
+最後に、作成したファイルの一覧を完全パスで出力してください。：
+
 
 ### 2. 貼り付け順序
 
@@ -376,14 +376,6 @@ https://github.com/Rih0z/Job-Automate/blob/main/Coding/Base/%E5%AE%9F%E8%A1%8C%E
 【レビュー結果】
 [上記の改善事項]
 
----
-
-【前回の成果物】
-[前回の ---OUTPUT DOCUMENT--- の内容]
-
----
-
-[実行プロンプト全体]
 ```
 
 ### 3. 改善後の流れ
