@@ -1,6 +1,78 @@
-# 企画書mdファイルからの16:9比率プレゼンテーションスライド生成プロンプト（プロフェッショナル版 v2）
+# 企画書mdファイルからの16:9比率プレゼンテーションスライド生成プロンプト（プロフェッショナル版 v4.1）
 
 ベテランITコンサルタントの視点から最適化された、提供された企画書のmdファイルから16:9比率のプレゼンテーションスライドをHTMLとCSSで自動生成するシステム。実際のビジネスプレゼンテーションで求められる要素を網羅し、視認性と操作性を最大化します。
+
+---
+
+## ⚠️ 重要：v4.1での改善点（視認性・表示崩れ対策）
+
+### 問題点と対策
+
+| 問題 | 原因 | 対策 |
+|------|------|------|
+| 文字が読めない | 背景色と文字色のコントラスト不足 | すべての要素に明示的な色指定 |
+| コンテンツがはみ出す | 1スライドに情報を詰め込みすぎ | 情報量ガイドラインを設定 |
+| CSS変数が効かない | 環境によって変数が解決されない | 直接カラーコードを使用 |
+| 印刷時に崩れる | 印刷用スタイルの不備 | 印刷用スタイルを徹底 |
+
+### 絶対ルール
+1. **CSS変数（var(--xxx)）は使用禁止** → 直接カラーコードを記述
+2. **すべてのテキスト要素に明示的なcolorを指定**
+3. **背景色と文字色のコントラスト比4.5:1以上を確保**
+4. **1スライドの情報量を制限**（詳細は後述）
+5. **スクロールバーを必ず有効化**（長い場合の保険）
+
+---
+
+## 📐 フォントサイズガイドライン（v4.1）
+
+プレゼンテーションは遠くから見ることも多いため、適切なサイズを維持します。
+
+| 要素 | 推奨サイズ | 最小サイズ | 備考 |
+|------|-----------|-----------|------|
+| スライドタイトル（h1） | 36px | 32px | 1行に収める |
+| セクション見出し（h2） | 26px | 24px | 明確に区別 |
+| 小見出し（h3） | 20px | 18px | カード内など |
+| 本文（p, li） | 20px | 18px | 読みやすさ重視 |
+| 補足・注釈 | 16px | 14px | 控えめに |
+
+---
+
+## 📊 1スライドあたりの情報量ガイドライン（v4.1 新規）
+
+**はみ出し防止の鍵は「フォントを小さくする」ではなく「情報を減らす」**
+
+### 基本ルール
+
+| 要素 | 上限 |
+|------|------|
+| 箇条書き（トップレベル） | **5項目まで** |
+| 箇条書き（ネスト含む合計） | **10項目まで** |
+| テーブルの行数 | **6行まで** |
+| カードの数 | **4枚まで** |
+| 段落テキスト | **3段落・計150文字まで** |
+
+### スライド分割の判断基準
+
+以下のいずれかに該当したら **スライドを分割**：
+
+```
+✅ 箇条書きが6項目以上
+✅ テーブルが7行以上
+✅ カードが5枚以上
+✅ テキストが200文字以上
+✅ 2カラムの両方にカードが3枚以上ずつ
+```
+
+### 情報量別のレイアウト選択
+
+| 情報量 | 推奨レイアウト |
+|--------|---------------|
+| 少ない（要点1-2個） | センター配置、大きめフォント |
+| 標準（要点3-5個） | 1カラム or 2カラム |
+| 多い（要点6個以上） | **スライドを分割** |
+
+---
 
 ## 重要：スライド生成前の事前処理
 
@@ -16,7 +88,9 @@
    - 英語表記：December 19, 2024
    - タイトルスライドや最終スライドに自動挿入
 
-## 基本設定（プロフェッショナル仕様）
+---
+
+## 基本設定（プロフェッショナル仕様 v4.1）
 
 ```html
 <!DOCTYPE html>
@@ -26,6 +100,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>プレゼンテーションタイトル</title>
   <style>
+    /* ============================================
+       v4.1: 視認性・表示崩れ対策版
+       - CSS変数を使用せず直接カラーコード指定
+       - すべての要素に明示的な色指定
+       - コントラスト比を確保
+       - フォントサイズを適正化（本文20px）
+       ============================================ */
+    
     * {
       margin: 0;
       padding: 0;
@@ -35,7 +117,7 @@
 
     body {
       background-color: #1a1a1a;
-      color: #333;
+      color: #333333;
       line-height: 1.6;
       overflow: hidden;
       height: 100vh;
@@ -44,25 +126,29 @@
       align-items: center;
     }
 
-    /* メインコンテナ - フルスクリーン対応 */
+    /* メインコンテナ */
     .presentation-container {
       width: 100%;
       height: 100%;
       max-width: 1920px;
       max-height: 1080px;
       position: relative;
-      background-color: #000;
+      background-color: #000000;
       box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
     }
 
-    /* スライドスタイル */
+    /* ============================================
+       スライド基本スタイル
+       重要: background-colorとcolorを必ず明示
+       ============================================ */
     .slide {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: white;
+      background-color: #ffffff;
+      color: #333333;
       display: none;
       opacity: 0;
       transform: translateX(100%);
@@ -81,34 +167,35 @@
       transform: translateX(-100%);
     }
 
-    /* スライドコンテンツ - スクロールバー対応 */
+    /* スライドコンテンツ - スクロールバー有効（保険） */
     .slide-content {
       position: absolute;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      padding: 50px 70px 70px;
+      padding: 50px 70px 60px;
       overflow-y: auto;
       overflow-x: hidden;
       display: flex;
       flex-direction: column;
+      background-color: #ffffff;
+      color: #333333;
     }
 
-    /* スクロールバーのカスタムスタイル（WebKit系ブラウザ用） */
+    /* スクロールバーのカスタムスタイル（WebKit系） */
     .slide-content::-webkit-scrollbar {
-      width: 10px;
+      width: 8px;
     }
 
     .slide-content::-webkit-scrollbar-track {
       background: #f1f1f1;
-      border-radius: 5px;
+      border-radius: 4px;
     }
 
     .slide-content::-webkit-scrollbar-thumb {
-      background: #c1c1c1;
-      border-radius: 5px;
-      transition: background 0.3s;
+      background: #cccccc;
+      border-radius: 4px;
     }
 
     .slide-content::-webkit-scrollbar-thumb:hover {
@@ -118,10 +205,10 @@
     /* Firefox用スクロールバー */
     .slide-content {
       scrollbar-width: thin;
-      scrollbar-color: #c1c1c1 #f1f1f1;
+      scrollbar-color: #cccccc #f1f1f1;
     }
 
-    /* ナビゲーション - 透明な画面内ボタン */
+    /* ナビゲーション */
     .nav-area {
       position: absolute;
       top: 0;
@@ -137,15 +224,10 @@
       background-color: rgba(0, 0, 0, 0.05);
     }
 
-    .nav-prev {
-      left: 0;
-    }
+    .nav-prev { left: 0; }
+    .nav-next { right: 0; }
 
-    .nav-next {
-      right: 0;
-    }
-
-    /* スライド番号とプログレスバー */
+    /* プログレスバー */
     .slide-progress {
       position: absolute;
       bottom: 0;
@@ -167,64 +249,61 @@
       bottom: 20px;
       right: 30px;
       font-size: 14px;
-      color: #999;
+      color: #999999;
       z-index: 101;
     }
 
-    /* タイポグラフィ最適化 */
+    /* ============================================
+       タイポグラフィ（v4.1: 適正サイズ）
+       重要: 必ずcolorを明示的に指定
+       ============================================ */
     h1 {
       color: #003366;
-      font-size: 38px;
+      font-size: 36px;
       font-weight: 700;
       margin-bottom: 25px;
-      letter-spacing: -0.5px;
-      line-height: 1.2;
+      padding-bottom: 12px;
+      border-bottom: 3px solid #0066cc;
+      line-height: 1.3;
     }
 
     h2 {
       color: #0066cc;
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 600;
       margin: 15px 0 12px;
-      letter-spacing: -0.3px;
     }
 
     h3 {
-      color: #333;
-      font-size: 22px;
-      font-weight: 500;
+      color: #333333;
+      font-size: 20px;
+      font-weight: 600;
       margin: 12px 0 8px;
     }
 
     h4 {
-      color: #555;
+      color: #444444;
       font-size: 18px;
-      font-weight: 500;
+      font-weight: 600;
       margin: 10px 0 6px;
     }
 
     p {
-      font-size: 17px;
+      color: #333333;
+      font-size: 20px;
       margin-bottom: 12px;
       line-height: 1.7;
     }
 
-    /* リストスタイル改良 */
     ul, ol {
-      margin: 0 0 15px 25px;
+      margin: 8px 0 15px 30px;
     }
 
     li {
-      font-size: 16px;
+      color: #333333;
+      font-size: 20px;
       margin-bottom: 8px;
       line-height: 1.5;
-    }
-
-    /* 強調表示 */
-    .highlight {
-      background: linear-gradient(transparent 60%, #ffeb3b 60%);
-      font-weight: 600;
-      padding: 0 4px;
     }
 
     strong {
@@ -232,65 +311,108 @@
       font-weight: 600;
     }
 
-    /* タイトルスライド専用スタイル */
+    /* ============================================
+       タイトルスライド（v4.1: 視認性確保）
+       重要: 濃い背景 + 白文字を徹底
+       ============================================ */
     .title-slide {
       background: linear-gradient(135deg, #003366 0%, #0066cc 100%);
-      color: white;
     }
 
     .title-slide .slide-content {
       justify-content: center;
       align-items: center;
       text-align: center;
+      background: transparent;
     }
 
+    /* タイトルスライド内のすべてのテキストを白に */
     .title-slide h1 {
-      color: white;
-      font-size: 52px;
-      margin-bottom: 25px;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      color: #ffffff;
+      font-size: 48px;
+      margin-bottom: 20px;
+      border: none;
+      padding: 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
 
     .title-slide .subtitle {
-      font-size: 26px;
-      margin-bottom: 35px;
-      opacity: 0.9;
+      color: #e0e0e0;
+      font-size: 24px;
+      margin-bottom: 30px;
     }
 
     .title-slide .author {
+      color: #cccccc;
       font-size: 20px;
-      opacity: 0.8;
     }
 
     .title-slide .date {
+      color: #aaaaaa;
       font-size: 16px;
-      margin-top: 10px;
-      opacity: 0.7;
+      margin-top: 15px;
     }
 
-    /* セクション区切りスライド */
+    .title-slide p {
+      color: #e0e0e0;
+    }
+
+    .title-slide .logos {
+      display: flex;
+      gap: 25px;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .title-slide .logo {
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 18px;
+      color: #ffffff;
+    }
+
+    .title-slide .times {
+      color: #888888;
+      font-size: 24px;
+    }
+
+    /* ============================================
+       セクション区切りスライド
+       ============================================ */
     .section-divider {
-      background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+      background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
     }
 
     .section-divider .slide-content {
       justify-content: center;
-      align-items: center;
-      text-align: center;
+      padding-left: 80px;
+      background: transparent;
     }
 
     .section-divider h1 {
-      font-size: 44px;
+      font-size: 40px;
       color: #003366;
+      border: none;
+      border-left: 6px solid #0066cc;
+      padding-left: 25px;
       line-height: 1.4;
-      padding: 0 40px;
     }
 
-    /* 2カラムレイアウト */
+    /* ============================================
+       レイアウト
+       ============================================ */
     .two-column {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 35px;
+      gap: 40px;
+      flex: 1;
+    }
+
+    .three-column {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 30px;
       flex: 1;
     }
 
@@ -299,58 +421,182 @@
       flex-direction: column;
     }
 
-    /* 3カラムレイアウト */
-    .three-column {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 25px;
-      flex: 1;
-    }
-
-    /* 画像とテキストのレイアウト */
-    .image-text-layout {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 40px;
-      align-items: center;
-      height: 100%;
-    }
-
-    .image-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #f5f5f5;
+    /* ============================================
+       カード（v4.1: 色を明示、サイズ適正化）
+       ============================================ */
+    .card {
+      background-color: #f8f8f8;
       border-radius: 8px;
-      padding: 20px;
-      height: 100%;
+      padding: 18px 20px;
+      margin-bottom: 15px;
+      border-left: 4px solid #0066cc;
     }
 
-    /* プロフェッショナルな表デザイン */
+    .card h3 {
+      color: #0066cc;
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+
+    .card h4 {
+      color: #003366;
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .card p {
+      color: #333333;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .card ul {
+      margin: 8px 0 8px 25px;
+    }
+
+    .card li {
+      color: #333333;
+      font-size: 18px;
+      margin-bottom: 5px;
+    }
+
+    /* カードのバリエーション */
+    .card.accent {
+      border-left-color: #ff6600;
+    }
+
+    .card.accent h3 {
+      color: #e65100;
+    }
+
+    .card.success {
+      border-left-color: #00a651;
+    }
+
+    .card.success h3 {
+      color: #00a651;
+    }
+
+    /* ============================================
+       キーポイント強調ボックス
+       ============================================ */
+    .key-point {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border-left: 5px solid #0066cc;
+      padding: 18px 22px;
+      margin: 15px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .key-point h3 {
+      color: #003366;
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 22px;
+    }
+
+    .key-point p {
+      color: #333333;
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+
+    .key-point ul {
+      margin: 8px 0 8px 25px;
+    }
+
+    .key-point li {
+      color: #333333;
+      font-size: 18px;
+    }
+
+    /* ============================================
+       ハイライトボックス
+       ============================================ */
+    .highlight {
+      background-color: #fffbeb;
+      border: 1px solid #f5a623;
+      border-radius: 8px;
+      padding: 15px 20px;
+      margin: 15px 0;
+    }
+
+    .highlight h4 {
+      color: #b45309;
+      margin: 0 0 8px 0;
+      font-size: 20px;
+    }
+
+    .highlight p {
+      color: #333333;
+      font-size: 18px;
+      margin: 0;
+    }
+
+    .highlight ul {
+      margin: 8px 0 0 25px;
+    }
+
+    .highlight li {
+      color: #333333;
+      font-size: 18px;
+    }
+
+    /* ============================================
+       CTA ボックス（v4.1: 内部テキストすべて白）
+       ============================================ */
+    .cta-box {
+      background: linear-gradient(135deg, #0066cc 0%, #003366 100%);
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .cta-box h2 {
+      color: #ffffff;
+      margin: 0 0 12px 0;
+      font-size: 28px;
+    }
+
+    .cta-box p {
+      color: #ffffff;
+      font-size: 20px;
+      margin: 0;
+    }
+
+    .cta-box strong {
+      color: #ffffff;
+    }
+
+    /* ============================================
+       テーブル
+       ============================================ */
     table {
       width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
+      border-collapse: collapse;
       margin: 15px 0;
-      background-color: white;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      font-size: 18px;
+      background-color: #ffffff;
       border-radius: 8px;
       overflow: hidden;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     th {
       background-color: #003366;
-      color: white;
+      color: #ffffff;
       font-weight: 600;
-      padding: 12px 14px;
+      padding: 12px 15px;
       text-align: left;
-      font-size: 15px;
     }
 
     td {
-      padding: 10px 14px;
+      color: #333333;
+      padding: 10px 15px;
       border-bottom: 1px solid #e0e0e0;
-      font-size: 14px;
     }
 
     tr:last-child td {
@@ -358,22 +604,24 @@
     }
 
     tr:nth-child(even) {
-      background-color: #f8f9fa;
+      background-color: #f8f8f8;
     }
 
-    /* ロードマップ専用デザイン */
+    /* ============================================
+       ロードマップ
+       ============================================ */
     .roadmap {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 15px;
       margin: 20px 0;
       position: relative;
-      padding-left: 40px;
+      padding-left: 35px;
     }
 
     .timeline-line {
       position: absolute;
-      left: 20px;
+      left: 14px;
       top: 20px;
       bottom: 20px;
       width: 3px;
@@ -388,257 +636,200 @@
 
     .roadmap-marker {
       position: absolute;
-      left: -29px;
-      width: 16px;
-      height: 16px;
+      left: -26px;
+      width: 14px;
+      height: 14px;
       background-color: #0066cc;
-      border: 3px solid white;
+      border: 3px solid #ffffff;
       border-radius: 50%;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .roadmap-content {
-      background-color: #f8f9fa;
+      background-color: #f8f8f8;
       border-left: 4px solid #0066cc;
       padding: 15px 20px;
       border-radius: 0 8px 8px 0;
       flex: 1;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .roadmap-content h3 {
-      margin: 0 0 8px 0;
-      font-size: 20px;
       color: #003366;
+      margin: 0 0 6px 0;
+      font-size: 20px;
     }
 
-    /* 円グラフ */
-    .chart-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 40px;
-      margin: 30px 0;
-    }
-
-    .pie-chart-wrapper {
-      position: relative;
-    }
-
-    .pie-chart {
-      width: 280px;
-      height: 280px;
-      border-radius: 50%;
-      position: relative;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .chart-center {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 120px;
-      height: 120px;
-      background-color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .chart-legend {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 16px;
-    }
-
-    .legend-color {
-      width: 24px;
-      height: 24px;
-      border-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-    }
-
-    /* アイコン付きリスト */
-    .icon-list {
-      list-style: none;
-      margin-left: 0;
-    }
-
-    .icon-list li {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-
-    .icon-list li::before {
-      content: "▶";
-      color: #0066cc;
-      font-weight: bold;
-      flex-shrink: 0;
-      margin-top: 2px;
-      font-size: 12px;
-    }
-
-    /* カード型レイアウト */
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 18px;
-      margin: 15px 0;
-    }
-
-    .card {
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      padding: 18px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .card h3 {
-      color: #0066cc;
-      margin-top: 0;
-      margin-bottom: 10px;
+    .roadmap-content p {
+      color: #666666;
+      margin: 0;
       font-size: 18px;
     }
 
-    .card h4 {
-      color: #003366;
-      margin-top: 0;
-      margin-bottom: 8px;
-      font-size: 16px;
+    /* ============================================
+       参加者リスト
+       ============================================ */
+    .participant-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
     }
 
-    .card p {
-      font-size: 15px;
-      margin-bottom: 8px;
+    .participant-section h2 {
+      margin-bottom: 15px;
     }
 
-    .card ul {
-      margin: 0 0 8px 20px;
-    }
-
-    .card li {
+    .badge {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 4px;
       font-size: 14px;
-      margin-bottom: 4px;
+      font-weight: 600;
+      color: #ffffff;
     }
 
-    /* キーポイント強調ボックス */
-    .key-point {
-      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-      border-left: 4px solid #0066cc;
-      padding: 18px 22px;
-      margin: 15px 0;
-      border-radius: 0 8px 8px 0;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    .badge.primary {
+      background-color: #0066cc;
     }
 
-    .key-point h3 {
-      margin-top: 0;
-      color: #003366;
-      font-size: 20px;
+    .badge.accent {
+      background-color: #ff6600;
     }
 
-    .key-point p {
-      font-size: 16px;
+    .badge.success {
+      background-color: #00a651;
+    }
+
+    .participant-list {
+      list-style: none;
+      margin: 0;
+    }
+
+    .participant-list li {
+      padding: 10px 15px;
+      background-color: #f8f8f8;
       margin-bottom: 8px;
+      border-radius: 6px;
+      border-left: 4px solid #dddddd;
     }
 
-    /* まとめスライド */
+    .participant-list.primary li {
+      border-left-color: #0066cc;
+    }
+
+    .participant-list.accent li {
+      border-left-color: #ff6600;
+    }
+
+    .participant-list .name {
+      color: #222222;
+      font-weight: 600;
+      display: block;
+      font-size: 18px;
+    }
+
+    .participant-list .role {
+      color: #666666;
+      font-size: 14px;
+    }
+
+    /* ============================================
+       サマリー（まとめスライド）v4.1強化版
+       ============================================ */
     .summary-slide {
       background-color: #f8f9fa;
     }
 
-    .summary-points {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-      margin-top: 20px;
+    .summary-slide .slide-content {
+      background-color: #f8f9fa;
     }
 
     .summary-item {
       display: flex;
-      align-items: center;
       gap: 18px;
-      background-color: white;
-      padding: 16px;
+      background-color: #ffffff;
+      padding: 18px 20px;
+      margin-bottom: 15px;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
     .summary-number {
-      width: 44px;
-      height: 44px;
+      width: 40px;
+      height: 40px;
       background-color: #0066cc;
-      color: white;
+      color: #ffffff;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      font-weight: bold;
+      font-weight: 700;
+      font-size: 20px;
       flex-shrink: 0;
     }
 
-    .summary-item h3 {
-      margin: 0 0 4px 0;
-      font-size: 18px;
+    .summary-text {
+      flex: 1;
     }
 
-    .summary-item p {
+    .summary-text h3 {
+      color: #003366;
+      margin: 0 0 5px 0;
+      font-size: 20px;
+    }
+
+    .summary-text p {
+      color: #555555;
       margin: 0;
-      font-size: 15px;
+      font-size: 16px;
     }
 
-    /* コールトゥアクション */
-    .cta-box {
+    /* ページ番号参照 */
+    .summary-page {
+      color: #0066cc;
+      font-size: 16px;
+      font-weight: 600;
+      white-space: nowrap;
+      padding: 6px 12px;
+      background-color: #e3f2fd;
+      border-radius: 20px;
+    }
+
+    /* Next Action */
+    .next-action {
       background: linear-gradient(135deg, #0066cc 0%, #003366 100%);
-      color: white;
-      padding: 25px;
-      border-radius: 12px;
-      text-align: center;
-      margin: 20px 0;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      padding: 20px 25px;
+      border-radius: 10px;
+      margin-top: 20px;
     }
 
-    .cta-box h2 {
-      color: white;
-      margin-bottom: 12px;
-      font-size: 26px;
+    .next-action h3 {
+      color: #ffffff;
+      margin: 0 0 8px 0;
+      font-size: 20px;
     }
 
-    .cta-box p {
+    .next-action p {
+      color: #ffffff;
+      margin: 0;
       font-size: 18px;
-      opacity: 0.9;
-      color: white;
     }
 
-    /* cta-box内のstrong要素も白文字に */
-    .cta-box strong {
-      color: white;
+    .next-action ul {
+      margin: 10px 0 0 25px;
     }
 
-    /* 用語解説グリッド */
+    .next-action li {
+      color: #ffffff;
+      font-size: 18px;
+    }
+
+    /* ============================================
+       用語解説
+       ============================================ */
     .glossary-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: 1fr 1fr;
       gap: 15px;
     }
 
@@ -652,20 +843,22 @@
     .glossary-item h4 {
       color: #e65100;
       margin: 0 0 6px 0;
-      font-size: 17px;
+      font-size: 16px;
     }
 
     .glossary-item p {
+      color: #333333;
       margin: 0;
-      font-size: 14px;
-      line-height: 1.5;
+      font-size: 16px;
     }
 
-    /* アニメーション */
+    /* ============================================
+       アニメーション
+       ============================================ */
     @keyframes fadeInUp {
       from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(15px);
       }
       to {
         opacity: 1;
@@ -674,279 +867,19 @@
     }
 
     .slide.active .animate-item {
-      animation: fadeInUp 0.6s ease-out forwards;
+      animation: fadeInUp 0.5s ease-out forwards;
     }
 
     .animate-item:nth-child(1) { animation-delay: 0.1s; }
-    .animate-item:nth-child(2) { animation-delay: 0.2s; }
-    .animate-item:nth-child(3) { animation-delay: 0.3s; }
-    .animate-item:nth-child(4) { animation-delay: 0.4s; }
-    .animate-item:nth-child(5) { animation-delay: 0.5s; }
-    .animate-item:nth-child(6) { animation-delay: 0.6s; }
+    .animate-item:nth-child(2) { animation-delay: 0.15s; }
+    .animate-item:nth-child(3) { animation-delay: 0.2s; }
+    .animate-item:nth-child(4) { animation-delay: 0.25s; }
+    .animate-item:nth-child(5) { animation-delay: 0.3s; }
+    .animate-item:nth-child(6) { animation-delay: 0.35s; }
 
-    /* キーボードショートカットヘルプ */
-    .help-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(0, 0, 0, 0.8);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .help-content {
-      background-color: white;
-      padding: 35px;
-      border-radius: 12px;
-      max-width: 450px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .help-content h2 {
-      margin-top: 0;
-      margin-bottom: 20px;
-      color: #003366;
-    }
-
-    .shortcut-list {
-      list-style: none;
-      margin: 0;
-    }
-
-    .shortcut-list li {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      padding: 8px;
-      background-color: #f5f5f5;
-      border-radius: 4px;
-    }
-
-    .shortcut-key {
-      font-family: monospace;
-      background-color: #e0e0e0;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-weight: bold;
-    }
-
-    /* レスポンシブ対応 */
-    @media (max-width: 1024px) {
-      .slide-content {
-        padding: 40px;
-      }
-      
-      h1 { font-size: 32px; }
-      h2 { font-size: 26px; }
-      h3 { font-size: 20px; }
-      p, li { font-size: 16px; }
-      
-      .two-column {
-        grid-template-columns: 1fr;
-      }
-      
-      .nav-area {
-        width: 20%;
-      }
-    }
-
-    /* =====================================
-       印刷・PDF出力用スタイル（v3 - 回転問題完全修正版）
-       - 90度回転バグを解消
-       - 表示通りに横向きで印刷
-       - A4サイズを明示的に指定
-       ===================================== */
-    @media print {
-      * {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
-      }
-
-      /* A4横向きを明示的にmm単位で指定（重要！） */
-      @page {
-        size: 297mm 210mm;
-        margin: 5mm;
-      }
-
-      html {
-        width: 297mm;
-        height: 210mm;
-      }
-
-      body {
-        width: 297mm;
-        height: auto;
-        margin: 0;
-        padding: 0;
-        background-color: white !important;
-        overflow: visible;
-      }
-
-      .presentation-container {
-        width: 287mm;
-        height: auto;
-        max-width: none;
-        max-height: none;
-        margin: 0;
-        padding: 0;
-        background-color: white !important;
-        box-shadow: none !important;
-        display: block;
-        position: static;
-      }
-
-      .slides-wrapper {
-        display: block;
-        width: 100%;
-      }
-
-      .slide {
-        width: 287mm;
-        height: 161.4mm; /* 16:9比率 = 287 * 9/16 */
-        page-break-after: always;
-        page-break-inside: avoid;
-        break-after: page;
-        break-inside: avoid;
-        margin: 0 auto 5mm auto;
-        padding: 0;
-        position: relative !important;
-        background-color: white !important;
-        display: block !important;
-        opacity: 1 !important;
-        transform: none !important;
-        box-sizing: border-box;
-        overflow: hidden;
-      }
-
-      .slide:last-child {
-        page-break-after: avoid;
-        break-after: auto;
-        margin-bottom: 0;
-      }
-
-      .slide-content {
-        position: absolute !important;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        padding: 8mm 10mm 10mm;
-        overflow: hidden !important;
-        height: 100% !important;
-        box-sizing: border-box;
-      }
-
-      /* タイトルスライドの背景保持 */
-      .title-slide {
-        background: linear-gradient(135deg, #003366 0%, #0066cc 100%) !important;
-      }
-
-      .title-slide .slide-content,
-      .title-slide h1,
-      .title-slide .subtitle,
-      .title-slide .author,
-      .title-slide .date,
-      .title-slide p {
-        color: white !important;
-      }
-
-      /* セクション区切りの背景保持 */
-      .section-divider {
-        background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%) !important;
-      }
-
-      /* 印刷用フォントサイズ調整 */
-      h1 { font-size: 28px !important; margin-bottom: 15px !important; }
-      h2 { font-size: 22px !important; margin-bottom: 10px !important; }
-      h3 { font-size: 18px !important; margin-bottom: 8px !important; }
-      h4 { font-size: 15px !important; }
-      p { font-size: 13px !important; margin-bottom: 8px !important; }
-      li { font-size: 13px !important; margin-bottom: 5px !important; }
-
-      .title-slide h1 { font-size: 38px !important; }
-      .title-slide .subtitle { font-size: 20px !important; }
-      .section-divider h1 { font-size: 32px !important; }
-
-      /* 表のスタイル保持 */
-      table {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
-      }
-
-      th {
-        background-color: #003366 !important;
-        color: white !important;
-        padding: 8px 10px !important;
-      }
-
-      td {
-        padding: 6px 10px !important;
-      }
-
-      /* カードの背景保持 */
-      .card {
-        background-color: #f8f9fa !important;
-        padding: 10px !important;
-        margin-bottom: 8px !important;
-      }
-
-      .key-point {
-        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%) !important;
-        padding: 10px 12px !important;
-        margin: 10px 0 !important;
-      }
-
-      /* CTA ボックスの保持 */
-      .cta-box {
-        background: linear-gradient(135deg, #0066cc 0%, #003366 100%) !important;
-        color: white !important;
-        padding: 15px !important;
-        margin: 12px 0 !important;
-      }
-
-      .cta-box h2,
-      .cta-box p,
-      .cta-box strong {
-        color: white !important;
-      }
-
-      /* 用語解説 */
-      .glossary-item {
-        background: linear-gradient(135deg, #fff9e6 0%, #fff3cc 100%) !important;
-        padding: 10px 12px !important;
-      }
-
-      /* グリッド調整 */
-      .two-column {
-        gap: 20px !important;
-      }
-
-      .card-grid {
-        gap: 12px !important;
-      }
-
-      /* アニメーション要素の表示 */
-      .animate-item {
-        opacity: 1 !important;
-        transform: none !important;
-        animation: none !important;
-      }
-
-      /* ナビゲーション要素を非表示 */
-      .nav-area, 
-      .slide-progress, 
-      .help-overlay, 
-      .pdf-export-btn,
-      .slide-number {
-        display: none !important;
-      }
-    }
-
-    /* PDF出力ボタン */
+    /* ============================================
+       PDF出力ボタン
+       ============================================ */
     .pdf-export-btn {
       position: fixed;
       bottom: 20px;
@@ -970,16 +903,14 @@
       background-color: #0052a3;
       opacity: 1;
       transform: scale(1.1);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
     }
 
     .pdf-export-btn svg {
       width: 24px;
       height: 24px;
-      fill: white;
+      fill: #ffffff;
     }
 
-    /* ツールチップ */
     .pdf-export-btn::after {
       content: 'PDF出力';
       position: absolute;
@@ -987,8 +918,8 @@
       left: 50%;
       transform: translateX(-50%);
       background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 4px 8px;
+      color: #ffffff;
+      padding: 5px 10px;
       border-radius: 4px;
       font-size: 12px;
       white-space: nowrap;
@@ -1002,28 +933,236 @@
       opacity: 1;
     }
 
-    /* フルスクリーン時は控えめに */
-    .fullscreen .pdf-export-btn {
-      opacity: 0.2;
-      width: 40px;
-      height: 40px;
+    /* ============================================
+       ヘルプオーバーレイ
+       ============================================ */
+    .help-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
     }
 
-    .fullscreen .pdf-export-btn:hover {
-      opacity: 0.9;
-      width: 48px;
-      height: 48px;
+    .help-content {
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 420px;
     }
 
-    .fullscreen .pdf-export-btn svg {
-      width: 20px;
-      height: 20px;
+    .help-content h2 {
+      color: #003366;
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    .shortcut-list {
+      list-style: none;
+      margin: 0;
+    }
+
+    .shortcut-list li {
+      color: #333333;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      background-color: #f5f5f5;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .shortcut-key {
+      font-family: monospace;
+      background-color: #e0e0e0;
+      color: #333333;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    /* ============================================
+       レスポンシブ対応
+       ============================================ */
+    @media (max-width: 1024px) {
+      .slide-content {
+        padding: 35px 45px 50px;
+      }
+      
+      h1 { font-size: 30px; }
+      h2 { font-size: 22px; }
+      h3 { font-size: 18px; }
+      p, li { font-size: 18px; }
+      
+      .two-column, .participant-grid, .glossary-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .nav-area {
+        width: 20%;
+      }
+    }
+
+    /* ============================================
+       印刷・PDF出力用スタイル（v4.1改善版）
+       ============================================ */
+    @media print {
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+
+      @page {
+        size: 297mm 210mm;
+        margin: 5mm;
+      }
+
+      html {
+        width: 297mm;
+        height: 210mm;
+      }
+
+      body {
+        width: 297mm;
+        height: auto;
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff !important;
+        overflow: visible;
+      }
+
+      .presentation-container {
+        width: 287mm;
+        height: auto;
+        max-width: none;
+        max-height: none;
+        margin: 0;
+        padding: 0;
+        background-color: #ffffff !important;
+        box-shadow: none !important;
+        display: block;
+        position: static;
+      }
+
+      .slides-wrapper {
+        display: block;
+        width: 100%;
+      }
+
+      .slide {
+        width: 287mm;
+        height: 161mm;
+        page-break-after: always;
+        page-break-inside: avoid;
+        break-after: page;
+        break-inside: avoid;
+        margin: 0 auto 5mm auto;
+        padding: 0;
+        position: relative !important;
+        background-color: #ffffff !important;
+        display: block !important;
+        opacity: 1 !important;
+        transform: none !important;
+        box-sizing: border-box;
+        overflow: hidden;
+      }
+
+      .slide:last-child {
+        page-break-after: avoid;
+        break-after: auto;
+        margin-bottom: 0;
+      }
+
+      .slide-content {
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 10mm 12mm 12mm;
+        overflow: hidden !important;
+        height: 100% !important;
+        box-sizing: border-box;
+      }
+
+      /* 印刷用フォントサイズ調整 */
+      h1 { font-size: 28px !important; }
+      h2 { font-size: 22px !important; }
+      h3 { font-size: 18px !important; }
+      p, li { font-size: 16px !important; }
+
+      /* タイトルスライドの背景と文字色を保持 */
+      .title-slide {
+        background: linear-gradient(135deg, #003366 0%, #0066cc 100%) !important;
+      }
+
+      .title-slide .slide-content {
+        background: transparent !important;
+      }
+
+      .title-slide h1 { font-size: 36px !important; }
+      .title-slide .subtitle { font-size: 20px !important; }
+
+      .title-slide h1,
+      .title-slide .subtitle,
+      .title-slide .author,
+      .title-slide .date,
+      .title-slide p {
+        color: #ffffff !important;
+      }
+
+      /* セクション区切りの背景保持 */
+      .section-divider {
+        background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%) !important;
+      }
+
+      .section-divider .slide-content {
+        background: transparent !important;
+      }
+
+      .section-divider h1 {
+        font-size: 32px !important;
+      }
+
+      /* CTAボックス */
+      .cta-box {
+        background: linear-gradient(135deg, #0066cc 0%, #003366 100%) !important;
+      }
+
+      .cta-box h2,
+      .cta-box p,
+      .cta-box strong {
+        color: #ffffff !important;
+      }
+
+      /* アニメーション要素の表示 */
+      .animate-item {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+      }
+
+      /* ナビゲーション要素を非表示 */
+      .nav-area, 
+      .slide-progress, 
+      .help-overlay, 
+      .pdf-export-btn,
+      .slide-number {
+        display: none !important;
+      }
     }
   </style>
 </head>
 <body>
   <div class="presentation-container">
-    <!-- スライドコンテンツ -->
     <div class="slides-wrapper">
       <!-- スライドはここに動的に生成される -->
     </div>
@@ -1052,37 +1191,18 @@
       <div class="help-content">
         <h2>キーボードショートカット</h2>
         <ul class="shortcut-list">
-          <li>
-            <span>次のスライド</span>
-            <span><span class="shortcut-key">→</span> / <span class="shortcut-key">Space</span></span>
-          </li>
-          <li>
-            <span>前のスライド</span>
-            <span><span class="shortcut-key">←</span> / <span class="shortcut-key">Backspace</span></span>
-          </li>
-          <li>
-            <span>最初のスライド</span>
-            <span><span class="shortcut-key">Home</span></span>
-          </li>
-          <li>
-            <span>最後のスライド</span>
-            <span><span class="shortcut-key">End</span></span>
-          </li>
-          <li>
-            <span>フルスクリーン</span>
-            <span><span class="shortcut-key">F</span></span>
-          </li>
-          <li>
-            <span>ヘルプを閉じる</span>
-            <span><span class="shortcut-key">Esc</span> / <span class="shortcut-key">?</span></span>
-          </li>
+          <li><span>次のスライド</span><span><span class="shortcut-key">→</span> / <span class="shortcut-key">Space</span></span></li>
+          <li><span>前のスライド</span><span><span class="shortcut-key">←</span> / <span class="shortcut-key">Backspace</span></span></li>
+          <li><span>最初のスライド</span><span><span class="shortcut-key">Home</span></span></li>
+          <li><span>最後のスライド</span><span><span class="shortcut-key">End</span></span></li>
+          <li><span>フルスクリーン</span><span><span class="shortcut-key">F</span></span></li>
+          <li><span>ヘルプ</span><span><span class="shortcut-key">?</span></span></li>
         </ul>
       </div>
     </div>
   </div>
 
   <script>
-    // プレゼンテーション管理クラス
     class PresentationManager {
       constructor() {
         this.slides = [];
@@ -1104,124 +1224,68 @@
       }
 
       setupEventListeners() {
-        // キーボードイベント
         document.addEventListener('keydown', (e) => this.handleKeyPress(e));
         
-        // タッチジェスチャー
         let touchStartX = 0;
         document.addEventListener('touchstart', (e) => {
           touchStartX = e.touches[0].clientX;
         });
         
         document.addEventListener('touchend', (e) => {
-          const touchEndX = e.changedTouches[0].clientX;
-          const diff = touchStartX - touchEndX;
-          
+          const diff = touchStartX - e.changedTouches[0].clientX;
           if (Math.abs(diff) > 50) {
-            if (diff > 0) {
-              this.navigateSlide(1);
-            } else {
-              this.navigateSlide(-1);
-            }
+            this.navigateSlide(diff > 0 ? 1 : -1);
           }
         });
         
-        // ヘルプオーバーレイ
         document.getElementById('helpOverlay').addEventListener('click', (e) => {
-          if (e.target.id === 'helpOverlay') {
-            this.toggleHelp();
-          }
+          if (e.target.id === 'helpOverlay') this.toggleHelp();
         });
       }
 
       handleKeyPress(e) {
         switch(e.key) {
-          case 'ArrowRight':
-          case ' ':
-            e.preventDefault();
-            this.navigateSlide(1);
-            break;
-          case 'ArrowLeft':
-          case 'Backspace':
-            e.preventDefault();
-            this.navigateSlide(-1);
-            break;
-          case 'Home':
-            e.preventDefault();
-            this.showSlide(0);
-            break;
-          case 'End':
-            e.preventDefault();
-            this.showSlide(this.totalSlides - 1);
-            break;
-          case 'f':
-          case 'F':
-            e.preventDefault();
-            this.toggleFullscreen();
-            break;
-          case '?':
-            e.preventDefault();
-            this.toggleHelp();
-            break;
-          case 'Escape':
-            e.preventDefault();
-            if (document.getElementById('helpOverlay').style.display === 'flex') {
-              this.toggleHelp();
-            }
+          case 'ArrowRight': case ' ': e.preventDefault(); this.navigateSlide(1); break;
+          case 'ArrowLeft': case 'Backspace': e.preventDefault(); this.navigateSlide(-1); break;
+          case 'Home': e.preventDefault(); this.showSlide(0); break;
+          case 'End': e.preventDefault(); this.showSlide(this.totalSlides - 1); break;
+          case 'f': case 'F': e.preventDefault(); this.toggleFullscreen(); break;
+          case '?': e.preventDefault(); this.toggleHelp(); break;
+          case 'Escape': 
+            if (document.getElementById('helpOverlay').style.display === 'flex') this.toggleHelp();
             break;
         }
       }
 
       navigateSlide(direction) {
         const newSlide = this.currentSlide + direction;
-        if (newSlide >= 0 && newSlide < this.totalSlides) {
-          this.showSlide(newSlide);
-        }
+        if (newSlide >= 0 && newSlide < this.totalSlides) this.showSlide(newSlide);
       }
 
       showSlide(index) {
-        // 現在のスライドを非表示
         if (this.slides[this.currentSlide]) {
           this.slides[this.currentSlide].classList.remove('active');
           this.slides[this.currentSlide].classList.add('prev');
         }
         
-        // 新しいスライドを表示
         setTimeout(() => {
-          this.slides.forEach(slide => {
-            slide.classList.remove('active', 'prev');
-          });
-          
+          this.slides.forEach(slide => slide.classList.remove('active', 'prev'));
           this.slides[index].classList.add('active');
           this.currentSlide = index;
           this.updateSlideNumber();
           this.updateProgressBar();
           
-          // スクロール位置をリセット
-          const slideContent = this.slides[index].querySelector('.slide-content');
-          if (slideContent) {
-            slideContent.scrollTop = 0;
-          }
-          
-          // アニメーション要素をリセット
-          const animateItems = this.slides[index].querySelectorAll('.animate-item');
-          animateItems.forEach(item => {
-            item.style.opacity = '0';
-            setTimeout(() => {
-              item.style.opacity = '';
-            }, 10);
-          });
+          const content = this.slides[index].querySelector('.slide-content');
+          if (content) content.scrollTop = 0;
         }, 10);
       }
 
       updateSlideNumber() {
-        document.getElementById('slideNumber').textContent = 
-          `${this.currentSlide + 1} / ${this.totalSlides}`;
+        document.getElementById('slideNumber').textContent = `${this.currentSlide + 1} / ${this.totalSlides}`;
       }
 
       updateProgressBar() {
-        const progress = ((this.currentSlide + 1) / this.totalSlides) * 100;
-        document.getElementById('progressBar').style.width = `${progress}%`;
+        document.getElementById('progressBar').style.width = `${((this.currentSlide + 1) / this.totalSlides) * 100}%`;
       }
 
       toggleFullscreen() {
@@ -1235,351 +1299,301 @@
       }
 
       toggleHelp() {
-        const helpOverlay = document.getElementById('helpOverlay');
-        helpOverlay.style.display = 
-          helpOverlay.style.display === 'flex' ? 'none' : 'flex';
+        const overlay = document.getElementById('helpOverlay');
+        overlay.style.display = overlay.style.display === 'flex' ? 'none' : 'flex';
       }
 
       exportToPDF() {
-        // 印刷前の設定案内を表示
-        const confirmed = confirm(
-          '📄 PDF出力の設定確認\n\n' +
-          '印刷ダイアログで以下を設定してください：\n\n' +
-          '✅ 用紙の向き：「横」（Landscape）\n' +
-          '✅ 用紙サイズ：A4\n' +
-          '✅ 余白：なし または 最小\n' +
-          '✅ 背景のグラフィック：オン\n\n' +
-          '【Chrome/Edgeの場合】\n' +
-          '「詳細設定」→「用紙サイズ」と「レイアウト」を確認\n\n' +
-          '続行しますか？'
-        );
-        
-        if (confirmed) {
+        if (confirm('📄 PDF出力の設定確認\n\n印刷ダイアログで以下を設定してください：\n\n✅ 用紙の向き：「横」（Landscape）\n✅ 用紙サイズ：A4\n✅ 余白：なし または 最小\n✅ 背景のグラフィック：オン\n\n続行しますか？')) {
           window.print();
         }
       }
     }
 
-    // グローバル関数（HTML内のonclickから呼び出し用）
     let presentationManager;
-    
-    function navigateSlide(direction) {
-      if (presentationManager) {
-        presentationManager.navigateSlide(direction);
-      }
-    }
-
-    function exportToPDF() {
-      if (presentationManager) {
-        presentationManager.exportToPDF();
-      }
-    }
-
-    // 初期化
-    document.addEventListener('DOMContentLoaded', () => {
-      presentationManager = new PresentationManager();
-    });
+    function navigateSlide(direction) { if (presentationManager) presentationManager.navigateSlide(direction); }
+    function exportToPDF() { if (presentationManager) presentationManager.exportToPDF(); }
+    document.addEventListener('DOMContentLoaded', () => { presentationManager = new PresentationManager(); });
   </script>
 </body>
 </html>
 ```
 
-## 企画書のMarkdownからスライドを生成する方法（プロ仕様）
+---
 
-### 1. コンテンツ解析と構造化
+## v4.1 コンテンツガイドライン
 
-企画書のmdファイルを解析する際は、以下の要素を識別し、適切なスライドタイプに変換します：
+### フォントサイズ（v4.1 適正化）
 
-#### スライドタイプの自動判定
-- **タイトルスライド**: 最初の`#`見出し、または`タイトル`を含む最初のセクション
-- **エグゼクティブサマリー**: `要約`、`サマリー`、`概要`を含むセクション
-- **アジェンダ/目次**: `目次`、`アジェンダ`、`agenda`を含むセクション
-- **セクション区切り**: 新しい大きなトピックの開始時
-- **コンテンツスライド**: 通常の内容
-- **比較スライド**: `比較`、`vs`、`対`を含むセクション
-- **ロードマップ**: `ロードマップ`、`スケジュール`、`工程`を含むセクション
-- **まとめスライド**: `まとめ`、`結論`、`今後`を含むセクション
+| 要素 | 画面表示 | 印刷時 |
+|------|----------|--------|
+| タイトル（h1） | 36px | 28px |
+| タイトルスライドh1 | 48px | 36px |
+| 見出し（h2） | 26px | 22px |
+| 小見出し（h3） | 20px | 18px |
+| 本文（p, li） | 20px | 16px |
+| 補足・注釈 | 16px | 14px |
 
-### 2. コンテンツ最適化ルール
+### 色の組み合わせルール
 
-#### 文章の圧縮と要約
-```markdown
-# 元の文章
-弊社の新しいクラウドサービスは、従来のオンプレミス型のシステムと比較して、初期投資を大幅に削減できるだけでなく、運用コストも約40%削減することが可能です。また、システムの拡張性も高く、ビジネスの成長に合わせて柔軟にリソースを追加できます。
+```
+【白背景 (#ffffff) の場合】
+- 見出し: #003366（濃紺）または #0066cc（青）
+- 本文: #333333（濃いグレー）
+- 強調: #0066cc（青）
 
-# スライド用に最適化
-• 初期投資: 大幅削減（オンプレミス比）
-• 運用コスト: 40%削減
-• 拡張性: ビジネス成長に応じた柔軟なリソース追加
+【濃い背景 (#003366等) の場合】
+- すべてのテキスト: #ffffff（白）
+- 副題: #e0e0e0（薄いグレー）
+- 補足: #aaaaaa（グレー）
+
+【グレー背景 (#f5f5f5等) の場合】
+- 見出し: #003366（濃紺）
+- 本文: #333333（濃いグレー）
 ```
 
-#### 情報の階層化
-- **メインポイント**: 各スライド3-5個まで
-- **サブポイント**: 各メインポイントに2-3個まで
-- **詳細情報**: 必要に応じて付録スライドへ移動
+### 禁止事項
 
-### 3. ビジュアル要素の自動生成
+1. ❌ CSS変数 `var(--xxx)` の使用
+2. ❌ `color: white` の曖昧な記述（`#ffffff` を使用）
+3. ❌ 背景色と同系色の文字色
+4. ❌ 1スライドに6項目以上の箇条書き
+5. ❌ スクロールバーの無効化
+6. ❌ 最終スライドを「ご清聴ありがとうございました」だけで終わらせる
 
-#### データの可視化
-- **数値データ** → 円グラフ、棒グラフ
-- **時系列データ** → ロードマップ、タイムライン
-- **比較データ** → 比較表、2カラムレイアウト
-- **プロセス** → フローチャート、ステップ図
+---
 
-#### アイコンとビジュアルキュー
-- 重要ポイントには自動的にアイコンを付与
-- カラーコーディングで情報の種類を区別
-- 視覚的な階層構造を明確化
+## 📋 最終スライド（まとめ）のガイドライン（v4.1 新規）
 
-### 4. スライド分割の自動化
+**最終スライドは「Thank You」ではなく、発表内容のサマリーとする**
 
-#### 分割基準
-1. **コンテンツ量**: 1スライドに収まらない場合は自動分割
-2. **論理的まとまり**: トピックごとに適切に分割
-3. **視認性**: フォントサイズが12px以下にならないよう調整
+### 必須要素
 
-#### 分割パターン
-```javascript
-// コンテンツ量に基づく自動分割
-function shouldSplitSlide(content) {
-  const maxBulletPoints = 6;
-  const maxTableRows = 8;
-  const maxTextLength = 500;
-  
-  return (
-    content.bulletPoints > maxBulletPoints ||
-    content.tableRows > maxTableRows ||
-    content.textLength > maxTextLength
-  );
-}
+1. **重要ポイント3〜5個**（箇条書き）
+2. **各ポイントの参照ページ番号**（詳細を見返せるように）
+3. **Next Action / 次のステップ**（あれば）
+
+### 推奨フォーマット
+
+```html
+<!-- 最終スライド: まとめ -->
+<div class="slide summary-slide">
+  <div class="slide-content">
+    <h1>まとめ</h1>
+    
+    <div class="summary-item">
+      <div class="summary-number">1</div>
+      <div class="summary-text">
+        <h3>重要ポイント1のタイトル</h3>
+        <p>簡潔な説明文（1〜2行）</p>
+      </div>
+      <div class="summary-page">→ p.5</div>
+    </div>
+    
+    <div class="summary-item">
+      <div class="summary-number">2</div>
+      <div class="summary-text">
+        <h3>重要ポイント2のタイトル</h3>
+        <p>簡潔な説明文（1〜2行）</p>
+      </div>
+      <div class="summary-page">→ p.8</div>
+    </div>
+    
+    <div class="summary-item">
+      <div class="summary-number">3</div>
+      <div class="summary-text">
+        <h3>重要ポイント3のタイトル</h3>
+        <p>簡潔な説明文（1〜2行）</p>
+      </div>
+      <div class="summary-page">→ p.12</div>
+    </div>
+    
+    <!-- Next Actionがあれば -->
+    <div class="next-action">
+      <h3>Next Action</h3>
+      <p>次のステップの内容</p>
+    </div>
+  </div>
+</div>
 ```
 
-### 5. プロフェッショナルなデザインパターン
+### まとめスライド用CSS
 
-#### カラースキーム
 ```css
-:root {
-  --primary-color: #003366;      /* 濃紺 - 信頼性 */
-  --secondary-color: #0066cc;    /* 青 - 技術的 */
-  --accent-color: #ff6600;       /* オレンジ - 強調 */
-  --success-color: #00a651;      /* 緑 - 成功/達成 */
-  --warning-color: #ffc107;      /* 黄 - 注意 */
-  --danger-color: #dc3545;       /* 赤 - リスク */
+/* まとめスライド */
+.summary-slide {
+  background-color: #f8f9fa;
+}
+
+.summary-slide .slide-content {
+  background-color: #f8f9fa;
+}
+
+.summary-item {
+  display: flex;
+  gap: 18px;
+  background-color: #ffffff;
+  padding: 18px 20px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.summary-number {
+  width: 40px;
+  height: 40px;
+  background-color: #0066cc;
+  color: #ffffff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.summary-text {
+  flex: 1;
+}
+
+.summary-text h3 {
+  color: #003366;
+  margin: 0 0 5px 0;
+  font-size: 20px;
+}
+
+.summary-text p {
+  color: #555555;
+  margin: 0;
+  font-size: 16px;
+}
+
+/* ページ番号参照 */
+.summary-page {
+  color: #0066cc;
+  font-size: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 6px 12px;
+  background-color: #e3f2fd;
+  border-radius: 20px;
+}
+
+/* Next Action */
+.next-action {
+  background: linear-gradient(135deg, #0066cc 0%, #003366 100%);
+  padding: 20px 25px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.next-action h3 {
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  font-size: 20px;
+}
+
+.next-action p {
+  color: #ffffff;
+  margin: 0;
+  font-size: 18px;
+}
+
+.next-action ul {
+  margin: 10px 0 0 25px;
+}
+
+.next-action li {
+  color: #ffffff;
+  font-size: 18px;
 }
 ```
 
-#### レイアウトパターン
-1. **インパクト重視**: タイトル + 大きな数字/グラフ
-2. **詳細説明**: 2カラム（テキスト + ビジュアル）
-3. **比較分析**: 並列カラムまたは比較表
-4. **ストーリー展開**: タイムライン形式
+### 良い例 vs 悪い例
 
-### 6. スクロールバー機能（v2で追加）
-
-各スライドにスクロールバーを追加し、コンテンツが多い場合でも下まで閲覧可能にします。
-
-#### 実装ポイント
-```css
-/* スクロールバー対応 */
-.slide-content {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
-/* カスタムスクロールバー（WebKit系） */
-.slide-content::-webkit-scrollbar {
-  width: 10px;
-}
-
-.slide-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 5px;
-}
-
-.slide-content::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 5px;
-}
-
-.slide-content::-webkit-scrollbar-thumb:hover {
-  background: #0066cc;
-}
-
-/* Firefox用 */
-.slide-content {
-  scrollbar-width: thin;
-  scrollbar-color: #c1c1c1 #f1f1f1;
-}
+**❌ 悪い例（避けるべき）**
 ```
-
-### 7. インタラクティブ要素
-
-#### トランジション効果
-- スライド切り替え: スムーズなスライドイン
-- 要素アニメーション: 段階的なフェードイン
-- 強調効果: ホバー時のハイライト
-
-#### プレゼンテーション機能
-- フルスクリーンモード（F キー）
-- プレゼンターノート（別ウィンドウ）
-- タイマー機能（オプション）
-- ポインター/ペンツール（将来実装）
-
-### 8. 印刷・PDF出力機能（v2で修正）
-
-#### 修正内容
-- 90度回転バグを解消
-- 表示通りにそのまま印刷
-- 横向き（landscape）で出力
-
-#### 実装ポイント
-```css
-@media print {
-  @page {
-    size: landscape;  /* A4 landscapeではなくlandscapeのみ */
-    margin: 10mm;
-  }
-
-  html, body {
-    height: auto;
-    overflow: visible;
-  }
-
-  .slide {
-    width: 100%;
-    height: auto;
-    min-height: 180mm;
-    aspect-ratio: 16 / 9;
-    page-break-after: always;
-    break-after: page;
-    position: relative !important;
-    display: block !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-
-  .slide-content {
-    position: relative !important;
-    overflow: visible !important;
-    height: auto !important;
-  }
-}
+Thank You
+ご清聴ありがとうございました
 ```
+→ 情報価値がない、聴衆が内容を忘れる
 
-### 9. 実装のベストプラクティス
-
-#### パフォーマンス最適化
-```javascript
-// 画像の遅延読み込み
-const lazyLoadImages = () => {
-  const images = document.querySelectorAll('img[data-src]');
-  const imageObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        img.src = img.dataset.src;
-        imageObserver.unobserve(img);
-      }
-    });
-  });
-  
-  images.forEach(img => imageObserver.observe(img));
-};
+**✅ 良い例**
 ```
+まとめ
 
-#### アクセシビリティ
-- キーボードナビゲーション完全対応
-- スクリーンリーダー対応
-- 高コントラストモード
-- フォントサイズ調整機能
+1. Ansible v2.6への直接移行を推奨 → p.12
+   EDA、自己修復、Lightspeed等のAI機能を活用
 
-### 10. 出力オプション
+2. Satellite + Ansible統合で一元管理 → p.15
+   サイロ化した顧客システムを統合
 
-#### エクスポート形式
-1. **HTML単体ファイル**: すべてのリソースを含む
-2. **PDF**: 印刷用に最適化（表示通りに出力）
-3. **PowerPoint互換**: PPTXへの変換（別ツール経由）
-4. **画像シーケンス**: 各スライドをPNG/JPEGで出力
+3. 非接続環境でのAI機能が課題 → p.13
+   Air-gapped環境での動作検証が必要
 
-### 11. 品質チェックリスト
+4. 商流は日本経由 → p.17
+   Red Hat Japan経由での契約が想定
 
-プレゼンテーション生成後、以下の項目を自動チェック：
-
-- [ ] 各スライドが16:9比率で表示されているか
-- [ ] スクロールバーが正常に機能するか
-- [ ] フォントサイズが適切か（最小12px）
-- [ ] 画像が適切に配置されているか
-- [ ] アニメーションが正常に動作するか
-- [ ] ナビゲーションが直感的か
-- [ ] カラーコントラストが十分か
-- [ ] 情報の階層が明確か
-- [ ] 印刷時に90度回転しないか
-- [ ] cta-box内の文字が白文字になっているか
-
-### 12. カスタマイズオプション
-
-#### テーマ設定
-```javascript
-const themes = {
-  corporate: {
-    primary: '#003366',
-    secondary: '#0066cc',
-    font: 'Noto Sans JP'
-  },
-  modern: {
-    primary: '#2c3e50',
-    secondary: '#3498db',
-    font: 'Helvetica Neue'
-  },
-  creative: {
-    primary: '#e74c3c',
-    secondary: '#f39c12',
-    font: 'Montserrat'
-  }
-};
+Next Action: Deep Diveセッションの日程調整
 ```
+→ 一目で重要ポイントがわかる、詳細ページに戻れる
+
+---
+
+## 品質チェックリスト（v4.1）
+
+プレゼンテーション生成後、以下を必ず確認：
+
+### 視認性チェック
+- [ ] タイトルスライドの文字が白色で表示されているか
+- [ ] 通常スライドの文字が濃い色で表示されているか
+- [ ] すべてのカード内テキストが読めるか
+- [ ] CTAボックス内のテキストが白色か
+- [ ] 遠くからでも読めるフォントサイズか
+
+### レイアウトチェック
+- [ ] 1スライドの箇条書きが5項目以内か
+- [ ] テーブルが6行以内か
+- [ ] コンテンツがスライド内に収まっているか
+- [ ] スクロールバーが機能するか（長いコンテンツ時）
+
+### 最終スライドチェック
+- [ ] 「Thank You」だけで終わっていないか
+- [ ] 重要ポイントが3〜5個まとめられているか
+- [ ] 各ポイントに参照ページ番号があるか
+- [ ] Next Action/次のステップが記載されているか（あれば）
+
+### 機能チェック
+- [ ] ← → キーでスライド移動できるか
+- [ ] PDF出力ボタンが機能するか
+- [ ] プログレスバーが更新されるか
+- [ ] スライド番号が正しいか
 
 ---
 
 ## 更新履歴
 
+### v4.1 (2026-01-22)
+- **フォントサイズ適正化**: 本文を20px、見出しを適切なサイズに変更
+- **情報量ガイドライン追加**: 1スライドあたりの上限を明確化
+- **スライド分割基準**: はみ出し防止のための判断基準を追加
+- **最終スライドガイドライン追加**: 「Thank You」ではなくサマリー形式に
+- **ページ番号参照**: まとめスライドに詳細ページへの参照を追加
+- **Next Actionセクション**: 次のステップを明示するスタイル追加
+- **パディング調整**: スライドコンテンツの余白を拡大
+
+### v4 (2026-01-21)
+- CSS変数廃止、直接カラーコード指定
+- 視認性強化、コントラスト確保
+
 ### v3 (2025-11-25)
-- **印刷90度回転バグ完全修正**: @pageサイズを`297mm 210mm`で明示的に指定
-- **スライドサイズ固定**: 印刷時のスライドサイズを`287mm x 161.4mm`（16:9比率）に固定
-- **印刷前設定案内**: PDF出力ボタン押下時に横向き設定などの確認ダイアログを表示
-- **印刷用フォントサイズ最適化**: 印刷時のフォントサイズを調整して可読性向上
+- 印刷90度回転バグ完全修正
 
 ### v2 (2025-11-25)
-- **スクロールバー追加**: 各スライドに縦方向のスクロールバーを追加。コンテンツが多くても下まで閲覧可能に
-- **印刷バグ修正**: PDF出力時の90度回転バグを解消（部分的）
-- **cta-box文字色修正**: cta-box内のstrong要素も白文字に統一
+- スクロールバー追加
+- cta-box文字色修正
 
 ### v1 (初版)
 - 基本的なスライド生成機能
-- 16:9比率対応
-- キーボードショートカット
-- PDF出力機能
-
----
-
-## 印刷時の注意事項
-
-PDF出力ボタンをクリックすると、以下の設定を促すダイアログが表示されます：
-
-1. **用紙の向き**: 「横」（Landscape）を選択
-2. **用紙サイズ**: A4
-3. **余白**: 「なし」または「最小」
-4. **背景のグラフィック**: オン（チェックを入れる）
-
-### ブラウザ別の設定方法
-
-| ブラウザ | 設定場所 |
-|----------|----------|
-| Chrome | 「詳細設定」→「レイアウト」で「横」を選択 |
-| Edge | 「その他の設定」→「レイアウト」で「横」を選択 |
-| Firefox | 印刷プレビュー → 「ページ設定」 |
-| Safari | 「ページ設定」→「向き」で横を選択 |
-
----
-
-このプロフェッショナル版の実装により、企画書から自動生成されるプレゼンテーションは、実際のビジネスシーンで即座に使用できる品質となります。
