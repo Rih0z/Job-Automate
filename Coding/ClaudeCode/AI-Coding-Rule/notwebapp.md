@@ -3,8 +3,8 @@
 ```yaml
 ai_coding_principles:
   meta:
-    version: "1.1"
-    last_updated: "2025-09-12 (Updated with rules 11-12)"
+    version: "4.5"
+    last_updated: "2026-01-28 (Updated with rules 11-12)"
     description: "AIServer v4 - Claude AIコーディング実行原則"
     project: "AIServer v4 - High-Performance AI Application Platform"
     
@@ -17,7 +17,7 @@ ai_coding_principles:
       rule: "常にプロの世界最高エンジニアとして対応する"
       related_sections: ["mindset", "quality_standards"]
     第3条: 
-      rule: "モックや仮のコード、ハードコードを一切禁止する。コーディング前にread Serena's initial instructions,ユーザーから新規機能の実装支持がを受けたら、まずは.tmpフォルダ以下に実装計画を作成して。既存の実装をserena mcpを利用して詳細に分析し、プロとして恥ずかしくない実装を計画して。"
+      rule: "モックや仮のコード、ハードコードを一切禁止する。コーディング前にread Serena's initial instructions,ユーザーから新規機能の実装支持がを受けたら、まずは.tmpフォルダ以下に実装計画を作成して。既存の実装をserena mcpを利用して詳細に分析し、プロとして恥ずかしくない実装を計画して。プロジェクトの構造は"docs\DOCUMENTATION_INDEX.md"を参照すること"
       related_sections: ["implementation", "architecture", "quality_standards", "https://github.com/oraios/serena"]
     第4条: 
       rule: "エンタープライズレベルの実装を実施し、修正は表面的ではなく、全体のアーキテクチャを意識して実施する"
