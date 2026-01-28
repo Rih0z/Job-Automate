@@ -1,12 +1,12 @@
-# CLAUDE.md - AIServer v4 コーディング原則
+# コーディング原則
 
 ```yaml
 ai_coding_principles:
   meta:
     version: "4.5"
     last_updated: "2026-01-28 (Updated with rules 11-12)"
-    description: "AIServer v4 - Claude AIコーディング実行原則"
-    project: "AIServer v4 - High-Performance AI Application Platform"
+    description: "Claude AIコーディング実行原則"
+    project: " High-Performance AI Application Platform"
     
   core_principles:
     mandatory_declaration: "全てのコーディング作業開始時に必ずcore_principlesを完全に宣言すること"
