@@ -1,59 +1,238 @@
-README.mdを読み込んで。このアプリを作成するにあたり最適な形になるよう宣言を追加し、CLAUDE.mdとして保存して。 ファイル構造はこのファイルに追記して。
-# Claude.md - AIコーディング原則
+# CLAUDE.md - AIServer v4 コーディング原則
 
 ```yaml
 ai_coding_principles:
   meta:
-    version: "1.0"
-    last_updated: "2025-07-29"
-    description: "Claude AIコーディング実行原則"
+    version: "1.1"
+    last_updated: "2025-09-12 (Updated with rules 11-12)"
+    description: "AIServer v4 - Claude AIコーディング実行原則"
+    project: "AIServer v4 - High-Performance AI Application Platform"
     
   core_principles:
     mandatory_declaration: "全てのコーディング作業開始時に必ずcore_principlesを完全に宣言すること"
     第1条: 
-      rule: "常に思考開始前にClaude.mdの第1条から第10条のAIコーディング原則を全て宣言してから実施する"
+      rule: "常に思考開始前にClaude.mdの第1条から第16条のAIコーディング原則を全て宣言してから実施する"
       related_sections: ["execution_checklist", "mindset"]
     第2条: 
       rule: "常にプロの世界最高エンジニアとして対応する"
       related_sections: ["mindset", "quality_standards"]
     第3条: 
-      rule: "モックや仮のコード、ハードコードを一切禁止する。コーディング前にread Serena's initial instructions,ユーザーから新規機能の実装支持がを受けたら、まずはtmpフォルダ以下に実装計画を作成して。既存の実装をserena mcpを利用して詳細に分析し、プロとして恥ずかしくない実装を計画して。"
-      related_sections: ["implementation", "architecture", "quality_standards",https://github.com/oraios/serena]
+      rule: "モックや仮のコード、ハードコードを一切禁止する。コーディング前にread Serena's initial instructions,ユーザーから新規機能の実装支持がを受けたら、まずは.tmpフォルダ以下に実装計画を作成して。既存の実装をserena mcpを利用して詳細に分析し、プロとして恥ずかしくない実装を計画して。"
+      related_sections: ["implementation", "architecture", "quality_standards", "https://github.com/oraios/serena"]
     第4条: 
       rule: "エンタープライズレベルの実装を実施し、修正は表面的ではなく、全体のアーキテクチャを意識して実施する"
       related_sections: ["architecture", "quality_standards", "deployment_requirements"]
     第5条: 
       rule: "問題に詰まったら、まずCLAUDE.mdやプロジェクトドキュメント内に解決策がないか確認する"
+      related_sections: ["project_documentation"]
     第6条: 
       rule: "顧客データやセキュリティなど、push前にアップロードするべきではない情報が含まれていないか確認する。作業完了ごとにgithubに状況をpushする。"
-    第７条: 
-      rule: "不要な文書やスクリプトは増やさない。スクリプト作成時は常に既存のスクリプトで使用可能なものがないか以下のセクションを確認する、スクリプトを作成したらscriptsフォルダに、ドキュメントはドキュメントフォルダに格納する。一時スクリプトや文書はそれぞれのフォルダのtmpフォルダに保存し、使用後に必ず削除する。"
-      related_sections: ["how_to_use_scripts"]
+      related_sections: ["security_checklist", "git_workflow"]
+    第7条: 
+      rule: "不要な文書やスクリプトは増やさない。スクリプト作成時は常に既存のスクリプトで使用可能なものがないか以下のセクションを確認する、スクリプトを作成したら.scriptフォルダに、ドキュメントはdocsフォルダに格納する。一時スクリプトや文書はそれぞれのフォルダの.tmpフォルダに保存し、使用後に必ず削除する。ファイルをさくせいしたら、作成したファイルの完全パスと作成日時を必ず".history\files.md"に書き込む。ドキュメント作成の際は、必ずすべての関連ドキュメントの完全パスを含める。"
+      related_sections: ["file_structure", "how_to_use_scripts"]
     第8条: 
       rule: "デザインはhttps://atlassian.design/components を読み込み、これに準拠する。"
-      related_sections: https://atlassian.design/components
+      related_sections: ["https://atlassian.design/components", "design_standards"]
     第9条: 
       rule: "作業完了後にもう一度すべての宣言を実施し、宣言どうりに作業を実施できているか確認する。"
+      related_sections: ["execution_checklist", "quality_assurance"]
     第10条: 
-      rule: "バグを修正する場合は、serena mcp を利用して原因の分析をし、tmpフォルダいかに報告資料を作成して。ユーザーに原因について報告する。すでに同様のバグの報告資料がある場合は、それを更新する。ユーザーが確認したら修正方法を提案する。修正方法が妥当か十分にレビューし、他の宣言に矛盾していないか確認した上でユーザーの確認をとり修正を実施する。バグ報告はドキュメントを作成し、tmpフォルダ以下に保存する。ユーザーがバグが解決したと言うまでドキュメントを残し、バグが解決したらドキュメントは削除する。"
+      rule: "バグを修正する場合は、serena mcp を利用して原因の分析をし、.tmpフォルダ以下に報告資料を作成して。ユーザーに原因について報告する。すでに同様のバグの報告資料がある場合は、それを更新する。ユーザーが確認したら修正方法を提案する。修正方法が妥当か十分にレビューし、他の宣言に矛盾していないか確認した上でユーザーの確認をとり修正を実施する。バグ報告はドキュメントを作成し、.tmpフォルダ以下に保存する。ユーザーがバグが解決したと言うまでドキュメントを残し、バグが解決したらドキュメントは削除する。"
+      related_sections: ["bug_tracking", "testing_standards"]
+    第11条:
+      rule: "ファイルバージョン管理の禁止: v2、_new、_oldなどのバージョン番号付きファイル作成を禁止する。既存ファイルの直接更新を徹底し、バックアップが必要な場合はGitを使用する。"
+      related_sections: ["file_structure", "git_workflow"]
+    第12条:
+      rule: "環境変数によるハードコード排除: パス、URL、設定値は全て環境変数化する。backend/config/*.pyで設定を一元管理し、環境変数でオーバーライド可能にする。.envファイルは使用しない。"
+      related_sections: ["implementation", "security_checklist", "quality_standards", "project_specific.configuration_management"]
+    第13条:
+      rule: "backend serverの起動が必要なテストを実施する際はユーザーにstart.batの実行を依頼する。AIがサーバーを起動してテストを始めることは許されない。単体テストなどのサーバーの起動が必要ないテストは積極的に実施する。"
+    第14条:
+      rule: "バックグラウンドタスクの実行は避ける。どうしても必要な場合はユーザーに許可をとる。"
+    第15条:
+      rule: "設計書などのドキュメントに沿って実行する場合は、出力の最初と最後に参考にしたドキュメントの完全パスを出力する。また、ドキュメントに作業が準拠しているか見直す。"
+    第16条:
+      rule: "一時的な解決策は実施せず、常に超長期的な問題解決を意識して解決に取り組む。複数の行動パターンがある場合は、長期的な目線で見て根本的な解決策になる方法を選んで"
+  file_structure:
+    temporary_files:
+      location: ".tmp/"
+      description: "一時ファイル、分析レポート、バグ報告"
+      sub_folders:
+        - ".tmp/analysis/"     # 分析レポート
+        - ".tmp/bugs/"         # バグ報告
+        - ".tmp/plans/"        # 実装計画
+    documents: 
+      location: "docs/"
+      description: "プロジェクトドキュメント"
+      existing_docs:
+        - "architecture.md"
+        - "modern_frontend_architecture.md"
+        - "quick_start_guide.md"
+        - "best_ai_frameworks_2025.md"
+        - "PORTABLE_TOOLS_DOCUMENTATION.md"
+    tests: 
+      location: ".test/"
+      description: "テストファイル"
+      structure:
+        - ".test/unit/"        # ユニットテスト
+        - ".test/integration/" # 統合テスト
+        - ".test/e2e/"        # E2Eテスト
+    scripts: 
+      location: ".script/"
+      description: "ユーティリティスクリプト"
+      structure:
+        - ".script/setup/"     # セットアップスクリプト
+        - ".script/deploy/"    # デプロイスクリプト
+        - ".script/utils/"     # ユーティリティ
+        - ".script/.tmp/"      # 一時スクリプト
+    source:
+      frontend: "frontend/"
+      backend: "backend/"
+      ai_infrastructure: ".tools/"
+    config: 
+      location: "config/"
+      description: "設定ファイル"
+
+  project_specific:
+    configuration_management:
+      central_location: "backend/config/"
+      description: ".envファイルを使用せず、backend/config/*.pyで全設定を一元管理"
+      principle: "全ての設定はbackend/config/*.pyで管理し、環境変数でオーバーライド可能にする"
+
+      key_files:
+        - "server_config.py - サーバー設定（ポート、ホスト）"
+        - "api_config.py - API/CORS/認証設定"
+        - "path_config.py - パス設定"
+        - "rag_config.py - RAG設定"
+        - "inference_config.py - 推論エンジン設定"
+        - "inference_defaults.py - 推論デフォルト値"
+        - "mcp_config.py - MCP設定"
+        - "search_config.py - Web検索設定"
+        - "embedding_config.py - エンベディング設定"
+
+      environment_override:
+        method: "start.bat または export コマンドで環境変数を設定"
+        example: "set BACKEND_PORT=8080"
+        priority: "環境変数 > config/*.py のデフォルト値"
+
+      documentation: "backend/config/README.md - 詳細な設定ガイド"
+
+    path_management:
+      central_config: "backend/config/path_config.py"
+      description: "全てのパス設定を一元管理"
+      principle: "パス設定は必ずPathConfigクラスを通して参照すること"
+
+      key_features:
+        - "環境変数によるオーバーライド機能"
+        - "自動バックエンド検出（CUDA優先）"
+        - "モデル優先順位管理（GPT-OSS優先）"
+        - "パス検証機能"
+
+      usage:
+        import_statement: "from backend.config.path_config import PathConfig"
+        methods:
+          - "PathConfig.get_llama_server_path() - LLAMA実行ファイル"
+          - "PathConfig.get_available_models() - 利用可能モデル一覧"
+          - "PathConfig.get_model_path(name) - 特定モデルパス"
+          - "PathConfig.validate_paths() - パス検証"
+
+      environment_overrides:
+        LLAMA_BACKEND: "使用するバックエンド名"
+        DEFAULT_MODEL: "デフォルトモデルファイル名"
+
+      referenced_by:
+        - "backend/services/gpt_oss_service.py"
+        - "backend/api/model_management_endpoints.py"
+        - "backend/api/test_model_endpoints.py"
+        - "backend/config/llama_config.py"
+
+    portable_environment:
+      python:
+        location: ".tools/extensions/backends/vendor/_amphibian/cpython3.11-win-x86@2/"
+        version: "3.11.9"
+        executable: "python.exe"
+        description: "ポータブルPython - システムインストール不要"
+      nodejs:
+        location: ".tools/extensions/backends/vendor/_amphibian/node-v20.11.0-win-x64/"
+        version: "20.11.0"
+        executable: "node.exe"
+        description: "ポータブルNode.js - システムインストール不要"
+      documentation: "docs/PORTABLE_TOOLS_DOCUMENTATION.md"
+
+    llama_integration:
+      inference_port: 8080
+      backends:
+        - "llama.cpp-win-x86_64-nvidia-cuda-avx2-1.45.0"
+        - "llama.cpp-win-x86_64-avx2-1.44.0"
+        - "llama.cpp-win-x86_64-vulkan-avx2-1.44.0"
+      embedding:
+        priority: "ONNX Runtime > PyTorch > GGUF"
+        models:
+          - name: "BGE-M3 (ONNX)"
+            path: ".tools/models/embeddings/bge-m3/onnx/model.onnx"
+            dimensions: 1024
+            performance: "23.5 texts/s (CPU), 117-235 texts/s (GPU)"
+            priority: 1
+            status: "✅ 実装済み"
+          - name: "BGE-M3 (PyTorch)"
+            path: ".tools/models/embeddings/models--BAAI--bge-m3/"
+            dimensions: 1024
+            performance: "GPU自動検出、バッチ64並列"
+            priority: 2
+            status: "✅ フォールバック実装済み"
+          - name: "BGE-M3 (GGUF)"
+            path: ".tools/models/embeddings/bge-m3-Q4_0.gguf"
+            dimensions: 1024
+            performance: "2 texts/s (省メモリ)"
+            priority: 3
+            status: "✅ フォールバック実装済み"
+          - name: "nomic-embed-text-v1.5 (GGUF)"
+            path: ".tools/models/embeddings/nomic-embed-text-v1.5.Q4_K_M.gguf"
+            dimensions: 768
+            performance: "英語特化"
+            priority: 4
+            status: "✅ サポート済み"
+        service_file: "backend/services/onnx_embedding_service.py"
+        documentation: "docs/02_implementation/rag/embedding_service.md"
+    
+    tech_stack:
+      frontend:
+        framework: "Next.js 15 (ポータブルNode.js使用)"
+        ui: "shadcn/ui"
+        styling: "Tailwind CSS"
+        language: "TypeScript"
+      backend:
+        runtime: "Python 3.11 (ポータブル版)"
+        api: "FastAPI / BentoML"
+        agents: "CrewAI / AutoGen"
+      databases:
+        vector: "ChromaDB (local persistence)"
+        traditional: "SQLite (local file-based)"
+      deployment:
+        serverless: "Modal"
+        container: "BentoML"
 
   quality_standards:
     security:
       - "GitHubへのプッシュ前にセキュリティ上の問題がないか確認すること"
       - "脆弱性スキャンの実施"
       - "認証・認可の適切な実装"
+      - ".tools/credentials/へのアクセス制限"
     
     architecture:
       - "SOLID原則に従っているか確認する"
       - "DDD（ドメイン駆動設計）/CQRSに従う"
       - "エンタープライズレベルのアーキテクチャにする"
       - "スケーラビリティを考慮した設計"
+      - "llama.cpp APIとの適切な統合"
     
     implementation:
       - "デモデータではなく、実際に機能するシステムにする"
       - "ハードコードは一切使用しない"
       - "環境変数・設定ファイルを適切に使用"
       - "依存性注入を活用"
+      - "llama.cpp HTTP APIの活用"
 
   testing_standards:
     approach:
@@ -65,11 +244,12 @@ ai_coding_principles:
       - "全てのAPIエンドポイントのテスト"
       - "エラーハンドリングのテスト"
       - "パフォーマンステスト"
+      - "llama.cpp接続テスト"
 
   documentation_management:
     structure:
-      - "必要以上にドキュメントを増やさず、ログは.claude/logs/フォルダに格納する"
-      - "必要なドキュメントは必ずdocumentフォルダに保存する"
+      - "必要以上にドキュメントを増やさず、ログは.tmp/logs/フォルダに格納する"
+      - "必要なドキュメントは必ずdocs/フォルダに保存する"
       - "更新は同じファイルを編集する"
       - "冗長に少しだけ名前を変えたファイルを増やさない"
     
@@ -83,6 +263,7 @@ ai_coding_principles:
       - "必ずURLが固定の本番環境にデプロイするようにする"
       - "フロントエンドとバックエンドの通信が必ず成功するようにデプロイ先のURLは指定する"
       - "CI/CDパイプラインの構築"
+      - "llama.cppサーバーとの接続確認"
     
     process:
       - "作業が完了したらClaude環境でビルドしデプロイすること"
@@ -96,17 +277,50 @@ ai_coding_principles:
       - "継続的改善の実践"
       - "コードレビューの徹底"
 
-  file_structure:
-    logs: ".claude/logs/"
-    documents: "documents/"
-    source: "src/"
-    tests: "tests/"
-    config: "config/"
-    deployment: "deploy/"
+  git_workflow:
+    commit_messages:
+      format: "[type]: description"
+      types:
+        - "feat: 新機能"
+        - "fix: バグ修正"
+        - "docs: ドキュメント更新"
+        - "refactor: リファクタリング"
+        - "test: テスト追加・修正"
+        - "chore: その他の変更"
+    
+    branch_strategy:
+      - "main: 本番環境"
+      - "develop: 開発環境"
+      - "feature/*: 機能開発"
+      - "bugfix/*: バグ修正"
+
+  security_checklist:
+    before_commit:
+      - "[ ] backend/config/*.py に機密情報（APIキー・パスワード）がハードコードされていないか"
+      - "[ ] .tools/credentials/ が .gitignore に含まれているか"
+      - "[ ] ログファイルに機密情報が含まれていないか"
+      - "[ ] 環境変数による設定オーバーライドが正しく機能しているか"
+
+  design_standards:
+    ui_framework: "Atlassian Design System"
+    components: "https://atlassian.design/components"
+    principles:
+      - "一貫性のあるUI/UX"
+      - "アクセシビリティの確保"
+      - "レスポンシブデザイン"
+      - "パフォーマンス最適化"
+
+  bug_tracking:
+    process:
+      - "バグ発見 → .tmp/bugs/ に報告書作成"
+      - "原因分析 → serena mcp使用"
+      - "修正提案 → ユーザー確認"
+      - "修正実施 → テスト"
+      - "解決確認 → 報告書削除"
 
   execution_checklist:
     mandatory_declaration:
-      - "[ ] **CORE_PRINCIPLES宣言**: 第1条〜第4条を完全に宣言"
+      - "[ ] **CORE_PRINCIPLES宣言**: 第1条〜第10条を完全に宣言"
       - "[ ] **関連セクション宣言**: 実行する作業に関連するセクションを宣言"
       - "[ ] 例：アーキテクチャ変更時は第3条・第4条 + architecture + quality_standards + implementation を宣言"
     
@@ -115,6 +329,7 @@ ai_coding_principles:
       - "[ ] 要件の理解と確認"
       - "[ ] アーキテクチャ設計"
       - "[ ] セキュリティ要件の確認"
+      - "[ ] llama.cpp接続確認"
     
     during_coding:
       - "[ ] SOLID原則の適用"
@@ -127,6 +342,72 @@ ai_coding_principles:
       - "[ ] セキュリティチェック"
       - "[ ] ドキュメント更新"
       - "[ ] デプロイ・動作確認"
+      - "[ ] Git commit & push"
+
+  how_to_use_scripts:
+    existing_scripts:
+      setup:
+        - "install_dependencies.sh: 依存関係インストール"
+        - "setup_llama.sh: llama.cpp設定"
+      deploy:
+        - "deploy_frontend.sh: フロントエンドデプロイ"
+        - "deploy_backend.sh: バックエンドデプロイ"
+      utils:
+        - "test_connection.py: llama.cpp接続テスト"
+        - "cleanup_tmp.sh: 一時ファイル削除"
+    
+    before_creating:
+      - "既存スクリプトを確認"
+      - "再利用可能性を検討"
+      - "必要最小限の実装"
+
+  project_documentation:
+    documentation_index: "docs/DOCUMENTATION_INDEX.md"  # 全ドキュメントの完全なインデックス
+    
+    core_documents:
+      - "README.md: プロジェクト概要"
+      - "CLAUDE.md: AIコーディング原則"
+      - "docs/DOCUMENTATION_INDEX.md: ドキュメント総合インデックス"
+    
+    architecture:
+      - "docs/architecture.md: システムアーキテクチャ"
+      - "docs/modern_frontend_architecture.md: フロントエンド設計"
+      - "docs/FRONTEND_BACKEND_API_CONTRACT.md: API仕様"
+      - "docs/FRAMEWORKS_COMPLETE_LIST.md: 28フレームワーク一覧"
+    
+    implementation:
+      - "backend/LANGCHAIN_PRODUCTION_IMPLEMENTATION_COMPLETE.md: LangChain本番実装"
+      - "backend/INTEGRATION_INSTRUCTIONS.md: バックエンド統合ガイド"
+      - "docs/direct_inference_implementation_guide.md: 直接推論実装"
+      - "docs/framework_implementation_guide.md: フレームワーク実装"
+    
+    deployment:
+      - "backend/Dockerfile: バックエンドコンテナ"
+      - "frontend/Dockerfile: フロントエンドコンテナ"
+      - "docker-compose.yml: 開発環境"
+      - "docker-compose.production.yml: 本番環境"
+      - "k8s/: Kubernetes設定"
+    
+    configuration:
+      - "backend/requirements_production.txt: Python依存関係"
+      - "frontend/package.json: Node.js依存関係"
+      - "setup_dependencies.py: 自動セットアップスクリプト"
+    
+    analysis_reports:
+      - ".tmp/: 一時分析レポート（作業後削除）"
+      - ".tmp/complete_infrastructure_analysis.md: 完全インフラ分析"
+
+  quality_assurance:
+    code_review:
+      - "セルフレビューの実施"
+      - "テスト通過確認"
+      - "ドキュメント更新確認"
+      - "セキュリティチェック完了"
+    
+    deployment_verification:
+      - "ローカル環境での動作確認"
+      - "ステージング環境でのテスト"
+      - "本番環境でのヘルスチェック"
 ```
 
 ## 使用方法
@@ -140,6 +421,14 @@ ai_coding_principles:
    第2条: 常にプロの世界最高エンジニアとして対応する  
    第3条: モックや仮のコード、ハードコードを一切禁止する
    第4条: エンタープライズレベルの実装を実施し、修正は表面的ではなく、全体のアーキテクチャを意識して実施する
+   第5条: 問題に詰まったら、まずCLAUDE.mdやプロジェクトドキュメント内に解決策がないか確認する
+   第6条: 顧客データやセキュリティなど、push前にアップロードするべきではない情報が含まれていないか確認する
+   第7条: 不要な文書やスクリプトは増やさない
+   第8条: デザインはAtlassian Design Systemに準拠する
+   第9条: 作業完了後にもう一度すべての宣言を実施し、宣言どうりに作業を実施できているか確認する
+   第10条: バグを修正する場合は、serena mcpを利用して原因の分析をする
+   第11条: ファイルバージョン管理の禁止（v2等の番号付きファイル作成禁止）
+   第12条: 環境変数によるハードコード排除（全設定値を環境変数化）
    ```
 
 2. **関連セクション宣言**: 実行する作業に応じて関連セクションも必ず宣言
@@ -153,6 +442,7 @@ ai_coding_principles:
    - implementation: ハードコード禁止、環境変数使用、依存性注入
    - architecture: SOLID原則、DDD/CQRS、エンタープライズレベル設計
    - quality_standards: セキュリティチェック、テスト実装
+   - file_structure: .tmp、docs、.test、.scriptフォルダ構成
    ```
 
 4. **チェックリスト活用**: mandatory_declaration → execution_checklistの順で確認
@@ -162,7 +452,7 @@ ai_coding_principles:
 ## ⚠️ 重要な注意事項
 
 ### 🔴 絶対遵守ルール
-- **CORE_PRINCIPLES必須宣言**: 作業開始時に第1条〜第4条を**必ず完全に宣言**
+- **CORE_PRINCIPLES必須宣言**: 作業開始時に第1条〜第10条を**必ず完全に宣言**
 - **関連セクション必須宣言**: 実行する作業に関連するセクションを**必ず事前に宣言**
 - **宣言なしでの作業開始は厳禁**: 宣言を省略・簡略化してはいけません
 
@@ -173,13 +463,24 @@ core_principles: [第3条, 第4条]
 related_sections: [architecture, implementation, quality_standards]
 
 # セキュリティ実装時の必須宣言  
-core_principles: [第1条, 第2条, 第4条]
-related_sections: [quality_standards.security, architecture, deployment_requirements]
+core_principles: [第1条, 第2条, 第4条, 第6条]
+related_sections: [quality_standards.security, architecture, deployment_requirements, security_checklist]
 
 # テスト実装時の必須宣言
 core_principles: [第2条, 第3条]
-related_sections: [testing_standards, implementation, quality_standards]
+related_sections: [testing_standards, implementation, quality_standards, file_structure.tests]
+
+# バグ修正時の必須宣言
+core_principles: [第10条]
+related_sections: [bug_tracking, testing_standards, file_structure.temporary_files]
 ```
+
+### 📁 ファイル配置ルール
+- **一時ファイル**: `.tmp/` 以下に配置（作業完了後削除）
+- **ドキュメント**: `docs/` 以下に配置（永続的）
+- **テスト**: `.test/` 以下に配置
+- **スクリプト**: `.script/` 以下に配置
+- **ソースコード**: `frontend/`、`backend/` に配置
 
 ### 🚫 禁止事項
 - この原則は**必須遵守事項**です
@@ -190,3 +491,19 @@ related_sections: [testing_standards, implementation, quality_standards]
 ### ✅ 品質保証
 - 宣言なしの作業は**品質保証対象外**となります
 - 関連セクション未宣言の作業は**不完全な実装**とみなされます
+
+## プロジェクト固有情報
+
+### llama.cpp設定
+- **APIエンドポイント**: http://127.0.0.1:8080
+- **利用可能バックエンド**: CUDA、Vulkan、AVX2
+- **エンベディングモデル**: Nomic Embed Text v1.5
+
+### 技術スタック
+- **フロントエンド**: Next.js 15 + shadcn/ui + TypeScript
+- **バックエンド**: Python 3.11 + FastAPI/BentoML
+- **エージェント**: CrewAI / AutoGen
+- **ベクトルDB**: Chroma (開発) / Pinecone (本番)
+
+---
+*Ultrathink. Don't hold back. Give it your all!*
