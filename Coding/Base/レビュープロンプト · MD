@@ -29,6 +29,7 @@
 3. 上記6カテゴリで点数とコメントを記録し、重大問題（ハードコード/テストごまかし）があれば 0 点扱い。
 4. `---REVIEW OUTPUT START---` テンプレートでレポートをまとめ、`.tmp/review/iteration_[ID]_[timestamp]_review/` に保存させる。
 5. 100点ならリーダーへ、未満なら実行エージェントへ戻す手順を `---NEXT AGENT INSTRUCTION---` に明記。
+6. **100点達成時は `---DOCUMENT UPDATE REQUEST---` セクションでドキュメント更新者向けの更新依頼を作成する。**
 
 ## 出力テンプレート
 ```
@@ -108,7 +109,15 @@
     "ドキュメント&トレーサビリティ": 12,
     "次イテレーション準備度": 10
   },
-  "next_phase_ready": false
+  "next_phase_ready": false,
+  "long_term_plan_path": "docs/project-name/roadmap.md",
+  "document_updates_required": [
+    {
+      "path": "ドキュメントパス",
+      "update_summary": "更新内容の概要",
+      "priority": "high/medium/low"
+    }
+  ]
 }
 
 ---REVIEW OUTPUT END---
@@ -116,15 +125,45 @@
 ---CREATED FILES---
 - .tmp/review/iteration_[ID]_[YYYYMMDD_HHMM]_review/review_report.md
 - .tmp/review/iteration_[ID]_[YYYYMMDD_HHMM]_review/feedback.json
+- .tmp/review/iteration_[ID]_[YYYYMMDD_HHMM]_review/document_update_request.md (100点達成時のみ)
 
 ---NEXT AGENT INSTRUCTION---
 - **100点**: リーダーエージェントへレポート全文 + リーダープロンプトを渡す。
 - **100点未満**: `---REVIEW REPORT---` の改善事項 + 前回成果物 + 実行プロンプトをターミナル2へ渡す。
+
+---DOCUMENT UPDATE REQUEST--- (100点達成時のみ)
+## 📝 ドキュメント更新依頼
+
+### 更新が必要なドキュメント
+| ドキュメント | 更新内容 | 優先度 |
+|-------------|---------|--------|
+| [ドキュメントパス] | [更新すべき内容の概要] | 高/中/低 |
+
+### 更新の背景
+- **完了したイテレーション**: [ID]
+- **実装された機能/変更**: [概要]
+- **影響を受けるドキュメント**: [一覧]
+
+### 具体的な更新指示
+1. **[ドキュメント名]**
+   - 更新箇所: [セクション名や行番号]
+   - 更新内容: [具体的に何を追記/修正するか]
+   - 参照すべき成果物: [.tmp/内のパス]
+
+### 注意事項
+- [更新時に注意すべき点]
+
+---LONG TERM PLAN---
+## 📍 実行中の長期的計画
+- **パス**: [長期的計画ファイルの完全パス]
+- **現在位置**: [ロードマップ上の現在のマイルストーン/フェーズ]
+- **進捗状況**: [このイテレーションで長期計画がどこまで進んだか]
 ```
 
 ## 保存ルール
 - レビュー結果は `.tmp/review/iteration_[ID]_[timestamp]_review/` に保存。
 - 完全パスを `---CREATED FILES---` で報告させ、不備があれば差し戻す。
+- **100点達成時**: ドキュメント更新依頼を `.tmp/review/iteration_[ID]_[timestamp]_review/document_update_request.md` にも保存する。
 
 ## ハードコード/ごまかし検出の観点
 - テストケースの値をそのまま返していないかを確認。
