@@ -1,3 +1,23 @@
+## セットアップ
+
+.mcp.json に以下の内容を記載して。
+```json
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "@playwright/mcp@latest"
+      ]
+    }
+  }
+}
+```
+
+---
+
+## テスト実行プロンプト
+
 - **テスト項目**: 上記の内容
 
 ## 前提条件

@@ -1,272 +1,158 @@
-# Job-Automate
+# Job-Automate プロンプト集
 
-## 📋 プロンプト目次 - すぐに使えるAI効率化テンプレート
+AIを活用した業務自動化・開発効率化のためのプロンプトライブラリ。
 
-### 🚀 すぐに試したい！人気プロンプト TOP 5
-1. [**企画書からスライド自動生成**](./slide/make-slide.md) - PowerPoint不要！HTMLスライドを自動作成
-2. [**実践的な事業計画書自動生成**](./document/make-proposal.md) - Word代替！完成度の高い企画書を数分で作成
-3. [**高度なプロンプト生成システム**](./Coding/ClaudeCode/1-1.promot-maker.md) - あなた専用のプロンプトを自動作成
-4. [**技術仕様書自動生成**](./document/make-specification.md) - 企画から実装可能な仕様書へ変換
-5. [**香水Hazy IPA開発プロジェクト**](./BlogSeries/idea-output/1.idea-stream.md) - 実際の活用事例を見る
+## ディレクトリ構成
 
-### 📂 カテゴリ別プロンプト一覧
-
-#### 📄 ビジネス文書作成（Microsoft Office代替）
-- 📝 [事業計画書作成](./document/make-proposal.md) - Word代替
-- 📋 [IT企画書作成](./document/make-IT-proposal.md) - 技術提案書専用
-- 📊 [技術仕様書生成](./document/make-specification.md) - 企画→開発仕様変換
-- 🎯 [心理学的アイデア発展](./document/make-businessidea.md) - アイデア→企画書変換
-- 🎞️ [プレゼン資料自動生成](./slide/make-slide.md) - PowerPoint代替
-
-#### 💻 最新AI開発ツール（Claude Code対応）
-- 🤖 [プロンプト生成システム](./Coding/ClaudeCode/1-1.promot-maker.md) - パーソナライズ対応
-- 📥 [プロンプトインポート](./Coding/ClaudeCode/1-2.prompt-importer.md) - 既存プロンプト管理
-- ⚡ [実装支援](./Coding/ClaudeCode/3.implement.md) - テスト駆動開発
-- 🎨 [UX最適化](./Coding/ClaudeCode/6.ux.md) - 心理学ベースの設計
-- 🔄 [UI/UXワークフロー](./Coding/ClaudeCode/How-to-make-ideal-UIUX.md) - 反復改善プロセス
-
-#### 📰 情報収集・市場分析
-- 🍺 [クラフトビール業界ニュース](./News/CraftBeer.md) - 業界特化型
-- 💻 [IT・テクノロジーニュース](./News/IT.md) - 技術トレンド
-- 📈 [投資分析・ポートフォリオ最適化](./News/invest.md) - 金融・投資戦略
-- 🌐 [一般ニュース収集](./News/TrendResearch.md) - 幅広い情報収集
-
-#### 🛠️ 開発・テスト支援
-- 📋 [コーディング規則](./Coding/Code-rule) - 16領域の標準化
-- 🚦 [実装開始支援](./Coding/implementation-start.md) - プロジェクト管理
-- 🧪 [テスト環境構築](./Coding/Test/) - Jest・品質保証
-
-### 💡 使い方のコツ
-1. **目的別検索**: 上記目次から目的に最も近いプロンプトを選択
-2. **段階的活用**: 簡単なプロンプトから始めて、複雑なものに挑戦
-3. **カスタマイズ**: テンプレートを自社の状況に合わせて調整
-4. **組み合わせ**: 複数のプロンプトを連携させてワークフロー化
+```
+Job-Automate/
+├── dev/          開発プロンプト集
+├── docs/         ドキュメント生成プロンプト
+├── business/     ビジネス・リサーチ
+├── content/      コンテンツ制作
+└── ops/          運用・管理
+```
 
 ---
 
-## 📚 収録プロンプト例
+## dev/ — 開発プロンプト集
 
-### クリエイティブ系
+### dev/three-agent/ — 3エージェント開発システム
+| ファイル | 説明 |
+|---|---|
+| [README.md](dev/three-agent/README.md) | システム概要 |
+| [leader.md](dev/three-agent/leader.md) | リーダープロンプト |
+| [executor.md](dev/three-agent/executor.md) | 実行プロンプト |
+| [reviewer.md](dev/three-agent/reviewer.md) | レビュープロンプト |
 
-#### 📝 アイデア実践プロジェクト例
-- [香水Hazy IPA開発プロジェクト](./BlogSeries/idea-output/1.idea-stream.md)
-  - 複数のプロンプトを組み合わせた実際の活用事例
-  - アイデア出しから詳細分析、市場調査計画までの一気通貫プロセス
-  - AIとの対話から革新的なクラフトビール企画を段階的に構築する実例
+### dev/bugfix/ — バグ修正・機能追加
+| ファイル | 説明 |
+|---|---|
+| [1.analyze.md](dev/bugfix/1.analyze.md) | 問題分析 |
+| [2.plan.md](dev/bugfix/2.plan.md) | 修正計画 |
+| [3.check.md](dev/bugfix/3.check.md) | チェック |
+| [4.eval.md](dev/bugfix/4.eval.md) | 評価 |
+| [5.do.md](dev/bugfix/5.do.md) | 実行 |
+| [6.fin.md](dev/bugfix/6.fin.md) | 完了 |
 
-### Microsoft Word代替：ビジネス文書自動作成
+### dev/architecture/ — アーキテクチャ文書化
+| ファイル | 説明 |
+|---|---|
+| [codebase-analysis.md](dev/architecture/codebase-analysis.md) | コードベース分析 |
+| [design.md](dev/architecture/design.md) | アーキテクチャ設計 |
+| [docs-update.md](dev/architecture/docs-update.md) | ドキュメント更新 |
+| [readme-update.md](dev/architecture/readme-update.md) | README更新 |
+| [git-push.md](dev/architecture/git-push.md) | Gitプッシュ |
 
-#### 📝 ビジネスアイデア開発ドキュメント作成
-- [実践的な事業計画書自動生成](./document/make-proposal.md)
-  - Microsoft Wordを使わずに、AIだけで洗練された事業計画書を短時間で作成
-  - 情報の入力だけで、市場分析、実現可能性評価、段階的な実装計画を自動構成
-  - 通常のWord作成で数日かかる文書を、数分のプロンプト入力で完成させる効率化
-  - **Wordではなくマークダウンを使う理由**: テキスト形式で軽量、バージョン管理が容易、修正が簡単、様々なツールで変換可能
+### dev/workflow/ — 開発フロー各フェーズ
+| ファイル | 説明 |
+|---|---|
+| [init.md](dev/workflow/init.md) | プロジェクト初期化 |
+| [requirements.md](dev/workflow/requirements.md) | 要件定義 |
+| [implementation-start.md](dev/workflow/implementation-start.md) | 実装開始 |
+| [pre-implement.md](dev/workflow/pre-implement.md) | 実装前確認 |
+| [implement.md](dev/workflow/implement.md) | 実装 |
+| [test.md](dev/workflow/test.md) | テスト実行 |
+| [refactor.md](dev/workflow/refactor.md) | リファクタリング |
+| [deploy.md](dev/workflow/deploy.md) | デプロイ (Cloudflare Pages) |
+| [document.md](dev/workflow/document.md) | ドキュメント更新 |
+| [design.md](dev/workflow/design.md) | UI/UXデザイン |
+| [uiux.md](dev/workflow/uiux.md) | UIUX設計指針 |
+| [prompt-maker.md](dev/workflow/prompt-maker.md) | プロンプト作成 |
+| [prompt-importer.md](dev/workflow/prompt-importer.md) | プロンプトインポート |
+| [artifact.md](dev/workflow/artifact.md) | アーティファクト生成 |
+| [client-server.md](dev/workflow/client-server.md) | クライアント・サーバー構成 |
+| [gemini.md](dev/workflow/gemini.md) | Gemini連携 |
+| [app-readme.md](dev/workflow/app-readme.md) | アプリREADME更新 |
 
-- [心理学的テクニックを活用したアイデア発展](./document/make-businessidea.md)
-  - 心理学的安全性を確保しながらアイデアを発展させる対話型プロンプト
-  - 共感的傾聴、肯定的発見、可能性の拡張などのテクニックを活用
-  - 漠然としたアイデアから実行可能な企画書へと変換するWord代替ワークフロー
-  - **Wordではなくマークダウンを使う理由**: 思考の流れを妨げない単純な記法、アイデア発展に集中できる環境
+### dev/rules/ — コーディング規約
+| ファイル | 説明 |
+|---|---|
+| [coding-principles.md](dev/rules/coding-principles.md) | AIコーディング原則 + 汎用コード規則 |
 
-#### 📋 IT系システム開発企画書作成
-- [詳細なIT企画書自動生成](./document/make-IT-proposal.md)
-  - Word文書作成の数分の1の時間で、プロ品質のIT提案書をAIで作成
-  - 技術的詳細、システム構成図、ROI分析などを自動で構造化
-  - ワードテンプレート不要で、最新のビジネス文書フォーマットを自動適用
-  - **Wordではなくマークダウンを使う理由**: ITチームとの共同編集が容易、技術文書管理システムとの互換性が高い
+### dev/testing/ — テスト基盤
+| ファイル | 説明 |
+|---|---|
+| [README.md](dev/testing/README.md) | テスト概要 |
+| [test-plan.md](dev/testing/test-plan.md) | テスト計画 |
+| [jest.config.js](dev/testing/jest.config.js) | Jest設定 |
+| [jest.setup.js](dev/testing/jest.setup.js) | Jestセットアップ |
+| [custom-reporter.js](dev/testing/custom-reporter.js) | カスタムレポーター |
+| [generate-coverage-chart.js](dev/testing/generate-coverage-chart.js) | カバレッジチャート生成 |
+| [__tests__/](dev/testing/__tests__/) | テストファイル群 |
+| [scripts/](dev/testing/scripts/) | テスト実行スクリプト |
+| [document/test-plan.md](dev/testing/document/test-plan.md) | 詳細テスト計画書 |
 
-### Microsoft PowerPoint代替：プレゼン資料自動作成
-
-#### 🎞️ プレゼンテーション作成自動化
-- [企画書からスライド自動生成プロンプト](./slide/make-slide.md)
-  - PowerPointなしで、Markdownテキストから16:9比率のHTMLスライドを自動生成
-  - デザインスキル不要で、プロ品質のスライドデザインを自動適用
-  - 通常のスライド作成時間の90%削減と、ロードマップ、比較表などの複雑図表も自動化
-  - **PowerPointではなくHTMLを使う理由**: 
-    - ブラウザさえあれば専用ソフトなしで閲覧可能
-    - デバイスを選ばない表示一貫性（PC、タブレット、スマホで同じ見た目）
-    - クラウド共有が容易で、URLだけで共有可能
-    - ウェブ技術を活かした多彩な表現（アニメーション、インタラクティブ要素）
-    - ファイルサイズが小さく、メール添付やアップロードが高速
-
-### 開発支援系
-
-#### 💻 Claude Code専用プロンプト集 - 最新AI開発ツール対応
-- [高度なプロンプト生成システム](./Coding/ClaudeCode/1-1.promot-maker.md)
-  - ユーザーの状況・感情・目標に完全適合したプロンプトを生成
-  - パーソナライゼーション機能とクロスプラットフォーム対応
-  - Claude/ChatGPT/Gemini等との効率的な情報連携システム
-
-- [プロンプトインポート機能](./Coding/ClaudeCode/1-2.prompt-importer.md)
-  - 既存プロンプトの効率的な取り込みと管理
-  - プロンプトライブラリの構築と活用
-
-- [プロダクト開発完全ガイド](./Coding/ClaudeCode/3.implement.md)
-  - テスト駆動型開発での実装支援
-  - 仕様書に基づく体系的な開発プロセス
-
-- [技術仕様書自動生成](./document/make-specification.md)
-  - 企画書から開発者向け技術仕様書を自動作成
-  - 実装可能なコード例と具体的な開発工程を含む詳細仕様
-
-- [UX設計最適化プロンプト](./Coding/ClaudeCode/6.ux.md)
-  - 心理学的テクニックを活用したユーザー体験設計
-  - WithなどのマッチングアプリのUXパターンを参考にした入力フロー最適化
-
-- [理想的なUI/UX制作ワークフロー](./Coding/ClaudeCode/How-to-make-ideal-UIUX.md)
-  - ドキュメント→アーティファクト→モック→本番実装の効率的フロー
-  - Claude Webとの連携による反復的UI改善プロセス
-
-#### 🛠️ 従来型開発支援
-- [汎用的なコード規則](./Coding/Code-rule)
-  - ファイルヘッダー、命名規則、コードフォーマットなどの標準化
-  - 16の領域にわたる包括的なコーディングスタンダード
-- [実装開始支援](./Coding/implementation-start.md)
-  - 開発プロジェクトの計画書分析から進捗管理まで
-  - 引き継ぎやドキュメント作成を含む体系的なサポート
-
-#### 🧪 テスト・品質管理
-- [包括的テスト環境構築](./Coding/Test/)
-  - Jest設定、カスタムレポーター、カバレッジ可視化
-  - テスト計画書とテスト実行スクリプト
-  - 品質保証のための自動化フロー
-
-### リサーチ・分析系
-
-#### 📰 ニュースリサーチ自動化
-- [クラフトビール業界ニュース収集](./News/CraftBeer.md)
-  - クラフトビール業界に特化した最新ニュースの収集と要約
-  - 限定ビール発売、ビアフェスティバル、コラボ情報などを網羅
-  - シアトル、全米、日本の3地域の動向をカバー
-
-- [IT・テクノロジーニュース収集](./News/IT.md)
-  - AI、GAFAM動向、Microsoftトレンドなどに関する最新情報を収集
-  - 地域別・カテゴリ別の情報整理と分析
-  - 表形式での見やすいレポート作成
-
-- [一般ニュース収集と分析](./News/TrendResearch.md)
-  - 事件・事故・リスク、投資・金融、政治・政策などの一般ニュースを収集
-  - 地域別の動向把握と要約
-  - 信頼性の高い情報源からの情報抽出
-
-#### 💹 投資分析・ポートフォリオ最適化
-- [投資ポートフォリオ分析と提案](./News/invest.md)
-  - 現在の投資ポートフォリオを分析し、最適な配分戦略を提案
-  - ETFごとの最新動向と見通しの評価
-  - 具体的な投資プランと6ヶ月間の段階的な移行戦略
-
-### 実践アプリケーション例
-
-#### 📊 PortfolioWise - AIプロンプト活用投資管理アプリ
-- [PortfolioWise GitHub](https://github.com/Rih0z/portfolio-manager)
-  - このリポジトリのプロンプト技術を実際のアプリケーションに統合した実例
-  - 投資ポートフォリオデータを自動的にAI分析用プロンプトに変換
-  - 株式・投資信託・ETFなどの資産データを取り込み、最適なAIプロンプトを生成
-  - 生成されたプロンプトをClaude、ChatGPT、Geminiなど好きなAIで利用可能
-  - **プライバシー重視設計**: ユーザーの資産データは一切外部サーバーに送信せず、AIプロンプトとしてローカルで生成
-  - **専門的な視点**: 資産クラスごとの相関性分析や地域・業種分散など、プロが行うような分析をAIに依頼
-  - ポートフォリオの視覚化、リバランス計算、資産配分の分析など包括的な機能
-  - [ウェブサイト](https://portfolio-wise.com)で実際に使用可能
-
-## 🚀 使い方
-
-1. **プロンプトを選択**: 目的に合ったプロンプトテンプレートを選ぶ
-2. **カスタマイズ**: 必要に応じて自分の状況に合わせて調整
-3. **AIに入力**: ChatGPT、Claude、GeminiなどのAIアシスタントに貼り付ける
-4. **結果を活用**: 生成された内容を確認し、必要に応じて微調整して使用
-
-## ✨ 実際の活用例
-
-### Microsoft Office代替：AIでのドキュメント作成ワークフロー
-1. [香水Hazy IPA開発プロジェクト](./BlogSeries/idea-output/1.idea-stream.md)を参考に、AIを使ったアイデア出しから企画化までの流れを実践
-2. [心理学的テクニックを活用したアイデア発展](./document/make-businessidea.md)プロンプトで初期アイデアを深掘り
-3. [実践的な事業計画書自動生成](./document/make-proposal.md)でビジネスプランを構造化（Word代替）
-   - Microsoft Wordを起動せずに完成度の高い企画書をAIで直接作成
-   - フォーマット調整の手間なく、プロ品質の文書を自動生成
-4. [詳細なIT企画書自動生成](./document/make-IT-proposal.md)で技術提案書を作成（Word代替）
-   - 技術文書作成の工数を大幅削減
-   - テンプレート不要でビジュアル要素も自動で整形
-5. [企画書からスライド自動生成](./slide/make-slide.md)でプレゼン資料化（PowerPoint代替）
-   - PowerPointを使わずに、企画書から直接プレゼン資料を自動生成
-   - デザイン作業の90%削減とスライド間の一貫性を自動確保
-
-### AIを活用した実践アプリケーション：PortfolioWise
-[PortfolioWise](https://portfolio-wise.com)は、このリポジトリのAIプロンプト技術を実際のアプリケーションに応用した好例です：
-
-1. **ユーザーの投資ポートフォリオデータを取得**
-   - 保有資産や目標配分などの情報を入力
-   - 株価データを自動取得し、現在の資産状況を分析
-
-2. **AIプロンプト自動生成機能の活用**
-   - ユーザーのポートフォリオデータを自動的にAI分析用プロンプトに変換
-   - 複雑なプロンプト設計を自動化し、最適な分析リクエストを生成
-
-3. **AIとの連携による高度な分析**
-   - 生成されたプロンプトを好きなAIアシスタント（Claude、ChatGPT等）に貼り付け
-   - AIが最新の市場情報を調査しながら、ユーザー固有のポートフォリオを詳細に分析
-   - 資産配分の評価、リスク分析、投資戦略の提案などを受け取り
-
-4. **プライバシーとセキュリティの確保**
-   - センシティブな資産データは外部サーバーに送信せず、ローカルでプロンプト生成
-   - AIとの対話はユーザー環境で行われるため、機密データを保護しながら分析可能
-
-この実装は「AIが得意な形式に業務を合わせる」というアプローチの実例で、従来の投資管理ツールとAIの強みを組み合わせた革新的なソリューションです。[GitHub](https://github.com/Rih0z/portfolio-manager)でソースコードを公開しており、このリポジトリで提供しているプロンプト技術の実践的な応用方法を学ぶことができます。
-
-### 業界動向のリサーチと分析
-1. ニュースリサーチ自動化プロンプトで最新情報を収集
-2. 投資分析プロンプトで市場影響を評価
-3. マークダウン形式のレポートを自動生成
-4. プレゼン自動生成プロンプトでレポートをスライド化
-
-### コード開発の効率化
-1. 実装開始支援プロンプトで開発計画を分析
-2. コード規則を基にした開発環境の準備
-3. 段階的な実装と進捗管理
-4. ドキュメント自動生成とコード品質の確保
-
-## 📚 参考資料・推奨図書
-
-AI活用と業務改革に関する理解を深めるための資料です：
-
-### オンラインリソース
-- [OpenAI Documentation](https://platform.openai.com/docs) - ChatGPTなどのAIモデル活用のための公式ドキュメント
-- [Anthropic Documentation](https://docs.anthropic.com/) - Claude AIモデルに関する公式ドキュメント
-- [GitHub Copilot Documentation](https://docs.github.com/en/copilot) - コード生成AIの活用ガイド
-
-## 📝 ライセンス
-
-このリポジトリのコンテンツはMITライセンスの下で公開されています。業務や個人利用など、自由にご活用ください。
-
-## 📞 運営者について
-
-こんにちは！このリポジトリを運営している [Koki Riho（Rih0z）](https://github.com/Rih0z) です。
-
-### 運営者プロフィール
-- **バックグラウンド**: 10年以上のソフトウェア開発経験、最近3年はAI関連プロジェクトに注力
-- **専門分野**: プロンプトエンジニアリング、業務自動化、AI導入コンサルティング
-- **趣味**: クラフトビール醸造、読書、ハイキング
-- **目標**: いつか自分のブルワリーを作ること、AIの力を使って人々がより創造的な仕事に集中できる環境を作ること
-- **ボランティア活動**: 地元のクラフトブルワリーにAI活用支援を無償で提供しています。香水Hazy IPAプロジェクトもその一環です。
-
-### 支援ポリシー
-- 質問には原則48時間以内に返信します
-- 初心者の質問こそ大切に対応します（「初歩的な質問です」と言う必要はありません！）
-- 具体的なユースケースについて相談いただければ、カスタマイズのアドバイスも可能です
-- プロンプト作成に関するあらゆる疑問・質問に対応します
-
-### 相談してほしいこと
-- 効率化のアイデアや成功体験
-- クラフトビール業界でのAI活用についての相談（完全ボランティアです！クラフトビール界に貢献したい強い思いからです。）
-
-### 連絡先
-- **GitHub**: [https://github.com/Rih0z](https://github.com/Rih0z)
-- **Twitter**: [@rihobeer2](https://x.com/rihobeer2)
-- **Email**: GitHub プロフィールに記載されているメールアドレスまでご連絡ください
-
-気軽にメッセージを送ってください。AIとともに業務改革を進めていきましょう！
+### dev/mcp/ — MCPツール
+| ファイル | 説明 |
+|---|---|
+| [playwright.md](dev/mcp/playwright.md) | Playwright MCP セットアップ＋テストガイド |
+| [serena.md](dev/mcp/serena.md) | Serena MCP |
+| [windows-setup.md](dev/mcp/windows-setup.md) | Windows MCP設定 |
 
 ---
 
-**AIと共に、もっと効率的に、もっとクリエイティブに。**  
-**あなたの日常業務を変革するプロンプト集、ぜひご活用ください！**
+## docs/ — ドキュメント生成プロンプト
+
+| ファイル | 説明 |
+|---|---|
+| [business-proposal.md](docs/business-proposal.md) | 事業提案書 |
+| [it-proposal.md](docs/it-proposal.md) | IT提案書 |
+| [generic-proposal.md](docs/generic-proposal.md) | 汎用提案書 |
+| [business-idea.md](docs/business-idea.md) | ビジネスアイデア |
+| [specification.md](docs/specification.md) | 仕様書 |
+
+---
+
+## business/ — ビジネス・リサーチ
+
+### business/ideas/
+| ファイル | 説明 |
+|---|---|
+| [ai-automation.md](business/ideas/ai-automation.md) | AI自動化ビジネスアイデア |
+
+### business/news/
+| ファイル | 説明 |
+|---|---|
+| [it.md](business/news/it.md) | ITニュース収集 |
+| [craft-beer.md](business/news/craft-beer.md) | クラフトビールニュース |
+| [trends.md](business/news/trends.md) | トレンドリサーチ |
+| [investment.md](business/news/investment.md) | 投資情報 |
+
+### business/seo/
+| ファイル | 説明 |
+|---|---|
+| [base.md](business/seo/base.md) | SEO基盤作成 |
+| [trend-keywords.md](business/seo/trend-keywords.md) | SEOトレンドキーワード |
+
+---
+
+## content/ — コンテンツ制作
+
+| ファイル | 説明 |
+|---|---|
+| [slides.md](content/slides.md) | スライド作成 |
+| [creative.md](content/creative.md) | クリエイティブ制作 |
+| [examples/beer-project-blog.md](content/examples/beer-project-blog.md) | ビールプロジェクトブログ例 |
+
+---
+
+## ops/ — 運用・管理
+
+### ops/server/
+| ファイル | 説明 |
+|---|---|
+| [automation.md](ops/server/automation.md) | サーバー自動化 |
+| [init.md](ops/server/init.md) | サーバー初期設定 |
+| [windows-standard.md](ops/server/windows-standard.md) | Windows標準手順 |
+
+### ops/hr/
+| ファイル | 説明 |
+|---|---|
+| [year-end-adjustment.md](ops/hr/year-end-adjustment.md) | 年末調整CSV生成 |
+
+---
+
+## 運営者
+
+[Koki Riho（Rih0z）](https://github.com/Rih0z) — GitHub / Twitter: [@rihobeer2](https://x.com/rihobeer2)
