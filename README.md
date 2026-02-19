@@ -6,16 +6,70 @@ AIを活用した業務自動化・開発効率化のためのプロンプトラ
 
 ```
 Job-Automate/
-├── dev/          開発プロンプト集
-├── docs/         ドキュメント生成プロンプト
+├── content/      プレゼン資料作成・レビュー
+├── docs/         新規事業・提案書作成
 ├── business/     ビジネス・リサーチ
-├── content/      コンテンツ制作
+├── dev/          開発プロンプト集
 └── ops/          運用・管理
 ```
 
 ---
 
+## content/ — プレゼン資料作成・レビュー
+
+### スライド生成
+| プロンプト | レビュー | 説明 |
+|---|---|---|
+| [slides.md](content/slides.md) | [review-slides.md](content/review-slides.md) | HTMLスライド自動生成（汎用版） |
+| [slides-pro.md](content/slides-pro.md) | [review-slides.md](content/review-slides.md) | HTMLスライド自動生成（プロフェッショナル版 v4.1） |
+
+### その他コンテンツ
+| ファイル | 説明 |
+|---|---|
+| [creative.md](content/creative.md) | クリエイティブ制作 |
+| [examples/beer-project-blog.md](content/examples/beer-project-blog.md) | ビールプロジェクトブログ例 |
+
+---
+
+## docs/ — 新規事業・提案書作成
+
+| プロンプト | レビュー | 説明 |
+|---|---|---|
+| [business-idea.md](docs/business-idea.md) | [review-business-idea.md](docs/review-business-idea.md) | ビジネスアイデア発展 |
+| [business-proposal.md](docs/business-proposal.md) | [review-proposal.md](docs/review-proposal.md) | 事業提案書・事業計画書 |
+| [it-proposal.md](docs/it-proposal.md) | [review-proposal.md](docs/review-proposal.md) | IT企画書・技術提案書 |
+| [generic-proposal.md](docs/generic-proposal.md) | [review-proposal.md](docs/review-proposal.md) | 汎用提案書 |
+| [specification.md](docs/specification.md) | — | 技術仕様書 |
+
+---
+
+## business/ — ビジネス・リサーチ
+
+### business/ideas/
+| ファイル | 説明 |
+|---|---|
+| [ai-automation.md](business/ideas/ai-automation.md) | AI自動化ビジネスアイデア |
+
+### business/news/
+| ファイル | 説明 |
+|---|---|
+| [it.md](business/news/it.md) | ITニュース収集 |
+| [craft-beer.md](business/news/craft-beer.md) | クラフトビールニュース |
+| [trends.md](business/news/trends.md) | トレンドリサーチ |
+| [investment.md](business/news/investment.md) | 投資情報 |
+
+### business/seo/
+| ファイル | 説明 |
+|---|---|
+| [base.md](business/seo/base.md) | SEO基盤作成 |
+| [trend-keywords.md](business/seo/trend-keywords.md) | SEOトレンドキーワード |
+
+---
+
 ## dev/ — 開発プロンプト集
+
+> コーディングを含むすべての開発は [dev/three-agent/](dev/three-agent/) をベースに進めてください。
+> リーダー・実行・レビューの3エージェント構成でレビュー機能が内蔵されています。
 
 ### dev/three-agent/ — 3エージェント開発システム
 | ファイル | 説明 |
@@ -89,62 +143,6 @@ Job-Automate/
 | [playwright.md](dev/mcp/playwright.md) | Playwright MCP セットアップ＋テストガイド |
 | [serena.md](dev/mcp/serena.md) | Serena MCP |
 | [windows-setup.md](dev/mcp/windows-setup.md) | Windows MCP設定 |
-
----
-
-## docs/ — ドキュメント生成プロンプト
-
-| ファイル | 説明 |
-|---|---|
-| [business-proposal.md](docs/business-proposal.md) | 事業提案書 |
-| [it-proposal.md](docs/it-proposal.md) | IT提案書 |
-| [generic-proposal.md](docs/generic-proposal.md) | 汎用提案書 |
-| [business-idea.md](docs/business-idea.md) | ビジネスアイデア |
-| [specification.md](docs/specification.md) | 仕様書 |
-
----
-
-## business/ — ビジネス・リサーチ
-
-### business/ideas/
-| ファイル | 説明 |
-|---|---|
-| [ai-automation.md](business/ideas/ai-automation.md) | AI自動化ビジネスアイデア |
-
-### business/news/
-| ファイル | 説明 |
-|---|---|
-| [it.md](business/news/it.md) | ITニュース収集 |
-| [craft-beer.md](business/news/craft-beer.md) | クラフトビールニュース |
-| [trends.md](business/news/trends.md) | トレンドリサーチ |
-| [investment.md](business/news/investment.md) | 投資情報 |
-
-### business/seo/
-| ファイル | 説明 |
-|---|---|
-| [base.md](business/seo/base.md) | SEO基盤作成 |
-| [trend-keywords.md](business/seo/trend-keywords.md) | SEOトレンドキーワード |
-
----
-
-## content/ — コンテンツ制作
-
-### スライド生成
-| ファイル | 説明 |
-|---|---|
-| [slides.md](content/slides.md) | HTMLスライド自動生成（汎用版） |
-| [slides-pro.md](content/slides-pro.md) | HTMLスライド自動生成（プロフェッショナル版 v4.1） |
-
-### レビュー・品質評価
-| ファイル | 説明 |
-|---|---|
-| [review-slides.md](content/review-slides.md) | スライド品質レビュー（100点評価） |
-
-### その他
-| ファイル | 説明 |
-|---|---|
-| [creative.md](content/creative.md) | クリエイティブ制作 |
-| [examples/beer-project-blog.md](content/examples/beer-project-blog.md) | ビールプロジェクトブログ例 |
 
 ---
 
