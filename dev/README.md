@@ -16,7 +16,23 @@
 
 ## 基本的な使い方
 
-新規プロジェクトでは `three-agent/` のシステムをベースに開発を進め、
-各フェーズで `workflow/` のプロンプトを参照する。
+### すべての開発の起点: three-agent/
 
-詳細なバグ修正や機能追加は `bugfix/` の6ステップに従って実施する。
+**コーディングを含むすべての開発は [`three-agent/`](three-agent/) をベースに進めてください。**
+
+1. `three-agent/leader.md` をリーダーエージェントに設定
+2. `three-agent/executor.md` を実行エージェントに設定
+3. `three-agent/reviewer.md` をレビューエージェントに設定
+
+### 詳細な実装が必要な場合
+
+特定のタスクで詳細なプロンプトが必要になったら、以下を参照してください：
+
+| やりたいこと | 参照先 |
+|---|---|
+| バグ修正・機能追加の手順を細かく進めたい | [bugfix/](bugfix/) 1〜6ステップ |
+| コードベースの分析・設計文書を作りたい | [architecture/](architecture/) |
+| 実装の各フェーズ（要件定義・デプロイ等）を進めたい | [workflow/](workflow/) |
+| コーディング規約を参照したい | [rules/coding-principles.md](rules/coding-principles.md) |
+| テスト環境を整備したい | [testing/](testing/) |
+| Playwright/SerenaなどMCPを使いたい | [mcp/](mcp/) |

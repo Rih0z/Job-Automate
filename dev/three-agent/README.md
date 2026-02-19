@@ -61,10 +61,25 @@
 ## プロンプトファイル
 | ファイル | 用途 | リンク |
 |---------|------|--------|
-| リーダープロンプト.md | 進行役（ターミナル1） | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/Coding/Base/%E3%83%AA%E3%83%BC%E3%83%80%E3%83%BC%E3%83%97%E3%83%AD%E3%83%B3%E3%83%97%E3%83%88.md) |
-| 実行プロンプト.md | 実行エージェント（ターミナル2） | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/Coding/Base/%E5%AE%9F%E8%A1%8C%E3%83%97%E3%83%AD%E3%83%B3%E3%83%97%E3%83%88.md) |
-| レビュープロンプト.md | レビューエージェント（ターミナル3） | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/Coding/Base/%E3%83%AC%E3%83%93%E3%83%A5%E3%83%BC%E3%83%97%E3%83%AD%E3%83%B3%E3%83%97%E3%83%88%20%C2%B7%20MD) |
-| README.md | 本ファイル | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/Coding/Base/README.md) |
+| leader.md | 進行役（ターミナル1） | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/dev/three-agent/leader.md) |
+| executor.md | 実行エージェント（ターミナル2） | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/dev/three-agent/executor.md) |
+| reviewer.md | レビューエージェント（ターミナル3） | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/dev/three-agent/reviewer.md) |
+| README.md | 本ファイル | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/dev/three-agent/README.md) |
+
+## 開発ベースとしての使い方
+
+**このシステムはすべての開発の起点**です。プロジェクト開始時は必ず three-agent システムを使って進めてください。
+
+細かい実装の詳細が必要になった場合は、以下の専用プロンプトを参照してください：
+
+| 用途 | 参照先 |
+|---|---|
+| バグ修正・機能追加 | [dev/bugfix/](../bugfix/) の 1〜6ステップ |
+| アーキテクチャ文書化 | [dev/architecture/](../architecture/) |
+| 実装フロー全般 | [dev/workflow/](../workflow/) |
+| コーディング規約 | [dev/rules/coding-principles.md](../rules/coding-principles.md) |
+| テスト基盤 | [dev/testing/](../testing/) |
+| MCPツール（Playwright等） | [dev/mcp/](../mcp/) |
 
 ## 実行手順（各ターミナル）
 1. **ターミナル1**: ユーザー要望 + リーダープロンプトを入力し、最新のイテレーション計画と実行指示を取得。
@@ -110,10 +125,10 @@ A. 実行プロンプトの出力テンプレートに「テストファース�
 
 | ファイル | 用途 | リンク |
 |---------|------|--------|
-| リーダープロンプト.md | リーダーエージェント用 | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/Coding/Base/%E3%83%AA%E3%83%BC%E3%83%80%E3%83%BC%E3%83%97%E3%83%AD%E3%83%B3%E3%83%97%E3%83%88.md) |
-| 実行プロンプト.md | 実行エージェント用 | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/Coding/Base/%E5%AE%9F%E8%A1%8C%E3%83%97%E3%83%AD%E3%83%B3%E3%83%97%E3%83%88.md) |
-| レビュープロンプト.md | レビューエージェント用 | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/Coding/Base/%E3%83%AC%E3%83%93%E3%83%A5%E3%83%BC%E3%83%97%E3%83%AD%E3%83%B3%E3%83%97%E3%83%88%20%C2%B7%20MD) |
-| README.md | このファイル | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/Coding/Base/README.md) |
+| leader.md | リーダーエージェント用 | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/dev/three-agent/leader.md) |
+| executor.md | 実行エージェント用 | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/dev/three-agent/executor.md) |
+| reviewer.md | レビューエージェント用 | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/dev/three-agent/reviewer.md) |
+| README.md | このファイル | [GitHub](https://github.com/Rih0z/Job-Automate/blob/main/dev/three-agent/README.md) |
 
 ## ワークフロー図
 
