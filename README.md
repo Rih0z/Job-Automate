@@ -129,9 +129,21 @@ Job-Automate/
 
 ## content/ — コンテンツ制作
 
+### スライド生成
 | ファイル | 説明 |
 |---|---|
-| [slides.md](content/slides.md) | スライド作成 |
+| [slides.md](content/slides.md) | HTMLスライド自動生成（汎用版） |
+| [slides-pro.md](content/slides-pro.md) | HTMLスライド自動生成（プロフェッショナル版 v4.1） |
+
+### レビュー・品質評価
+| ファイル | 説明 |
+|---|---|
+| [review-slides.md](content/review-slides.md) | スライド品質レビュー（100点評価） |
+| [review-docs.md](content/review-docs.md) | OneNEC HTML記事品質レビュー（100点評価） |
+
+### その他
+| ファイル | 説明 |
+|---|---|
 | [creative.md](content/creative.md) | クリエイティブ制作 |
 | [examples/beer-project-blog.md](content/examples/beer-project-blog.md) | ビールプロジェクトブログ例 |
 
