@@ -322,5 +322,5 @@
 
 ## 参照ドキュメント
 
-- 作成プロンプト: `docs/13_forNEC/0_prompd/make-slide.md`
-- 本レビュープロンプト: `docs/13_forNEC/0_prompd/review-slide.md`
+- 作成プロンプト: `content/slides-pro.md`
+- 本レビュープロンプト: `content/review-slides.md`

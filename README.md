@@ -139,7 +139,6 @@ Job-Automate/
 | ファイル | 説明 |
 |---|---|
 | [review-slides.md](content/review-slides.md) | スライド品質レビュー（100点評価） |
-| [review-docs.md](content/review-docs.md) | OneNEC HTML記事品質レビュー（100点評価） |
 
 ### その他
 | ファイル | 説明 |

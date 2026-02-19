@@ -14,7 +14,6 @@
 | ファイル | 説明 |
 |---|---|
 | [review-slides.md](review-slides.md) | スライド品質レビュー（make-slide.md 対応・100点評価） |
-| [review-docs.md](review-docs.md) | OneNEC HTML記事品質レビュー（100点評価） |
 
 ## その他
 
