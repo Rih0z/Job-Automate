@@ -2,6 +2,28 @@
 
 AIを活用した業務自動化・開発効率化のためのプロンプトライブラリ。
 
+## 対応AIサービス
+
+| カテゴリ | 推奨サービス |
+|---|---|
+| 全般（docs / business / content / ops） | [Claude](https://claude.ai) / [ChatGPT](https://chatgpt.com) / [Gemini](https://gemini.google.com) |
+| リサーチ・ニュース収集（business/news） | [Perplexity](https://www.perplexity.ai) / [Grok](https://grok.com) / [Gemini](https://gemini.google.com) |
+| 開発（dev/） | [Claude Code](https://docs.anthropic.com/ja/docs/claude-code/overview) / [Cursor](https://www.cursor.com) / [Cline](https://cline.bot) |
+
+---
+
+## Claude Code スラッシュコマンド
+
+Claude Code でこのリポジトリを開いたときに使えるスキル：
+
+| コマンド | 何をするか |
+|---------|-----------|
+| `/review-implementation` | 実装を5軸（テスト・正確性・マネタイズ・ペルソナ・UX）で100点満点評価 |
+
+> 詳細は `CLAUDE.md` を参照。
+
+---
+
 ## ディレクトリ構成
 
 ```
@@ -60,6 +82,7 @@ Job-Automate/
 |---|---|---|
 | [review-business-idea.md](docs/review-business-idea.md) | アイデア文書 | 独自性・市場性・実現可能性・ペルソナ明確性・展開計画 |
 | [review-proposal.md](docs/review-proposal.md) | 提案書・企画書 | 構成・論理性／市場分析・実現可能性／ペルソナ適合性／根拠の明確性／説得力 |
+| [review-implementation.md](docs/review-implementation.md) | 実装コード | テスト品質／処理の正確性／マネタイズ整合性／ペルソナ適合実装／UX品質 |
 
 ---
 
