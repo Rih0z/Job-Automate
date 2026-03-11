@@ -14,25 +14,43 @@ AIを活用した業務自動化・開発効率化のためのプロンプトラ
 
 ## Claude Code スラッシュコマンド
 
-Claude Code でこのリポジトリを開いたときに使えるスキル：
+このリポジトリをクローンして Claude Code で開くだけで使えるスキル：
 
-| コマンド | 何をするか |
-|---------|-----------|
-| `/review-implementation` | 実装を5軸（テスト・正確性・マネタイズ・ペルソナ・UX）で100点満点評価 |
+| コマンド | コマンド本体 | 何をするか |
+|---------|-------------|-----------|
+| `/review-implementation` | [.claude/commands/review-implementation.md](.claude/commands/review-implementation.md) | 実装を5軸（テスト・正確性・マネタイズ・ペルソナ・UX）で100点満点評価 |
+| `/review-changes` | [.claude/commands/review-changes.md](.claude/commands/review-changes.md) | 直近の変更差分を4軸（実装正確性・テストカバレッジ・テスト品質/戦略・追跡可能性）で100点満点評価。**別エージェントで実行**し客観性を確保 |
+
+> `/review-changes` は実装セッションとは別のエージェントを自動起動してレビューする。詳細は [agents.md](agents.md) 参照。
+
+**他のプロジェクトでもスキルを使いたい場合:**
+```bash
+mkdir -p ~/.claude/commands
+cp .claude/commands/*.md ~/.claude/commands/
+```
 
 > 詳細は `CLAUDE.md` を参照。
 
 ---
 
+## ルートファイル
+
+| ファイル | 何をするか |
+|---|---|
+| [CLAUDE.md](CLAUDE.md) | Claude Code 向けリファレンスマニュアル（スキル一覧・追加ルール・プロジェクト構成） |
+| [agents.md](agents.md) | エージェント分離アーキテクチャ（レビューの客観性確保・分離ルール・制約と限界） |
+
 ## ディレクトリ構成
 
 ```
 Job-Automate/
-├── content/      プレゼン資料作成・レビュー
-├── docs/         新規事業・提案書作成
-├── business/     ビジネス・リサーチ
-├── dev/          開発プロンプト集
-└── ops/          運用・管理
+├── .claude/commands/  Claude Code スラッシュコマンド（クローンすれば誰でも使える）
+├── agents.md          エージェント分離アーキテクチャ
+├── content/           プレゼン資料作成・レビュー
+├── docs/              新規事業・提案書作成・レビュー基準
+├── business/          ビジネス・リサーチ
+├── dev/               開発プロンプト集
+└── ops/               運用・管理
 ```
 
 ---
@@ -83,6 +101,7 @@ Job-Automate/
 | [review-business-idea.md](docs/review-business-idea.md) | アイデア文書 | 独自性・市場性・実現可能性・ペルソナ明確性・展開計画 |
 | [review-proposal.md](docs/review-proposal.md) | 提案書・企画書 | 構成・論理性／市場分析・実現可能性／ペルソナ適合性／根拠の明確性／説得力 |
 | [review-implementation.md](docs/review-implementation.md) | 実装コード | テスト品質／処理の正確性／マネタイズ整合性／ペルソナ適合実装／UX品質 |
+| [review-changes.md](docs/review-changes.md) | 変更差分 | 実装正確性／テストカバレッジ／テスト品質・戦略／追跡可能性 |
 
 ---
 
