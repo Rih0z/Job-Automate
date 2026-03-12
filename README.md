@@ -88,20 +88,20 @@ Job-Automate/
 
 | プロンプト | レビュー | 何をするか |
 |---|---|---|
-| [business-idea.md](docs/business-idea.md) | [review-business-idea.md](docs/review-business-idea.md) | ひと言のアイデアを話す → 対話形式で市場・ペルソナ・収益モデルを整理し事業計画へ発展 |
-| [business-proposal.md](docs/business-proposal.md) | [review-proposal.md](docs/review-proposal.md) | ビジネスコンセプト＋チーム情報を入力 → 事業提案書・事業計画書を生成（ペルソナ・TAM/SAM分析含む） |
-| [it-proposal.md](docs/it-proposal.md) | [review-proposal.md](docs/review-proposal.md) | IT課題・システム概要を入力 → 体験価値重視のIT企画書・技術提案書を生成 |
-| [generic-proposal.md](docs/generic-proposal.md) | [review-proposal.md](docs/review-proposal.md) | 商品・サービスの情報を入力 → 業界問わず使える汎用提案書を生成 |
+| [business-idea.md](docs/business-idea.md) | [review-business-idea.md](docs/review-business-idea.md) | ひと言のアイデアを話す → 対話形式で市場・ペルソナ・収益モデル・**競合克服戦略・エンゲージメント設計**を整理し事業計画へ発展 |
+| [business-proposal.md](docs/business-proposal.md) | [review-proposal.md](docs/review-proposal.md) | ビジネスコンセプト＋チーム情報を入力 → 事業提案書を生成（ペルソナ・TAM/SAM・競合分析・**習慣ループ・リテンション設計**含む） |
+| [it-proposal.md](docs/it-proposal.md) | [review-proposal.md](docs/review-proposal.md) | IT課題・システム概要を入力 → 体験価値重視のIT企画書を生成（**エンゲージメント設計・モート分析**含む） |
+| [generic-proposal.md](docs/generic-proposal.md) | [review-proposal.md](docs/review-proposal.md) | 商品・サービスの情報を入力 → 業界問わず使える汎用提案書を生成（**エンゲージメント・リテンション設計**含む） |
 | [specification.md](docs/specification.md) | — | 企画書のmdファイルを渡す → 開発者が実装できる技術仕様書を生成 |
 
 ### レビュープロンプトの違い
 
-| ファイル | 対象 | 評価軸（5軸・100点満点） |
+| ファイル | 対象 | 評価軸（100点満点） |
 |---|---|---|
-| [review-business-idea.md](docs/review-business-idea.md) | アイデア文書 | 独自性・市場性・実現可能性・ペルソナ明確性・展開計画 |
-| [review-proposal.md](docs/review-proposal.md) | 提案書・企画書 | 構成・論理性／市場分析・実現可能性／ペルソナ適合性／根拠の明確性／説得力 |
-| [review-implementation.md](docs/review-implementation.md) | 実装コード | テスト品質／処理の正確性／マネタイズ整合性／ペルソナ適合実装／UX品質 |
-| [review-changes.md](docs/review-changes.md) | 変更差分 | 実装正確性／テストカバレッジ／テスト品質・戦略／追跡可能性 |
+| [review-business-idea.md](docs/review-business-idea.md) | アイデア文書 | **6軸**: 独自性・競合克服戦略(20)／市場性(15)／実現可能性(15)／ペルソナ(15)／**エンゲージメント・リテンション設計(20)**／展開計画(15) |
+| [review-proposal.md](docs/review-proposal.md) | 提案書・企画書 | **6軸**: 構成(15)／市場分析・競合克服戦略(20)／ペルソナ適合性(15)／根拠(15)／**エンゲージメント・リテンション設計(20)**／説得力(15) |
+| [review-implementation.md](docs/review-implementation.md) | 実装コード | 5軸: テスト品質／処理の正確性／マネタイズ整合性／ペルソナ適合実装／UX品質 |
+| [review-changes.md](docs/review-changes.md) | 変更差分 | 4軸: 実装正確性／テストカバレッジ／テスト品質・戦略／追跡可能性 |
 
 ---
 
