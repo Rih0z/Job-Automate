@@ -92,7 +92,7 @@ Job-Automate/
 | [business-proposal.md](docs/business-proposal.md) | [review-proposal.md](docs/review-proposal.md) | ビジネスコンセプト＋チーム情報を入力 → 事業提案書を生成（ペルソナ・TAM/SAM・競合分析・**習慣ループ・リテンション設計**含む） |
 | [it-proposal.md](docs/it-proposal.md) | [review-proposal.md](docs/review-proposal.md) | IT課題・システム概要を入力 → 体験価値重視のIT企画書を生成（**エンゲージメント設計・モート分析**含む） |
 | [generic-proposal.md](docs/generic-proposal.md) | [review-proposal.md](docs/review-proposal.md) | 商品・サービスの情報を入力 → 業界問わず使える汎用提案書を生成（**エンゲージメント・リテンション設計**含む） |
-| [specification.md](docs/specification.md) | — | 企画書のmdファイルを渡す → 開発者が実装できる技術仕様書を生成 |
+| [specification.md](docs/specification.md) | [review-specification.md](docs/review-specification.md) | 企画書のmdファイルを渡す → 開発者が実装できる技術仕様書を生成 |
 
 ### レビュープロンプトの違い
 
@@ -102,6 +102,11 @@ Job-Automate/
 | [review-proposal.md](docs/review-proposal.md) | 提案書・企画書 | **6軸**: 構成(15)／市場分析・競合克服戦略(20)／ペルソナ適合性(15)／根拠(15)／**エンゲージメント・リテンション設計(20)**／説得力(15) |
 | [review-implementation.md](docs/review-implementation.md) | 実装コード | 5軸: テスト品質／処理の正確性／マネタイズ整合性／ペルソナ適合実装／UX品質 |
 | [review-changes.md](docs/review-changes.md) | 変更差分 | 4軸: 実装正確性／テストカバレッジ／テスト品質・戦略／追跡可能性 |
+| [review-specification.md](docs/review-specification.md) | 技術仕様書 | 5軸: 要件網羅性／アーキテクチャ／API・データ設計／テスト戦略／実装・運用計画 |
+| [review-research.md](business/review-research.md) | リサーチ・ニュース・SEO | 5軸: 正確性／網羅性／分析深度／構成／実用性 |
+| [review-ai-automation.md](business/ideas/review-ai-automation.md) | AI自動化ビジネスモデル | 6軸: 実現可能性／収益性／自動化／競合モート／エンゲージメント／リスク |
+| [review-persona.md](dev/design/review-persona.md) | ペルソナ分析 | 5軸: 具体性／課題深掘り／デザイン整合性／セグメント分類／検証可能性 |
+| [review-ops.md](ops/review-ops.md) | 運用スクリプト・サーバー設定 | 5軸: セキュリティ／冪等性／エラーハンドリング／運用性／パフォーマンス |
 
 ---
 
@@ -109,11 +114,13 @@ Job-Automate/
 
 ### business/ideas/
 
-| ファイル | 何をするか |
-|---|---|
-| [ai-automation.md](business/ideas/ai-automation.md) | 無料ツール（Gemini API・Cloudflare等）で月収10万円を目指すAI自動化ビジネスを10案提案させる |
+| ファイル | レビュー | 何をするか |
+|---|---|---|
+| [ai-automation.md](business/ideas/ai-automation.md) | [review-ai-automation.md](business/ideas/review-ai-automation.md) | 無料ツール（Gemini API・Cloudflare等）で月収10万円を目指すAI自動化ビジネスを10案提案させる |
 
 ### business/news/
+
+> レビューは [review-research.md](business/review-research.md) を使用（ニュース・SEO共通）
 
 | ファイル | 何をするか |
 |---|---|
@@ -123,6 +130,8 @@ Job-Automate/
 | [investment.md](business/news/investment.md) | 投資関連情報を収集・整理する |
 
 ### business/seo/
+
+> レビューは [review-research.md](business/review-research.md) を使用（ニュース・SEO共通）
 
 | ファイル | 何をするか |
 |---|---|
@@ -150,9 +159,9 @@ Job-Automate/
 
 ペルソナ分析からデザイン方針を導出するフレームワーク。
 
-| ファイル | 何をするか |
-|---|---|
-| [persona.md](dev/design/persona.md) | 顧客の年齢・ニーズ・フラストレーションを分析 → カラー・フォント・UXパターンを決定する（最初に実施） |
+| ファイル | レビュー | 何をするか |
+|---|---|---|
+| [persona.md](dev/design/persona.md) | [review-persona.md](dev/design/review-persona.md) | 顧客の年齢・ニーズ・フラストレーションを分析 → カラー・フォント・UXパターンを決定する（最初に実施） |
 | [design-system.md](dev/design/design-system.md) | IBM Carbon準拠のデザイントークン・コンポーネント仕様を参照する |
 | [design-guidelines.md](dev/design/design-guidelines.md) | 絵文字禁止・ダークモード・レスポンシブ・品質チェックリストを参照する |
 | [design-research.md](dev/design/design-research.md) | 優れたUX原則・AIっぽくないデザイン手法のリファレンス |
@@ -176,6 +185,8 @@ Job-Automate/
 ## ops/ — 運用・管理
 
 ### ops/server/
+
+> レビューは [review-ops.md](ops/review-ops.md) を使用
 
 | ファイル | 何をするか |
 |---|---|

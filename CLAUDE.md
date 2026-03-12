@@ -56,6 +56,11 @@ cp .claude/commands/*.md ~/.claude/commands/
 | `docs/review-changes.md` | 変更レビューの詳細基準（`/review-changes` の参照元） | 実装正確性・テストカバレッジ・テスト品質/戦略・追跡可能性 |
 | `docs/review-business-idea.md` | ビジネスアイデアのレビュー | 独自性・競合克服戦略・市場性・実現可能性・ペルソナ明確性・エンゲージメント/リテンション設計・展開計画（6軸・100点満点） |
 | `docs/review-proposal.md` | 提案書・企画書のレビュー | 構成・市場分析/競合克服戦略・ペルソナ適合性・根拠・エンゲージメント/リテンション設計・説得力（6軸・100点満点） |
+| `docs/review-specification.md` | 技術仕様書のレビュー | 要件網羅性・アーキテクチャ・API/データ設計・テスト戦略・実装/運用計画（5軸・100点満点） |
+| `business/review-research.md` | リサーチ・ニュース収集・SEO分析のレビュー | 正確性・網羅性・分析深度・構成・実用性（5軸・100点満点） |
+| `business/ideas/review-ai-automation.md` | AI自動化ビジネスモデル10案のレビュー | 実現可能性・収益性・自動化・競合モート・エンゲージメント・リスク（6軸・100点満点） |
+| `dev/design/review-persona.md` | ペルソナ分析のレビュー | 具体性・課題深掘り・デザイン整合性・セグメント分類・検証可能性（5軸・100点満点） |
+| `ops/review-ops.md` | 運用スクリプト・サーバー設定のレビュー | セキュリティ・冪等性・エラーハンドリング・運用性・パフォーマンス（5軸・100点満点） |
 | `dev/three-agent/reviewer.md` | TDDコードレビュー（three-agentシステム専用） | TDD証跡・カバレッジ・実装整合性・ドキュメント |
 
 **手動での使い方:**
