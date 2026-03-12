@@ -54,8 +54,8 @@ cp .claude/commands/*.md ~/.claude/commands/
 |----------------|------|--------|
 | `docs/review-implementation.md` | 実装レビューの詳細基準（`/review-implementation` の参照元） | テスト・正確性・マネタイズ・ペルソナ・UX |
 | `docs/review-changes.md` | 変更レビューの詳細基準（`/review-changes` の参照元） | 実装正確性・テストカバレッジ・テスト品質/戦略・追跡可能性 |
-| `docs/review-business-idea.md` | ビジネスアイデアのレビュー | 独自性・市場性・実現可能性・ペルソナ明確性・展開計画 |
-| `docs/review-proposal.md` | 提案書・企画書のレビュー | 構成・市場分析・ペルソナ適合性・根拠・説得力 |
+| `docs/review-business-idea.md` | ビジネスアイデアのレビュー | 独自性・競合克服戦略・市場性・実現可能性・ペルソナ明確性・エンゲージメント/リテンション設計・展開計画（6軸・100点満点） |
+| `docs/review-proposal.md` | 提案書・企画書のレビュー | 構成・市場分析/競合克服戦略・ペルソナ適合性・根拠・エンゲージメント/リテンション設計・説得力（6軸・100点満点） |
 | `dev/three-agent/reviewer.md` | TDDコードレビュー（three-agentシステム専用） | TDD証跡・カバレッジ・実装整合性・ドキュメント |
 
 **手動での使い方:**
