@@ -183,6 +183,12 @@ Job-Automate/
 
 > **コーディングを含むすべての開発は [dev/three-agent/](dev/three-agent/) から始めてください。**
 
+### Claude Code セットアップ
+
+| ファイル | 何をするか |
+|---|---|
+| [claude-md.md](dev/claude-md.md) | 任意のプロジェクトに対して Anthropic ベストプラクティス準拠の `CLAUDE.md` を生成する（80行/10KB上限・段階的開示・条文番号方式オプション含む） |
+
 ### dev/three-agent/ — 3エージェント開発システム
 
 3つのAIセッションを使い分け、TDD（テスト駆動開発）で品質を担保しながら開発する。
