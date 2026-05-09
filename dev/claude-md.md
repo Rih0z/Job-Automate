@@ -73,6 +73,20 @@ description: 任意のプロジェクトに対し、Anthropic 公式 Best Practi
 
 `@path/to/import` 構文で他ファイル import 可能（公式 verbatim）。
 
+### hooks（公式記述）
+
+> 公式 verbatim: *"Use hooks for actions that must happen every time with zero exceptions."* / *"Hooks run scripts automatically at specific points in Claude's workflow. Unlike CLAUDE.md instructions which are advisory, hooks are deterministic and guarantee the action happens."* / *"Edit `.claude/settings.json` directly to configure hooks by hand, and run `/hooks` to browse what's configured."* （出典: [best-practices#set-up-hooks](https://code.claude.com/docs/en/best-practices#set-up-hooks)）
+
+CLAUDE.md は advisory（埋もれると Claude が無視する）。**確実に毎回実行させたい動作は hook 化する**のが公式推奨。設定先は `~/.claude/settings.json`（user）または `.claude/settings.json`（project）の `hooks` フィールド。詳細仕様は [hooks-guide](https://code.claude.com/docs/en/hooks-guide) / [hooks reference](https://code.claude.com/docs/en/hooks)。
+
+主要イベントと出力契約（出典: [hooks reference](https://code.claude.com/docs/en/hooks)）:
+
+- `SessionStart`（matcher: `startup|resume|clear|compact`）— `exit 0` の stdout が Claude の context に追加される
+- `UserPromptSubmit` — `exit 0` の stdout が context に追加される。`exit 2` でプロンプト送信を block 可
+- `PreToolUse` — `exit 2` + stderr で tool 実行を block。context 注入は `hookSpecificOutput.additionalContext` JSON 形式
+- `PostToolUse` — **plain stdout は context 注入されない**（公式 verbatim: *"PostToolUse, PostToolBatch, PreToolUse: Use additionalContext inside hookSpecificOutput"*）。`{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"..."}}` JSON で出力する
+- `Stop` / `SubagentStop` — `exit 0` の stdout は debug log のみ（context 注入されない）。`exit 2` で停止を block しタスク継続を強制可（公式: *"Prevents Claude from stopping, continues the conversation"*）
+
 ---
 
 ## 本プロンプト独自の運用ノウハウ
@@ -125,6 +139,38 @@ description: 任意のプロジェクトに対し、Anthropic 公式 Best Practi
 - issue 連携: `issues/open/[ID].md` および `issues/processing/[ID].md` の本文冒頭に「進行中 handoff: [完全パス]」を記載。handoff 更新時は issue 側も同期更新する
 - 構成: ゴール / 完了したこと / 残課題 / 関連ファイル（path:line）/ 落とし穴
 
+### 独自運用: 規約の hooks 化判断（advisory → deterministic 昇格）
+
+CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude が長文の中で見落とす可能性がある。次の判断基準で「確実に毎回動かしたい」規約は hook 化する。
+
+**hooks 化候補の判断基準**:
+- 同じ動作を毎セッション・毎タスクで漏れなく実行したい（例: session 開始時の handoff Read、関連 docs 読込宣言）
+- ファイル命名・配置の規約違反を物理的に防ぎたい（例: handoff ファイル名の検証）
+- 重要ファイル（CLAUDE.md / skills / commands）の更新後に必ずレビューを起動したい
+- session 終了時に成果物の保存・整理を促したい
+
+**hooks 設計指針**:
+- スクリプト本体は `.claude/scripts/` に分離して `pwsh -NoProfile -File <path>` で呼ぶ（settings.json の JSON エスケープを避け、debug しやすくする）
+- Windows 環境では各 hook 設定に `"shell": "powershell"` を明示する
+- PostToolUse の context 注入は `hookSpecificOutput.additionalContext` JSON 形式（plain stdout は注入されない）
+- PreToolUse は `exit 2` + stderr で block。誤 reject を避けるため対象 path を厳密にフィルタする
+- 各 script の冒頭で `[Console]::In.ReadToEnd() | ConvertFrom-Json` で event data を受け取り、`tool_input.file_path` でフィルタ
+- `$ErrorActionPreference` は全域上書きせず、各 cmdlet の `-ErrorAction SilentlyContinue` で局所化（debug ログを潰さない）
+
+**参考実装（5 hook 構成）**:
+
+| イベント | 用途 | reject/notify |
+|---|---|---|
+| `SessionStart` | `.tmp/handoffs/` 最新パスを context 注入し handoff Read を促す | notify |
+| `UserPromptSubmit` | `docs/*.md` 直近 3 ファイルを候補として注入し関連 docs 宣言を促す | notify |
+| `PreToolUse(Write)` | `.tmp/handoffs/` への Write 時に命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` を検証 | reject (`exit 2`) |
+| `PostToolUse(Edit\|Write\|MultiEdit)` | CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 更新時に公式 WebFetch + 別エージェントレビューを促す | notify (additionalContext JSON) |
+| `Stop` | 最新 handoff が 1 時間以上未更新なら更新リマインド | notify |
+
+**hooks 監査（定期点検）**:
+- `enabledPlugins` で有効化された plugin と settings.json の hooks フィールドを照合し、**dead hooks**（marketplace 配下にあるが load されていない）と **無駄 hooks**（同じ動作の重複・効果薄）を検出する
+- `/hooks` コマンドで現状確認、定期的に運用棚卸し
+
 ### 独自運用: 別エージェントレビューサイクル
 
 成果物（実装・設計・docs・**CLAUDE.md・skills**）は実行後に別エージェントから skills レビューを最低 1 回受ける。
@@ -170,7 +216,7 @@ description: 任意のプロジェクトに対し、Anthropic 公式 Best Practi
 公式推奨は「`/init` で生成 → 反復改善」。次の **3 ステップ**で済む場合これを default とする:
 
 1. `/init` で起動 or 出力テンプレ A（縮約版）を埋める
-2. 自己評価ルーブリック（14 項目）で全 Y を確認
+2. 自己評価ルーブリック（15 項目）で全 Y を確認
 3. 別エージェント skills レビュー合格 → 出力
 
 採用条件: 単独 or 短期、規約数が少なく CLAUDE.md 単体で剪定の目安（概ね 100 行）程度に収まる見込み。
@@ -233,7 +279,7 @@ paths:
 
 下記「出力テンプレート」（A 軽量 / B 重量）から採用構造に応じて選択。該当しないセクションは削除可、ただし削除理由を明示。
 
-#### Step 6: 自己評価（14 項目ルーブリック）
+#### Step 6: 自己評価（15 項目ルーブリック）
 
 下記ルーブリックで Y/N 評価。N が 1 つでもあれば書き直す。
 
@@ -383,7 +429,7 @@ paths:
 
 ---
 
-## 自己評価ルーブリック（14 項目）
+## 自己評価ルーブリック（15 項目）
 
 ゴールドスタンダード `~/CLAUDE.md`(67 行) と `AIServer_v4/CLAUDE.md`(41 行) の両方が全 Y を満たすことを実証済み。
 
@@ -406,6 +452,7 @@ paths:
 | 12 | 「新しい○○を追加する手順」のガバナンスがある |  |
 | 13 | emphasis（IMPORTANT / YOU MUST）出現が 5 件以下に絞られている（公式 emphasis ガイダンスに沿う） |  |
 | 14 | 進行中タスク・TODO・バージョン番号など陳腐化情報なし |  |
+| 15 | 確実に毎回実行したい advisory ルールが hooks 化候補として識別され、settings.json の hooks に登録されている（または該当なしと宣言されている） |  |
 
 N が残れば書き直して再評価する。Litmus Test に合格しない行は削る。
 
@@ -416,7 +463,7 @@ N が残れば書き直して再評価する。Litmus Test に合格しない行
 - 重量 path 参考: AIServer v4 `CLAUDE.md`（41 行）— rules 分離・条文方式・`@import` 併用・第24条肥大化防止
 - 軽量 path 参考: Job-Automate `CLAUDE.md` — 縮約版・decision tree + ガバナンス・CLAUDE.md 単体完結
 
-両方とも上 14 項目ルーブリックで全 Y を実証済み。
+両方とも上 15 項目ルーブリックで全 Y を実証済み。
 
 ---
 
@@ -443,6 +490,7 @@ N が残れば書き直して再評価する。Litmus Test に合格しない行
 - [ ] emphasis（IMPORTANT / YOU MUST）が本プロンプト全体で 5 件以下か（語気強め「必須・禁止・削除不可・絶対」も平叙文化されているか）
 - [ ] 公式 verbatim 引用に出典 URL + セクション名が付いているか
 - [ ] 行数による出力拒否ゲートが残っていないか（公式は数値閾値を持たない）
+- [ ] hooks 化判断セクションがあり、5 hook 参考構成と監査手順（dead/無駄 hooks 検出）が含まれているか
 
 ---
 *準拠ソース: https://code.claude.com/docs/en/best-practices "Write an effective CLAUDE.md"*
