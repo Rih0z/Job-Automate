@@ -102,6 +102,8 @@ CLAUDE.md は advisory（埋もれると Claude が無視する）。**確実に
 
 公式の質的 *"concise"* を実運用上の参考値に落とした AIServer v4 起源の目安。「N 行で出力拒否」のような硬性基準ではない。プロジェクト規模に応じて自由に緩めてよい（200 行でも問題ないプロジェクトはある）。判定は数値より「公式 *"rules getting lost in the noise"* 兆候の有無」を主基準にする。
 
+**warning / fail の二段運用パターン**（重量 path 採用時の参考）: AIServer v4 では「40 行 / 5KB warning、80 行 / 10KB fail」を二段で持つことで、剪定検討の早期トリガーと分割の閾値を分けている。本プロンプトでは数値を硬性化しないが、**「早期気付き warning + 移行検討 fail の二段構え」設計概念**は汎用的に有効。重量 path 採用時に独自の二段閾値を設定する場合の参考にしてよい。
+
 ### 独自構造: 軽量 path / 重量 path
 
 | path | 形式 | 採用条件 | 参考実装 |
@@ -131,6 +133,45 @@ CLAUDE.md は advisory（埋もれると Claude が無視する）。**確実に
 ### 独自運用: session 開始時 handoff 自動 Read
 
 新規 chat / `/clear` 直後、chat paste 引継ぎが無ければ `.tmp/handoffs/` の最新ファイルを Read。受領した役割のみ実施・scope creep を避け、関連気付きは別 Issue 起票する。
+
+### 独自運用: issue ライフサイクル管理（open → processing → closed）
+
+タスク・問題は `issues/` 配下の 3 段階フォルダで状態管理する:
+
+| フォルダ | 状態 | 配置タイミング |
+|---|---|---|
+| `issues/open/[ID].md` | 未着手 | 問題発見・新タスク要求時の起票先 |
+| `issues/processing/[ID].md` | 着手中 | open から `git mv` で移動。冒頭に進行中 handoff の完全パスを記載 |
+| `issues/closed/[ID].md` | 完了 | processing から `git mv` で移動。受入基準達成・テストパス・lint 通過を本文末に宣言 |
+
+**問題発見即起票ルール**: タスク中に別バグ・改善・気付きを発見しても**現タスクで触らない**。発見した事実だけを `issues/open/[ID].md` に起票して終わり、元のタスクに戻る。理由: 現タスク差分の肥大とロールバック困難を防ぎ、レビュー単位を 1 issue = 1 目的に保つため。
+
+**1 issue = 1 目的**: 1 つの issue に複数目的を混ぜない。関連する別目的を発見したら新 issue として起票する。
+
+**handoff と issue の関係**:
+- issue = タスクの正本（要件・受入基準・履歴。状態遷移は git mv で記録）
+- handoff = 進行中の引継ぎメモ（次セッションへの context 連続性）
+- `issues/processing/[ID].md` 冒頭に進行中 handoff の完全パスを記載し、handoff のファイル名も `issue-[ID]` を含めて相互参照する
+
+**各 issue ファイル冒頭の標準ヘッダ**（open / processing / closed すべて共通）:
+
+```markdown
+# Issue [ID]: [短いタイトル]
+
+**概要**: [1〜2 行の説明 — 何の問題か、何を達成するか]
+**状態**: open / processing / closed
+**最新 handoff**: [完全パス・例: C:/Users/.../.tmp/handoffs/2026-05-09-issue-42-claude-md-pruning.md]
+**起票日**: YYYY-MM-DD
+**関連 issue**: [#N1, #N2 ...] （あれば）
+
+## 受入基準
+- [ ] ...
+
+## 履歴・メモ
+...
+```
+
+handoff 更新のたびに該当 issue ファイルの「最新 handoff」行も同期更新する。これにより issue ファイル単独で再開可能（issue を開けば説明と最新 handoff の場所が即座に分かる）。
 
 ### 独自運用: handoff 管理（命名・保持・issue 連携）
 
@@ -379,6 +420,7 @@ paths:
 
 ---
 *[行数] 行 / [KB] KB*
+*[Optional: チーム鼓舞 1 行 — 例: "Ultrathink. Don't hold back. Give it your all!"]*
 ````
 
 ### B. 重量 path（rules 分離・条文方式）— AIServer v4 `CLAUDE.md` 形式
@@ -423,6 +465,7 @@ paths:
 
 ---
 *[行数] 行 / [KB] KB*
+*[Optional: チーム鼓舞 1 行 — 例: "Ultrathink. Don't hold back. Give it your all!"]*
 ````
 
 該当しないセクションは削除可（理由明示）。
@@ -447,6 +490,8 @@ paths:
 | 9b | handoff 命名規約（`[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、識別単語は 2〜4 語 kebab-case）が明記 |  |
 | 9c | handoff 保持規約（次 handoff 作成まで前 handoff を削除しない）が明記 |  |
 | 9d | issue ファイル連携（`issues/open|processing/[ID].md` 冒頭に進行中 handoff の完全パス記載）が明記 |  |
+| 9e | 各 issue ファイル冒頭ヘッダ（タイトル / 概要 1〜2 行 / 状態 / 最新 handoff 完全パス / 起票日）の標準形式が明記され、handoff 更新時の同期更新ルールがある |  |
+| 9f | issues/ 3 段階フォルダ管理（open → processing → closed の git mv 遷移）と問題発見即起票（scope creep 禁止・現タスクで触らない）が独立セクションとして明記されている |  |
 | 10 | 詳細ルールは別ファイルに分離 or リンクのみ |  |
 | 11 | 意思決定支援（decision tree / 前提条件表 / ルール参照テーブル）が 1 つ以上 |  |
 | 12 | 「新しい○○を追加する手順」のガバナンスがある |  |
