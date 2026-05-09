@@ -102,18 +102,20 @@ CLAUDE.md は advisory（埋もれると Claude が無視する）。**確実に
 
 公式の質的 *"concise"* を実運用上の参考値に落とした AIServer v4 起源の目安。「N 行で出力拒否」のような硬性基準ではない。プロジェクト規模に応じて自由に緩めてよい（200 行でも問題ないプロジェクトはある）。判定は数値より「公式 *"rules getting lost in the noise"* 兆候の有無」を主基準にする。
 
-**warning / fail の二段運用パターン**（重量 path 採用時の参考）: AIServer v4 では「40 行 / 5KB warning、80 行 / 10KB fail」を二段で持つことで、剪定検討の早期トリガーと分割の閾値を分けている。本プロンプトでは数値を硬性化しないが、**「早期気付き warning + 移行検討 fail の二段構え」設計概念**は汎用的に有効。重量 path 採用時に独自の二段閾値を設定する場合の参考にしてよい。
+**warning / fail の二段運用パターン**: AIServer v4 では「40 行 / 5KB warning、80 行 / 10KB fail」を二段で持つことで、剪定検討の早期トリガーと分割の閾値を分けている。本プロンプトでは数値を硬性化しないが、**「早期気付き warning + 構造見直し fail の二段構え」設計概念**は汎用的に有効。標準セット採用時に独自の二段閾値を設定する場合の参考にしてよい。
 
-### 独自構造: 軽量 path / 重量 path
+### 独自構造: 標準セット 4 種（規模を問わず default）
 
-| path | 形式 | 採用条件 | 参考実装 |
-|------|------|---------|---------|
-| 軽量（縮約版） | CLAUDE.md 単体 | 単独運用 / 6 ヶ月以内 / 規約数が少ない | Job-Automate `CLAUDE.md` |
-| 重量（rules 分離） | CLAUDE.md + `.claude/rules/*.md` 6 ファイル | 複数人 / 長期 / 規約数が多い | AIServer v4 `CLAUDE.md`（41 行） |
+CLAUDE.md は単体ではなく、次の 4 セットで構成する。プロジェクト規模に関係なく**最初から AIServer v4 級の品質**で揃える。軽量・縮約版は採用しない。
 
-**default は軽量 path**。軽量 path で剪定の目安（概ね 100 行）を超えても挙動が安定していれば継続して良い。Claude が指示を無視し始めたら重量 path への移行を検討する。
+| セット | 役割 | 参考実装 |
+|---|---|---|
+| `CLAUDE.md` 本体 | インデックス + 起動時必須手順 + ルール参照テーブル + ルート構成 + 末尾入口リンク | AIServer v4 `CLAUDE.md`（41 行） |
+| `.claude/rules/*.md` 6 ファイル | 規約本文（条文方式・通し番号管理） | AIServer v4 `.claude/rules/` |
+| `.claude/settings.json` の `hooks` | advisory ルールの deterministic 化（5 hook 構成） | 本リポジトリ `~/.claude/settings.json` |
+| `.claude/scripts/hook-*.ps1` 5 ファイル | hooks 本体スクリプト | 本リポジトリ `~/.claude/scripts/` |
 
-重量 path の rules セット（採用時に揃えるファイル群）:
+rules 6 ファイルの内訳:
 
 | ファイル | 役割 | load 戦略 |
 |---|---|---|
@@ -253,7 +255,7 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 
 | 成果物 | 公式 / 評価基準 | 推奨 skill |
 |------|--------------|----------|
-| CLAUDE.md | Anthropic 公式「Write an effective CLAUDE.md」 | `/review-skill` 相当・Step 8 の WebFetch レビュー |
+| CLAUDE.md | Anthropic 公式「Write an effective CLAUDE.md」 | `/review-skill` 相当・Step 7 の WebFetch レビュー |
 | `.claude/skills/*/SKILL.md` | Anthropic 公式 Skills 作成ガイド（`docs/skills-building-guide.md`） | `/review-skill` |
 | `.claude/commands/*.md`（slash command） | 同上 Skills 作成ガイド + 公式 commands 仕様 | `/review-skill` |
 | 実装コード | プロジェクト規約 + テスト戦略 | `/review-changes` / `/review-implementation` |
@@ -276,25 +278,9 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 
 ## 生成手順
 
-### 軽量 path（default・公式 `/init` 相当）
+規模を問わず、最初から標準セット 4 種（CLAUDE.md + rules 6 + settings.json hooks + hook scripts 5）を揃える。下記 8 ステップで進める。
 
-公式推奨は「`/init` で生成 → 反復改善」。次の **3 ステップ**で済む場合これを default とする:
-
-1. `/init` で起動 or 出力テンプレ A（縮約版）を埋める
-2. 自己評価ルーブリック（17 項目）で全 Y を確認
-3. 別エージェント skills レビュー合格 → 出力
-
-採用条件: 単独 or 短期、規約数が少なく CLAUDE.md 単体で剪定の目安（概ね 100 行）程度に収まる見込み。
-
-### 重量 path（rules 分離・条文方式）
-
-複数人 / 長期 / 規約数が多い場合のみ採用。下記 9 ステップを通す。
-
-#### Step 1: 採用構造宣言
-
-「軽量 path（縮約版）」または「重量 path（rules 分離・条文方式）」のいずれかを宣言する。Step 5 自己評価と Step 8 関連ファイル提案に伝搬する。
-
-#### Step 2: 事実収集
+#### Step 1: 事実収集
 
 推測・捏造はしない。不明箇所は `> [要確認]` で残す:
 
@@ -306,7 +292,7 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 - 環境変数・OS 依存・既知の落とし穴
 - gitignore 例外（意図的に追跡しているもの）
 
-#### Step 3: 候補セクション生成 + Litmus Test 適用
+#### Step 2: 候補セクション生成 + Litmus Test 適用
 
 各セクションに公式 Litmus Test を適用:
 
@@ -314,13 +300,15 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 - `テスト実行は npm run test:single -- <file>` → 推測で `npm test` 実行されると全テスト走る → 残す
 - 「コードは綺麗に書きましょう」 → 自明 → 削除
 
-#### Step 4: 段階的開示への分離
+#### Step 3: 段階的開示への分離
 
-CLAUDE.md に直接書かない:
+CLAUDE.md 本体に直接書かず、規約本文は rules 6 ファイルに分離する:
 
 | 内容 | 逃がし先 |
 |------|---------|
-| 全タスク共通の規約 | `.claude/rules/[name].md`（重量 path 採用時） |
+| 全タスク共通の規約（コード品質・テスト方針） | `.claude/rules/code-quality.md` / `test-verify.md`（`@import` 常時 load） |
+| 特定タスク時のみのルール（Issue・review・governance） | `.claude/rules/issue-workflow.md` / `review.md` / `governance.md`（`paths:` path-scope） |
+| 条番号インデックスと既知の制約 | `.claude/rules/meta.md`（常時 load） |
 | 詳細手順・長文 | `docs/[topic].md` → リンクのみ |
 | 時々しか使わない知識・ワークフロー | `.claude/skills/[name]/SKILL.md`（公式推奨） |
 | 個人ノート | `CLAUDE.local.md`（gitignore） |
@@ -340,44 +328,40 @@ paths:
 
 `paths:` match した file Read 時のみ auto-load。常時 load させたい場合は `paths:` 省略 + CLAUDE.md から `@import`。
 
-#### Step 5: テンプレートで組み立て
+#### Step 4: テンプレートで組み立て
 
-下記「出力テンプレート」（A 軽量 / B 重量）から採用構造に応じて選択。該当しないセクションは削除可、ただし削除理由を明示。
+下記「出力テンプレート」に project 固有値を埋める。該当しないセクションは削除可、ただし削除理由を明示。
 
-#### Step 6: 自己評価（17 項目ルーブリック）
+#### Step 5: 自己評価（17 項目ルーブリック）
 
 下記ルーブリックで Y/N 評価。N が 1 つでもあれば書き直す。
 
-#### Step 7: サイズ確認
+#### Step 6: サイズ確認
 
 `(Get-Content <path>).Count` と `(Get-Item <path>).Length` を実行（PowerShell）／ Bash では `wc -l` `wc -c`。実測値を末尾の `*[行数] 行 / [KB] KB*` に転記する（推定値は書かない）。剪定の目安（概ね 100 行）を超えていたら Step 3 へ戻って剪定するか検討する。**ただし行数を理由に出力拒否はしない**（公式は数値閾値を持たない。出力拒否は「Claude が指示を無視している」観察可能な兆候があった時のみ）。
 
-#### Step 8: 別エージェント公式準拠レビュー
+#### Step 7: 別エージェント公式準拠レビュー
 
-生成 CLAUDE.md（重量 path 時は併設 rules も）を別エージェントに渡してレビューを受ける。
+生成 CLAUDE.md と併設 rules 6 ファイル（および生成済み settings.json hooks）を別エージェントに渡してレビューを受ける。
 
 レビュアが必ず実施すること:
 
 1. **YOU MUST** `WebFetch` で `https://code.claude.com/docs/en/best-practices` を取得する（記憶ベースで判定しない）。冒頭に取得日時と主要原則の引用を出力する
 2. 公式 Include/Exclude / Litmus Test / 5 配置 / `@import` / emphasis に対し 1 項目ずつ Y/N 評価
-3. （重量 path 時）rules 6 ファイルが実在するか・条番号が通し管理されているかを Read で確認
+3. rules 6 ファイルが実在するか・条番号が通し管理されているかを Read で確認
 4. 公式該当箇所と生成 CLAUDE.md 該当行を並べて示す
 
-レビュアに渡すもの: 生成 CLAUDE.md 中身・rules ファイル絶対パス（重量 path 時）・公式 URL のみ。渡さないもの: 本プロンプト・公式の引用や要約・生成過程・会話履歴。
+レビュアに渡すもの: 生成 CLAUDE.md 中身・rules 6 ファイル絶対パス・settings.json hooks（生成済みであれば）・公式 URL のみ。渡さないもの: 本プロンプト・公式の引用や要約・生成過程・会話履歴。
 
 合格基準: 公式項目全 Y かつ 90 点以上、かつ冒頭で WebFetch 取得日時引用がある。Web 取得していないレビューは無効、再依頼する。
 
 不合格時: 修正して再レビュー。**3 回 FAIL で `issues/open/[YYYY-MM-DD]-claude-md-generation.md` 起票・中断・ユーザーに報告**。
 
-#### Step 9: 出力 & 関連ファイルセットの実生成 + 引継ぎ
+#### Step 8: 出力 & 標準セット 4 種の実生成 + 引継ぎ
 
-レビュー合格後、project の事実に合わせて **関連ファイルセットを実生成**する（Step 1〜2 で集めた事実から条文・規約・hook を埋める）:
+レビュー合格後、project の事実に合わせて **標準セット 4 種を実生成**する（Step 1 で集めた事実から条文・規約・hook を埋める）:
 
-**軽量 path 採用時** — CLAUDE.md 1 ファイルのみ生成。
-
-**重量 path 採用時** — 下記 3 セットを生成:
-
-1. **CLAUDE.md 本体** — 出力テンプレ B に project 固有値（プロジェクト名・一行サマリ・コマンド・ルート構成・末尾入口リンク）を埋めて生成
+1. **CLAUDE.md 本体** — 出力テンプレートに project 固有値（プロジェクト名・一行サマリ・コマンド・ルート構成・末尾入口リンク）を埋めて生成
 
 2. **`.claude/rules/*.md` 6 ファイル** — Step 1 事実から条文を抽出して生成（条番号は通し管理・ファイル間で重複させない）:
 
@@ -431,72 +415,7 @@ paths:
 
 ---
 
-## 出力テンプレート
-
-### A. 軽量 path（縮約版）— Job-Automate `CLAUDE.md` 形式
-
-````markdown
-# CLAUDE.md - [プロジェクト名]
-
-> [一行サマリ — 何を、誰のために、どんな技術で作るか]
-
-## よく使うコマンド
-
-- 起動: `[コマンド]`
-- テスト: `[コマンド]`（単一テスト優先 / 全実行回避 など方針も）
-- ビルド: `[コマンド]`
-- 型チェック / Lint: `[コマンド]`
-
-## ルート構成
-
-`[entry]` / `[dir1]/` [責務] / `[dir2]/` [責務] / 一時: `.tmp/` `.history/`（gitignore 推奨）。git 完全追跡の例外があれば明記。
-
-## コード規約（デフォルトと異なる点のみ）
-
-- [例: ES Modules を使う / CommonJS 禁止]
-- [例: import は destructure する]
-
-## 環境・落とし穴
-
-- [必須環境変数、OS 依存、絶対 NG など 3〜5 項目]
-
-## YOU MUST NOT（過去の失敗から）
-
-- [3〜5 項目。新規プロジェクトでは省略可]
-
-## 何を使うか（decision tree）
-
-```
-[判断軸]
-├─ [選択肢 A] → [対応コマンド]
-└─ [選択肢 B] → [対応コマンド]
-```
-
-## レビュー受領サイクル
-
-- 全成果物（実装・**CLAUDE.md**・**skills**・docs）は別エージェント skills レビュー最低 1 回
-- 対応 skill: 実装→`/review-changes`、skills/commands→`/review-skill`、CLAUDE.md→公式 Best Practices WebFetch レビュー
-- 合格まで反復、3 回失敗で `issues/open/` 起票・中断
-- レビュアには diff と評価基準のみ（実装意図・会話履歴は渡さない）
-
-## handoff 管理
-
-- ファイル名: `.tmp/handoffs/[YYYY-MM-DD]-issue-[ID]-[識別単語].md`（issue 紐付けあり）／ `[YYYY-MM-DD]-[識別単語].md`（紐付けなし）。識別単語は 2〜4 語 kebab-case
-- 次の handoff を作るまで前 handoff は削除しない（タスク完了直後でも保持）
-- `issues/open/[ID].md` / `issues/processing/[ID].md` の冒頭に「進行中 handoff: [完全パス]」を記載
-
-## 新しい○○を追加するルール
-
-1. [規約ファイルを置く場所]
-2. [CLAUDE.md / README への追記要否]
-3. [自己完結性などの設計原則]
-
----
-*[行数] 行 / [KB] KB*
-*[Optional: チーム鼓舞 1 行 — 例: "Ultrathink. Don't hold back. Give it your all!"]*
-````
-
-### B. 重量 path（rules 分離・条文方式）— AIServer v4 `CLAUDE.md` 形式
+## 出力テンプレート — AIServer v4 形式（rules 分離・条文方式・標準セット 4 種）
 
 ````markdown
 # CLAUDE.md - [プロジェクト名]
@@ -556,17 +475,17 @@ paths:
 | 3 | 全コマンド・全パスが実在（推測ゼロ・捏造ゼロ） |  |
 | 4 | 各行が公式 Litmus Test に合格 |  |
 | 5 | ルート構成 1 行サマリがある |  |
-| 6 | デフォルトと異なるコード規約・テスト方針が記載（重量 path: rules への分離で可） |  |
-| 7 | 環境・落とし穴 / YOU MUST NOT がある（重量 path: rules への分離で可・新規プロジェクトでは YOU MUST NOT 省略可） |  |
-| 8 | 別エージェントレビューサイクルが記載（重量 path: `review.md` への分離で可） |  |
-| 9a | session 開始時 handoff 自動 Read 運用が明記（重量 path: `issue-workflow.md` で可） |  |
+| 6 | デフォルトと異なるコード規約・テスト方針が `code-quality.md` / `test-verify.md` に記載されている |  |
+| 7 | 環境・落とし穴 / YOU MUST NOT が rules に記載されている（新規プロジェクトでは YOU MUST NOT 省略可） |  |
+| 8 | 別エージェントレビューサイクルが `review.md` に記載されている |  |
+| 9a | session 開始時 handoff 自動 Read 運用が `issue-workflow.md` に明記されている |  |
 | 9b | handoff 命名規約（`[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、識別単語は 2〜4 語 kebab-case）が明記 |  |
 | 9c | handoff 保持規約（次 handoff 作成まで前 handoff を削除しない）が明記 |  |
 | 9d | issue ファイル連携（`issues/open|processing/[ID].md` 冒頭に進行中 handoff の完全パス記載）が明記 |  |
 | 9e | 各 issue ファイル冒頭ヘッダ（タイトル / 概要 1〜2 行 / 状態 / 最新 handoff 完全パス / 起票日）の標準形式が明記され、handoff 更新時の同期更新ルールがある |  |
 | 9f | issues/ 3 段階フォルダ管理（open → processing → closed の git mv 遷移）と問題発見即起票（scope creep 禁止・現タスクで触らない）が独立セクションとして明記されている |  |
 | 16 | PC 再起動・session 復元の自動化（SessionStart hook で `issues/processing/*.md` 全 scan + 各 issue の最新 handoff 完全パス抽出 → User 通知 + 並列委任パターン）が独立セクションで明記されている |  |
-| 17 | Step 9 で重量 path 採用時の関連ファイルセット 3 種（CLAUDE.md + rules 6 ファイル + settings.json hooks + hook scripts 5）の **実生成手順** が明記され、雛形が示されている |  |
+| 17 | Step 8 で標準セット 4 種（CLAUDE.md + rules 6 ファイル + settings.json hooks + hook scripts 5）の **実生成手順** が明記され、雛形が示されている |  |
 | 10 | 詳細ルールは別ファイルに分離 or リンクのみ |  |
 | 11 | 意思決定支援（decision tree / 前提条件表 / ルール参照テーブル）が 1 つ以上 |  |
 | 12 | 「新しい○○を追加する手順」のガバナンスがある |  |
@@ -580,10 +499,10 @@ N が残れば書き直して再評価する。Litmus Test に合格しない行
 
 ## ゴールドスタンダード参照
 
-- 重量 path 参考: AIServer v4 `CLAUDE.md`（41 行）— rules 分離・条文方式・`@import` 併用・第24条肥大化防止
-- 軽量 path 参考: Job-Automate `CLAUDE.md` — 縮約版・decision tree + ガバナンス・CLAUDE.md 単体完結
+- 標準参考実装: AIServer v4 `CLAUDE.md`（41 行）— rules 分離・条文方式・`@import` 併用・第24条肥大化防止
+- 自律化参考実装: 本リポジトリの `~/.claude/settings.json` + `~/.claude/scripts/` の 5 hook 構成
 
-両方とも上 17 項目ルーブリックで全 Y を実証済み。
+両者を組み合わせた標準セット 4 種が 17 項目ルーブリックで全 Y を実証する基盤となる。
 
 ---
 
@@ -602,8 +521,8 @@ N が残れば書き直して再評価する。Litmus Test に合格しない行
 
 本プロンプトを更新する人向け。生成 CLAUDE.md の評価には関係しない:
 
-- [ ] Step 8 で WebFetch が要件化されているか
-- [ ] Step 9 で `/clear` + handoff 保存が指示されているか
+- [ ] Step 7 で WebFetch が要件化されているか
+- [ ] Step 8 で `/clear` + handoff 保存が指示されているか
 - [ ] handoff 規約（ファイル名 `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、次 handoff 作成まで保持、issue ファイルへの完全パス記載）が一貫しているか
 - [ ] skills 更新時の公式 Skills ガイド WebFetch レビューが要件化されているか
 - [ ] 「公式準拠の核」と「独自運用」のラベル分離が崩れていないか
@@ -612,7 +531,7 @@ N が残れば書き直して再評価する。Litmus Test に合格しない行
 - [ ] 行数による出力拒否ゲートが残っていないか（公式は数値閾値を持たない）
 - [ ] hooks 化判断セクションがあり、5 hook 参考構成と監査手順（dead/無駄 hooks 検出）が含まれているか
 - [ ] PC 再起動・session 復元（SessionStart hook の processing scan + User 通知 + 並列委任）が含まれているか
-- [ ] Step 9 で関連ファイルセット 3 種（CLAUDE.md / rules 6 / settings.json hooks + hook scripts 5）の実生成手順と雛形が含まれているか
+- [ ] Step 8 で標準セット 4 種（CLAUDE.md / rules 6 / settings.json hooks + hook scripts 5）の実生成手順と雛形が含まれているか
 
 ---
 *準拠ソース: https://code.claude.com/docs/en/best-practices "Write an effective CLAUDE.md"*
