@@ -173,6 +173,30 @@ CLAUDE.md は advisory（埋もれると Claude が無視する）。**確実に
 
 handoff 更新のたびに該当 issue ファイルの「最新 handoff」行も同期更新する。これにより issue ファイル単独で再開可能（issue を開けば説明と最新 handoff の場所が即座に分かる）。
 
+### 独自運用: PC 再起動・session 復元の自動化
+
+PC 再起動 / session 切断後に進行中タスクを自動検出し、User に通知して並列委任できる仕組み。
+
+**SessionStart hook の責務**（matcher: `startup|resume|clear|compact`）:
+1. `.tmp/handoffs/` 最新ファイルを検出して context 注入
+2. `issues/processing/*.md` を全 scan し、各 issue の「タイトル」「最新 handoff の完全パス」を抽出して context 注入
+3. context 末尾に「中断作業 N 件あり。User に通知し、再開対象を確認するか、それぞれ別 Agent に並列委任するか提示せよ」と指示
+
+**User 通知フォーマット例**（Claude が User に伝える形）:
+```
+PC 再起動を検出。中断中の作業 N 件:
+  1. issue [42] - claude-md 剪定 (handoff: .tmp/handoffs/2026-05-09-issue-42-claude-md-pruning.md)
+  2. issue [43] - hooks 監査 (handoff: .tmp/handoffs/2026-05-09-issue-43-hooks-audit.md)
+どれを再開しますか？ それぞれを別 Agent に並列委任しますか？
+```
+
+**並列委任パターン**: 各 issue を個別 Agent に渡す場合、`Agent` ツールで以下のみ提供する:
+- handoff の完全パス（再解釈・補完なしで本文をそのまま信頼させる）
+- issue の完全パス
+- 役割範囲（scope creep を避ける指示）
+
+これにより PC 再起動でも作業の context 連続性が保たれ、複数 issue の並列処理が安全に行える。
+
 ### 独自運用: handoff 管理（命名・保持・issue 連携）
 
 - ファイル名: `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`（issue 紐付けあり）／ `[YYYY-MM-DD]-[識別単語].md`（紐付けなし）。識別単語は 2〜4 語 kebab-case、作業内容が一目で分かるもの
@@ -202,7 +226,7 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 
 | イベント | 用途 | reject/notify |
 |---|---|---|
-| `SessionStart` | `.tmp/handoffs/` 最新パスを context 注入し handoff Read を促す | notify |
+| `SessionStart` | `.tmp/handoffs/` 最新パス + `issues/processing/*.md` 全 scan（タイトル + 最新 handoff 完全パス）を context 注入し、PC 再起動復元・並列委任を促す | notify |
 | `UserPromptSubmit` | `docs/*.md` 直近 3 ファイルを候補として注入し関連 docs 宣言を促す | notify |
 | `PreToolUse(Write)` | `.tmp/handoffs/` への Write 時に命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` を検証 | reject (`exit 2`) |
 | `PostToolUse(Edit\|Write\|MultiEdit)` | CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 更新時に公式 WebFetch + 別エージェントレビューを促す | notify (additionalContext JSON) |
@@ -257,7 +281,7 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 公式推奨は「`/init` で生成 → 反復改善」。次の **3 ステップ**で済む場合これを default とする:
 
 1. `/init` で起動 or 出力テンプレ A（縮約版）を埋める
-2. 自己評価ルーブリック（15 項目）で全 Y を確認
+2. 自己評価ルーブリック（17 項目）で全 Y を確認
 3. 別エージェント skills レビュー合格 → 出力
 
 採用条件: 単独 or 短期、規約数が少なく CLAUDE.md 単体で剪定の目安（概ね 100 行）程度に収まる見込み。
@@ -320,7 +344,7 @@ paths:
 
 下記「出力テンプレート」（A 軽量 / B 重量）から採用構造に応じて選択。該当しないセクションは削除可、ただし削除理由を明示。
 
-#### Step 6: 自己評価（15 項目ルーブリック）
+#### Step 6: 自己評価（17 項目ルーブリック）
 
 下記ルーブリックで Y/N 評価。N が 1 つでもあれば書き直す。
 
@@ -345,16 +369,65 @@ paths:
 
 不合格時: 修正して再レビュー。**3 回 FAIL で `issues/open/[YYYY-MM-DD]-claude-md-generation.md` 起票・中断・ユーザーに報告**。
 
-#### Step 9: 出力 & 引継ぎ
+#### Step 9: 出力 & 関連ファイルセットの実生成 + 引継ぎ
 
-レビュー合格後、ユーザーに伝える:
+レビュー合格後、project の事実に合わせて **関連ファイルセットを実生成**する（Step 1〜2 で集めた事実から条文・規約・hook を埋める）:
 
+**軽量 path 採用時** — CLAUDE.md 1 ファイルのみ生成。
+
+**重量 path 採用時** — 下記 3 セットを生成:
+
+1. **CLAUDE.md 本体** — 出力テンプレ B に project 固有値（プロジェクト名・一行サマリ・コマンド・ルート構成・末尾入口リンク）を埋めて生成
+
+2. **`.claude/rules/*.md` 6 ファイル** — Step 1 事実から条文を抽出して生成（条番号は通し管理・ファイル間で重複させない）:
+
+   | ファイル | 内容 | YAML frontmatter | load |
+   |---|---|---|---|
+   | `meta.md` | 第1〜N条インデックス（条見出し + 所在ファイル）+ 既知の制約 | なし | 常時 |
+   | `code-quality.md` | コード変更規約（命名・import・型）の条文 | `description` のみ | `@import` で常時 |
+   | `test-verify.md` | テスト・自検証規約（ランナー・lint・受入基準）の条文 | `description` のみ | `@import` で常時 |
+   | `issue-workflow.md` | Issue 起票・handoff・/clear 規約の条文 | `paths: ["issues/**", ".tmp/**"]` | path-scope |
+   | `review.md` | 別エージェントレビュー規約の条文 | `paths: ["**/*.<lang>", ".claude/commands/**"]` | path-scope |
+   | `governance.md` | 肥大化防止・新項目追加規約の条文 | `paths: ["CLAUDE.md", ".claude/**"]` | path-scope |
+
+3. **`~/.claude/settings.json`（または project の `.claude/settings.json`）の hooks セット** — 5 hook 構成。既存設定がある場合は `hooks` フィールドのみ追記（permissions / model 等は保持）:
+
+   ```json
+   {
+     "hooks": {
+       "SessionStart": [{ "matcher": "startup|resume|clear|compact",
+         "hooks": [{ "type": "command", "shell": "powershell",
+           "command": "pwsh -NoProfile -File <scripts>/hook-session-start.ps1" }] }],
+       "UserPromptSubmit": [{ "hooks": [{ "type": "command", "shell": "powershell",
+         "command": "pwsh -NoProfile -File <scripts>/hook-user-prompt-submit.ps1" }] }],
+       "PreToolUse": [{ "matcher": "Write",
+         "hooks": [{ "type": "command", "shell": "powershell",
+           "command": "pwsh -NoProfile -File <scripts>/hook-pre-tool-use-handoff.ps1" }] }],
+       "PostToolUse": [{ "matcher": "Edit|Write|MultiEdit",
+         "hooks": [{ "type": "command", "shell": "powershell",
+           "command": "pwsh -NoProfile -File <scripts>/hook-post-tool-use.ps1" }] }],
+       "Stop": [{ "hooks": [{ "type": "command", "shell": "powershell",
+         "command": "pwsh -NoProfile -File <scripts>/hook-stop.ps1" }] }]
+     }
+   }
+   ```
+
+   **hook scripts も併せて生成**（`<scripts>/hook-*.ps1` 5 ファイル）:
+   - `hook-session-start.ps1` — `.tmp/handoffs/` 最新 + `issues/processing/*.md` 全 scan を context 注入（PC 再起動復元）
+   - `hook-user-prompt-submit.ps1` — `docs/*.md` 直近 3 ファイルを context 注入
+   - `hook-pre-tool-use-handoff.ps1` — handoff 命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` 検証、違反なら `exit 2` + stderr で reject
+   - `hook-post-tool-use.ps1` — CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 編集時に `hookSpecificOutput.additionalContext` JSON で公式 WebFetch レビュー reminder
+   - `hook-stop.ps1` — 1 時間以上未更新 handoff があれば更新リマインド
+
+   各 script 冒頭で `[Console]::In.ReadToEnd() | ConvertFrom-Json` から `tool_name` / `tool_input.file_path` を取り、`-ErrorAction SilentlyContinue` は cmdlet 単位で局所化する。
+
+**ユーザーへの最終報告**:
 - 生成内容の要約（3 行以内）
 - `> [要確認]` 残項目
-- 関連ファイル提案（重量 path 時は rules 6 ファイルセット）
+- **生成したファイル一覧（フルパス）**: CLAUDE.md / rules 6 / settings.json / hook scripts 5
 - レビュア合格スコア
 
-大タスク完了のため `/clear` を促す。`/clear` 前に handoff を保存する（命名・保持・issue 連携の規約本体は本プロンプト「独自運用: handoff 管理」を正本とし、ここでは参照のみ）。handoff 内容: ゴール / 完了したこと（行数・スコア）/ 残課題 / 関連ファイル（path:line）/ 落とし穴。
+大タスク完了のため `/clear` を促す。`/clear` 前に handoff を保存する（命名・保持・issue 連携の規約本体は「独自運用: handoff 管理」を正本とし、ここでは参照のみ）。
 
 ---
 
@@ -472,7 +545,7 @@ paths:
 
 ---
 
-## 自己評価ルーブリック（15 項目）
+## 自己評価ルーブリック（17 項目）
 
 ゴールドスタンダード `~/CLAUDE.md`(67 行) と `AIServer_v4/CLAUDE.md`(41 行) の両方が全 Y を満たすことを実証済み。
 
@@ -492,6 +565,8 @@ paths:
 | 9d | issue ファイル連携（`issues/open|processing/[ID].md` 冒頭に進行中 handoff の完全パス記載）が明記 |  |
 | 9e | 各 issue ファイル冒頭ヘッダ（タイトル / 概要 1〜2 行 / 状態 / 最新 handoff 完全パス / 起票日）の標準形式が明記され、handoff 更新時の同期更新ルールがある |  |
 | 9f | issues/ 3 段階フォルダ管理（open → processing → closed の git mv 遷移）と問題発見即起票（scope creep 禁止・現タスクで触らない）が独立セクションとして明記されている |  |
+| 16 | PC 再起動・session 復元の自動化（SessionStart hook で `issues/processing/*.md` 全 scan + 各 issue の最新 handoff 完全パス抽出 → User 通知 + 並列委任パターン）が独立セクションで明記されている |  |
+| 17 | Step 9 で重量 path 採用時の関連ファイルセット 3 種（CLAUDE.md + rules 6 ファイル + settings.json hooks + hook scripts 5）の **実生成手順** が明記され、雛形が示されている |  |
 | 10 | 詳細ルールは別ファイルに分離 or リンクのみ |  |
 | 11 | 意思決定支援（decision tree / 前提条件表 / ルール参照テーブル）が 1 つ以上 |  |
 | 12 | 「新しい○○を追加する手順」のガバナンスがある |  |
@@ -508,7 +583,7 @@ N が残れば書き直して再評価する。Litmus Test に合格しない行
 - 重量 path 参考: AIServer v4 `CLAUDE.md`（41 行）— rules 分離・条文方式・`@import` 併用・第24条肥大化防止
 - 軽量 path 参考: Job-Automate `CLAUDE.md` — 縮約版・decision tree + ガバナンス・CLAUDE.md 単体完結
 
-両方とも上 15 項目ルーブリックで全 Y を実証済み。
+両方とも上 17 項目ルーブリックで全 Y を実証済み。
 
 ---
 
@@ -536,6 +611,8 @@ N が残れば書き直して再評価する。Litmus Test に合格しない行
 - [ ] 公式 verbatim 引用に出典 URL + セクション名が付いているか
 - [ ] 行数による出力拒否ゲートが残っていないか（公式は数値閾値を持たない）
 - [ ] hooks 化判断セクションがあり、5 hook 参考構成と監査手順（dead/無駄 hooks 検出）が含まれているか
+- [ ] PC 再起動・session 復元（SessionStart hook の processing scan + User 通知 + 並列委任）が含まれているか
+- [ ] Step 9 で関連ファイルセット 3 種（CLAUDE.md / rules 6 / settings.json hooks + hook scripts 5）の実生成手順と雛形が含まれているか
 
 ---
 *準拠ソース: https://code.claude.com/docs/en/best-practices "Write an effective CLAUDE.md"*
