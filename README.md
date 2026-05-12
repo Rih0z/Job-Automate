@@ -101,6 +101,14 @@ Job-Automate/
 |---|---|---|
 | [slides-pro.md](content/slides-pro.md) | [review-slides.md](content/review-slides.md) | mdファイルを渡す → ブラウザで動くHTMLスライドを生成（← →キー操作・PDF出力・16:9対応） |
 
+### ブログ記事
+
+> 記事本文は **AIと議論しながら自由に組み立てる**（固定の作成プロンプトは持たない）。組み立て後のレビューに下記プロンプトを使う。
+
+| プロンプト | 何をするか |
+|---|---|
+| [review-blog.md](content/review-blog.md) | 任意のサイト（note / Qiita / Zenn / Medium / Dev.to / 企業ブログ / 社内ポータル等）のブログ記事を11観点110点満点でレビュー。設定欄でプラットフォーム軸・業界軸・記事タイプ軸・運用軸を切り替え、0-gate（プラットフォーム固有制約）/ 4-gate（外部主体財務・性能・評判断定）/ 9-gate（コンプライアンス・業界規制）で重大違反を即D判定 |
+
 ### その他コンテンツ
 
 | ファイル | 何をするか |
@@ -146,6 +154,7 @@ Job-Automate/
 | [review-ai-automation.md](business/ideas/review-ai-automation.md) | AI自動化ビジネスモデル | 6軸: 実現可能性／収益性／自動化／競合モート／エンゲージメント／リスク |
 | [review-persona.md](dev/design/review-persona.md) | ペルソナ分析 | 5軸: 具体性／課題深掘り／デザイン整合性／セグメント分類／検証可能性 |
 | [review-ops.md](ops/review-ops.md) | 運用スクリプト・サーバー設定 | 5軸: セキュリティ／冪等性／エラーハンドリング／運用性／パフォーマンス |
+| [review-blog.md](content/review-blog.md) | ブログ記事（note / Qiita / Zenn / Medium / 企業ブログ等） | **11軸110点満点**: わかりやすさ／独自性／有益性／事実正確性／事実と所感分離／冒頭サマリ／冗長性・一貫性／読みやすさ・文体／コンプライアンス／第三者配慮／技術評価妥当性 + **3ゲート条項**（0-gate プラットフォーム制約 / 4-gate 外部主体断定 / 9-gate コンプラ違反）で即D判定 |
 
 ---
 

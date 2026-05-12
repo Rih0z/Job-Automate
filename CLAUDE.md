@@ -64,6 +64,7 @@ cp .claude/commands/*.md ~/.claude/commands/
 | `business/ideas/review-ai-automation.md` | AI自動化ビジネスモデル10案のレビュー | 実現可能性・収益性・自動化・競合モート・エンゲージメント・リスク（6軸・100点満点） |
 | `dev/design/review-persona.md` | ペルソナ分析のレビュー | 具体性・課題深掘り・デザイン整合性・セグメント分類・検証可能性（5軸・100点満点） |
 | `ops/review-ops.md` | 運用スクリプト・サーバー設定のレビュー | セキュリティ・冪等性・エラーハンドリング・運用性・パフォーマンス（5軸・100点満点） |
+| `content/review-blog.md` | ブログ記事（note / Qiita / Zenn / Medium / 企業ブログ等）のレビュー | わかりやすさ・独自性・有益性・事実正確性・事実所感分離・冒頭サマリ・冗長性一貫性・読みやすさ文体・コンプライアンス・第三者配慮・技術評価妥当性（11軸・110点満点／100点換算で判定） |
 | `dev/three-agent/reviewer.md` | TDDコードレビュー（three-agentシステム専用） | TDD証跡・カバレッジ・実装整合性・ドキュメント |
 
 **手動での使い方:**
