@@ -159,6 +159,29 @@ A〜D だけだと CLAUDE.md 本体の肥大化は防げても、`@import` で�
 
 新規 chat / `/clear` 直後、chat paste 引継ぎが無ければ `.tmp/handoffs/` の最新ファイルを Read。受領した役割のみ実施・scope creep を避け、関連気付きは別 Issue 起票する。
 
+**stale handoff 誤受領防止**: 最新 handoff が **7 日以上前 / 既に「## 完了」marker 済 / 「次 session 不要」明記**のいずれかなら、受領せず User に最新指示を確認する（古い引継ぎを誤って再開する事故を防ぐ）。**90 日 archive ローテーション**: 90 日経過した handoff は `.tmp/archive/handoffs/` に退避し、context 肥大化を防ぐ（AIServer v4 第22条由来）。
+
+### 独自運用: 並走 agent 痕跡 4 軸 recheck（並走衝突防止）
+
+複数 agent / 複数 session が同一リポジトリで並走する運用では、着手前に並走痕跡を検出して衝突を防ぐ（AIServer v4 第22条 V 由来。同条は「6 回連続の並走衝突」という実損失から生まれた高優先機構）。
+
+**検出する 2 境界**（この時点で 4 軸を literal 実行）:
+- (A) session 開始時 / handoff 受領直後（新規 chat・`/clear` 直後、条文宣言の前）
+- (B) plan 起票前（`.tmp/plans/<id>.md` Write 前）
+
+**4 軸 literal command**（bash / PowerShell 両対応。shell redirect は環境に合わせる: bash `2>/dev/null` / PowerShell `2>$null` または `-ErrorAction SilentlyContinue`）:
+
+| 軸 | 検出対象 | command（bash 例） |
+|---|---|---|
+| axis 1 | 同 Issue の並走 commit | `git log -10 --all --oneline -- <issue_path>` |
+| axis 2 | 同 Issue の handoff / plan | `ls -t .tmp/handoffs/*<id>*.md`、`ls -t .tmp/plans/*<id>*.md` |
+| axis 3 | 並走 worktree | `git branch --show-current && git worktree list` |
+| axis 4 | 別 session の uncommitted Edit | `git status --short` |
+
+**痕跡検出時の action**: (a) 着手 hold + User 確認 / (b) 既存 work 引継ぎへ切替（自分の plan 撤回）/ (c) scope 重複 vs complementary 弁別 / (d) handoff index に並走痕跡を明示。
+
+**関連 docs 読込宣言への統合**: 第23条の証跡 3 要素（完全パス + 1 文要約 + タスク関連性）に「**並走痕跡 4 軸 clean 確認済**」を 4th 要素として加える。4 軸全 clean を確認後のみ着手を継続する。enforcement は SessionStart hook の自動実行（hook + 手動宣言の二重防壁）。
+
 ### 独自運用: issue ライフサイクル管理（open → processing → closed）
 
 タスク・問題は `issues/` 配下の 3 段階フォルダで状態管理する:
@@ -167,7 +190,13 @@ A〜D だけだと CLAUDE.md 本体の肥大化は防げても、`@import` で�
 |---|---|---|
 | `issues/open/[ID].md` | 未着手 | 問題発見・新タスク要求時の起票先 |
 | `issues/processing/[ID].md` | 着手中 | open から `git mv` で移動。冒頭に進行中 handoff の完全パスを記載 |
-| `issues/closed/[ID].md` | 完了 | processing から `git mv` で移動。受入基準達成・テストパス・lint 通過を本文末に宣言 |
+| `issues/closed/[ID].md` | 完了 | processing から `git mv` で移動。下記 close 検証 4 段を本文末に証拠付きで宣言 |
+
+**close 前検証 4 段**（AIServer v4 第21条由来。「修正したつもり」「regression 未確認 close」を構造的に排除）:
+1. **再現 → 修正後 pass**: 元 bug の再現条件で修正後に再実行し、症状消失を ログ / 出力 / スクショ / テスト結果ファイル のいずれかで証拠記録
+2. **negative test（regression 防壁化）**: 修正を意図的に外す or 旧 commit に戻して fail することを確認し、test が真に bug を捕捉する保証を残す。可能なら自動テストとして永続化
+3. **他機能 regression smoke**: 影響範囲の関連機能を実機で run し症状ゼロを確認（unit / integration smoke のみでは close 不可）
+4. **証拠アーカイブ**: `issues/closed/[ID].md` に コマンド出力 / ログ抜粋 / スクショパス / 実行時刻 / 関連 commit hash を添付。「目視確認した」「unit test PASS のみ」だけでは close 不可
 
 **問題発見即起票ルール**: タスク中に別バグ・改善・気付きを発見しても**現タスクで触らない**。発見した事実だけを `issues/open/[ID].md` に起票して終わり、元のタスクに戻る。理由: 現タスク差分の肥大とロールバック困難を防ぎ、レビュー単位を 1 issue = 1 目的に保つため。
 
@@ -251,7 +280,7 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 
 | イベント | 用途 | reject/notify |
 |---|---|---|
-| `SessionStart` | `.tmp/handoffs/` 最新パス + `issues/processing/*.md` 全 scan（タイトル + 最新 handoff 完全パス）を context 注入し、PC 再起動復元・並列委任を促す | notify |
+| `SessionStart` | `.tmp/handoffs/` 最新パス + `issues/processing/*.md` 全 scan（タイトル + 最新 handoff 完全パス）+ **並走 agent 痕跡 4 軸 recheck**（git log / handoff・plan / worktree / git status）を context 注入し、PC 再起動復元・並列委任・並走衝突防止を促す | notify |
 | `UserPromptSubmit` | `docs/*.md` 直近 3 ファイルを候補として注入し関連 docs 宣言を促す | notify |
 | `PreToolUse(Write)` | `.tmp/handoffs/` への Write 時に命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` を検証 | reject (`exit 2`) |
 | `PostToolUse(Edit\|Write\|MultiEdit)` | CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 更新時に公式 WebFetch + 別エージェントレビューを促す | notify (additionalContext JSON) |
@@ -272,7 +301,13 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
                                                   3 回 FAIL → issues/open/[ID].md 起票・中断
 ```
 
-レビュアに渡すのは **diff と評価基準のみ**。実装意図・会話履歴は渡さない。公式が紹介する Writer/Reviewer pattern と整合する独自強化。
+レビュアに渡すのは **レビュー対象の完全パスと review skill の 2 点のみ**。レビュアは対象を自分で Read し（proof-by-presence で客観性確保）、評価基準は skill から取得する。実装意図・会話履歴・生成過程・本プロンプトは渡さない。公式が紹介する Writer/Reviewer pattern と整合する独自強化。
+
+**レビュー強度の運用基準**（AIServer v4 第18条由来）:
+- **並列本数**: 重要成果物（CLAUDE.md / skills / 破壊的変更）は独立エージェント **2〜4 本を並列起動**し、**converged findings（複数エージェントで一致した指摘）**を抽出する。Blocker は次工程前に修正。軽微な変更は 1 本で可
+- **TDD test-first**: 実装コードを書く前に test を書き、修正前 test が **fail することを確認**してから実装に着手する（negative test の永続化を test 作成段階で保証）
+- **ループ上限**: 計画レビュー最大 3 周・実装レビュー別カウントで最大 1 周。合計 4 周で収束しなければ scope 削減 or 別 Issue 分割に切替（iteration 発散防止。上図フローの skills レビュー「3 回 FAIL」とは別カウント — 上図は単一成果物の skills レビュー周回、本項は計画+実装を含む広義サイクルの上限）
+- **自己レビュー不可**: 必ず別 subagent に分離する
 
 **対象別の評価基準**:
 
@@ -288,6 +323,17 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 - skills（`.claude/skills/`、`~/.claude/skills/`、`.claude/commands/` 含む）を新規作成または更新したら、別エージェントに `/review-skill` 相当のレビューを依頼する
 - レビュアは Anthropic 公式 Skills 作成ガイド（[skills](https://code.claude.com/docs/en/skills)）を WebFetch で取得して判定する（記憶ベースで判定しない）。構造・トリガー設計・命令品質・出力設計・実用性の 5 軸で 100 点満点採点
 - 90 点以上で合格。3 回 FAIL で `issues/open/[ID].md` 起票・中断
+
+### 独自運用: 成果物の生成主体明示（誤認防止）
+
+テスト結果・成果物について、**LLM が生成したもの**か **script / template / library（pptxgenjs 等）が生成したもの**かを厳格に区別する（AIServer v4 第17条由来。汎用的な誠実性規律）。
+
+- ファイル名・レポート・commit message・記事で生成主体を正確に記述する
+- 複数ステージのテストは各ステージの成功 / 失敗を独立に記録する
+- LLM が失敗し代替手段（script 直接実行等）で補完した場合は「LLM は失敗・代替手段で成功」と明記し、LLM の成功として扱わない
+- 成果物のメタデータ（PPTX の `dc:creator`、生成ログ等）と主張内容を突合して検証する
+
+曖昧な記述・ごまかしを避け、「動かさずにできたと言わない」（自検証）と対で運用する。
 
 ---
 
@@ -314,6 +360,7 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 - デプロイ方法
 - 環境変数・OS 依存・既知の落とし穴
 - gitignore 例外（意図的に追跡しているもの）
+- **汎用規律条文の採否**（AIServer v4 由来の候補メニュー。各々を公式 Litmus Test に通し、プロジェクトが実際に採る規律だけを `code-quality.md` の条文にする）: モック / ハードコード禁止・バージョン番号付きファイル（`v2`/`_new`/`_old`）禁止・ルート直下への新規ファイル作成抑制・設定値の一元管理・一時しのぎでなく超長期的な根本解決
 - **プロジェクトの目的**（このプロジェクトは何を解決しようとしているのか — 1〜2 文の課題定義）
 - **進捗状況**（現在のフェーズ・主要マイルストーン達成状況・既知の未完了領域 — README / Issue / commit 履歴 / `issues/processing/*.md` から事実ベースで抽出）
 
@@ -367,16 +414,16 @@ paths:
 
 #### Step 7: 別エージェント公式準拠レビュー
 
-生成 CLAUDE.md と併設 rules 6 ファイル（および生成済み settings.json hooks）を別エージェントに渡してレビューを受ける。
+生成物（CLAUDE.md + rules 6〜7 + settings.json hooks + hook scripts）を別エージェントに渡してレビューを受ける。渡すのは**対象の完全パスと review skill の 2 点のみ**（下記参照）。
 
-レビュアが必ず実施すること:
+レビュアが必ず実施すること（= review skill が内包する評価手順）:
 
 1. **YOU MUST** `WebFetch` で `https://code.claude.com/docs/en/best-practices` を取得する（記憶ベースで判定しない）。冒頭に取得日時と主要原則の引用を出力する
 2. 公式 Include/Exclude / Litmus Test / 5 配置 / `@import` / emphasis に対し 1 項目ずつ Y/N 評価
 3. rules 6 ファイルが実在するか・条番号が通し管理されているかを Read で確認
 4. 公式該当箇所と生成 CLAUDE.md 該当行を並べて示す
 
-レビュアに渡すもの: 生成 CLAUDE.md 中身・rules 6 ファイル絶対パス・settings.json hooks（生成済みであれば）・公式 URL のみ。渡さないもの: 本プロンプト・公式の引用や要約・生成過程・会話履歴。
+上記 1〜4 が **review skill が内包する評価手順**である（WebFetch 指示と評価基準は skill 側に含まれるため、URL や引用を別途渡さない）。レビュアに渡すもの（**2 点のみ**）: ① レビュー対象の**完全パス**（生成 CLAUDE.md + rules 6〜7 + settings.json + hook scripts の絶対パス。中身はインライン貼付せず、レビュアが自分で Read する）② 適用する **review skill 名**。渡さないもの: ファイル中身のインライン貼付・公式 URL や引用・本プロンプト・生成過程・会話履歴。
 
 合格基準: 公式項目全 Y かつ 90 点以上、かつ冒頭で WebFetch 取得日時引用がある。Web 取得していないレビューは無効、再依頼する。
 
@@ -394,9 +441,9 @@ paths:
    |---|---|---|---|
    | `meta.md` | 第1〜N条インデックス（条見出し + 所在ファイル）+ **既知の制約（[claude-code Issue #23478](https://github.com/anthropics/claude-code/issues/23478) の path-scope auto-load Read 時のみ発火 bug を URL 付きで明記）** + **常時 load ファイル 5KB soft cap 宣言**（第24条 F 項） | なし | 常時 |
    | `code-quality.md` | コード変更規約（命名・import・型）の条文 | `description` のみ | `@import` で常時 |
-   | `test-verify.md` | テスト・自検証規約（ランナー・lint・受入基準）の条文 | `description` のみ | `@import` で常時 |
-   | `issue-workflow.md` | Issue 起票・handoff・/clear 規約の条文 | `paths: ["issues/**", ".tmp/**"]` | path-scope |
-   | `review.md` | 別エージェントレビュー規約の条文 | `paths: ["**/*.<lang>", ".claude/commands/**"]` | path-scope |
+   | `test-verify.md` | テスト・自検証規約（ランナー・lint・受入基準・**close 前検証 4 段**［再現→pass / negative test / regression smoke / 証拠アーカイブ］・**成果物の生成主体明示**［LLM 生成物 vs script/lib 生成物の厳格区別］）の条文 | `description` のみ | `@import` で常時 |
+   | `issue-workflow.md` | Issue 起票・handoff・/clear 規約の条文（**並走 agent 痕跡 4 軸 recheck**・stale handoff 誤受領防止・90 日 archive 含む） | `paths: ["issues/**", ".tmp/**"]` | path-scope |
+   | `review.md` | 別エージェントレビュー規約の条文（**2〜4 本並列 + converged findings**・**TDD test-first**・ループ上限［計画 3 周 / 実装 1 周］・自己レビュー不可・**渡すのは対象完全パス + review skill のみ**） | `paths: ["**/*.<lang>", ".claude/commands/**"]` | path-scope |
    | `governance.md` | 肥大化防止・新項目追加規約の条文を **第24条 A〜F の 6 項目構造**（A サイズ閾値 / B 新項目ルーティング / C 公式準拠 / D 定期レビュー / E 自動検証 / F 常時 load 5KB cap）で記述 | `paths: ["CLAUDE.md", ".claude/**"]` | path-scope |
    | `docs-management.md`（**オプション**: `docs/` 配下に 5 section 以上ある場合のみ） | docs 配置 mapping（section リスト + 各 section の対象範囲）+ 新 docs 配置 flow（既存 section 該当判定 → なければ Issue 起票で section 配置を converge）+ 全 section README 必須化 + **4 箇所同期更新義務**（rule mapping / validate script / INDEX / generator）+ 過時マーカー "as of YYYY-MM-DD" 強制 | `paths: ["docs/**/README.md", "docs/**/*.md", "CLAUDE.md", ".claude/rules/governance.md"]` | path-scope |
 
@@ -423,7 +470,7 @@ paths:
    ```
 
    **hook scripts も併せて生成**（`<scripts>/hook-*.ps1` 5 ファイル）:
-   - `hook-session-start.ps1` — `.tmp/handoffs/` 最新 + `issues/processing/*.md` 全 scan を context 注入（PC 再起動復元）
+   - `hook-session-start.ps1` — `.tmp/handoffs/` 最新 + `issues/processing/*.md` 全 scan + 並走 agent 痕跡 4 軸 recheck（git log / handoff・plan / worktree / git status、検出時は (a)hold+確認 (b)引継ぎ切替 (c)scope 弁別 (d)handoff 明示を促す）を context 注入（PC 再起動復元 + 並走衝突防止）
    - `hook-user-prompt-submit.ps1` — `docs/*.md` 直近 3 ファイルを context 注入
    - `hook-pre-tool-use-handoff.ps1` — handoff 命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` 検証、違反なら `exit 2` + stderr で reject
    - `hook-post-tool-use.ps1` — CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 編集時に `hookSpecificOutput.additionalContext` JSON で公式 WebFetch レビュー reminder
@@ -457,7 +504,7 @@ paths:
 1. 関連 docs 読込宣言（第15条 + 第23条）: 該当 docs を最低 1 つ Read し「完全パス + 1 文要約 + タスク関連性 1 文」を**宣言の最初と最後の両方**に出力する（最初 = 根拠表明、最後 = 実際に踏まえた証跡）
 2. 条文宣言（第1条 lazy load 運用）: タスク該当ルール（下表）のみ宣言してから着手する。**全条一括宣言は不要**
 3. 作業 → 自検証 → 他者レビュー（別エージェント）を作業節目で実施する。CLAUDE.md / skills 更新時は公式準拠を WebFetch ベースでレビュー（skills→`/review-skill` 90 点合格／3 回 FAIL で `issues/open/[ID].md` 起票・中断）
-4. session 開始時（新規 chat / `/clear` 直後）: chat paste 引継ぎが無ければ `.tmp/handoffs/` 最新を Read。役割のみ実施・scope creep を避ける
+4. session 開始時（新規 chat / `/clear` 直後）: chat paste 引継ぎが無ければ `.tmp/handoffs/` 最新を Read（7 日以上前 / 完了済 / 次 session 不要 の handoff は受領せず確認）。**並走 agent 痕跡 4 軸 recheck（git log / handoff・plan / worktree / git status）が clean か確認**してから役割のみ実施・scope creep を避ける
 5. handoff 規約: ファイル名 `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、次 handoff 作成まで保持、`issues/open|processing/[ID].md` 冒頭に進行中 handoff の完全パス記載（詳細 `issue-workflow.md`）
 
 ## ルール一覧
@@ -529,6 +576,12 @@ paths:
 | 22 | 条文宣言が **lazy load 運用**（タスク該当条のみ宣言・全条一括宣言は不要・第1条）になっている |  |
 | 23 | `docs/` 配下に 5 section 以上ある場合は **`docs-management.md` 7 ファイル目**（docs 配置 mapping / 新 docs 配置 flow / 全 section README 必須化 + 4 箇所同期更新義務 / 過時マーカー）が生成されている。該当しない小規模プロジェクトでは「不要」と明示宣言されている |  |
 
+| 24 | 並走 agent 痕跡 4 軸 recheck（git log / handoff・plan / worktree / git status の 2 境界実行 + 検出時 action a〜d）が `issue-workflow.md` に明記され、SessionStart hook にも組込まれている |  |
+| 25 | 成果物の生成主体明示（LLM 生成物 vs script/lib 生成物の厳格区別・メタデータ突合）が `test-verify.md` に明記されている |  |
+| 26 | close 前検証 4 段（再現→pass / negative test / regression smoke / 証拠アーカイブ）が `test-verify.md` または issue lifecycle に明記されている |  |
+| 27 | 別エージェントレビューが 2〜4 本並列 + converged findings 抽出・TDD test-first・ループ上限（計画 3 / 実装 1）で `review.md` に明記され、レビュアに渡すのは**対象完全パス + review skill のみ**になっている |  |
+| 28 | stale handoff 誤受領防止（7 日以上前 / 完了済 / 次 session 不要 は受領せず確認）が明記されている |  |
+
 N が残れば書き直して再評価する。Litmus Test に合格しない行は削る。
 
 ---
@@ -574,6 +627,11 @@ N が残れば書き直して再評価する。Litmus Test に合格しない行
 - [ ] `docs-management.md` のオプション扱い（採用判定基準と生成内容）が明示されているか
 - [ ] 関連 docs 読込宣言が「最初と最後の両方」（第15条 + 第23条）になっているか
 - [ ] 条文宣言の lazy load 運用（全条一括宣言は不要・第1条）が明示されているか
+- [ ] 並走 agent 痕跡 4 軸 recheck（第22条 V）が独自運用 + hook 仕様 + テンプレートに含まれているか
+- [ ] 成果物の生成主体明示（第17条）が独自運用 + test-verify.md 生成指示に含まれているか
+- [ ] close 前検証 4 段（第21条: 再現→pass / negative test / regression smoke / 証拠アーカイブ）が含まれているか
+- [ ] 別エージェントレビューが 2〜4 本並列 + TDD test-first + ループ上限（第18条）で記述され、レビュアに渡すのが対象完全パス + review skill のみになっているか
+- [ ] stale handoff 誤受領防止（第22条 V）が含まれているか
 
 ---
 *準拠ソース: https://code.claude.com/docs/en/best-practices "Write an effective CLAUDE.md"*
