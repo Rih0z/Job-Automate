@@ -17,75 +17,28 @@ description: 任意のプロジェクトに対し、Anthropic 公式 Best Practi
 
 ---
 
-## 公式準拠の核（Anthropic 公式 verbatim）
+## 公式準拠の核（実行時 WebFetch 必須・本プロンプトに焼き込まない）
 
-> 出典: `https://code.claude.com/docs/en/best-practices` "Write an effective CLAUDE.md" セクション。本セクションの主張はすべて同 URL から WebFetch で再取得し検証可能。
+> Anthropic 公式は随時更新される。**公式の文言・テーブル・数値・API 契約を本プロンプトに転記（焼き込み）しない**。生成・レビュー開始時に下記を必ず WebFetch で取得し、その時点の現行版で判定する（記憶・過去の引用で代替しない。WebFetch 失敗時は焼き込み版で代替せず、取得できるまで生成を中断する）。
+>
+> 焼き込み禁止の理由は公式 Exclude 項目「Information that changes frequently」と同根。実際、本プロンプトが過去に転記した Include/Exclude テーブルは現行公式とドリフトした（行の増減・例示変更）。転記は必ず腐る。
 
-### Litmus Test（公式）
+### 取得対象と確認項目（名称のみ列挙・本文/テーブル/数値は取得して読む）
 
-> 公式 verbatim: *"Keep it concise. For each line, ask: 'Would removing this cause Claude to make mistakes?' If not, cut it."* / *"Bloated CLAUDE.md files cause Claude to ignore your actual instructions!"* （出典: [best-practices#write-an-effective-claude-md](https://code.claude.com/docs/en/best-practices#write-an-effective-claude-md)）
+| URL | 取得時に現行版を確認する項目 |
+|---|---|
+| `https://code.claude.com/docs/en/best-practices`（"Write an effective CLAUDE.md" / "Avoid common failure patterns" / "Add an adversarial review step"） | Litmus Test の文言 / Include・Exclude テーブルの現行内容 / サイズ・行数の記述（数値閾値の有無）/ emphasis ガイダンス / 5 配置 + `@path` import / hooks（advisory との対比）/ Writer-Reviewer・adversarial review の注意（reviewer は gap を過剰報告しがち → correctness と明示要件に関わる gap のみ採用） |
+| `https://code.claude.com/docs/en/skills` | SKILL.md 必須・frontmatter（`name` 任意 / `description` 推奨 / `description`+`when_to_use` の文字数上限）/ 本文の recurring token cost と簡潔性 / progressive disclosure（supporting files で参照分離）/ SKILL.md 行数の目安 / commands と skills の統合 / `disable-model-invocation` 等 |
+| `https://code.claude.com/docs/en/hooks`・`https://code.claude.com/docs/en/hooks-guide` | hook イベント別の出力契約（どの stdout が context 注入されるか / `exit 2` の意味 / `additionalContext` JSON / Stop の連続 block 上限など、hook 生成直前に現行仕様を確認） |
 
-合格しない行は削除する。「親切で書いておく」「念のため」の行は残さない。
+取得後、冒頭に「取得日時 + 確認した現行原則の要点」を出力してから生成・レビューに進む。この WebFetch は省略不可。
 
-### Include / Exclude（公式テーブル）
+### 本プロンプト由来の独自運用基準（公式転記ではない・保持する）
 
-| ✅ Include | ❌ Exclude |
-|---------|---------|
-| Bash commands Claude can't guess | Anything Claude can figure out by reading code |
-| Code style rules that differ from defaults | Standard language conventions Claude already knows |
-| Testing instructions and preferred test runners | Detailed API documentation (link to docs instead) |
-| Repository etiquette (branch naming, PR conventions) | Information that changes frequently |
-| Architectural decisions specific to your project | Long explanations or tutorials |
-| Developer environment quirks (required env vars) | File-by-file descriptions of the codebase |
-| Common gotchas or non-obvious behaviors | Self-evident practices |
-| | Domain knowledge / workflows that are only relevant sometimes → use **Skills** (`.claude/skills/`) |
+公式の文言ではなく本プロンプト由来の運用判断。公式が変わっても独自基準として有効だが、取得時に公式と矛盾しないか都度突合する:
 
-### 公式推奨サイクル
-
-- 新規は `/init` で初期生成 → 反復改善
-- 公式 verbatim: *"Treat CLAUDE.md like code: review it when things go wrong, prune it regularly, and test changes by observing whether Claude's behavior actually shifts."* （出典: [best-practices#write-an-effective-claude-md](https://code.claude.com/docs/en/best-practices#write-an-effective-claude-md)）
-- 公式 verbatim: *"If your CLAUDE.md is too long, Claude ignores half of it because important rules get lost in the noise. Fix: Ruthlessly prune. If Claude already does something correctly without the instruction, delete it or convert it to a hook."* （出典: [best-practices#avoid-common-failure-patterns](https://code.claude.com/docs/en/best-practices#avoid-common-failure-patterns)）
-- ルール追加後に挙動が変わらないなら、そのルールが他に埋もれていることを疑う
-
-### emphasis（公式記述）
-
-> 公式 verbatim: *"You can tune instructions by adding emphasis (e.g., 'IMPORTANT' or 'YOU MUST') to improve adherence."* （出典: [best-practices#write-an-effective-claude-md](https://code.claude.com/docs/en/best-practices#write-an-effective-claude-md)）
-
-公式は使用を許容するが、濫用すると無効化される（公式 *"rules getting lost in the noise"* と同種の現象）。本プロンプトの独自運用基準は次の 1 本化:
-
-- **生成 CLAUDE.md・本プロンプト本体ともに、emphasis（IMPORTANT / YOU MUST）は最大 5 件目安**。それ以外の語気強め（必須・禁止・削除不可・絶対）は平叙文に書き換える
-
-### サイズ（公式記述・数値閾値なし）
-
-> 公式 verbatim: *"keep it short and human-readable"* / *"Keep it concise. For each line, ask: 'Would removing this cause Claude to make mistakes?' If not, cut it."* （出典: [best-practices#write-an-effective-claude-md](https://code.claude.com/docs/en/best-practices#write-an-effective-claude-md)）
-
-公式は数値閾値を持たない。「N 行で fail」のような硬性基準は公式に存在しないため、本プロンプトでも CLAUDE.md に行数による出力拒否を求めない。本プロンプトの「サイズの目安」は剪定タイミングの参考値であり、硬性基準ではない。プロジェクト規模・読み手の慣れに応じて自由に緩めて良い。
-
-### 5 配置（公式 verbatim）
-
-| 配置 | 役割 |
-|------|------|
-| `~/.claude/CLAUDE.md` | applies to all Claude sessions |
-| `./CLAUDE.md` | check into git to share with your team |
-| `./CLAUDE.local.md` | personal project-specific notes（gitignore） |
-| Parent directories | useful for monorepos |
-| Child directories | pulled in on demand when working in those subdirs |
-
-`@path/to/import` 構文で他ファイル import 可能（公式 verbatim）。
-
-### hooks（公式記述）
-
-> 公式 verbatim: *"Use hooks for actions that must happen every time with zero exceptions."* / *"Hooks run scripts automatically at specific points in Claude's workflow. Unlike CLAUDE.md instructions which are advisory, hooks are deterministic and guarantee the action happens."* / *"Edit `.claude/settings.json` directly to configure hooks by hand, and run `/hooks` to browse what's configured."* （出典: [best-practices#set-up-hooks](https://code.claude.com/docs/en/best-practices#set-up-hooks)）
-
-CLAUDE.md は advisory（埋もれると Claude が無視する）。**確実に毎回実行させたい動作は hook 化する**のが公式推奨。設定先は `~/.claude/settings.json`（user）または `.claude/settings.json`（project）の `hooks` フィールド。詳細仕様は [hooks-guide](https://code.claude.com/docs/en/hooks-guide) / [hooks reference](https://code.claude.com/docs/en/hooks)。
-
-主要イベントと出力契約（出典: [hooks reference](https://code.claude.com/docs/en/hooks)）:
-
-- `SessionStart`（matcher: `startup|resume|clear|compact`）— `exit 0` の stdout が Claude の context に追加される
-- `UserPromptSubmit` — `exit 0` の stdout が context に追加される。`exit 2` でプロンプト送信を block 可
-- `PreToolUse` — `exit 2` + stderr で tool 実行を block。context 注入は `hookSpecificOutput.additionalContext` JSON 形式
-- `PostToolUse` — **plain stdout は context 注入されない**（公式 verbatim: *"PostToolUse, PostToolBatch, PreToolUse: Use additionalContext inside hookSpecificOutput"*）。`{"hookSpecificOutput":{"hookEventName":"PostToolUse","additionalContext":"..."}}` JSON で出力する
-- `Stop` / `SubagentStop` — `exit 0` の stdout は debug log のみ（context 注入されない）。`exit 2` で停止を block しタスク継続を強制可（公式: *"Prevents Claude from stopping, continues the conversation"*）
+- **emphasis（IMPORTANT / YOU MUST）は最大 5 件目安**。それ以外の語気強め（必須・禁止・絶対）は平叙文化する（公式 emphasis 許容を運用上引き締めた独自基準）
+- **行数による出力拒否ゲートを設けない**。公式が数値閾値を持たないことを取得時に確認した上で、剪定判断は "rules getting lost in the noise" の兆候を主基準にする（数値は参考値）
 
 ---
 
@@ -155,11 +108,13 @@ rules 6 ファイル + オプション 1 ファイルの内訳:
 
 A〜D だけだと CLAUDE.md 本体の肥大化は防げても、`@import` で常時 load される rules ファイル経由の context 汚染を防げない。F が AIServer 独自の最も効く改良点。
 
-### 独自運用: session 開始時 handoff 自動 Read
+### 独自運用: handoff 受領（user 明示指示駆動・本文は自動 Read しない）
 
-新規 chat / `/clear` 直後、chat paste 引継ぎが無ければ `.tmp/handoffs/` の最新ファイルを Read。受領した役割のみ実施・scope creep を避け、関連気付きは別 Issue 起票する。
+handoff は **user の明示指示でのみ受領**する: ① user が chat に paste、または ② user が「handoff X を読んで」と指示。**最新 handoff の本文を session 開始時に自動 Read しない**（無関係な最新 handoff の誤受領と、本文を毎 session 注入する context 汚染を防ぐ）。受領後は役割のみ実施・scope creep を避け、関連気付きは別 Issue 起票する。
 
-**stale handoff 誤受領防止**: 最新 handoff が **7 日以上前 / 既に「## 完了」marker 済 / 「次 session 不要」明記**のいずれかなら、受領せず User に最新指示を確認する（古い引継ぎを誤って再開する事故を防ぐ）。**90 日 archive ローテーション**: 90 日経過した handoff は `.tmp/archive/handoffs/` に退避し、context 肥大化を防ぐ（AIServer v4 第22条由来）。
+SessionStart hook は**本文を注入せず、ポインタと verdict のみ通知する**: 中断作業の一覧（issue タイトル + handoff ファイル名のみ）と並走 4 軸 verdict（clean / 痕跡あり）を提示し「どれを再開しますか？」と user に問う。**本文 Read は user が再開対象を選択した後に、その 1 件だけ**行う。
+
+**stale handoff 誤受領防止**: 提示する handoff のうち **7 日以上前 / 既に「## 完了」marker 済 / 「次 session 不要」明記**のものは "stale" と注記し、user が誤って選ばないようにする。**90 日 archive ローテーション**: 90 日経過した handoff は `.tmp/archive/handoffs/` に退避し context 肥大化を防ぐ（AIServer v4 第22条由来）。
 
 ### 独自運用: 並走 agent 痕跡 4 軸 recheck（並走衝突防止）
 
@@ -232,9 +187,9 @@ handoff 更新のたびに該当 issue ファイルの「最新 handoff」行も
 PC 再起動 / session 切断後に進行中タスクを自動検出し、User に通知して並列委任できる仕組み。
 
 **SessionStart hook の責務**（matcher: `startup|resume|clear|compact`）:
-1. `.tmp/handoffs/` 最新ファイルを検出して context 注入
-2. `issues/processing/*.md` を全 scan し、各 issue の「タイトル」「最新 handoff の完全パス」を抽出して context 注入
-3. context 末尾に「中断作業 N 件あり。User に通知し、再開対象を確認するか、それぞれ別 Agent に並列委任するか提示せよ」と指示
+1. `.tmp/handoffs/` 最新ファイルの**ファイル名のみ**を検出（本文は Read/注入しない）
+2. `issues/processing/*.md` を全 scan し、各 issue の「タイトル」「最新 handoff のファイル名」を抽出（**本文は注入しない・ポインタのみ**）
+3. 並走 4 軸 verdict（clean / 痕跡あり）と合わせ「中断作業 N 件あり。再開対象を user に確認し、選択された 1 件のみ本文 Read、または別 Agent に並列委任せよ（stale なものは注記）」と指示
 
 **User 通知フォーマット例**（Claude が User に伝える形）:
 ```
@@ -256,6 +211,7 @@ PC 再起動を検出。中断中の作業 N 件:
 - ファイル名: `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`（issue 紐付けあり）／ `[YYYY-MM-DD]-[識別単語].md`（紐付けなし）。識別単語は 2〜4 語 kebab-case、作業内容が一目で分かるもの
 - 保持: 次の handoff を新規作成するまで前 handoff は削除しない。次 handoff 作成時に削除またはアーカイブする（次セッションが連続して読み戻せるようにするため）
 - issue 連携: `issues/open/[ID].md` および `issues/processing/[ID].md` の本文冒頭に「進行中 handoff: [完全パス]」を記載。handoff 更新時は issue 側も同期更新する
+- 受領: handoff は user 明示指示でのみ受領し、本文は再開対象に選ばれた 1 件のみ Read する（自動最新 Read はしない）
 - 構成: ゴール / 完了したこと / 残課題 / 関連ファイル（path:line）/ 落とし穴
 
 ### 独自運用: 規約の hooks 化判断（advisory → deterministic 昇格）
@@ -271,7 +227,7 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 **hooks 設計指針**:
 - スクリプト本体は `.claude/scripts/` に分離して `pwsh -NoProfile -File <path>` で呼ぶ（settings.json の JSON エスケープを避け、debug しやすくする）
 - Windows 環境では各 hook 設定に `"shell": "powershell"` を明示する
-- PostToolUse の context 注入は `hookSpecificOutput.additionalContext` JSON 形式（plain stdout は注入されない）
+- 各 hook イベントの出力契約（どの stdout が context 注入されるか / `additionalContext` JSON の要否 / `exit 2` の意味 / Stop の連続 block 上限）は **hook 生成直前に hooks reference を WebFetch で確認**する（焼き込まず現行仕様に従う）
 - PreToolUse は `exit 2` + stderr で block。誤 reject を避けるため対象 path を厳密にフィルタする
 - 各 script の冒頭で `[Console]::In.ReadToEnd() | ConvertFrom-Json` で event data を受け取り、`tool_input.file_path` でフィルタ
 - `$ErrorActionPreference` は全域上書きせず、各 cmdlet の `-ErrorAction SilentlyContinue` で局所化（debug ログを潰さない）
@@ -280,7 +236,7 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 
 | イベント | 用途 | reject/notify |
 |---|---|---|
-| `SessionStart` | `.tmp/handoffs/` 最新パス + `issues/processing/*.md` 全 scan（タイトル + 最新 handoff 完全パス）+ **並走 agent 痕跡 4 軸 recheck**（git log / handoff・plan / worktree / git status）を context 注入し、PC 再起動復元・並列委任・並走衝突防止を促す | notify |
+| `SessionStart` | **ポインタと verdict のみ注入**: `.tmp/handoffs/` 最新の**ファイル名** + `issues/processing/*.md` 全 scan（タイトル + handoff ファイル名）+ 並走 4 軸 **verdict**（clean / 痕跡あり）。**本文は注入しない**（汚染防止）。再開対象は user 選択後にその 1 件のみ Read | notify |
 | `UserPromptSubmit` | `docs/*.md` 直近 3 ファイルを候補として注入し関連 docs 宣言を促す | notify |
 | `PreToolUse(Write)` | `.tmp/handoffs/` への Write 時に命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` を検証 | reject (`exit 2`) |
 | `PostToolUse(Edit\|Write\|MultiEdit)` | CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 更新時に公式 WebFetch + 別エージェントレビューを促す | notify (additionalContext JSON) |
@@ -308,6 +264,7 @@ CLAUDE.md / 本プロンプトに書いた規約は advisory なので、Claude 
 - **TDD test-first**: 実装コードを書く前に test を書き、修正前 test が **fail することを確認**してから実装に着手する（negative test の永続化を test 作成段階で保証）
 - **ループ上限**: 計画レビュー最大 3 周・実装レビュー別カウントで最大 1 周。合計 4 周で収束しなければ scope 削減 or 別 Issue 分割に切替（iteration 発散防止。上図フローの skills レビュー「3 回 FAIL」とは別カウント — 上図は単一成果物の skills レビュー周回、本項は計画+実装を含む広義サイクルの上限）
 - **自己レビュー不可**: 必ず別 subagent に分離する
+- **過剰報告の抑制**（公式 adversarial review の注意・取得時に現行文言を確認）: reviewer は「gap を探せ」と指示されると健全な成果物でも何か報告しがち。**correctness と明示要件に関わる gap のみ採用**し、それ以外は optional 扱いとして over-engineering を避ける
 
 **対象別の評価基準**:
 
@@ -382,7 +339,7 @@ CLAUDE.md 本体に直接書かず、規約本文は rules 6 ファイルに分�
 | 特定タスク時のみのルール（Issue・review・governance） | `.claude/rules/issue-workflow.md` / `review.md` / `governance.md`（`paths:` path-scope） |
 | 条番号インデックスと既知の制約 | `.claude/rules/meta.md`（常時 load） |
 | 詳細手順・長文 | `docs/[topic].md` → リンクのみ |
-| 時々しか使わない知識・ワークフロー | `.claude/skills/[name]/SKILL.md`（公式推奨） |
+| 時々しか使わない知識・ワークフロー | `.claude/skills/[name]/SKILL.md`（公式推奨。commands は skills に統合済 = `.claude/commands/x.md` と `.claude/skills/x/SKILL.md` は同じ `/x` を作る。frontmatter `name` は任意・`description` 推奨。現行仕様は skills docs を WebFetch で確認） |
 | 個人ノート | `CLAUDE.local.md`（gitignore） |
 
 `paths:` frontmatter 例:
@@ -470,7 +427,7 @@ paths:
    ```
 
    **hook scripts も併せて生成**（`<scripts>/hook-*.ps1` 5 ファイル）:
-   - `hook-session-start.ps1` — `.tmp/handoffs/` 最新 + `issues/processing/*.md` 全 scan + 並走 agent 痕跡 4 軸 recheck（git log / handoff・plan / worktree / git status、検出時は (a)hold+確認 (b)引継ぎ切替 (c)scope 弁別 (d)handoff 明示を促す）を context 注入（PC 再起動復元 + 並走衝突防止）
+   - `hook-session-start.ps1` — ポインタ（handoff ファイル名 + `issues/processing/*.md` のタイトル）と並走 4 軸 verdict のみ注入（**本文は Read/注入しない**）。検出時は (a)hold+確認 (b)引継ぎ切替 (c)scope 弁別 (d)handoff 明示を促す。本文は user 選択後にその 1 件のみ Read（PC 再起動復元 + 並走衝突防止 + context 汚染防止）
    - `hook-user-prompt-submit.ps1` — `docs/*.md` 直近 3 ファイルを context 注入
    - `hook-pre-tool-use-handoff.ps1` — handoff 命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` 検証、違反なら `exit 2` + stderr で reject
    - `hook-post-tool-use.ps1` — CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 編集時に `hookSpecificOutput.additionalContext` JSON で公式 WebFetch レビュー reminder
@@ -504,7 +461,7 @@ paths:
 1. 関連 docs 読込宣言（第15条 + 第23条）: 該当 docs を最低 1 つ Read し「完全パス + 1 文要約 + タスク関連性 1 文」を**宣言の最初と最後の両方**に出力する（最初 = 根拠表明、最後 = 実際に踏まえた証跡）
 2. 条文宣言（第1条 lazy load 運用）: タスク該当ルール（下表）のみ宣言してから着手する。**全条一括宣言は不要**
 3. 作業 → 自検証 → 他者レビュー（別エージェント）を作業節目で実施する。CLAUDE.md / skills 更新時は公式準拠を WebFetch ベースでレビュー（skills→`/review-skill` 90 点合格／3 回 FAIL で `issues/open/[ID].md` 起票・中断）
-4. session 開始時（新規 chat / `/clear` 直後）: chat paste 引継ぎが無ければ `.tmp/handoffs/` 最新を Read（7 日以上前 / 完了済 / 次 session 不要 の handoff は受領せず確認）。**並走 agent 痕跡 4 軸 recheck（git log / handoff・plan / worktree / git status）が clean か確認**してから役割のみ実施・scope creep を避ける
+4. session 開始時（新規 chat / `/clear` 直後）: handoff は **user 明示指示でのみ受領**（最新を自動 Read しない）。hook が提示するポインタ + 並走 4 軸 verdict を見て、user が再開対象を選んだら**その 1 件のみ本文 Read**（stale = 7 日以上前 / 完了済 / 次 session 不要 は選ばない）。受領後は役割のみ実施・scope creep を避ける
 5. handoff 規約: ファイル名 `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、次 handoff 作成まで保持、`issues/open|processing/[ID].md` 冒頭に進行中 handoff の完全パス記載（詳細 `issue-workflow.md`）
 
 ## ルール一覧
@@ -555,13 +512,13 @@ paths:
 | 6 | デフォルトと異なるコード規約・テスト方針が `code-quality.md` / `test-verify.md` に記載されている |  |
 | 7 | 環境・落とし穴 / YOU MUST NOT が rules に記載されている（新規プロジェクトでは YOU MUST NOT 省略可） |  |
 | 8 | 別エージェントレビューサイクルが `review.md` に記載されている |  |
-| 9a | session 開始時 handoff 自動 Read 運用が `issue-workflow.md` に明記されている |  |
+| 9a | handoff は user 明示指示で受領し本文は選択 1 件のみ Read（最新を自動 Read しない）運用が `issue-workflow.md` に明記されている |  |
 | 9b | handoff 命名規約（`[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、識別単語は 2〜4 語 kebab-case）が明記 |  |
 | 9c | handoff 保持規約（次 handoff 作成まで前 handoff を削除しない）が明記 |  |
 | 9d | issue ファイル連携（`issues/open|processing/[ID].md` 冒頭に進行中 handoff の完全パス記載）が明記 |  |
 | 9e | 各 issue ファイル冒頭ヘッダ（タイトル / 概要 1〜2 行 / 状態 / 最新 handoff 完全パス / 起票日）の標準形式が明記され、handoff 更新時の同期更新ルールがある |  |
 | 9f | issues/ 3 段階フォルダ管理（open → processing → closed の git mv 遷移）と問題発見即起票（scope creep 禁止・現タスクで触らない）が独立セクションとして明記されている |  |
-| 16 | PC 再起動・session 復元の自動化（SessionStart hook で `issues/processing/*.md` 全 scan + 各 issue の最新 handoff 完全パス抽出 → User 通知 + 並列委任パターン）が独立セクションで明記されている |  |
+| 16 | PC 再起動・session 復元の自動化（SessionStart hook はポインタ + verdict のみ注入＝本文を注入しない、`issues/processing/*.md` 全 scan で User 通知 → 選択後 1 件のみ Read + 並列委任）が独立セクションで明記されている |  |
 | 17 | Step 8 で標準セット 4 種（CLAUDE.md + rules 6 ファイル + settings.json hooks + hook scripts 5）の **実生成手順** が明記され、雛形が示されている |  |
 | 10 | 詳細ルールは別ファイルに分離 or リンクのみ |  |
 | 11 | 意思決定支援（decision tree / 前提条件表 / ルール参照テーブル）が 1 つ以上 |  |
@@ -576,11 +533,13 @@ paths:
 | 22 | 条文宣言が **lazy load 運用**（タスク該当条のみ宣言・全条一括宣言は不要・第1条）になっている |  |
 | 23 | `docs/` 配下に 5 section 以上ある場合は **`docs-management.md` 7 ファイル目**（docs 配置 mapping / 新 docs 配置 flow / 全 section README 必須化 + 4 箇所同期更新義務 / 過時マーカー）が生成されている。該当しない小規模プロジェクトでは「不要」と明示宣言されている |  |
 
-| 24 | 並走 agent 痕跡 4 軸 recheck（git log / handoff・plan / worktree / git status の 2 境界実行 + 検出時 action a〜d）が `issue-workflow.md` に明記され、SessionStart hook にも組込まれている |  |
+| 24 | 並走 agent 痕跡 4 軸 recheck（git log / handoff・plan / worktree / git status の 2 境界実行 + 検出時 action a〜d）が `issue-workflow.md` に明記され、SessionStart hook に **verdict のみ注入**の形で組込まれている |  |
 | 25 | 成果物の生成主体明示（LLM 生成物 vs script/lib 生成物の厳格区別・メタデータ突合）が `test-verify.md` に明記されている |  |
 | 26 | close 前検証 4 段（再現→pass / negative test / regression smoke / 証拠アーカイブ）が `test-verify.md` または issue lifecycle に明記されている |  |
 | 27 | 別エージェントレビューが 2〜4 本並列 + converged findings 抽出・TDD test-first・ループ上限（計画 3 / 実装 1）で `review.md` に明記され、レビュアに渡すのは**対象完全パス + review skill のみ**になっている |  |
-| 28 | stale handoff 誤受領防止（7 日以上前 / 完了済 / 次 session 不要 は受領せず確認）が明記されている |  |
+| 28 | stale handoff（7 日以上前 / 完了済 / 次 session 不要）を提示時に注記し user が誤選択しないようにする設計が明記されている |  |
+| 29 | 公式（best-practices / skills / hooks）の文言・テーブル・数値・API 契約を本プロンプトに焼き込まず、生成・レビュー開始時に WebFetch で取得し現行版で判定する設計（焼き込み版が残っていない） |  |
+| 30 | reviewer への過剰報告抑制（reviewer は gap を過剰報告しがち → correctness と明示要件に関わる gap のみ採用）が明記されている |  |
 
 N が残れば書き直して再評価する。Litmus Test に合格しない行は削る。
 
@@ -616,10 +575,12 @@ N が残れば書き直して再評価する。Litmus Test に合格しない行
 - [ ] skills 更新時の公式 Skills ガイド WebFetch レビューが要件化されているか
 - [ ] 「公式準拠の核」と「独自運用」のラベル分離が崩れていないか
 - [ ] emphasis（IMPORTANT / YOU MUST）が本プロンプト全体で 5 件以下か（語気強め「必須・禁止・削除不可・絶対」も平叙文化されているか）
-- [ ] 公式 verbatim 引用に出典 URL + セクション名が付いているか
+- [ ] 公式内容（文言・テーブル・数値・API 契約）を焼き込まず実行時 WebFetch 取得に統一されているか（verbatim・テーブル転記が残っていないか）
+- [ ] handoff 受領が user 明示指示駆動で、SessionStart hook がポインタ + verdict のみ注入（本文を注入しない）になっているか
+- [ ] reviewer 過剰報告抑制（correctness / 明示要件に関わる gap のみ採用）が含まれているか
 - [ ] 行数による出力拒否ゲートが残っていないか（公式は数値閾値を持たない）
 - [ ] hooks 化判断セクションがあり、5 hook 参考構成と監査手順（dead/無駄 hooks 検出）が含まれているか
-- [ ] PC 再起動・session 復元（SessionStart hook の processing scan + User 通知 + 並列委任）が含まれているか
+- [ ] PC 再起動・session 復元（SessionStart hook は processing scan をポインタ + verdict のみ注入＝本文非注入 → User 通知 + 選択後 1 件のみ Read + 並列委任）が含まれているか
 - [ ] Step 8 で標準セット 4 種（CLAUDE.md / rules 6 / settings.json hooks + hook scripts 5）の実生成手順と雛形が含まれているか
 - [ ] [claude-code Issue #23478](https://github.com/anthropics/claude-code/issues/23478) の path-scope auto-load Read 時のみ発火 bug が URL 付きで明示されているか
 - [ ] `governance.md` 生成指示が第24条 A〜F の 6 項目構造で記述されているか
