@@ -196,7 +196,7 @@ Job-Automate/
 
 | ファイル | 何をするか |
 |---|---|
-| [claude-md (skill)](dev/.claude/skills/claude-md/SKILL.md) | 任意のプロジェクトに対して Anthropic ベストプラクティス準拠の標準セット（`CLAUDE.md` 本体 + `.claude/rules/` 条文 + `settings.json` hooks + hook scripts）を生成する。公式 docs は焼き込まず実行時 WebFetch で都度確認、段階的開示・別エージェントレビュー（対象パス + review skill のみ渡す）・handoff/issue 運用を含む |
+| [agent-harness-bootstrap (skill)](dev/.claude/skills/agent-harness-bootstrap/SKILL.md) | 任意のプロジェクトに対して Anthropic ベストプラクティス準拠の標準セット（`CLAUDE.md` 本体 + `.claude/rules/` 条文 + `settings.json` hooks + hook scripts）を生成する。公式 docs は焼き込まず実行時 WebFetch で都度確認、段階的開示・別エージェントレビュー（対象パス + review skill のみ渡す）・handoff/issue 運用を含む。詳細素材は `template.md` / `rubric.md` / `hooks-reference.md` / `maintainer-checklist.md` に分離 |
 
 ### dev/three-agent/ — 3エージェント開発システム
 
