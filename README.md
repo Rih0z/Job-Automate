@@ -197,6 +197,9 @@ Job-Automate/
 | ファイル | 何をするか |
 |---|---|
 | [agent-harness-bootstrap (skill)](dev/.claude/skills/agent-harness-bootstrap/SKILL.md) | 任意のプロジェクトに対して Anthropic ベストプラクティス準拠の標準セット（`CLAUDE.md` 本体 + `.claude/rules/` 条文 + `settings.json` hooks + hook scripts）を生成する。公式 docs は焼き込まず実行時 WebFetch で都度確認、段階的開示・別エージェントレビュー（対象パス + review skill のみ渡す）・handoff/issue 運用を含む。詳細素材は `template.md` / `rubric.md` / `hooks-reference.md` / `maintainer-checklist.md` に分離 |
+| [review-oss-contribution (skill)](dev/.claude/skills/review-oss-contribution/SKILL.md) | OSS貢献候補（指定ディレクトリ配下の提案 md 群）を独自性・先行技術・実現可能性・戦略の4基準で審査し GO/HOLD/REJECT を判定する |
+| [skills-audit (skill)](dev/.claude/skills/skills-audit/SKILL.md) | リポジトリ内の全スキル（`.claude/skills/` + `.claude/commands/`）を一括監査し、Anthropic公式ベストプラクティス準拠度を GOOD/MIGRATE/IMPROVE/SPLIT の4段階で判定する。単体スキルの5軸採点（`/review-skill`）を補完する一括監査ツール |
+| [stop-ai-slop-jp (skill)](dev/.claude/skills/stop-ai-slop-jp/SKILL.md) | AIで書いた日本語を人間の文章に戻す執筆・編集・レビュー用スキル（[hardikpandya/stop-slop](https://github.com/hardikpandya/stop-slop) 着想・MIT・Daichi Nagashima 作、vendoring）。全角ダッシュ・偏愛語だけでなく主体の不在・命題型見出し・壮大化・両論併記・リズムの均一さを検出・修正する |
 
 ### dev/three-agent/ — 3エージェント開発システム
 
