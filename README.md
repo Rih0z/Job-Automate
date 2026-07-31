@@ -47,7 +47,7 @@ AIがどれだけ進化しても、**「何を良しとするか」の基準を�
 
 - **作成プロンプトは人間が書き下ろさず、AIに書かせる**。ワークフローの作成プロンプトそのものも、まずAIに生成させてから人間が評価する。人間の時間は「何を良しとするか」を決めるレビュー基準の練り上げと、生成物の**監査・レビュー**に集中させる（作成プロンプトを人間が直接執筆する時間を最小化する）。
 - **AIが作業中に別の問題（バグ・逸脱・想定外の挙動）を見つけても、その場で勝手に修正させない**。まず「何を見つけたか」の事実だけを報告させ、直すかどうか・いつ直すかは人間が判断してから着手させる。暴走の芽を勝手に握り潰させない・現在のタスクの範囲を広げさせない（scope creep防止）ための安全弁。
-- この2点を含む「AIにharnessを作らせる時に人間が何を人間の役割として残すか」という考え方は [.claude/skills/agent-harness-bootstrap](.claude/skills/agent-harness-bootstrap/SKILL.md)（任意のプロジェクト向けにCLAUDE.md/harnessを生成するSkill）に体系化されている。同Skillが内蔵する主な原則:
+- この2点を含む「AIにharnessを作らせる時に人間が何を人間の役割として残すか」という考え方は、任意のプロジェクト向けにCLAUDE.md/harnessを生成するSkillである **`.claude/skills/agent-harness-bootstrap/SKILL.md`**（[本文へのリンク](.claude/skills/agent-harness-bootstrap/SKILL.md)）に体系化されている。同Skillが内蔵する主な原則:
   - **段階的開示（progressive disclosure）**: 頻繁には使わない知識をCLAUDE.md本体に書き込まず、`.claude/skills/` へ逃がして常時読み込みコストを下げる
   - **公式準拠の核と独自運用ノウハウのラベル分離**: Anthropic公式ドキュメントの内容は実行時にその都度取得し、Skill本体に転記・焼き込みしない（公式ドキュメントは更新されるため、転記は陳腐化する）
   - **自己レビュー不可**: 生成したCLAUDE.md・Skillsは生成した本人（同一セッション）が合格判定を下さず、別エージェントに検証させる
@@ -87,12 +87,12 @@ AIがどれだけ進化しても、**「何を良しとするか」の基準を�
 
 ### `.claude/skills/` — 自動発動するSkills
 
-| Skill | 何をするか |
+| Skill本体（フルパス） | 何をするか |
 |---|---|
-| [agent-harness-bootstrap](.claude/skills/agent-harness-bootstrap/SKILL.md) | 任意のプロジェクトに Anthropic ベストプラクティス準拠の `CLAUDE.md` + `.claude/rules/` + hooks 一式を生成・剪定する |
-| [review-oss-contribution](.claude/skills/review-oss-contribution/SKILL.md) | OSS貢献候補を独自性・先行技術・実現可能性・戦略の4基準で審査しGO/HOLD/REJECTを判定する |
-| [skills-audit](.claude/skills/skills-audit/SKILL.md) | リポジトリ内の全Skillsを一括監査しGOOD/MIGRATE/IMPROVE/SPLITを判定する |
-| [stop-ai-slop-jp](.claude/skills/stop-ai-slop-jp/SKILL.md) | AIで書いた日本語を人間の文章に戻す（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・Daichi Nagashima 作、vendoring） |
+| [.claude/skills/agent-harness-bootstrap/SKILL.md](.claude/skills/agent-harness-bootstrap/SKILL.md) | 任意のプロジェクトに Anthropic ベストプラクティス準拠の `CLAUDE.md` + `.claude/rules/` + hooks 一式を生成・剪定する（= CLAUDE.md を作成するprompt本体） |
+| [.claude/skills/review-oss-contribution/SKILL.md](.claude/skills/review-oss-contribution/SKILL.md) | OSS貢献候補を独自性・先行技術・実現可能性・戦略の4基準で審査しGO/HOLD/REJECTを判定する |
+| [.claude/skills/skills-audit/SKILL.md](.claude/skills/skills-audit/SKILL.md) | リポジトリ内の全Skillsを一括監査しGOOD/MIGRATE/IMPROVE/SPLITを判定する |
+| [.claude/skills/stop-ai-slop-jp/SKILL.md](.claude/skills/stop-ai-slop-jp/SKILL.md) | AIで書いた日本語を人間の文章に戻す（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・Daichi Nagashima 作、vendoring） |
 
 **他のプロジェクトでもコマンドを使いたい場合:**
 ```bash
