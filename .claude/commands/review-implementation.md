@@ -1,7 +1,7 @@
 # /review-implementation — 実装品質 総合レビュー
 
 > プロジェクト全体の実装品質を5軸（テスト・正確性・マネタイズ・ペルソナ・UX）で100点満点評価する。
-> 詳細な評価基準は `docs/review-implementation.md` を参照。
+> 詳細な評価基準は `workflows/software-development/review-implementation.md` を参照。
 
 ---
 
@@ -22,11 +22,11 @@
 
 以下を自動で収集し、レビューの前提情報とする。
 
-1. **ペルソナ定義**: `dev/design/persona.md`（なければ推定ユーザーを仮定し注記）
+1. **ペルソナ定義**: `workflows/software-development/design/persona.md`（なければ推定ユーザーを仮定し注記）
 2. **収益モデル**: README 等に記載（なければマネタイズ軸をN/Aとし80点満点に換算）
 3. **テスト戦略**: `jest.config.*` / `vitest.config.*` / `pytest.ini` 等のテスト設定
-4. **デザインガイドライン**: `dev/design/design-guidelines.md`（なければ一般的UXベストプラクティスで評価）
-5. **コーディング規約**: `dev/rules/coding-principles.md`
+4. **デザインガイドライン**: `workflows/software-development/design/design-guidelines.md`（なければ一般的UXベストプラクティスで評価）
+5. **コーディング規約**: `workflows/software-development/rules/coding-principles.md`
 
 ---
 
@@ -61,7 +61,7 @@
 
 ## 詳細な評価基準
 
-プロジェクト内に `docs/review-implementation.md` がある場合は、その内容を読み込んで詳細なチェックリストとして使用すること。
+プロジェクト内に `workflows/software-development/review-implementation.md` がある場合は、その内容を読み込んで詳細なチェックリストとして使用すること。
 
 ---
 

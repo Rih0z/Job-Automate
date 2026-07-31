@@ -3,6 +3,8 @@
 このリポジトリはAI活用業務自動化のためのプロンプトライブラリです。
 Claude Code でプロンプトを開発・改善するときのガイドです。
 
+プロンプトは成果物の種類ではなく**業務ワークフロー単位**で `workflows/<name>/` に束ねる（ハーネスの考え方は [workflows/README.md](workflows/README.md)）。Claude Code が自動検出する実行可能な Skills/Commands はリポジトリ直下 `.claude/` に置く。
+
 ---
 
 ## アップロードポリシー（公開リポジトリ）
@@ -28,6 +30,15 @@ Claude Code でプロンプトを開発・改善するときのガイドです�
 | `/review-changes` | **変更差分のテスト・実装レビュー（エージェント分離）** | 実装正確性・テストカバレッジ・テスト品質/戦略・追跡可能性（4軸・100点満点） |
 | `/review-skill` | **Skills品質レビュー** | 構造・トリガー設計・命令品質・出力設計・実用性（5軸・100点満点） |
 
+### 自動発動するSkills（`.claude/skills/`）
+
+| Skill | 用途 |
+|---|---|
+| `agent-harness-bootstrap` | 任意のプロジェクトに Anthropic ベストプラクティス準拠の `CLAUDE.md` + `.claude/rules/` + hooks 一式を生成・剪定する |
+| `review-oss-contribution` | OSS貢献候補を独自性・先行技術・実現可能性・戦略の4基準で審査しGO/HOLD/REJECTを判定する |
+| `skills-audit` | リポジトリ内の全Skillsを一括監査しGOOD/MIGRATE/IMPROVE/SPLITを判定する |
+| `stop-ai-slop-jp` | AIで書いた日本語を人間の文章に戻す（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・Daichi Nagashima 作、vendoring） |
+
 ### グローバルスキル（どのプロジェクトでも使える・任意セットアップ）
 
 > `~/.claude/commands/` にコピーすると、他のプロジェクトでも使える。
@@ -50,8 +61,8 @@ cp .claude/commands/*.md ~/.claude/commands/
 → `/review-changes`: **別エージェントを自動起動**し、テスト基盤を自動検出して変更に対する実装正確性・テスト網羅性を評価する。実装コンテキストを遮断して客観性を確保する。
 
 **詳細な評価基準:**
-- `docs/review-implementation.md` — `/review-implementation` の詳細基準
-- `docs/review-changes.md` — `/review-changes` の詳細基準
+- `workflows/software-development/review-implementation.md` — `/review-implementation` の詳細基準
+- `workflows/software-development/review-changes.md` — `/review-changes` の詳細基準
 
 **エージェント分離アーキテクチャ:** `agents.md` を参照
 
@@ -63,54 +74,24 @@ cp .claude/commands/*.md ~/.claude/commands/
 
 | プロンプトファイル | 用途 | 評価軸 |
 |----------------|------|--------|
-| `docs/review-implementation.md` | 実装レビューの詳細基準（`/review-implementation` の参照元） | テスト・正確性・マネタイズ・ペルソナ・UX |
-| `docs/review-changes.md` | 変更レビューの詳細基準（`/review-changes` の参照元） | 実装正確性・テストカバレッジ・テスト品質/戦略・追跡可能性 |
-| `docs/review-skill.md` | Skills品質レビューの詳細基準（`/review-skill` の参照元） | 構造・トリガー設計・命令品質・出力設計・実用性 |
-| `docs/skills-building-guide.md` | Anthropic公式Skills作成マニュアル（`/review-skill` の評価根拠） | — |
-| `docs/review-business-idea.md` | ビジネスアイデアのレビュー | 独自性・競合克服戦略・市場性・実現可能性・ペルソナ明確性・エンゲージメント/リテンション設計・展開計画（6軸・100点満点） |
-| `docs/review-proposal.md` | 提案書・企画書のレビュー | 構成・市場分析/競合克服戦略・ペルソナ適合性・根拠・エンゲージメント/リテンション設計・説得力（6軸・100点満点） |
-| `docs/review-specification.md` | 技術仕様書のレビュー | 要件網羅性・アーキテクチャ・API/データ設計・テスト戦略・実装/運用計画（5軸・100点満点） |
-| `business/review-research.md` | リサーチ・ニュース収集・SEO分析のレビュー | 正確性・網羅性・分析深度・構成・実用性（5軸・100点満点） |
-| `business/ideas/review-ai-automation.md` | AI自動化ビジネスモデル10案のレビュー | 実現可能性・収益性・自動化・競合モート・エンゲージメント・リスク（6軸・100点満点） |
-| `dev/design/review-persona.md` | ペルソナ分析のレビュー | 具体性・課題深掘り・デザイン整合性・セグメント分類・検証可能性（5軸・100点満点） |
-| `ops/review-ops.md` | 運用スクリプト・サーバー設定のレビュー | セキュリティ・冪等性・エラーハンドリング・運用性・パフォーマンス（5軸・100点満点） |
-| `content/review-blog.md` | ブログ記事（note / Qiita / Zenn / Medium / 企業ブログ等）のレビュー | わかりやすさ・独自性・有益性・事実正確性・事実所感分離・冒頭サマリ・冗長性一貫性・読みやすさ文体・コンプライアンス・第三者配慮・技術評価妥当性（11軸・110点満点／100点換算で判定） |
-| `dev/three-agent/reviewer.md` | TDDコードレビュー（three-agentシステム専用） | TDD証跡・カバレッジ・実装整合性・ドキュメント |
+| `workflows/software-development/review-implementation.md` | 実装レビューの詳細基準（`/review-implementation` の参照元） | テスト・正確性・マネタイズ・ペルソナ・UX |
+| `workflows/software-development/review-changes.md` | 変更レビューの詳細基準（`/review-changes` の参照元） | 実装正確性・テストカバレッジ・テスト品質/戦略・追跡可能性 |
+| `workflows/software-development/review-skill.md` | Skills品質レビューの詳細基準（`/review-skill` の参照元） | 構造・トリガー設計・命令品質・出力設計・実用性 |
+| `workflows/software-development/skills-building-guide.md` | Anthropic公式Skills作成マニュアル（`/review-skill` の評価根拠） | — |
+| `workflows/business-planning/review-business-idea.md` | ビジネスアイデアのレビュー | 独自性・競合克服戦略・市場性・実現可能性・ペルソナ明確性・エンゲージメント/リテンション設計・展開計画（6軸・100点満点） |
+| `workflows/business-planning/review-proposal.md` | 提案書・企画書のレビュー | 構成・市場分析/競合克服戦略・ペルソナ適合性・根拠・エンゲージメント/リテンション設計・説得力（6軸・100点満点） |
+| `workflows/business-planning/review-specification.md` | 技術仕様書のレビュー | 要件網羅性・アーキテクチャ・API/データ設計・テスト戦略・実装/運用計画（5軸・100点満点） |
+| `workflows/research-intelligence/review-research.md` | リサーチ・ニュース収集・SEO分析のレビュー | 正確性・網羅性・分析深度・構成・実用性（5軸・100点満点） |
+| `workflows/business-planning/ideas/review-ai-automation.md` | AI自動化ビジネスモデルのレビュー | 実現可能性・収益性・自動化・競合モート・エンゲージメント・リスク（6軸・100点満点） |
+| `workflows/software-development/design/review-persona.md` | ペルソナ分析のレビュー | 具体性・課題深掘り・デザイン整合性・セグメント分類・検証可能性（5軸・100点満点） |
+| `workflows/ops-management/review-ops.md` | 運用スクリプト・サーバー設定のレビュー | セキュリティ・冪等性・エラーハンドリング・運用性・パフォーマンス（5軸・100点満点） |
+| `workflows/content-creation/review-blog.md` | ブログ記事（note / Qiita / Zenn / Medium / 企業ブログ等）のレビュー | わかりやすさ・独自性・有益性・事実正確性・事実所感分離・冒頭サマリ・冗長性一貫性・読みやすさ文体・コンプライアンス・第三者配慮・技術評価妥当性（11軸・110点満点／100点換算で判定） |
+| `workflows/software-development/three-agent/reviewer.md` | TDDコードレビュー（three-agentシステム専用） | TDD証跡・カバレッジ・実装整合性・ドキュメント |
 
 **手動での使い方:**
 ```
 （Claude Code または Claude.ai で）
-docs/review-implementation.md の内容 + 対象コードを貼り付けて「レビューしてください」と依頼
-```
-
----
-
-## レビュースキルの選び方
-
-```
-何をレビューしたいか？
-│
-├─ 実装コード（プロジェクト全体）
-│   └─ /review-implementation（グローバルスキル）
-│        └─ 詳細基準は docs/review-implementation.md
-│
-├─ 最新の変更差分（テスト・実装の正確性）
-│   └─ /review-changes（グローバルスキル）
-│        └─ 詳細基準は docs/review-changes.md
-│
-├─ Skills / スラッシュコマンドの品質
-│   └─ /review-skill（プロジェクトスキル）
-│        └─ 詳細基準は docs/review-skill.md
-│        └─ 評価根拠は docs/skills-building-guide.md
-│
-├─ ビジネスアイデア文書
-│   └─ docs/review-business-idea.md を貼り付けて依頼
-│
-├─ 提案書・企画書
-│   └─ docs/review-proposal.md を貼り付けて依頼
-│
-└─ Three-Agentシステムの各イテレーション
-    └─ dev/three-agent/reviewer.md（ターミナル3専用）
+workflows/software-development/review-implementation.md の内容 + 対象コードを貼り付けて「レビューしてください」と依頼
 ```
 
 ---
@@ -119,54 +100,33 @@ docs/review-implementation.md の内容 + 対象コードを貼り付けて「�
 
 | 準備 | ファイル例 | なければ |
 |------|-----------|---------|
-| ペルソナ定義 | `dev/design/persona.md` | 推定ユーザーを仮定して評価（スコアに注記あり） |
+| ペルソナ定義 | `workflows/software-development/design/persona.md` | 推定ユーザーを仮定して評価（スコアに注記あり） |
 | 収益モデル | README に記載 | マネタイズ観点をN/Aとして除外し80点満点に換算 |
 | テスト戦略 | `jest.config.*` 等 | テストファイルを探して判断 |
-| デザインガイドライン | `dev/design/design-guidelines.md` | 一般的なUXベストプラクティスで評価 |
+| デザインガイドライン | `workflows/software-development/design/design-guidelines.md` | 一般的なUXベストプラクティスで評価 |
 
 ---
 
-## 新しいスキルを追加するルール
+## 新しいワークフロー・スキルを追加するルール
 
-### プロジェクトスキルとして追加（推奨 — git 共有される）
+### 業務ワークフローとして追加（プロンプトの本体）
+
+1. `workflows/<workflow-name>/` を作成する
+2. 対応する作成プロンプト（`<対象>.md`）とレビュープロンプト（`review-<対象>.md`）をペアで管理する
+3. `workflows/<workflow-name>/README.md` に目的・使用順序・関連skills/commandsを書く
+4. `workflows/README.md` の一覧表と `README.md` のテーブルに追記する
+
+### Claude Code プロジェクトスキルとして追加（推奨 — git 共有される）
 
 1. `.claude/commands/[コマンド名].md` を作成する
-2. コマンドを自己完結にする（他プロジェクトのパスをハードコードしない）
+2. コマンドを自己完結にする（他ワークフローのパスをハードコードしない）
 3. このファイル（`CLAUDE.md`）のプロジェクトスキルテーブルに追記する
-4. 詳細な評価基準は `docs/review-[対象].md` に分離して記述する
+4. 詳細な評価基準は該当ワークフローの `review-[対象].md` に分離して記述する
 5. エージェント分離が必要な場合は `agents.md` のエージェント一覧にも追記する
 6. 他プロジェクトでも使いたい場合は `~/.claude/commands/` にもコピーする
-
-### 手動プロンプトとして追加
-
-1. `docs/review-[対象].md` にプロンプトを作成する
-2. 対応する作成プロンプト（`docs/[対象].md`）とペアで管理する
-3. このファイル（`CLAUDE.md`）と `README.md` のテーブルに追記する
 
 ---
 
 ## プロジェクト構成
 
-```
-Job-Automate/
-├── CLAUDE.md              ← このファイル（レビュースキルのマニュアル）
-├── agents.md              ← エージェント分離アーキテクチャ（レビューの客観性確保）
-├── README.md              ← ユーザー向けプロンプト一覧
-├── docs/                  ← 新規事業・提案書・レビュー基準ドキュメント
-│   ├── review-implementation.md  ← /review-implementation の詳細基準
-│   ├── review-changes.md         ← /review-changes の詳細基準
-│   ├── review-business-idea.md
-│   └── review-proposal.md
-├── business/              ← ビジネスリサーチ系プロンプト
-├── content/               ← プレゼン資料・スライド系プロンプト
-├── dev/                   ← 開発プロンプト集
-│   ├── design/            ← デザインシステム・ペルソナ分析
-│   ├── rules/             ← コーディング規約
-│   ├── mcp/               ← MCPツール設定
-│   └── three-agent/       ← 3エージェント開発システム
-├── .claude/commands/       ← プロジェクトスキル（git共有・クローンすれば誰でも使える）
-│   ├── review-implementation.md  ← /review-implementation コマンド本体
-│   ├── review-changes.md         ← /review-changes コマンド本体
-│   └── review-skill.md           ← /review-skill コマンド本体
-└── ops/                   ← サーバー運用・HR系プロンプト
-```
+トップレベルは `CLAUDE.md` / `README.md` / `agents.md` / `.claude/`（commands・skills）/ `workflows/`（業務ワークフロー単位のハーネス）/ `archive/`（旧プロンプト）。ワークフローごとの内訳・各ファイルの所在は [workflows/README.md](workflows/README.md) と [README.md](README.md) を参照（このファイルでは重複記載しない）。

@@ -22,7 +22,7 @@
    - package.json / pyproject.toml / Cargo.toml / go.mod 等
    - jest.config.* / vitest.config.* / pytest.ini 等
    - .github/workflows/ 等のCI設定
-7. docs/review-changes.md の内容（評価基準 — プロジェクト内にあれば読み込む）
+7. workflows/software-development/review-changes.md の内容（評価基準 — プロジェクト内にあれば読み込む）
 ```
 
 **スコープの優先順位:**
@@ -68,7 +68,7 @@ Agent ツールの設定:
 [ここに変更ファイル一覧を埋め込む]
 
 ## 評価基準
-[ここに docs/review-changes.md の内容を埋め込む。
+[ここに workflows/software-development/review-changes.md の内容を埋め込む。
  プロジェクト内にない場合は以下の4軸で評価する:
  - 軸1: 実装の正確性 (30点) — ロジック・エッジケース・エラーハンドリング・セキュリティ
  - 軸2: テストカバレッジの網羅性 (30点) — テストの存在・正常/異常/境界値・副作用分離・回帰

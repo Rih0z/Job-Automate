@@ -1,6 +1,6 @@
-# content/ — プレゼン資料作成・レビュー
+# workflows/content-creation/ — プレゼン資料作成・レビュー
 
-スライド生成とレビューのプロンプト集。
+業務ワークフロー「コンテンツ制作」のハーネス。スライド生成とレビューのプロンプト集。
 
 ---
 
@@ -35,4 +35,9 @@ mdファイル（企画書・資料）を渡すと、**ブラウザで動くHTML
 | ファイル | 説明 |
 |---|---|
 | [creative.md](creative.md) | クリエイティブ制作 |
+| [review-blog.md](review-blog.md) | ブログ記事の11軸レビュー（詳細は [ルートREADME](../../README.md#content-creation--プレゼン資料作成レビュー)） |
 | [examples/](examples/) | 実際の活用事例 |
+
+---
+
+[← ワークフロー一覧に戻る](../README.md)

@@ -39,7 +39,7 @@
 │ ユーザーとの会話     │          │  - git diff（コード差分） │
 │ 試行錯誤の履歴       │          │  - 変更ファイル一覧       │
 │                     │    ✓     │  - テスト設定ファイル     │
-│ git diff            │ ────────→│  - docs/review-changes.md │
+│ git diff            │ ────────→│  - workflows/software-development/review-changes.md │
 │ 変更ファイル一覧     │          │    （評価基準）           │
 │ テスト設定           │          │                          │
 └─────────────────────┘          └──────────────────────────┘
@@ -50,7 +50,7 @@
 - 変更されたファイルの内容
 - テスト設定ファイル（jest.config.*, pytest.ini 等）
 - CI設定ファイル
-- `docs/review-changes.md` の評価基準
+- `workflows/software-development/review-changes.md` の評価基準
 
 **渡してはいけないもの（実装コンテキスト）:**
 - 実装の意図・目的の説明
@@ -67,11 +67,11 @@
    - `git diff HEAD~1` / `git diff --cached` / `git diff` を取得
    - 変更ファイル一覧を取得
    - テスト設定ファイルを検出
-   - `docs/review-changes.md` の内容を取得
+   - `workflows/software-development/review-changes.md` の内容を取得
 
 2. **レビューエージェント起動**（Agent ツール）
    - 収集した情報のみをプロンプトに含める
-   - `docs/review-changes.md` の評価基準をプロンプトに含める
+   - `workflows/software-development/review-changes.md` の評価基準をプロンプトに含める
    - Agent ツールの `subagent_type: "general-purpose"` で起動
 
 3. **結果の返却**
@@ -87,7 +87,7 @@
   → コードを実装する
 
 ターミナル2（レビューセッション — 別の Claude Code を起動）:
-  → docs/review-changes.md を読み込ませる
+  → workflows/software-development/review-changes.md を読み込ませる
   → 「このプロジェクトの直近の変更をレビューしてください」と依頼
   → レビューエージェントは git diff を自分で取得してレビューする
 ```
@@ -98,7 +98,7 @@
 
 1. このファイルの「エージェント一覧」テーブルに追記する
 2. `/[コマンド名]` のコマンドファイルを `~/.claude/commands/` に作成する（オーケストレーター）
-3. 評価基準を `docs/review-[対象].md` に作成する
+3. 評価基準を `workflows/<ワークフロー名>/review-[対象].md` に作成する
 4. 分離ルール（何を渡すか・何を渡さないか）を明記する
 5. `CLAUDE.md` のスキルテーブルに追記する
 

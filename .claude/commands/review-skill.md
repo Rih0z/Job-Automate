@@ -1,8 +1,8 @@
 # /review-skill — Skills 品質レビュー
 
 > 作成済みの Claude Code スラッシュコマンド / Claude.ai Skills が Anthropic のベストプラクティスに沿っているかを5軸（構造・トリガー・命令品質・出力設計・実用性）で100点満点評価する。
-> 詳細な評価基準は `docs/review-skill.md` を参照。
-> 評価の根拠となるマニュアルは `docs/skills-building-guide.md`。
+> 詳細な評価基準は `workflows/software-development/review-skill.md` を参照。
+> 評価の根拠となるマニュアルは `workflows/software-development/skills-building-guide.md`。
 
 ---
 
@@ -23,10 +23,10 @@ Anthropic 公式ガイド「The Complete Guide to Building Skills for Claude」�
 
 以下を自動で収集し、レビューの前提情報とする。
 
-1. **スキル作成マニュアル**: `docs/skills-building-guide.md` を読み込む（評価基準の根拠）
-2. **詳細評価基準**: `docs/review-skill.md` を読み込む
+1. **スキル作成マニュアル**: `workflows/software-development/skills-building-guide.md` を読み込む（評価基準の根拠）
+2. **詳細評価基準**: `workflows/software-development/review-skill.md` を読み込む
 3. **対象スキルファイル**: 引数で指定されたファイル、または `.claude/commands/*.md` の全ファイル
-4. **関連ドキュメント**: 対象スキルが参照している `docs/review-*.md` 等のファイル
+4. **関連ドキュメント**: 対象スキルが参照している `workflows/*/review-*.md` 等のファイル
 5. **CLAUDE.md**: スキル一覧テーブルとの整合性確認
 6. **README.md**: ドキュメントへの反映状況確認
 
@@ -74,8 +74,8 @@ Anthropic 公式ガイド「The Complete Guide to Building Skills for Claude」�
 
 ## 詳細な評価基準
 
-`docs/review-skill.md` の内容を読み込んで詳細なチェックリストとして使用すること。
-評価の根拠となるベストプラクティスは `docs/skills-building-guide.md` に記載。
+`workflows/software-development/review-skill.md` の内容を読み込んで詳細なチェックリストとして使用すること。
+評価の根拠となるベストプラクティスは `workflows/software-development/skills-building-guide.md` に記載。
 
 ---
 
@@ -101,7 +101,7 @@ Anthropic 公式ガイド「The Complete Guide to Building Skills for Claude」�
 - レビュー日:
 - スキル形式:（Claude Code コマンド / SKILL.md）
 - ユースケースカテゴリ:
-- 参照マニュアル: docs/skills-building-guide.md
+- 参照マニュアル: workflows/software-development/skills-building-guide.md
 
 ## 総合評価
 - **総合点: XX / 100点**
