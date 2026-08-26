@@ -115,6 +115,8 @@ workflows/software-development/review-implementation.md の内容 + 対象コー
 
 ## 新しいワークフロー・スキルを追加するルール
 
+**追加前チェック（共通）**: 既存の `workflows/` 一覧・`.claude/commands/` 一覧を検索し、目的が重複する既存プロンプト/スキルがないか確認する（重複なら新設せず既存を拡張する）。作成後は別エージェント（`/review-skill` 等）によるレビューを最低 1 回受け、指摘が収束してからマージする。
+
 ### 業務ワークフローとして追加（プロンプトの本体）
 
 1. `workflows/<workflow-name>/` を作成する

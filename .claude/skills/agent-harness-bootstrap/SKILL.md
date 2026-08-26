@@ -141,8 +141,9 @@ Claude はタスク開始時に関連 docs を最低 1 つ読み、**宣言の�
 | 定期レビュー | 公式 docs ドリフト検出のための定期点検 | 定期的に公式 Best Practices を WebFetch + ドリフト改修計画 |
 | 自動検証 | サイズ閾値・命名規約の hook / CI 検証 | `PreToolUse(Write)` で命名検証、`PostToolUse(Edit)` でサイズ警告 |
 | 常時 load ファイルの cap | `meta.md` + `@import` で常時 load される rules 個別の cap | 各 5KB soft cap、超えたら path-scope rules に逃がす |
+| 新条文追加手順 | 新しい規約を rules に足す前に踏む 5 段（既存条の重複・言い換えでないか確認 → 配置先を項目性質で判定 → 公式ドキュメントと矛盾しないか確認 → 影響する自動検証（hook/CI）があれば同時更新 → 独立レビュー 2 本以上を収束させてから確定）。重複ならまず既存条の拡張を優先し新設しない | 追加提案のたびにこの 5 段をチェックリストとして踏ませる |
 
-サイズ閾値だけでは `@import` 常時 load rules 経由の context 汚染を防げない。「常時 load ファイルの cap」観点が context 汚染を構造的に塞ぐ最も効く一手になる。
+サイズ閾値だけでは `@import` 常時 load rules 経由の context 汚染を防げない。「常時 load ファイルの cap」観点が context 汚染を構造的に塞ぐ最も効く一手になる。「新条文追加手順」観点は、規約が場当たり的に増殖し公式からドリフトする経路を構造的に塞ぐ。
 
 ### 独自運用: handoff 受領（user 明示指示駆動・本文は自動 Read しない）
 
@@ -410,9 +411,9 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 | `review.md` | 別エージェントレビュー規約の条文（**2〜4 本並列 + converged findings**・**TDD test-first**・ループ上限［計画 3 周 / 実装 1 周］・自己レビュー不可・**渡すのは対象完全パス + レビュー用 skill のみ**） | `paths: ["**/*.<lang>", ".claude/commands/**"]` | path-scope |
 | `governance.md` | 肥大化防止・新項目追加規約の条文を **複数観点の項目群**（サイズ閾値 / 新項目ルーティング / 公式準拠 / 定期レビュー / 自動検証 / 常時 load ファイル cap 等・増減可）で記述 | `paths: ["CLAUDE.md", ".claude/**"]` | path-scope |
 | `execution-routing.md`（**オプション**） | 司令塔の 3 責務 + 振り分け表（定型→低コスト / 高難度→高コスト / 方針→司令塔）+ 高コスト主体抑制（dispatch 5 点明示）+ escalation protocol | `description` のみ | `@import` で常時 |
-| `docs-management.md`（**オプション**: `docs/` 配下に概ね 5 section 以上） | docs 配置 mapping + 新 docs 配置 flow + 全 section README 必須化 + **同期更新義務**（rule mapping / validate script / INDEX / generator）+ 過時マーカー "as of YYYY-MM-DD" 強制 | `paths: ["docs/**/README.md", "docs/**/*.md", "CLAUDE.md", ".claude/rules/governance.md"]` | path-scope |
+| `docs-management.md`（**オプション**: `docs/` 配下に概ね 5 section 以上） | docs 配置 mapping + 新 docs 配置 flow + 全 section README 必須化 + **同期更新義務**（構造的事実を複数箇所に重複保持せざるを得ない時は、コピー先を rule 本文に全て列挙し、コピー間の自動 diff/整合チェックを用意する — 単一 SoT を宣言して残りを放置しない）+ 過時マーカー "as of YYYY-MM-DD" 強制 | `paths: ["docs/**/README.md", "docs/**/*.md", "CLAUDE.md", ".claude/rules/governance.md"]` | path-scope |
 
-**3. `settings.json` の hooks セット + hook scripts**（採用時のみ） — 参考 5 hook 構成・settings.json 例（Windows PowerShell / Mac・Linux bash）・hook script 5 ファイルの役割と生成方法は **`hooks-reference.md` を参照**する。既存設定がある場合は `hooks` フィールドのみ追記（permissions / model 等は保持）。
+**3. `settings.json` の hooks セット + hook scripts**（採用時のみ） — 参考 6 hook 構成・settings.json 例（Windows PowerShell / Mac・Linux bash）・hook script（該当するもののみ生成）の役割と生成方法は **`hooks-reference.md` を参照**する。既存設定がある場合は `hooks` フィールドのみ追記（permissions / model 等は保持）。
 
 **ユーザーへの最終報告**:
 - **プロジェクト概要**（プロジェクト未読の第三者が読んでも理解できるレベルで書く。Step 1 で収集した事実のみを使い推測・捏造はしない）:

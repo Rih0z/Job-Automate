@@ -18,7 +18,7 @@ SKILL.md 本体「独自運用: 規約の hooks 化判断」と生成手順 Step
 - 各 script の冒頭で標準入力から event data（JSON）を受け取り、`tool_input.file_path` でフィルタする。PowerShell は `[Console]::In.ReadToEnd() | ConvertFrom-Json`、bash は `input=$(cat); jq -r '.tool_input.file_path' <<<"$input"`（または `python3` で parse）
 - エラー抑制は全域上書きせず局所化する（debug ログを潰さない）。PowerShell は各 cmdlet の `-ErrorAction SilentlyContinue`、bash は各コマンド末尾の `2>/dev/null`
 
-## 参考 hook 構成（5 hook 例・すべて任意採用）
+## 参考 hook 構成（6 hook 例・すべて任意採用）
 
 | イベント | 用途 | reject/notify |
 |---|---|---|
@@ -26,7 +26,19 @@ SKILL.md 本体「独自運用: 規約の hooks 化判断」と生成手順 Step
 | `UserPromptSubmit` | `docs/*.md` 直近 3 ファイルを候補として注入し関連 docs 宣言を促す | notify |
 | `PreToolUse(Write)` | `.tmp/handoffs/` への Write 時に命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` を検証 | reject (`exit 2`) |
 | `PostToolUse(Edit\|Write\|MultiEdit)` | CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 更新時に公式 WebFetch + 別エージェントレビューを促す | notify (additionalContext JSON) |
+| `PostToolUse(Edit\|Write\|MultiEdit)`（派生成果物の自動再生成） | 監視対象ファイル（例: CLAUDE.md）の編集を検知し、そこから派生する成果物（生成 README / 目次 / 索引等）を **advisory reminder ではなく hook 自身が再生成する**。複数 generator を実行する場合は各 exit code を実行直後に退避し OR 結合する（後発の成功が先発の失敗を隠さないようにする） | notify（再生成結果 or 失敗詳細を additionalContext に含める） |
 | `Stop` | 最新 handoff が 1 時間以上未更新なら更新リマインド | notify |
+
+## 外部規約のキャッシュ運用（任意・PostToolUse レビュー系 hook 向け）
+
+`PostToolUse` の公式 WebFetch レビュー hook は毎回 WebFetch する運用が基本（本 SKILL.md「公式準拠の核」参照・焼き込み禁止）。ただし hook 発火頻度が高く WebFetch コストが無視できない場合、または offline/低帯域環境向けに配布する場合は、以下条件を **すべて満たす時のみ** キャッシュ運用へ切替えてよい:
+
+1. 参照元 URL から一度だけ WebFetch し、判定基準を構造化データ（JSON 等）として保存する
+2. 保存データに **取得日** (`fetched` 等のフィールド) を必ず記録する
+3. **再取得トリガー条件**（例: レビューで基準の陳腐化が疑われた時 / 定期棚卸し時）を保存データ自体に明記する
+4. hook はこの保存データを読み込み判定基準を注入するのみとし、判定基準の生成・改変は行わない（焼き込み＝無断で古い基準を恒久化することの禁止であり、日付付き・再取得条件付きキャッシュはこれに該当しない）
+
+この運用は「毎回 WebFetch」と「一度焼き込んで放置」の中間案であり、**取得日と再取得条件が欠けたキャッシュは焼き込み禁止違反として扱う**。
 
 ## hooks 監査（定期点検）
 
@@ -73,7 +85,7 @@ Mac / Linux（bash）の例 — 各 command を bash script 呼び出しに置�
 
 （他イベントも同様に `bash <scripts>/hook-*.sh` へ置き換える）
 
-## hook scripts（`<scripts>/hook-*` 5 ファイル・対象 OS の言語で生成）
+## hook scripts（`<scripts>/hook-*` 6 ファイル・対象 OS の言語で生成。派生成果物の自動再生成 hook は該当する監視対象がある時のみ生成）
 
 役割は言語共通:
 
@@ -81,6 +93,7 @@ Mac / Linux（bash）の例 — 各 command を bash script 呼び出しに置�
 - `hook-user-prompt-submit` — `docs/*.md` 直近 3 ファイルを context 注入
 - `hook-pre-tool-use-handoff` — handoff 命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` 検証、違反なら `exit 2` + stderr で reject
 - `hook-post-tool-use` — CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 編集時に `hookSpecificOutput.additionalContext` JSON で公式 WebFetch レビュー reminder
+- `hook-post-tool-use-regen`（**任意**・監視対象ファイルから派生成果物を生成している時のみ） — 監視対象の編集を検知し派生成果物を実際に再生成、各 generator の exit code を OR 結合して失敗を隠さず報告
 - `hook-stop` — 1 時間以上未更新 handoff があれば更新リマインド
 
 各 script 冒頭で標準入力の JSON から `tool_name` / `tool_input.file_path` を取り、エラー抑制は個別コマンド単位で局所化する（PowerShell: `[Console]::In.ReadToEnd() | ConvertFrom-Json` + `-ErrorAction SilentlyContinue` / bash: `input=$(cat)` + `jq` または `python3` で parse + 各コマンド `2>/dev/null`）。
