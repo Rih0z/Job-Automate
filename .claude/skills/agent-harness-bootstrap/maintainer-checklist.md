@@ -12,7 +12,7 @@
 - [ ] handoff 受領が user 明示指示駆動で、SessionStart hook がポインタ + verdict のみ注入（本文を注入しない）になっているか
 - [ ] reviewer 過剰報告抑制（correctness / 明示要件に関わる gap のみ採用）が含まれているか
 - [ ] 行数による出力拒否ゲートが残っていないか（公式は数値閾値を持たない）
-- [ ] hooks 化判断が `hooks-reference.md` にあり、参考 5 hook 構成と監査手順（dead/無駄 hooks 検出）+ **OS 別 shell 実装（Windows PowerShell / Mac・Linux bash）**が含まれているか
+- [ ] hooks 化判断が `hooks-reference.md` にあり、参考 6 hook 構成と監査手順（dead/無駄 hooks 検出）+ **OS 別 shell 実装（Windows PowerShell / Mac・Linux bash）**が含まれているか
 - [ ] スケール調整（小規模では rules / hooks / オプションを間引く）が生成手順の最初に位置づけられているか
 - [ ] PC 再起動・session 復元（SessionStart hook は processing scan をポインタ + verdict のみ注入＝本文非注入 → User 通知 + 選択後 1 件のみ Read + 並列委任）が含まれているか
 - [ ] Step 8 で採用セット（CLAUDE.md / コア rules / 採用オプション / settings.json hooks + hook scripts）の実生成手順と雛形が含まれているか
