@@ -85,8 +85,9 @@ Claude はタスク開始時に関連 docs を最低 1 つ読み、**宣言の�
 | 自動検証 | サイズ閾値・命名規約の hook / CI 検証 | `PreToolUse(Write)` で命名検証、`PostToolUse(Edit)` でサイズ警告 |
 | 常時 load ファイルの cap | `meta.md` + `@import` で常時 load される rules 個別の cap | 各 5KB soft cap、超えたら path-scope rules に逃がす |
 | 新条文追加手順 | 新しい規約を rules に足す前に踏む 5 段（既存条の重複・言い換えでないか確認 → 配置先を項目性質で判定 → 公式ドキュメントと矛盾しないか確認 → 影響する自動検証（hook/CI）があれば同時更新 → 独立レビュー 2 本以上を収束させてから確定）。重複ならまず既存条の拡張を優先し新設しない | 追加提案のたびにこの 5 段をチェックリストとして踏ませる |
+| advisory → hook 昇格判断 | 公式は明記する: 「hooks are deterministic and guarantee the action happens... Use hooks for actions that must happen every time with zero exceptions」。rules 条文に「必ず」「例外なく」等の zero-exception 語気を使う時は、(a) 毎回・例外なく実行されるべきか (b) pass/fail が機械的に判定可能か の両方を満たす規律だけ hook 化を検討する（両方満たさない文脈依存の判断は advisory のまま rules に残してよい） | 既存規約の一斉 hook 化はしない。新条文追加時と定期レビュー時に候補判定するのみ |
 
-サイズ閾値だけでは `@import` 常時 load rules 経由の context 汚染を防げない。「常時 load ファイルの cap」観点が context 汚染を構造的に塞ぐ最も効く一手になる。「新条文追加手順」観点は、規約が場当たり的に増殖し公式からドリフトする経路を構造的に塞ぐ。
+サイズ閾値だけでは `@import` 常時 load rules 経由の context 汚染を防げない。「常時 load ファイルの cap」観点が context 汚染を構造的に塞ぐ最も効く一手になる。「新条文追加手順」観点は、規約が場当たり的に増殖し公式からドリフトする経路を構造的に塞ぐ。「advisory → hook 昇格判断」観点は、公式の zero-exception ガイダンスへの non-compliance (advisory 文言だけで済ませてしまう) を構造的に防ぐ。
 
 ### 独自運用: handoff 受領（user 明示指示駆動・本文は自動 Read しない）
 

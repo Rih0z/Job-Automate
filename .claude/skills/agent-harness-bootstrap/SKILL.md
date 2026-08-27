@@ -61,7 +61,7 @@ when_to_use: 「CLAUDE.md を作って」「`/init` の代わりに公式準拠�
 - **実行主体・モデル格の振り分け規約**（`execution-routing.md`）— 司令塔の 3 責務・振り分け表・高コスト主体抑制・escalation protocol
 - **関連 docs 読込宣言** — タスク開始時に関連 docs を読み、宣言の最初と最後の両方に証跡を出力
 - **条文宣言の lazy load 運用** — 該当条のみ宣言、全条一括宣言はしない
-- **governance.md の項目群** — サイズ閾値・新項目ルーティング・公式準拠・定期レビュー・自動検証・常時 load cap・新条文追加手順（5 段チェックリスト）
+- **governance.md の項目群** — サイズ閾値・新項目ルーティング・公式準拠・定期レビュー・自動検証・常時 load cap・新条文追加手順（5 段チェックリスト）・advisory→hook 昇格判断（zero-exception 語気の条文は hook 化候補か判定）
 - **handoff 受領** — user 明示指示でのみ受領、本文は自動 Read しない。stale 誤受領防止・archive ローテーション
 - **並走 agent 痕跡 4 軸 recheck** — session 開始時 / plan 起票前に commit・handoff/plan・worktree・uncommitted Edit の 4 軸を確認
 - **issue ライフサイクル管理**（open → processing → closed）— close 前検証 4 段、問題発見即起票ルール、1 issue = 1 目的
