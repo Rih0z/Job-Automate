@@ -30,7 +30,7 @@
 | commit 直前/作業節目 | `review.md` (path-scope) | [該当条] |
 | CLAUDE.md/.claude 編集 | `governance.md` (path-scope) | [該当条] |
 
-（`execution-routing.md` / `docs-management.md` を採用した場合は行を追加）
+（採用時の追加は load 戦略で扱いが異なる。**`execution-routing.md` を採用した場合**: 上の `@import` ブロックに `@.claude/rules/execution-routing.md` の行を追加**し**、ルール一覧テーブルにも行を追加する（`@import` 忘れは「テーブル上は常時 load と書いてあるが実際は読み込まれない」既知の失敗パターンなので両方必須）。**`docs-management.md` を採用した場合**: テーブルに行を追加するのみ（`@import` 不要、`paths:` で path-scope）。）
 
 ## ルート構成
 

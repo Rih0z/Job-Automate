@@ -32,6 +32,7 @@
 | 26 | 条文宣言が **lazy load 運用**（タスク該当条のみ宣言・全条一括宣言は不要）になっている |  |
 | 27 | `docs/` 配下に概ね 5 section 以上ある場合は **`docs-management.md`**（docs 配置 mapping / 新 docs 配置 flow / 全 section README 必須化 + 同期更新義務 / 過時マーカー）が生成されている。該当しない小規模プロジェクトでは「不要」と明示宣言されている |  |
 | 28 | 複数の実行主体・モデル格を使い分けるプロジェクトでは **`execution-routing.md`**（司令塔 3 責務 + 振り分け表 + 高コスト主体抑制 + escalation）が生成されている。該当しない場合は「不要」と明示宣言されている |  |
+| 28b | 28 で `execution-routing.md` を生成した場合、生成 CLAUDE.md 本体の `@import` ブロックに **`@.claude/rules/execution-routing.md` の行が実在する**（テーブルに「常時 load」と書くだけで `@import` 行が抜けている＝名ばかり常時 load になっていないか、生成物を Read して確認する） |  |
 | 29 | 並走 agent 痕跡 4 軸 recheck（git log / handoff・plan / worktree / git status の 2 境界実行 + 検出時 action a〜d）が `issue-workflow.md` に明記され、SessionStart hook に **verdict のみ注入**の形で組込まれている（並走なし小規模では「不要」宣言で可） |  |
 | 30 | 成果物の生成主体明示（LLM 生成物 vs script/lib 生成物の厳格区別・メタデータ突合）が `test-verify.md` に明記されている |  |
 | 31 | close 前検証 4 段（再現→pass / negative test / regression smoke / 証拠アーカイブ）が `test-verify.md` または issue lifecycle に明記されている |  |
