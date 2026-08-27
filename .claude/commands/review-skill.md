@@ -1,34 +1,28 @@
-# /review-skill — Skills 品質レビュー
+# /review-skill — Skills 品質レビュー（エージェント分離実行）
 
+> **このコマンドは別エージェントを起動してレビューを行う。現在のセッションでは直接レビューしない。**
+> 実装コンテキスト（作成時の思考過程・設計判断・会話履歴）をレビューエージェントに渡さないことで客観性を確保する。
 > 作成済みの Claude Code スラッシュコマンド / Claude.ai Skills が Anthropic のベストプラクティスに沿っているかを5軸（構造・トリガー・命令品質・出力設計・実用性）で100点満点評価する。
 > 詳細な評価基準は `workflows/software-development/review-skill.md` を参照。
 > 評価の根拠となるマニュアルは `workflows/software-development/skills-building-guide.md`。
 
 ---
 
-## あなたの役割
+## 実行手順
 
-あなたは Claude Skills のエキスパートレビュアーです。
-Anthropic 公式ガイド「The Complete Guide to Building Skills for Claude」に基づき、スキルの品質を客観的にレビューし、100点満点で評価してください。
+### ステップ1: 情報収集（この実装セッションで行う）
 
-### 行動原則
-- **証拠主義**: スキルファイルの記述事実のみに基づいて評価する。推測でスコアを付けない
-- **各スコアにはファイルパスと該当箇所の引用を含める**こと
-- **非破壊**: レビューのみ行い、スキルファイルの編集は行わない
-- 証拠不十分時は各レンジの下限で採点する
+以下の事実情報のみを収集する。スキル作成の意図・目的・設計判断の説明は**含めない**。
 
----
-
-## レビュー前の情報収集
-
-以下を自動で収集し、レビューの前提情報とする。
-
-1. **スキル作成マニュアル**: `workflows/software-development/skills-building-guide.md` を読み込む（評価基準の根拠）
-2. **詳細評価基準**: `workflows/software-development/review-skill.md` を読み込む
-3. **対象スキルファイル**: 引数で指定されたファイル、または `.claude/commands/*.md` の全ファイル
-4. **関連ドキュメント**: 対象スキルが参照している `workflows/*/review-*.md` 等のファイル
-5. **CLAUDE.md**: スキル一覧テーブルとの整合性確認
-6. **README.md**: ドキュメントへの反映状況確認
+```
+収集対象:
+1. スキル作成マニュアル: workflows/software-development/skills-building-guide.md の内容（評価基準の根拠）
+2. 詳細評価基準: workflows/software-development/review-skill.md の内容
+3. 対象スキルファイル: 引数で指定されたファイル、または .claude/commands/*.md の全ファイルの内容
+4. 関連ドキュメント: 対象スキルが参照している workflows/*/review-*.md 等のファイルの内容
+5. CLAUDE.md のスキル一覧テーブル
+6. README.md のドキュメント反映状況
+```
 
 ### 引数によるスコープ制御
 
@@ -36,7 +30,47 @@ Anthropic 公式ガイド「The Complete Guide to Building Skills for Claude」�
 - ファイルパス指定 → そのファイルのみレビュー
 - 複数ファイル指定 → 指定ファイル群をレビュー
 
----
+### ステップ2: レビューエージェント起動
+
+**Agent ツール**を使い、以下の設定で別エージェントを起動する:
+
+```
+Agent ツールの設定:
+- subagent_type: "general-purpose"
+- description: "Review skill quality objectively"
+- prompt: 以下のテンプレートに収集した情報を埋め込む
+```
+
+**プロンプトテンプレート（レビューエージェントに渡す内容）:**
+
+````
+あなたは Claude Skills のエキスパートレビュアーです。
+Anthropic 公式ガイド「The Complete Guide to Building Skills for Claude」に基づき、
+以下のスキルファイルの品質を客観的にレビューし、100点満点で評価してください。
+
+## 行動原則
+- 証拠主義: スキルファイルの記述事実のみに基づいて評価する。推測でスコアを付けない
+- 各スコアにはファイルパスと該当箇所の引用を含めること
+- 非破壊: レビューのみ行い、スキルファイルの編集は行わない
+- 証拠不十分時は各レンジの下限で採点する
+
+## スキル作成マニュアル（評価基準の根拠）
+[ここに workflows/software-development/skills-building-guide.md の内容を埋め込む]
+
+## 詳細評価基準
+[ここに workflows/software-development/review-skill.md の内容を埋め込む]
+
+## 対象スキルファイル
+[ここに対象スキルファイルの内容を埋め込む（複数ある場合は全て）]
+
+## 関連ドキュメント
+[ここに対象スキルが参照している workflows/*/review-*.md 等の内容を埋め込む]
+
+## CLAUDE.md スキル一覧テーブル
+[ここに該当部分を埋め込む]
+
+## README.md ドキュメント反映状況
+[ここに該当部分を埋め込む]
 
 ## 評価軸（5項目・各20点 = 100点満点）
 
@@ -146,3 +180,18 @@ Anthropic 公式ガイド「The Complete Guide to Building Skills for Claude」�
 2. 【推奨】
 3. 【任意】
 ```
+````
+
+### ステップ3: 結果の報告
+
+レビューエージェントから返却された結果を、そのままユーザーに表示する。
+要約や解釈を加えない（レビューの客観性を維持するため）。
+
+---
+
+## 注意事項
+
+- **絶対に実装セッション内で直接レビューしない**。必ず Agent ツールで別エージェントを起動すること
+- レビューエージェントに渡す情報は事実（スキルファイルの記述内容・評価基準ドキュメント）のみ。スキル作成の意図・設計判断・会話履歴は渡さない
+- 対象スキルの規模が小さい場合でも分離実行する。規模で判断しない
+- 詳細なアーキテクチャは `agents.md` を参照
