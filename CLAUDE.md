@@ -40,12 +40,16 @@ Claude Code でプロンプトを開発・改善するときのガイドです�
 
 ### 自動発動するSkills（`.claude/skills/`）
 
-| Skill | 用途 |
+このリポジトリの `workflows/` 配下のプロンプトは全て `.claude/skills/<name>/SKILL.md` として skill 化されている。このリポジトリを Claude Code で開けば、該当する話題を話した時に自動発動するか、`/<name>` で直接呼び出せる（一覧は `.claude/skills/` を `ls` するか `/skills` コマンドで確認。個別の説明・トリガー文言は各 SKILL.md の frontmatter `description` に集約されており、本表では重複記載しない）。
+
+| ドメイン | 例 |
 |---|---|
-| `agent-harness-bootstrap` | 任意のプロジェクトに Anthropic ベストプラクティス準拠の `CLAUDE.md` + `.claude/rules/` + hooks 一式を生成・剪定する |
-| `review-oss-contribution` | OSS貢献候補を独自性・先行技術・実現可能性・戦略の4基準で審査しGO/HOLD/REJECTを判定する |
-| `skills-audit` | リポジトリ内の全Skillsを一括監査しGOOD/MIGRATE/IMPROVE/SPLITを判定する |
-| `stop-ai-slop-jp` | AIで書いた日本語を人間の文章に戻す（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・Daichi Nagashima 作、vendoring） |
+| 汎用ガバナンス | `agent-harness-bootstrap`（CLAUDE.md/rules/hooks 一式生成）・`review-oss-contribution`・`skills-audit`・`skill-authoring-guide`・`stop-ai-slop-jp`（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・vendoring） |
+| business-planning | `business-idea` / `business-proposal` / `generic-proposal` / `it-proposal` / `specification` / `ai-automation` とそれぞれの `review-*` |
+| content-creation | `creative-text-art` / `slides-pro` / `review-blog` / `review-slides` |
+| ops-management | `year-end-adjustment-csv` / `server-automation` / `server-init` / `server-windows-standard` / `review-ops` |
+| research-intelligence | `craft-beer-news-research` / `it-tech-news-research` / `general-news-research` / `investment-portfolio-analysis` / `seo-keyword-article-planner` / `blog-seo-growth-planner` / `research-deliverable-review` |
+| software-development (design/mcp/その他) | `ui-design-guidelines` / `ibm-carbon-design-system` / `avoid-ai-generated-design-look` / `customer-persona-design` / `review-persona-analysis` / `playwright-mcp-e2e-testing` / `mcp-server-setup` / `model-cost-optimization-routing` / `three-agent-tdd-workflow` |
 
 ### グローバルスキル（どのプロジェクトでも使える・任意セットアップ）
 
@@ -76,9 +80,9 @@ cp .claude/commands/*.md ~/.claude/commands/
 
 ---
 
-### 手動で使うレビュープロンプト（貼り付けて使う）
+### 手動で使うレビュープロンプト（Claude Code 外・貼り付けて使う場合のフォールバック）
 
-> コードではなく、ドキュメント・アイデア・提案書のレビューに使う。
+> 以下は全て `.claude/skills/` 配下に対応する skill があるため、Claude Code 環境では上表の skill を使う方が推奨（自動発動 + エージェント分離が組込済み）。Claude.ai 等 Claude Code 以外の環境で使う場合のみ、元プロンプトを直接貼り付ける。
 
 | プロンプトファイル | 用途 | 評価軸 |
 |----------------|------|--------|
