@@ -1,0 +1,73 @@
+# レビュー系 skills の共有 rubric SoT
+# 由来: 9 skill (research-deliverable-review / review-ai-automation / review-specification /
+#   review-proposal / review-persona-analysis / review-business-idea / review-blog /
+#   review-slides / review-ops) が個別に保持していた S/A/B/C/D 判定表・行動原則ブロックの重複を
+#   本ファイルへ集約 (severity/verdict の定義を1箇所に集約し、各 skill は参照するだけにする設計)。
+#
+# 運用:
+#   - 各レビュー skill は「S/A/B/C/D 等 verdict の意味・対応方針」と「証拠主義/非破壊/引用義務等の
+#     行動原則」の prose 再掲を持たず、本ファイルの該当 key を Read して従う。
+#   - skill 固有の配点表 (何を・何軸・何点満点で評価するか、各軸の採点目安) は各 SKILL.md 側に残す
+#     (skill 固有 judgment のため、本ファイルには持ち込まない)。
+#   - verdict 語彙は意図的に統一しない (対象領域が異なるため registry 化に留める)。
+#     新設レビュー skill は verdict_scales の既存 scale から選択すること。既存 scale で表現不能な
+#     場合のみ scale を本ファイルへ追加し、追加理由を commit message に明記する。
+
+schema: review-rubrics/v1
+
+common_principles:
+  # 9 skill のプロンプトテンプレートにほぼ同一文言で重複していた「行動原則」の SoT。
+  # 各 skill は該当箇所を「本ファイル common_principles の evidence_based / citation_required /
+  # non_destructive を適用」という参照に置き換える。skill 固有の追加原則 (前提条件優先確認・
+  # Devil's Advocate・セキュリティ最優先報告等) は各 SKILL.md 側にそのまま残す。
+  evidence_based:
+    title: 証拠主義
+    body: 推測でスコアを付けない。対象成果物（文書・スクリプト・スライド等）本文の記載内容のみで評価する。記載不十分な場合は各採点レンジの下限で採点する。
+  citation_required:
+    title: 引用義務
+    body: 各軸のスコアには、該当する成果物内の記述（見出し・表の行・セクション名など）を最低1つ以上引用すること。
+  non_destructive:
+    title: 非破壊
+    body: レビューのみ行い、対象ファイルの編集・実行は行わない。レビュワーは元ファイルを絶対に編集してはならない。改善点は「提案」として記載し、修正作業は作成者自身が行う。
+  used_by: [research-deliverable-review, review-ai-automation, review-specification, review-proposal, review-persona-analysis, review-business-idea, review-slides, review-ops]
+  # review-blog は原本 (workflows/content-creation/review-blog.md) が独自の行動原則を持つため
+  # common_principles の used_by には含めない (rank5_100 と同じ理由、下記コメント参照)。
+
+verdict_scales:
+  # 名前付き verdict scale の registry。
+  rank5_100:
+    # 100点満点・複数軸合算方式の S/A/B/C/D。9 skill が採用していた bands (90-100/80-89/70-79/
+    # 60-69/59以下) と、各段階の「対応方針」の共通部分をここに集約。
+    # skill 固有の細かい言い回し（例:「本番環境への適用準備完了」「開発チームへ引き渡し」）は
+    # 各 SKILL.md の出力フォーマット内コメントとして残してよい (meaning は最大公約数の表現)。
+    labels: [S, A, B, C, D]
+    max_score: 100
+    bands:
+      - {label: S, range: 90-100, meaning: そのまま提出・活用・次工程への引き渡しが可能。追加修正は不要}
+      - {label: A, range: 80-89, meaning: 軽微な修正・補強を行えば次工程へ進められる}
+      - {label: B, range: 70-79, meaning: 修正推奨。特定の観点で深掘り・再検討が必要}
+      - {label: C, range: 60-69, meaning: 大幅な修正・再検討が必要}
+      - {label: D, range: 0-59, meaning: 根本的な見直し・書き直しが必要}
+    used_by: [research-deliverable-review, review-ai-automation, review-specification, review-proposal, review-persona-analysis, review-business-idea, review-slides, review-ops]
+    # review-blog は原本 (workflows/content-creation/review-blog.md, 956行) が独自の 110点満点 +
+    # 0/4/9-gate 即D判定を持つため rank5_100 の used_by には含めない (原本 SoT を上書きしない)。
+    # review-blog はゲート条項による即D判定のみ本 scale と趣旨を共有する旨を SKILL.md に注記する。
+  go3:
+    # カテゴリカル判定 (点数閾値なし)。4基準 (独自性・先行技術・実現可能性・戦略) それぞれの
+    # 判定結果を突き合わせて GO/HOLD/REJECT を導出する。
+    labels: [GO, HOLD, REJECT]
+    type: categorical
+    criteria: [独自性, 先行技術, 実現可能性, 戦略]
+    rule: |
+      4基準（独自性・先行技術・実現可能性・戦略）それぞれを ✅ (クリア) / △ (軽微な懸念) /
+      ❌ (重大な懸念) で個別判定した上で、以下の優先順位で総合判定する。
+      - 独自性が ❌ (ライセンス上再配布・改変が認められないソースに由来する等) → 無条件で REJECT
+        (他基準の結果によらず独自性 ❌ は最優先で REJECT。倫理・ライセンスリスクのため)
+      - 独自性が ✅ かつ、残り3基準 (先行技術・実現可能性・戦略) が全て ✅ → GO
+      - 独自性が ✅ かつ、残り3基準のいずれかが ❌ (例: 先行技術=同一アプローチが既にマージ済み/
+        活発な議論が進行中で割り込む余地がない、実現可能性=対象OSSの言語で実装不可能、
+        戦略=Issueで手の内を見せすぎている等の致命的欠陥) → REJECT
+      - 独自性が ✅ かつ、重大な❌はないが1つ以上△ (軽微な懸念、例: PRがやや大きい・
+        先行議論はあるが方向性が異なる・Issue先出しの順序が最適でない等) → HOLD
+        (懸念点を解消してから再提出)
+    used_by: [review-oss-contribution]

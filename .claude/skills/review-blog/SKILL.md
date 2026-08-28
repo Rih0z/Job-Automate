@@ -24,6 +24,7 @@ argument-hint: "<レビュー対象記事ファイルの絶対パス>"
 
 原本は 956 行と長大なため、本 SKILL.md には要約のみ記載する（progressive disclosure）。
 **評価軸・配点・N/A処理ルール・ゲート条項・出力フォーマットは一切要約・改変せず、レビューエージェントに原本ファイルを直接 Read させて適用すること。**
+（参考: S/A/B/C/D 判定ラベルが最終的に何を意味するかの一般形は `.claude/skills/_shared/review-rubrics.yaml` の `verdict_scales.rank5_100` に集約している。本 skill の実際の点数帯・0/4/9-gate 即D判定は原本ファイルが唯一の SoT であり、上記共有ファイルはそれを上書きしない。）
 
 ## 実行手順
 
