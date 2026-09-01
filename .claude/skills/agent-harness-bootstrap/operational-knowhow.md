@@ -118,13 +118,15 @@ SessionStart hook は**本文を注入せず、ポインタと verdict のみ通
 
 ### 独自運用: issue ライフサイクル管理（open → processing → closed）
 
-タスク・問題は `issues/` 配下の 3 段階フォルダで状態管理する:
+タスク・問題は `issues/` 配下のフォルダで状態管理する。並走エージェント数・修正の重大度に応じて 3 段階（open→processing→closed）または 4 段階（下記オプション参照）を選ぶ:
 
 | フォルダ | 状態 | 配置タイミング |
 |---|---|---|
 | `issues/open/[ID].md` | 未着手 | 問題発見・新タスク要求時の起票先 |
 | `issues/processing/[ID].md` | 着手中 | open から `git mv` で移動。冒頭に進行中 handoff の完全パスを記載 |
 | `issues/closed/[ID].md` | 完了 | processing から `git mv` で移動。下記 close 検証 4 段を本文末に証拠付きで宣言 |
+
+**オプション: 4 段階化（pending＝検証待ちバッファ）** — 「修正した本人がその場で closed にする」を構造的に防ぎたい場合、processing と closed の間に `issues/pending/[ID].md`（修正完了・独立検証待ち）を挟む。状態遷移ツール（`git mv` を wrap するスクリプト等）側で pending を経由しない open/processing→closed の直行遷移を拒否し、明示的な override フラグ経由でのみ許可する。修正した本人と検証する主体が分離できる運用（別エージェント・別セッションでの再検証）でのみ効果があるため、単一セッション完結の小規模プロジェクトでは 3 段階のままで良い。
 
 **close 前検証 4 段**（「修正したつもり」「regression 未確認 close」を構造的に排除する）:
 1. **再現 → 修正後 pass**: 元 bug の再現条件で修正後に再実行し、症状消失を ログ / 出力 / スクショ / テスト結果ファイル のいずれかで証拠記録
