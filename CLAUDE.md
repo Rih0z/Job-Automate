@@ -46,7 +46,7 @@ Claude Code でプロンプトを開発・改善するときのガイドです�
 
 | ドメイン | 例 |
 |---|---|
-| 汎用ガバナンス | `agent-harness-bootstrap`（CLAUDE.md/rules/hooks 一式生成）・`review-oss-contribution`・`skills-audit`・`skill-authoring-guide`・`stop-ai-slop-jp`（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・vendoring）・`review-gate`（工程別レビューゲート・観点はcriteria JSONで定義し育てる）・`single-session-tdd`（単一セッションTDD+独立レビュー）・`repo-hygiene-patrol`（ファイル構造衛生パトロール、2026-08-31 追加） |
+| 汎用ガバナンス | `agent-harness-bootstrap`（CLAUDE.md/rules/hooks 一式生成）・`review-oss-contribution`・`skills-audit`・`skill-authoring-guide`・`stop-ai-slop-jp`（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・vendoring）・`review-gate`（工程別レビューゲート・観点はcriteria JSONで定義し育てる）・`single-session-tdd`（単一セッションTDD+独立レビュー）・`repo-hygiene-patrol`（ファイル構造衛生パトロール、2026-08-31 追加）・`blind-eval-harness`（複数サンプル盲検一括評価、2026-09-01 追加） |
 | business-planning | `business-idea` / `business-proposal` / `generic-proposal` / `it-proposal` / `specification` / `ai-automation` とそれぞれの `review-*` |
 | content-creation | `creative-text-art` / `slides-pro` / `review-blog` / `review-slides` |
 | ops-management | `year-end-adjustment-csv` / `server-automation` / `server-init` / `server-windows-standard` / `review-ops` |
@@ -147,7 +147,7 @@ workflows/software-development/review-implementation.md の内容 + 対象コー
 
 research/proposal/report 系の成果物が外部情報・過去データに基づく事実主張をする場合、根拠となる資料の完全パス (ローカルファイル) または URL (外部情報源) を近接記載することを推奨する。適用対象は成果物テンプレート出力および `review-*` skill のレビュー結果 (既存の `citation_required` は変更しない)。事実主張でない意見・提案・戦略考察には適用しない。
 
-本 repo は AIServer_v4 のような CI 機械検証を持たないため、本項目は **advisory な推奨** であり必須ゲートではない (2026-08-31 時点。将来 review-* skill への組み込みが進めば昇格を検討)。
+本 repo は自動 CI 機械検証を持たないため、本項目は **advisory な推奨** であり必須ゲートではない (2026-08-31 時点。将来 review-* skill への組み込みが進めば昇格を検討)。
 
 ## プロジェクト構成
 

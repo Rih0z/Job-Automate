@@ -216,6 +216,9 @@ MCP サーバーが提供するツールアクセスを強化するワークフ�
 - アクション前のコンプライアンスチェック
 - 監査証跡
 
+### Pattern 6: Router + Content-free Skills(2026-09-01 追加)
+ナレッジベースが大きい場合、1つの巨大なSKILL.mdに全知識を詰めない。ルーター役のskillは「どのトピックがどの参照ファイル/セクションにあるか」の索引のみを持ち、本文コンテンツは持たない。個別トピックのskill(または`references/`配下のファイル)は本文コンテンツのみを持ち、ルーティングロジックを持たない。効果: ①関連トピックだけがcontextに載る(token節約) ②本文更新時にルーターを触らずに済む(疎結合)。副作用: ルーター経由の間接呼び出しはprompt injectionの経路になりうるため、ルーターが外部入力(取得したWebコンテンツ等)をそのまま次のskill呼び出し先の判断に使わないよう明示的にガードする。
+
 ---
 
 ## 7. テストと反復
@@ -280,6 +283,9 @@ Should NOT trigger:
 - [ ] 無関係なトピックではトリガーされない
 - [ ] 機能テストがパス
 
+### 保守(2026-09-01 追加)
+- [ ] `metadata.version` 等のバージョン表記を持つskillは、内容(振る舞い)を変えない編集(typo修正・言い回し調整)でバージョンを自動的に繰り上げない。繰り上げは振る舞いが変わる変更時のみ、変更前後の差分をchangelogに残す。
+
 ---
 
 ## 9. Claude Code コマンド形式との対応
@@ -307,4 +313,4 @@ Claude Code のスラッシュコマンド（`.claude/commands/*.md`）にも以
 
 ## 出典・関連
 
-原文: `workflows/software-development/skills-building-guide.md`。`.claude/commands/review-skill.md`（`/review-skill`）の評価基準本体としても参照される。本リポジトリの `.claude/skills/skills-audit/SKILL.md` と役割が近接するため、重複が疑われる場合は第20条相当の drift 起票で整理すること。
+原文: `workflows/software-development/skills-building-guide.md`。`.claude/commands/review-skill.md`（`/review-skill`）の評価基準本体としても参照される。本リポジトリの `.claude/skills/skills-audit/SKILL.md` と役割が近接するため、重複が疑われる場合はメンテナンスIssueで整理すること。
