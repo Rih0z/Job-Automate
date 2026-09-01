@@ -1,0 +1,80 @@
+{
+  "stage": "test",
+  "stage_name": "テスト",
+  "when": "テストを書いてRed(失敗)を確認した直後。実装(Green)を書き始める前に必ず実施",
+  "pass_rule": { "must_pass_all": true, "min_score": 80 },
+  "criteria": [
+    {
+      "id": "spec_traceability",
+      "name": "仕様トレーサビリティ",
+      "weight": 20,
+      "must_pass": true,
+      "checks": [
+        "各テストが仕様書・設計書の記述に対応している",
+        "テスト名が仕様の文として読める",
+        "仕様にない振る舞いをテストが勝手に定義していない"
+      ]
+    },
+    {
+      "id": "strictness",
+      "name": "アサーションの厳密さ",
+      "weight": 20,
+      "must_pass": true,
+      "checks": [
+        "期待値が厳密(toEqual等)で、緩いアサーション(length>0, toBeTruthy)で逃げていない",
+        "実装の都合に合わせて期待値を調整していない",
+        "スナップショット頼みで意図が読めないテストになっていない"
+      ]
+    },
+    {
+      "id": "coverage_error",
+      "name": "異常系カバレッジ",
+      "weight": 15,
+      "must_pass": false,
+      "checks": [
+        "認可失敗(不正なトークン・権限なし)のケースがある",
+        "バリデーション失敗(不正な書式・範囲外・矛盾入力)のケースがある",
+        "DB・ネットワーク失敗時のケースがある"
+      ]
+    },
+    {
+      "id": "coverage_boundary",
+      "name": "境界値カバレッジ",
+      "weight": 15,
+      "must_pass": false,
+      "checks": [
+        "ゼロ件・空データ・上限値・期間や数量の端のケースがある",
+        "ドメイン固有の境界(日付境界・タイムゾーン・DST・文字コード・通貨等、該当するもの)のケースがある"
+      ]
+    },
+    {
+      "id": "coverage_normal",
+      "name": "正常系カバレッジ",
+      "weight": 10,
+      "must_pass": false,
+      "checks": [
+        "主要ユースケースが一通り揃っている"
+      ]
+    },
+    {
+      "id": "independence",
+      "name": "テストの独立性",
+      "weight": 10,
+      "must_pass": false,
+      "checks": [
+        "テスト間で状態を共有していない",
+        "実行順序・現在時刻・乱数に依存しない(時刻は固定注入)"
+      ]
+    },
+    {
+      "id": "mocking",
+      "name": "副作用の分離",
+      "weight": 10,
+      "must_pass": false,
+      "checks": [
+        "外部依存(DB・API・ファイルI/O)がモック/スタブで分離されている",
+        "pure functionのテストに不要なモックを持ち込んでいない"
+      ]
+    }
+  ]
+}

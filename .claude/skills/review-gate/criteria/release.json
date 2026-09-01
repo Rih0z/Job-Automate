@@ -1,0 +1,69 @@
+{
+  "stage": "release",
+  "stage_name": "リリース",
+  "when": "デプロイ・本番反映の直前に必ず実施",
+  "pass_rule": { "must_pass_all": true, "min_score": 80 },
+  "criteria": [
+    {
+      "id": "all_tests_pass",
+      "name": "全テスト通過",
+      "weight": 20,
+      "must_pass": true,
+      "checks": [
+        "ユニット・統合テストがすべてPASSしている",
+        "スキップ・コメントアウトされたテストがない"
+      ]
+    },
+    {
+      "id": "secrets",
+      "name": "秘密情報",
+      "weight": 20,
+      "must_pass": true,
+      "checks": [
+        ".env系ファイル・鍵がコミットされていない",
+        "APIキー・強権限キーがクライアントバンドル・リポジトリに含まれない",
+        "デプロイ先の環境変数設定が本番用になっている"
+      ]
+    },
+    {
+      "id": "e2e_flow",
+      "name": "E2E動作確認",
+      "weight": 20,
+      "must_pass": true,
+      "checks": [
+        "主要ユースケースの一連の流れが実環境で動く",
+        "対応環境(ブラウザ・デバイス・地域設定等)の代表ケースで確認済み"
+      ]
+    },
+    {
+      "id": "responsive_env",
+      "name": "対応環境・レスポンシブ",
+      "weight": 15,
+      "must_pass": false,
+      "checks": [
+        "モバイル・デスクトップ両方でレイアウトが崩れない(Web UIの場合)",
+        "主要操作がタッチ・マウス双方で実用精度で動く(該当する場合)"
+      ]
+    },
+    {
+      "id": "performance",
+      "name": "性能",
+      "weight": 10,
+      "must_pass": false,
+      "checks": [
+        "初期表示・主要操作が体感で速い(不要なJS・巨大依存がない)"
+      ]
+    },
+    {
+      "id": "docs_updated",
+      "name": "ドキュメント同期",
+      "weight": 15,
+      "must_pass": false,
+      "checks": [
+        "仕様書・設計書が実装の現状と一致している",
+        "READMEに利用方法が書かれている",
+        "進捗管理(チェックリスト等)が更新されている"
+      ]
+    }
+  ]
+}
