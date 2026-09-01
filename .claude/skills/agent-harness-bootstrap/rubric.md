@@ -16,7 +16,7 @@
 | 10 | handoff 保持規約（次 handoff 作成まで前 handoff を削除しない）が明記されている |  |
 | 11 | issue ファイル連携（`issues/open|processing/[ID].md` 冒頭に進行中 handoff の完全パス記載）が明記されている |  |
 | 12 | 各 issue ファイル冒頭ヘッダ（タイトル / 概要 1〜2 行 / 状態 / 最新 handoff 完全パス / 起票日）の標準形式が明記され、handoff 更新時の同期更新ルールがある |  |
-| 13 | issues/ 3 段階フォルダ管理（open → processing → closed の git mv 遷移）と問題発見即起票（scope creep 禁止・現タスクで触らない）が独立セクションとして明記されている |  |
+| 13 | issues/ 3 段階（または pending 検証バッファを挟む 4 段階・採用判定は該当条件に基づく）のフォルダ管理（git mv 遷移）と問題発見即起票（scope creep 禁止・現タスクで触らない）が独立セクションとして明記されている |  |
 | 14 | PC 再起動・session 復元の自動化（SessionStart hook はポインタ + verdict のみ注入＝本文を注入しない、`issues/processing/*.md` 全 scan で User 通知 → 選択後 1 件のみ Read + 並列委任）が明記されている（並走なし小規模では「不要」宣言で可） |  |
 | 15 | Step 8 で採用セット（CLAUDE.md + 採用 rules + settings.json hooks + hook scripts）の **実生成手順** が明記され、雛形が示されている |  |
 | 16 | 詳細ルールは別ファイルに分離 or リンクのみ |  |
