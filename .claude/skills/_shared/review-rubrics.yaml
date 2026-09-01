@@ -71,3 +71,20 @@ verdict_scales:
         先行議論はあるが方向性が異なる・Issue先出しの順序が最適でない等) → HOLD
         (懸念点を解消してから再提出)
     used_by: [review-oss-contribution]
+
+# 指摘単位の severity (2026-08-31 追加、`.tmp/plans/20260831_plan_rules_dir_docs_citation_and_review_fixes.md`)。
+# verdict_scales (文書全体スコア帯) とは別軸: こちらは各指摘 1 件ごとの重大度 + 対応アクション。
+# 既存 verdict_scales は変更しない、指摘単位のラベルとして併用する。
+severity:
+  HIGH:
+    definition: 内容の正確性・実行可能性を損なう重大な欠陥
+    action: 修正必須 (次工程へ進めない)
+    used_by: [review-oss-contribution, review-specification]
+  MEDIUM:
+    definition: 品質を下げるが致命的ではない欠陥
+    action: 次イテレーションで修正
+    used_by: [review-oss-contribution, review-specification]
+  LOW:
+    definition: 軽微な改善余地
+    action: 推奨 (任意)
+    used_by: [review-oss-contribution, review-specification]

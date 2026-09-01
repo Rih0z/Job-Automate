@@ -154,7 +154,7 @@ Agent ツールの設定:
 
 ## 採点方法（総合点：100点満点）
 
-`.claude/skills/_shared/review-rubrics.yaml` を Read し、`verdict_scales.rank5_100` の bands/meaning に従って S/A/B/C/D を判定すること（点数帯・各段階の対応方針は同ファイルが SoT）。
+`.claude/skills/_shared/review-rubrics.yaml` を Read し、`verdict_scales.rank5_100` の bands/meaning に従って S/A/B/C/D を判定すること（点数帯・各段階の対応方針は同ファイルが SoT）。**指摘単位の重大度 (2026-08-31 追加)**: 各観点の個別指摘には同ファイルの `severity` (HIGH/MEDIUM/LOW) を付す (総合点の算出方法は変更しない)。
 
 ## 出力（レビュー結果出力フォーマット）
 

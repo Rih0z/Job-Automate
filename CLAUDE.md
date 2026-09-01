@@ -143,6 +143,12 @@ workflows/software-development/review-implementation.md の内容 + 対象コー
 
 ---
 
+## 根拠明記の推奨 (2026-08-31)
+
+research/proposal/report 系の成果物が外部情報・過去データに基づく事実主張をする場合、根拠となる資料の完全パス (ローカルファイル) または URL (外部情報源) を近接記載することを推奨する。適用対象は成果物テンプレート出力および `review-*` skill のレビュー結果 (既存の `citation_required` は変更しない)。事実主張でない意見・提案・戦略考察には適用しない。
+
+本 repo は AIServer_v4 のような CI 機械検証を持たないため、本項目は **advisory な推奨** であり必須ゲートではない (2026-08-31 時点。将来 review-* skill への組み込みが進めば昇格を検討)。
+
 ## プロジェクト構成
 
 トップレベルは `CLAUDE.md` / `README.md` / `agents.md` / `.claude/`（commands・skills）/ `workflows/`（業務ワークフロー単位のハーネス）/ `archive/`（旧プロンプト）。ワークフローごとの内訳・各ファイルの所在は [workflows/README.md](workflows/README.md) と [README.md](README.md) を参照（このファイルでは重複記載しない）。
