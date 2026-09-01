@@ -47,10 +47,10 @@ Claude Code でプロンプトを開発・改善するときのガイドです�
 | ドメイン | 例 |
 |---|---|
 | 汎用ガバナンス | `agent-harness-bootstrap`（CLAUDE.md/rules/hooks 一式生成）・`review-oss-contribution`・`skills-audit`・`skill-authoring-guide`・`stop-ai-slop-jp`（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・vendoring）・`review-gate`（工程別レビューゲート・観点はcriteria JSONで定義し育てる）・`single-session-tdd`（単一セッションTDD+独立レビュー）・`repo-hygiene-patrol`（ファイル構造衛生パトロール、2026-08-31 追加）・`blind-eval-harness`（複数サンプル盲検一括評価、2026-09-01 追加） |
-| business-planning | `business-idea` / `business-proposal` / `generic-proposal` / `it-proposal` / `specification` / `ai-automation` とそれぞれの `review-*` |
+| business-planning | `business-idea` / `business-proposal` / `generic-proposal` / `it-proposal` / `specification` / `ai-automation` とそれぞれの `review-*`・`multi-tenant-template-injector`（複数クライアント向けテンプレートのテナント分離、2026-09-01 追加） |
 | content-creation | `creative-text-art` / `slides-pro` / `review-blog` / `review-slides` |
 | ops-management | `year-end-adjustment-csv` / `server-automation` / `server-init` / `server-windows-standard` / `review-ops` |
-| research-intelligence | `craft-beer-news-research` / `it-tech-news-research` / `general-news-research` / `investment-portfolio-analysis` / `seo-keyword-article-planner` / `blog-seo-growth-planner` / `research-deliverable-review` |
+| research-intelligence | `craft-beer-news-research` / `it-tech-news-research` / `general-news-research` / `investment-portfolio-analysis` / `seo-keyword-article-planner` / `blog-seo-growth-planner` / `research-deliverable-review` / `source-verification-scan`（非公開情報・捏造導線スキャン、2026-09-01 追加） / `staged-investigation-workflow`（ゲート付き段階的調査、2026-09-01 追加） |
 | software-development (design/mcp/その他) | `ui-design-guidelines` / `ibm-carbon-design-system` / `avoid-ai-generated-design-look` / `customer-persona-design` / `review-persona-analysis` / `playwright-mcp-e2e-testing` / `mcp-server-setup` / `model-cost-optimization-routing` / `three-agent-tdd-workflow`（3ターミナル分離型。単一セッション版は `single-session-tdd`） |
 
 ### グローバルスキル（どのプロジェクトでも使える・任意セットアップ）
