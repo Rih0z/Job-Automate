@@ -1,0 +1,59 @@
+{
+  "stage": "repo-hygiene",
+  "stage_name": "リポジトリ衛生パトロール",
+  "checks": [
+    {
+      "id": "versioned_filenames",
+      "name": "バージョン番号付きファイル名",
+      "command": "find . -not -path \"*/node_modules/*\" -not -path \"*/.git/*\" \\( -name \"*_v[0-9]*\" -o -name \"*_new.*\" -o -name \"*_old.*\" -o -name \"*_backup*\" -o -name \"*_copy*\" -o -name \"* (1).*\" -o -name \"* (2).*\" \\)",
+      "severity": "HIGH",
+      "rationale": "Gitがバックアップ機能を提供するため、ファイル名でのバージョン管理は不要かつ紛れの元"
+    },
+    {
+      "id": "os_artifacts",
+      "name": "OS由来のゴミファイル",
+      "command": "find . -iname \"nul\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\"; ls -d C:* 2>/dev/null; find . -name \".DS_Store\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\"",
+      "severity": "HIGH",
+      "rationale": ".DS_Store は .gitignore への追記も併せて提案する"
+    },
+    {
+      "id": "root_build_residue",
+      "name": "テスト・ビルドの残骸がルートに漏れていないか",
+      "command": "ls -d htmlcov/ coverage/ dist/ build/ __pycache__/ 2>/dev/null | grep -v node_modules; ls coverage.xml .coverage 2>/dev/null",
+      "severity": "MEDIUM",
+      "rationale": "ルート直下にあり、かつプロジェクトの通常のビルド出力先として明示的に規約化されていない場合のみ該当"
+    },
+    {
+      "id": "oversized_files",
+      "name": "肥大化ファイル",
+      "command": "find . -size +50M -not -path \"./.git/*\" -not -path \"*/node_modules/*\"",
+      "severity": "WARN",
+      "rationale": "Git LFS の使用や .gitignore 追加を検討する余地の指摘のみ、削除は提案しない"
+    },
+    {
+      "id": "gitignore_gaps",
+      "name": ".gitignore 漏れ",
+      "command": "git ls-files | grep -E \"\\.pyc$|__pycache__/|\\.coverage$|htmlcov/|\\.log$|node_modules/\"",
+      "severity": "MEDIUM",
+      "rationale": "1件以上ヒットしたら .gitignore への追記とトラッキング解除を提案"
+    },
+    {
+      "id": "root_clutter",
+      "name": "ルート直下の散らかり",
+      "command": null,
+      "severity": "WARN",
+      "rationale": "機械判定しない(判断支援のみ)。ルート直下のファイル一覧を README/CLAUDE.md の「トップレベル構成」と照合し、規約が無い場合は種類の異なるファイルが無秩序に増えていないか目視確認する"
+    },
+    {
+      "id": "numeric_target_drift",
+      "name": "数値目標の整合性ドリフト",
+      "command": "grep -rn \"[0-9]+%|[0-9]+点以上|閾値\" CLAUDE.md .claude/ docs/ 2>/dev/null",
+      "severity_rules": {
+        "HIGH": "prose の宣言と実際の強制値(CI閾値変数・validator定数等)が食い違っている、または全く強制されていない",
+        "MEDIUM": "数値目標が prose 側に手書きで複数箇所重複記載されている(1箇所更新で他が stale 化する構造)",
+        "WARN": "数値の記載に測定日時・測定コマンドの citation が無く、いつの時点の値か不明"
+      },
+      "rationale": "推奨是正パターン: 数値そのものを prose に書かず「強制する設定ファイルの当該行」を唯一のSoTとし、rule/docs側は参照のみにする"
+    }
+  ]
+}

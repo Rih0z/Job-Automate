@@ -1,0 +1,53 @@
+{
+  "stage": "oss-contribution",
+  "stage_name": "OSS貢献候補の審査",
+  "when": "候補ディレクトリに新規候補が配置された時",
+  "verdict_scale": "go3",
+  "verdict_scale_sot": ".claude/skills/_shared/review-rubrics.yaml#verdict_scales.go3",
+  "criteria": [
+    {
+      "id": "originality",
+      "name": "独自性チェック(最重要)",
+      "critical": true,
+      "checks": [
+        "自プロジェクトの独自開発で発見・実装した知見か",
+        "他のOSSから学んだ知見の応用か(ライセンス互換性を確認済みか)",
+        "ライセンス互換性の確認が未完了、または参照元が複数あり出所の切り分けが曖昧でないか",
+        "ライセンス上再配布・改変が認められないソース(非公開コードのリーク、閲覧のみ許諾されたソース等)を参照して得た設計パターンでないか"
+      ],
+      "contamination_grep": "プロジェクト内に非再配布・流出ソースの参照禁止ディレクトリが存在する場合、候補ファイルの記述内容を当該ディレクトリに対してGrepし、固有の実装パターン名(クラス名・関数名・変数名)との一致を確認する。参照禁止ディレクトリが存在しないプロジェクトではN/A。",
+      "reject_rule": "❌ 判定 → 他基準の結果によらず無条件で REJECT"
+    },
+    {
+      "id": "prior_art",
+      "name": "先行技術チェック",
+      "critical": false,
+      "checks": [
+        "同じアプローチが既に提案されていないか",
+        "既にマージ済みの修正で解決されていないか",
+        "活発な議論が進行中で割り込む余地がないか"
+      ]
+    },
+    {
+      "id": "feasibility",
+      "name": "実現可能性チェック",
+      "critical": false,
+      "checks": [
+        "PRが小規模(初回貢献の場合は目安+50行以内)に収まるか",
+        "対象OSSの言語で実装可能か",
+        "CI/テストを通せるか"
+      ]
+    },
+    {
+      "id": "strategy",
+      "name": "戦略チェック",
+      "critical": false,
+      "checks": [
+        "Issue + 最小PR を同時に出す計画か",
+        "Issue で手の内を見せすぎていないか",
+        "PRが1目的に絞られているか"
+      ]
+    }
+  ],
+  "severity_note": "各基準への個別指摘(❌/△の理由)には .claude/skills/_shared/review-rubrics.yaml の severity (HIGH/MEDIUM/LOW) を付す。GO/HOLD/REJECT の総合判定ロジックは変更しない、指摘の重大度表示を追加するのみ(2026-08-31)。"
+}
