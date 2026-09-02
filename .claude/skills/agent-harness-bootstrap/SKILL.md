@@ -182,7 +182,7 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 |---|---|---|---|
 | `meta.md` | 条インデックス（条見出し + 所在ファイル）+ **既知の制約（[claude-code Issue #23478](https://github.com/anthropics/claude-code/issues/23478) の path-scope auto-load Read 時のみ発火 bug を URL 付きで明記）** + **常時 load ファイル 5KB soft cap 宣言** | なし | 常時 |
 | `code-quality.md` | コード変更規約（命名・import・型）の条文 | `description` のみ | `@import` で常時 |
-| `test-verify.md` | テスト・自検証規約（ランナー・lint・受入基準・**close 前検証 4 段**［再現→pass / negative test / regression smoke / 証拠アーカイブ］・**成果物の生成主体明示**［LLM 生成物 vs script/lib 生成物の厳格区別］）の条文 | `description` のみ | `@import` で常時 |
+| `test-verify.md` | テスト・自検証規約（ランナー・lint・受入基準・**close 前検証 4 段**［再現→pass / negative test / regression smoke / 証拠アーカイブ］・**成果物の生成主体明示**［LLM 生成物 vs script/lib 生成物の厳格区別］・**数値目標の単一 SoT 化**［カバレッジ%・合格率等の閾値を prose に手書きせず、閾値を強制する設定ファイル（CI workflow・validator script 等）を唯一の SoT とする。宣言値と実際の強制値が食い違う／複数箇所に重複記載されて片方だけ更新され stale 化する、という観察済みの失敗パターンを防ぐための必須条文（実コードのカバレッジ計測対象がないプロジェクトでは「合格率」「品質スコア」等の類似閾値に読み替える）］）の条文 | `description` のみ | `@import` で常時 |
 | `issue-workflow.md` | Issue 起票・handoff・/clear 規約の条文（**並走 agent 痕跡 4 軸 recheck**・stale handoff 誤受領防止・古い handoff の archive 含む） | `paths: ["issues/**", ".tmp/**"]` | path-scope |
 | `review.md` | 別エージェントレビュー規約の条文（**2〜4 本並列 + converged findings**・**TDD test-first**・ループ上限［計画 3 周 / 実装 1 周］・自己レビュー不可・**渡すのは対象完全パス + レビュー用 skill のみ**） | `paths: ["**/*.<lang>", ".claude/commands/**"]` | path-scope |
 | `governance.md` | 肥大化防止・新項目追加規約の条文を **複数観点の項目群**（サイズ閾値 / 新項目ルーティング / 公式準拠 / 定期レビュー / 自動検証 / 常時 load ファイル cap 等・増減可）で記述 | `paths: ["CLAUDE.md", ".claude/**"]` | path-scope |
