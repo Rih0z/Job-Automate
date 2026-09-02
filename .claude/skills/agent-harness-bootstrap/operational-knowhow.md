@@ -16,7 +16,7 @@ SKILL.md 本体「本スキル独自の運用ノウハウ」の索引から参�
 
 | レベル | 対象 | 目安 | 対応 |
 |------|------|------|------|
-| 剪定検討 | CLAUDE.md 本体 | 概ね 100 行 / 10KB を超え始めたら | Litmus Test で再評価。挙動が変わらないルールが埋もれていないか観察 |
+| 剪定検討 | CLAUDE.md 本体 | 概ね 100 行 / 10KB を超え始めたら | 「削除したら Claude が間違えるか」の基準で再評価。挙動が変わらないルールが埋もれていないか観察 |
 | 分割推奨 | CLAUDE.md 本体 | Claude が指示を無視し始める兆候が出たら | rules / skills / docs へ分割 |
 | 常時 load rules 個別 cap | `meta.md` / `@import` で常時 load される rules 個別 | **5KB soft cap**（独自強化） | cap 超過時は条文を path-scope rules に逃がすか、長文条文を docs/ に分離してリンク化 |
 

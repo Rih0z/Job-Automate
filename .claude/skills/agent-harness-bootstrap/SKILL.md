@@ -36,7 +36,7 @@ when_to_use: 「CLAUDE.md を作って」「`/init` の代わりに公式準拠�
 
 | URL | 取得時に現行版を確認する項目 |
 |---|---|
-| `https://code.claude.com/docs/en/best-practices`（"Write an effective CLAUDE.md" / "Avoid common failure patterns" / "Add an adversarial review step"） | Litmus Test の文言 / Include・Exclude テーブルの現行内容 / サイズ・行数の記述（数値閾値の有無）/ emphasis ガイダンス / 5 配置 + `@path` import / hooks（advisory との対比）/ Writer-Reviewer・adversarial review の注意（reviewer は gap を過剰報告しがち → correctness と明示要件に関わる gap のみ採用） |
+| `https://code.claude.com/docs/en/best-practices`（"Write an effective CLAUDE.md" / "Avoid common failure patterns" / "Add an adversarial review step"） | 行の要否判定基準の文言（**固定の名称ではなく都度の言い回しを確認する**。2026-09-02 確認時点では「削除したら Claude がミスするか」という問い掛け形式）/ Include・Exclude テーブルの現行内容 / サイズ・行数の記述（数値閾値の有無）/ emphasis ガイダンス / 5 配置 + `@path` import / hooks（advisory との対比）/ Writer-Reviewer・adversarial review の注意（reviewer は gap を過剰報告しがち → correctness と明示要件に関わる gap のみ採用） |
 | `https://code.claude.com/docs/en/skills` | SKILL.md 必須・frontmatter（`name` 任意 / `description` 推奨 / `description`+`when_to_use` の文字数上限）/ 本文の recurring token cost と簡潔性 / progressive disclosure（supporting files で参照分離）/ SKILL.md 行数の目安 / commands と skills の統合 / `disable-model-invocation` 等 |
 | `https://code.claude.com/docs/en/hooks`・`https://code.claude.com/docs/en/hooks-guide` | hook イベント別の出力契約（どの stdout が context 注入されるか / `exit 2` の意味 / `additionalContext` JSON / Stop の連続 block 上限など、hook 生成直前に現行仕様を確認） |
 
@@ -99,14 +99,14 @@ when_to_use: 「CLAUDE.md を作って」「`/init` の代わりに公式準拠�
 - デプロイ方法
 - 環境変数・OS 依存・既知の落とし穴
 - gitignore 例外（意図的に追跡しているもの）
-- **汎用規律条文の採否**（候補メニュー。各々を公式 Litmus Test に通し、プロジェクトが実際に採る規律だけを `code-quality.md` の条文にする）: モック / ハードコード禁止・バージョン番号付きファイル（`v2`/`_new`/`_old`）禁止・ルート直下への新規ファイル作成抑制・設定値の一元管理・一時しのぎでなく超長期的な根本解決・**レガシー排除**（後方互換シム・二重経路・旧スクリプトを残さず、置換が完了した旧経路は同一作業内で削除する。Git 履歴がバックアップになるため保険的に残さない）
+- **汎用規律条文の採否**（候補メニュー。各々を「削除したら Claude が間違えるか」の基準に照らし、プロジェクトが実際に採る規律だけを `code-quality.md` の条文にする）: モック / ハードコード禁止・バージョン番号付きファイル（`v2`/`_new`/`_old`）禁止・ルート直下への新規ファイル作成抑制・設定値の一元管理・一時しのぎでなく超長期的な根本解決・**レガシー排除**（後方互換シム・二重経路・旧スクリプトを残さず、置換が完了した旧経路は同一作業内で削除する。Git 履歴がバックアップになるため保険的に残さない）
 - **実行主体の使い分けの有無**（複数の AI エージェント / モデル格 / 人手を振り分ける運用があるか → あれば `execution-routing.md` 採用）
 - **プロジェクトの目的**（何を解決しようとしているのか — 1〜2 文の課題定義）
 - **進捗状況**（現在のフェーズ・主要マイルストーン達成状況・既知の未完了領域 — README / Issue / commit 履歴 / `issues/processing/*.md` から事実ベースで抽出）
 
-### Step 2: 候補セクション生成 + Litmus Test 適用
+### Step 2: 候補セクション生成 + 要否判定
 
-各セクションに公式 Litmus Test を適用:
+各セクションに「削除したら Claude が間違えるか」の基準を適用:
 
 - `# Architecture` 直下 `This project uses TypeScript.` → `package.json` で分かる → 削除
 - `テスト実行は npm run test:single -- <file>` → 推測で `npm test` されると全テスト走る → 残す
@@ -160,7 +160,7 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 レビュアが必ず実施すること（= review skill が内包する評価手順）:
 
 1. **YOU MUST** `WebFetch` で `https://code.claude.com/docs/en/best-practices` を取得する（記憶ベースで判定しない）。冒頭に取得日時と主要原則の引用を出力する
-2. 公式 Include/Exclude / Litmus Test / 5 配置 / `@import` / emphasis に対し 1 項目ずつ Y/N 評価
+2. 公式 Include/Exclude / 行の要否判定基準 / 5 配置 / `@import` / emphasis に対し 1 項目ずつ Y/N 評価
 3. 採用した rules ファイルが実在するか・条番号が通し管理されているかを Read で確認
 4. 公式該当箇所と生成 CLAUDE.md 該当行を並べて示す
 
