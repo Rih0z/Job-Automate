@@ -132,7 +132,7 @@ workflows/software-development/review-implementation.md の内容 + 対象コー
 1. `workflows/<workflow-name>/` を作成する
 2. 対応する作成プロンプト（`<対象>.md`）とレビュープロンプト（`review-<対象>.md`）をペアで管理する
 3. `workflows/<workflow-name>/README.md` に目的・使用順序・関連skills/commandsを書く
-4. `workflows/README.md` の一覧表と `README.md` のテーブルに追記する
+4. `workflows/README.md` の一覧表と `README.md` のテーブルに追記する（この step の追記漏れは `.claude/skills/workflow-coverage-and-structure/SKILL.md` で機械検査できる、2026-09-02 追加）
 
 ### Claude Code プロジェクトスキルとして追加（推奨 — git 共有される）
 
@@ -168,3 +168,5 @@ research/proposal/report 系の成果物が外部情報・過去データに基�
 ## プロジェクト構成
 
 トップレベルは `CLAUDE.md` / `README.md` / `agents.md` / `.claude/`（commands・skills）/ `workflows/`（業務ワークフロー単位のハーネス）/ `archive/`（旧プロンプト）。ワークフローごとの内訳・各ファイルの所在は [workflows/README.md](workflows/README.md) と [README.md](README.md) を参照（このファイルでは重複記載しない）。
+
+**「テストカバレッジは?」「プロジェクト構成は?」に相当する質問への回答 (2026-09-02 追加)**: `.claude/skills/workflow-coverage-and-structure/SKILL.md` で即答する（`bash .claude/skills/workflow-coverage-and-structure/scripts/workflow-doc-coverage-check.sh --report`）。上記「新しいワークフロー・スキルを追加するルール」step 4（README 追記）の機械検査として使う。

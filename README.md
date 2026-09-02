@@ -275,7 +275,7 @@ Job-Automate/
 1. `workflows/<workflow-name>/` を作成する
 2. 作成プロンプトとペアになる `review-*.md` を作成する
 3. `workflows/<workflow-name>/README.md` に目的・使用順序・関連skills/commandsを書く
-4. `workflows/README.md` の一覧表と、本ファイルに追記する
+4. `workflows/README.md` の一覧表と、本ファイルに追記する（追記漏れは `.claude/skills/workflow-coverage-and-structure/SKILL.md` で機械検査できる）
 
 ### Claude Code Skill/Command として追加（自動発動させたい場合）
 

@@ -26,7 +26,7 @@ Claude Code から自動検出される実行可能な Skills（`.claude/skills/
 2. 作成プロンプト（ゴール・制約・品質基準を簡潔に）を置く
 3. 対応するレビュープロンプト（`review-*.md`）をペアで作成する
 4. `workflows/<workflow-name>/README.md` に目的・使用順序・関連skills/commandsを書く
-5. 本ファイル（`workflows/README.md`）の一覧表と、ルート [README.md](../README.md) に追記する
+5. 本ファイル（`workflows/README.md`）の一覧表と、ルート [README.md](../README.md) に追記する（追記漏れは `.claude/skills/workflow-coverage-and-structure/SKILL.md` で機械検査できる）
 6. 汎用的に自動判定・自動レビューさせたい場合のみ、リポジトリ直下 `.claude/skills/` or `.claude/commands/` に対応する Skill/Command を追加する（[software-development/README.md](software-development/README.md#claude-code-harness-構築claudeskills) 参照）
 
 ---
