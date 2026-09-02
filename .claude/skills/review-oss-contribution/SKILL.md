@@ -45,7 +45,7 @@ Agent ツールの設定:
 以下の候補ファイルを読み、独自性・先行技術・実現可能性・戦略の4基準で審査してください。
 
 ## 行動原則
-`.claude/skills/_shared/review-rubrics.yaml`（完全パス: C:\...\Job-Automate\.claude\skills\_shared\review-rubrics.yaml）
+`.claude/skills/_shared/review-rubrics.yaml`（リポジトリルートからの相対パス）
 の `common_principles` と `severity` を Read して適用すること。
 
 ## 審査対象ファイル

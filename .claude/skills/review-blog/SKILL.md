@@ -20,7 +20,7 @@ argument-hint: "<レビュー対象記事ファイルの絶対パス>"
 
 対象: $ARGUMENTS
 
-原本（評価軸・配点・ゲート条項・出力フォーマットの一次ソース）: `C:\Users\217216X721451\github\Job-Automate\workflows\content-creation\review-blog.md`
+原本（評価軸・配点・ゲート条項・出力フォーマットの一次ソース）: `workflows/content-creation/review-blog.md`（リポジトリルートからの相対パス）
 
 原本は 956 行と長大なため、本 SKILL.md には要約のみ記載する（progressive disclosure）。
 **評価軸・配点・N/A処理ルール・ゲート条項・出力フォーマットは一切要約・改変せず、レビューエージェントに原本ファイルを直接 Read させて適用すること。**
@@ -60,7 +60,7 @@ Agent ツールの設定:
 採点してください。レビュワーは元ファイルを絶対に編集してはならない。フィードバックの提供のみ行う。
 
 ## 評価基準ファイル（必ず Read してから採点すること。要約・省略・改変禁止）
-C:\Users\217216X721451\github\Job-Automate\workflows\content-creation\review-blog.md
+workflows/content-creation/review-blog.md（このリポジトリのルートからの相対パス。呼び出し元セッションの作業ディレクトリを基準に解決すること）
 
 上記ファイルを Read し、以下を一言一句そのまま適用すること:
 - レビュー前の設定欄（A.プラットフォーム軸 / B.業界軸 / C.記事タイプ軸 / D.運用軸）

@@ -19,7 +19,7 @@ argument-hint: "<レビュー対象 HTML スライドファイルの絶対パス
 
 対象: $ARGUMENTS
 
-原本: `C:\Users\217216X721451\github\Job-Automate\workflows\content-creation\review-slides.md`
+原本: `workflows/content-creation/review-slides.md`（リポジトリルートからの相対パス）
 （対応する作成プロンプト = `.claude/skills/slides-pro/SKILL.md`）
 
 ## 実行手順
@@ -157,7 +157,7 @@ Agent ツールの設定:
 
 ## 採点方法
 
-総合点：100点満点。`.claude/skills/_shared/review-rubrics.yaml` を Read し、`verdict_scales.rank5_100` の bands/meaning に従って S/A/B/C/D を判定すること（点数帯・各段階の対応方針は同ファイルが SoT）。
+総合点：100点満点。`.claude/skills/_shared/review-rubrics.yaml` を Read し、`verdict_scales.rank5_100` の bands/meaning に従って S/A/B/C/D を判定すること（点数帯・各段階の対応方針は同ファイルが SoT）。行動原則（証拠主義・引用義務・非破壊）は同ファイルの `common_principles` を適用する。
 
 ## レビュー結果出力フォーマット
 

@@ -15,7 +15,7 @@ argument-hint: "<企画書 md ファイルの絶対パス>"
 # 企画書mdファイルからの16:9比率プレゼンテーションスライド生成プロンプト（プロフェッショナル版 v4.1）
 
 原本（完全な HTML/CSS/JS テンプレート・コンテンツガイドライン・品質チェックリストの一次ソース）:
-`C:\Users\217216X721451\github\Job-Automate\workflows\content-creation\slides-pro.md`
+`workflows/content-creation/slides-pro.md`（リポジトリルートからの相対パス）
 
 原本は 1599 行と長大なため、本 SKILL.md には要約のみ記載する（progressive disclosure）。
 **スライド生成を実行する際は、上記原本ファイルを Read し、そこに記載された完全な HTML/CSS/JS
