@@ -11,7 +11,7 @@ allowed-tools: Read
 
 # 超高級ゴンベ顔文字作成プロンプト
 
-原本: `C:\Users\217216X721451\github\Job-Automate\workflows\content-creation\creative.md`
+原本: `workflows/content-creation/creative.md`（リポジトリルートからの相対パス）
 
 ## ʕ•ﻌ•ʔฅ レベルの装飾的で立体的な可愛いゴンベ絵文字を作る完全ガイド
 

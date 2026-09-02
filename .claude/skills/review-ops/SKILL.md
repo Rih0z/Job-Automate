@@ -324,4 +324,4 @@ Agent ツールの設定:
 - サーバー初期設定 skill: `.claude/skills/server-init/SKILL.md`
 - サーバー自動化 skill: `.claude/skills/server-automation/SKILL.md`
 - Windows標準化 skill: `.claude/skills/server-windows-standard/SKILL.md`
-- 元プロンプト (SoT): `C:\Users\217216X721451\github\Job-Automate\workflows\ops-management\review-ops.md`
+- 元プロンプト (SoT): `workflows/ops-management/review-ops.md`（リポジトリルートからの相対パス）
