@@ -48,7 +48,7 @@ Claude Code でプロンプトを開発・改善するときのガイドです�
 
 | ドメイン | 例 |
 |---|---|
-| 汎用ガバナンス | `agent-harness-bootstrap`（CLAUDE.md/rules/hooks 一式生成）・`review-oss-contribution`・`skills-audit`・`skill-authoring-guide`・`stop-ai-slop-jp`（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・vendoring）・`review-gate`（工程別レビューゲート・観点はcriteria JSONで定義し育てる）・`single-session-tdd`（単一セッションTDD+独立レビュー）・`repo-hygiene-patrol`（ファイル構造衛生パトロール、2026-08-31 追加）・`blind-eval-harness`（複数サンプル盲検一括評価、2026-09-01 追加） |
+| 汎用ガバナンス | `agent-harness-bootstrap`（CLAUDE.md/rules/hooks 一式生成）・`review-oss-contribution`・`skills-audit`・`skill-authoring-guide`・`stop-ai-slop-jp`（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・vendoring）・`review-gate`（工程別レビューゲート・観点はcriteria JSONで定義し育てる）・`single-session-tdd`（単一セッションTDD+独立レビュー）・`repo-hygiene-patrol`（ファイル構造衛生パトロール、2026-08-31 追加）・`blind-eval-harness`（複数サンプル盲検一括評価、2026-09-01 追加）・`issue-lifecycle-tracking`（ファイルベース状態遷移によるIssue追跡・数値目標の単一SoT化・N回連続FAILのIssue起票エスカレーション、2026-09-03 追加） |
 | business-planning | `business-idea` / `business-proposal` / `generic-proposal` / `it-proposal` / `specification` / `ai-automation` とそれぞれの `review-*`・`multi-tenant-template-injector`（複数クライアント向けテンプレートのテナント分離、2026-09-01 追加） |
 | content-creation | `creative-text-art` / `slides-pro` / `review-blog` / `review-slides` |
 | ops-management | `year-end-adjustment-csv` / `server-automation` / `server-init` / `server-windows-standard` / `review-ops` |
