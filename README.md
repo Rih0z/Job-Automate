@@ -210,6 +210,7 @@ Job-Automate/
 | プロンプト | レビュー | 何をするか |
 |---|---|---|
 | [slides-pro.md](workflows/content-creation/slides-pro.md) | [review-slides.md](workflows/content-creation/review-slides.md) | mdファイルを渡す → ブラウザで動くHTMLスライドを生成（← →キー操作・PDF出力・16:9対応） |
+| [thumbnail-generation.md](workflows/content-creation/thumbnail-generation.md) | [review-thumbnail.md](workflows/content-creation/review-thumbnail.md) | Gemini等の画像生成AI + Claudeの役割分担で、実写真+ブランド要素統合→創造的仕上げ→CTRフック追加の3ラウンドでサムネイル画像を生成（2026-09-04追加） |
 | [review-blog.md](workflows/content-creation/review-blog.md) | — | 任意のサイト（note / Qiita / Zenn / Medium / Dev.to / 企業ブログ等）のブログ記事を11観点110点満点でレビュー。0-gate（プラットフォーム固有制約）/ 4-gate（外部主体財務・性能・評判断定）/ 9-gate（コンプライアンス・業界規制）で重大違反を即D判定 |
 | [creative.md](workflows/content-creation/creative.md) | — | ゴンベ顔文字など装飾的なテキストアートを生成する |
 | [examples/beer-project-blog.md](workflows/content-creation/examples/beer-project-blog.md) | — | ビールプロジェクトのブログ記事例 |

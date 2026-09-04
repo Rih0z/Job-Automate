@@ -9,6 +9,7 @@
 | プロンプト | レビュー | 説明 |
 |---|---|---|
 | [slides-pro.md](slides-pro.md) | [review-slides.md](review-slides.md) | HTMLスライド自動生成 v4.1 |
+| [thumbnail-generation.md](thumbnail-generation.md) | [review-thumbnail.md](review-thumbnail.md) | Gemini等の画像生成AI + Claudeの3ラウンド分業でサムネイル画像を生成(2026-09-04追加) |
 
 ### slides-pro.md が何をするか
 
@@ -27,6 +28,18 @@ mdファイル（企画書・資料）を渡すと、**ブラウザで動くHTML
 ### review-slides.md が何をするか
 
 生成済みのスライドHTMLを渡すと、視認性・情報量・構成・最終スライド品質をレビューする。
+
+---
+
+## サムネイル画像生成
+
+### thumbnail-generation.md が何をするか
+
+ブラウザ操作可能な画像生成AI(Gemini等)とClaude Codeの役割分担で、ブログ/動画のサムネイル画像を3ラウンド(土台生成→創造的仕上げ→CTRフック追加+レビュー修正)で生成する。ラウンドごとの新規チャットセッション・ブランド要素参照画像の毎回添付・サーキットブレーカー規則など、実測ベースの運用ノウハウを含む。
+
+### review-thumbnail.md が何をするか
+
+生成済みのサムネイル画像を、整合性(破綻・誤生成・架空要素)とCTR観点の2軸チェックリストでレビューし PASS/REVISE/REGENERATE を判定する。
 
 ---
 
