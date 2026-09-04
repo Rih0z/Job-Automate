@@ -17,12 +17,17 @@ ROOT="${PROVENANCE_ROOT:-$(cd "$SKILL_DIR/../../.." && pwd)}"
 STATE="${HARNESS_SETUP_STATE_DIR:-$ROOT/.tmp/harness-setup}/state.json"
 [[ -f "$STATE" ]] || exit 0
 # python3 という名前の実行ファイルが PATH にあっても動作するとは限らない（Windows の
-# Microsoft Store stub 等、`command -v` は成功するが実行すると何もしない/エラーになるケースがある）。
-# 実際に `-c "print(1)"` を実行させて動く候補を選ぶ（これを怠ると本 gate が「常に無音で通過」する
-# = 検証未完了のまま Stop できてしまう静かな機能欠落になる）。
+# Microsoft Store App Execution Alias スタブ等、実行自体がハングし `timeout` でも kill
+# できないケースが実機で確認された。これを怠ると本 gate が「常に無音で通過」する
+# = 検証未完了のまま Stop できてしまう静かな機能欠落になる）。解決済みパスが既知の壊れた
+# stub 配置（WindowsApps 配下）でないかを文字列一致だけで判定し、危険な実行を避ける。
 PYTHON=""
 for cand in python3 python py; do
-  if command -v "$cand" >/dev/null 2>&1 && "$cand" -c "print(1)" >/dev/null 2>&1; then
+  p="$(command -v "$cand" 2>/dev/null)" || continue
+  case "$p" in
+    */WindowsApps/*|*\\WindowsApps\\*) continue ;;
+  esac
+  if "$cand" -c "print(1)" >/dev/null 2>&1; then
     PYTHON="$cand"; break
   fi
 done

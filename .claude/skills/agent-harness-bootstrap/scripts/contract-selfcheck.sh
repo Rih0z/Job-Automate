@@ -16,11 +16,17 @@ ROOT="$(cd "$SKILL_DIR/../../.." && pwd)"
 MANIFEST="$SKILL_DIR/provenance.json"
 CHECK="$SKILL_DIR/scripts/provenance-check.sh"
 # python3 という名前の実行ファイルが PATH にあっても動作するとは限らない（Windows の
-# Microsoft Store stub 等）。実際に `-c "print(1)"` を実行させて動く候補を選ぶ。
+# Microsoft Store App Execution Alias スタブ等、実行自体がハングし `timeout` でも kill
+# できないケースが実機で確認された）。解決済みパスが既知の壊れた stub 配置（WindowsApps 配下）
+# でないかを文字列一致だけで判定し、危険な実行を避けてから `-c "print(1)"` で動作確認する。
 resolve_python() {
-  local cand
+  local cand p
   for cand in python3 python py; do
-    if command -v "$cand" >/dev/null 2>&1 && "$cand" -c "print(1)" >/dev/null 2>&1; then
+    p="$(command -v "$cand" 2>/dev/null)" || continue
+    case "$p" in
+      */WindowsApps/*|*\\WindowsApps\\*) continue ;;
+    esac
+    if "$cand" -c "print(1)" >/dev/null 2>&1; then
       printf '%s' "$cand"; return 0
     fi
   done
