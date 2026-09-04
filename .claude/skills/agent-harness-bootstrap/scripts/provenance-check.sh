@@ -67,14 +67,28 @@ if [[ -n "$TARGET" ]]; then
 fi
 [[ -z "$SELECTION" || -f "$SELECTION" ]] || { echo "FAIL: $SELECTION が存在しない" >&2; exit 1; }
 
-command -v python3 >/dev/null 2>&1 || { echo "FAIL: python3 が必要" >&2; exit 1; }
+# python3 という名前の実行ファイルが PATH にあっても動作するとは限らない（Windows の
+# Microsoft Store stub 等、`command -v` は成功するが実行すると何もしない/エラーになるケースがある）。
+# 実際に `-c "print(1)"` を実行させて動く候補を選ぶ。
+resolve_python() {
+  local cand
+  for cand in python3 python py; do
+    if command -v "$cand" >/dev/null 2>&1 && "$cand" -c "print(1)" >/dev/null 2>&1; then
+      printf '%s' "$cand"; return 0
+    fi
+  done
+  return 1
+}
+PYTHON="$(resolve_python)" || { echo "FAIL: 動作する python (python3 / python / py) が見つからない" >&2; exit 1; }
+# Windows のコンソールコードページ (cp1252 等) だと日本語 print() で UnicodeEncodeError になるため強制 UTF-8
+export PYTHONUTF8=1
 [[ -f "$MANIFEST" ]] || { echo "FAIL: $MANIFEST が存在しない" >&2; exit 1; }
 # files[] の相対パスは移植元リポジトリのルート基準で解決する
 cd "$ROOT" || { echo "FAIL: ROOT $ROOT に cd できない" >&2; exit 1; }
 
 # Python 側で C1〜C11 をまとめて判定し、違反行を stdout に出す（1 行 1 違反。WARN 行は違反に数えない）。
 # 末尾に "SUMMARY elements=<n> skills=<n> violations=<n>" を出す。
-OUT=$(python3 - "$MANIFEST" "$RUBRIC" "$SKILLS_DIR" "$COMMANDS_DIR" "$KNOWHOW" "$SELECTION" "$TARGET" <<'PY'
+OUT=$("$PYTHON" - "$MANIFEST" "$RUBRIC" "$SKILLS_DIR" "$COMMANDS_DIR" "$KNOWHOW" "$SELECTION" "$TARGET" <<'PY'
 import json, os, re, sys
 manifest, rubric, skills_dir, commands_dir, knowhow, selection, target = sys.argv[1:8]
 v = []

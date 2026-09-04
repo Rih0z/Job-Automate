@@ -15,12 +15,25 @@ SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ROOT="$(cd "$SKILL_DIR/../../.." && pwd)"
 MANIFEST="$SKILL_DIR/provenance.json"
 CHECK="$SKILL_DIR/scripts/provenance-check.sh"
-command -v python3 >/dev/null 2>&1 || { echo "FAIL: python3 が必要" >&2; exit 1; }
+# python3 という名前の実行ファイルが PATH にあっても動作するとは限らない（Windows の
+# Microsoft Store stub 等）。実際に `-c "print(1)"` を実行させて動く候補を選ぶ。
+resolve_python() {
+  local cand
+  for cand in python3 python py; do
+    if command -v "$cand" >/dev/null 2>&1 && "$cand" -c "print(1)" >/dev/null 2>&1; then
+      printf '%s' "$cand"; return 0
+    fi
+  done
+  return 1
+}
+PYTHON="$(resolve_python)" || { echo "FAIL: 動作する python (python3 / python / py) が見つからない" >&2; exit 1; }
+# Windows のコンソールコードページ (cp1252 等) だと日本語 print() で UnicodeEncodeError になるため強制 UTF-8
+export PYTHONUTF8=1
 
 SCRATCH="$(mktemp -d)"
 [[ "${SELFCHECK_KEEP:-0}" == "1" ]] || trap 'rm -rf "$SCRATCH"' EXIT
 
-python3 - "$MANIFEST" "$SCRATCH" "$ROOT" <<'PY'
+"$PYTHON" - "$MANIFEST" "$SCRATCH" "$ROOT" <<'PY'
 import json, os, re, sys, shutil
 manifest, tgt, root = sys.argv[1:4]
 d = json.load(open(manifest, encoding="utf-8"))

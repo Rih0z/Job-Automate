@@ -16,10 +16,22 @@ SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ROOT="${PROVENANCE_ROOT:-$(cd "$SKILL_DIR/../../.." && pwd)}"
 STATE="${HARNESS_SETUP_STATE_DIR:-$ROOT/.tmp/harness-setup}/state.json"
 [[ -f "$STATE" ]] || exit 0
-command -v python3 >/dev/null 2>&1 || exit 0
+# python3 という名前の実行ファイルが PATH にあっても動作するとは限らない（Windows の
+# Microsoft Store stub 等、`command -v` は成功するが実行すると何もしない/エラーになるケースがある）。
+# 実際に `-c "print(1)"` を実行させて動く候補を選ぶ（これを怠ると本 gate が「常に無音で通過」する
+# = 検証未完了のまま Stop できてしまう静かな機能欠落になる）。
+PYTHON=""
+for cand in python3 python py; do
+  if command -v "$cand" >/dev/null 2>&1 && "$cand" -c "print(1)" >/dev/null 2>&1; then
+    PYTHON="$cand"; break
+  fi
+done
+[[ -n "$PYTHON" ]] || exit 0
+# Windows のコンソールコードページ (cp1252 等) だと日本語 print() で UnicodeEncodeError になるため強制 UTF-8
+export PYTHONUTF8=1
 input=$(cat 2>/dev/null || true)
 
-python3 - "$STATE" "$input" <<'PY'
+"$PYTHON" - "$STATE" "$input" <<'PY'
 import json, sys
 state_path, raw = sys.argv[1], sys.argv[2]
 try:
