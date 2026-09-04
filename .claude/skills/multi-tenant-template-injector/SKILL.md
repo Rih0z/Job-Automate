@@ -2,7 +2,7 @@
 name: multi-tenant-template-injector
 description: "複数クライアント/組織向けに同じ成果物テンプレート(提案書・記事・資料)を使い回す時、クライアント固有の確定文面(免責事項・フッター・関連リンク等)をテンプレート本体にハードコードせず、クライアント別の設定ファイルから解決して注入する構造を設計・実装する。Use when the user asks to '複数クライアント向けのテンプレートを作りたい', 'クライアント固有の文言を注入したい', 'multi-tenant template', 'テンプレートの組織/クライアント分離'."
 disable-model-invocation: true
-allowed-tools: Read Grep Glob
+allowed-tools: Read Grep Glob Write Edit
 ---
 
 # マルチテナント・テンプレート注入
