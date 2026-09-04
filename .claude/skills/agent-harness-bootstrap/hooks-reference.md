@@ -17,6 +17,7 @@ SKILL.md 本体「独自運用: 規約の hooks 化判断」と生成手順 Step
 - PreToolUse は `exit 2` + stderr で block。誤 reject を避けるため対象 path を厳密にフィルタする
 - 各 script の冒頭で標準入力から event data（JSON）を受け取り、`tool_input.file_path` でフィルタする。PowerShell は `[Console]::In.ReadToEnd() | ConvertFrom-Json`、bash は `input=$(cat); jq -r '.tool_input.file_path' <<<"$input"`（または `python3` で parse）
 - エラー抑制は全域上書きせず局所化する（debug ログを潰さない）。PowerShell は各 cmdlet の `-ErrorAction SilentlyContinue`、bash は各コマンド末尾の `2>/dev/null`
+- **reject 分岐は実際に reject を return/exit しているかをコードレベルで確認する**（CLI hook script は `exit 2` の有無、SDK ベースの custom hook 関数は deny の戻り値を実際に `return` しているかを確認する）。`if` ブロック内に `print`/ログ出力はあるが実際の reject を return し忘れ、ブロック外の末尾で空の許可応答（`exit 0` 相当 / 空オブジェクト等）に到達すると、ログ上は判定が動いているように見えても実際は素通りする。生成した hook をレビューする際は「ログの文言」ではなく「reject 経路が本当に return/exit されているか」を確認する
 
 ## 参考 hook 構成（6 hook 例・すべて任意採用）
 
