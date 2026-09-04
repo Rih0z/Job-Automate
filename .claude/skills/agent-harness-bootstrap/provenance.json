@@ -59,10 +59,33 @@
         16,
         17,
         18,
-        20,
-        34
+        20
       ],
-      "depends_on": []
+      "depends_on": [],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": "CLAUDE.md"
+          },
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "<!-- id:"
+          },
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules",
+            "pattern": "<!-- id:"
+          },
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "ルート構成"
+          }
+        ],
+        "when_unselected": []
+      }
     },
     {
       "id": "official-skills-core",
@@ -91,6 +114,20 @@
       "depends_on": []
     },
     {
+      "id": "shared-anthropic-best-practices",
+      "kind": "asset",
+      "provenance": "official",
+      "source": "https://code.claude.com/docs/en/best-practices / https://code.claude.com/docs/en/skills / https://code.claude.com/docs/en/hooks",
+      "summary": "Anthropic 公式ベストプラクティス（CLAUDE.md / Skills / hooks / adversarial review）の原則を、取得日と再取得条件付きの 1 つの構造化データとして保持するファイル。agent-harness-bootstrap・harness-setup-review・skills-audit・skill-authoring-guide・review-skill が判定基準の SoT として参照し、refetch_when に該当する時は各 source_url の現行版で裏取りして更新する。",
+      "files": [
+        ".claude/skills/_shared/anthropic-best-practices.json"
+      ],
+      "rubric_items": [
+        34
+      ],
+      "depends_on": []
+    },
+    {
       "id": "official-adversarial-review",
       "kind": "principle",
       "provenance": "official",
@@ -104,7 +141,17 @@
         7,
         35
       ],
-      "depends_on": []
+      "depends_on": [],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "WebFetch"
+          }
+        ],
+        "when_unselected": []
+      }
     },
     {
       "id": "emphasis-cap-5",
@@ -119,7 +166,17 @@
       ],
       "depends_on": [
         "official-claude-md-core"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "emphasis_max",
+            "path": "CLAUDE.md",
+            "max": 5
+          }
+        ],
+        "when_unselected": []
+      }
     },
     {
       "id": "no-line-count-gate",
@@ -167,7 +224,42 @@
       ],
       "depends_on": [
         "official-claude-md-core"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/rules/meta.md"
+          },
+          {
+            "type": "file_exists",
+            "path": ".claude/rules/code-quality.md"
+          },
+          {
+            "type": "file_exists",
+            "path": ".claude/rules/test-verify.md"
+          },
+          {
+            "type": "import",
+            "path": ".claude/rules/code-quality.md"
+          },
+          {
+            "type": "import",
+            "path": ".claude/rules/test-verify.md"
+          },
+          {
+            "type": "grep",
+            "path": ".claude/rules/meta.md",
+            "pattern": "23478"
+          },
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "ルール一覧"
+          }
+        ],
+        "when_unselected": []
+      }
     },
     {
       "id": "separate-agent-review-cycle",
@@ -185,7 +277,30 @@
       ],
       "depends_on": [
         "official-adversarial-review"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/rules/review.md"
+          },
+          {
+            "type": "frontmatter_paths",
+            "path": ".claude/rules/review.md"
+          },
+          {
+            "type": "grep",
+            "path": ".claude/rules/review.md",
+            "pattern": "別エージェント"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/rules/review.md"
+          }
+        ]
+      }
     },
     {
       "id": "review-cycle-parameters",
@@ -201,7 +316,28 @@
       ],
       "depends_on": [
         "separate-agent-review-cycle"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules/review.md",
+            "pattern": "converged"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules/review.md",
+            "pattern": "converged"
+          },
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "3 回 FAIL"
+          }
+        ]
+      }
     },
     {
       "id": "hooks-promotion-judgement",
@@ -220,6 +356,30 @@
       ]
     },
     {
+      "id": "deterministic-enforcement-structured-data",
+      "kind": "rules",
+      "provenance": "official-derived",
+      "summary": "script / hook / レビュアが機械的に検査するデータ（閾値・判定基準・チェックリスト・選択記録）は散文に埋め込まず、フィールドが明示された構造化データ（JSON / YAML）で定義し、検証スクリプトで強制する。公式の『本当に保証したい規律は指示文でなく決定的な仕組みで強制する』（hooks / skills ガイド）の運用化。",
+      "applies_to": [
+        "生成 rules test-verify.md",
+        "hooks-reference.md 一般原則"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "official-hooks-contract"
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules/test-verify.md",
+            "pattern": "構造化データ"
+          }
+        ],
+        "when_unselected": []
+      }
+    },
+    {
       "id": "hooks-reference-set",
       "kind": "hooks",
       "provenance": "author-preference",
@@ -230,7 +390,21 @@
       "rubric_items": [],
       "depends_on": [
         "hooks-promotion-judgement"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/settings.json"
+          },
+          {
+            "type": "grep",
+            "path": ".claude/settings.json",
+            "pattern": "\"hooks\""
+          }
+        ],
+        "when_unselected": []
+      }
     },
     {
       "id": "size-guideline-100-lines",
@@ -244,7 +418,23 @@
       "rubric_items": [],
       "depends_on": [
         "no-line-count-gate"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "100 行"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "100 行"
+          }
+        ]
+      }
     },
     {
       "id": "always-load-5kb-cap",
@@ -260,7 +450,23 @@
       ],
       "depends_on": [
         "rules-split-progressive-disclosure"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules/meta.md",
+            "pattern": "5 ?KB"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules/meta.md",
+            "pattern": "5 ?KB"
+          }
+        ]
+      }
     },
     {
       "id": "docs-read-declaration",
@@ -274,7 +480,28 @@
       "rubric_items": [
         25
       ],
-      "depends_on": []
+      "depends_on": [],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "読込宣言"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "読込宣言"
+          },
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules",
+            "pattern": "読込宣言"
+          }
+        ]
+      }
     },
     {
       "id": "lazy-rule-declaration",
@@ -290,7 +517,23 @@
       ],
       "depends_on": [
         "rules-split-progressive-disclosure"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "条文宣言"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "条文宣言"
+          }
+        ]
+      }
     },
     {
       "id": "governance-multi-aspect",
@@ -307,7 +550,30 @@
       ],
       "depends_on": [
         "rules-split-progressive-disclosure"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/rules/governance.md"
+          },
+          {
+            "type": "frontmatter_paths",
+            "path": ".claude/rules/governance.md"
+          },
+          {
+            "type": "grep",
+            "path": ".claude/rules/governance.md",
+            "pattern": "新条文|新項目"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/rules/governance.md"
+          }
+        ]
+      }
     },
     {
       "id": "generic-discipline-menu",
@@ -323,7 +589,17 @@
       ],
       "depends_on": [
         "rules-split-progressive-disclosure"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules/code-quality.md",
+            "pattern": "レガシー|ハードコード|バージョン番号"
+          }
+        ],
+        "when_unselected": []
+      }
     },
     {
       "id": "issue-lifecycle",
@@ -343,7 +619,40 @@
         12,
         13
       ],
-      "depends_on": []
+      "depends_on": [],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/rules/issue-workflow.md"
+          },
+          {
+            "type": "frontmatter_paths",
+            "path": ".claude/rules/issue-workflow.md"
+          },
+          {
+            "type": "grep",
+            "path": ".claude/rules/issue-workflow.md",
+            "pattern": "issues/open"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "issues/open"
+          },
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules",
+            "pattern": "issues/open"
+          },
+          {
+            "type": "dir_absent",
+            "path": "issues"
+          }
+        ]
+      }
     },
     {
       "id": "close-verification-4-steps",
@@ -361,7 +670,23 @@
       "soft_depends_on": [
         "issue-lifecycle"
       ],
-      "note": "issue-lifecycle 非選択時は第 4 段の証拠アーカイブ先を issues/closed/ でなく PR 本文・テストログ等の実在する場所に置き換える"
+      "note": "issue-lifecycle 非選択時は第 4 段の証拠アーカイブ先を issues/closed/ でなく PR 本文・テストログ等の実在する場所に置き換える",
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules/test-verify.md",
+            "pattern": "negative test"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules/test-verify.md",
+            "pattern": "negative test"
+          }
+        ]
+      }
     },
     {
       "id": "handoff-management",
@@ -383,7 +708,41 @@
       "soft_depends_on": [
         "issue-lifecycle"
       ],
-      "note": "issue-lifecycle 非採用時は issue 紐付けなしの命名 [YYYY-MM-DD]-[識別単語].md のみを使う"
+      "note": "issue-lifecycle 非採用時は issue 紐付けなしの命名 [YYYY-MM-DD]-[識別単語].md のみを使う",
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules/issue-workflow.md",
+            "pattern": "handoff"
+          },
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "handoff"
+          },
+          {
+            "type": "gitignore",
+            "pattern": ".tmp/"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "handoff"
+          },
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules",
+            "pattern": "handoff"
+          },
+          {
+            "type": "dir_absent",
+            "path": ".tmp/handoffs"
+          }
+        ]
+      }
     },
     {
       "id": "concurrent-agent-4-axis-recheck",
@@ -403,7 +762,28 @@
       "soft_depends_on": [
         "issue-lifecycle"
       ],
-      "note": "issue-lifecycle 非選択時は axis 1 の <issue_path> を作業対象ファイルのパスに読み替える"
+      "note": "issue-lifecycle 非選択時は axis 1 の <issue_path> を作業対象ファイルのパスに読み替える",
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules/issue-workflow.md",
+            "pattern": "worktree"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules",
+            "pattern": "4 軸"
+          },
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "4 軸"
+          }
+        ]
+      }
     },
     {
       "id": "session-restore-hook",
@@ -425,7 +805,23 @@
       "soft_depends_on": [
         "concurrent-agent-4-axis-recheck"
       ],
-      "note": "concurrent-agent-4-axis-recheck 非選択時は verdict を注入せずポインタのみ通知する"
+      "note": "concurrent-agent-4-axis-recheck 非選択時は verdict を注入せずポインタのみ通知する",
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/settings.json",
+            "pattern": "SessionStart"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": ".claude/settings.json",
+            "pattern": "hook-session-start"
+          }
+        ]
+      }
     },
     {
       "id": "execution-routing",
@@ -442,7 +838,25 @@
       ],
       "depends_on": [
         "rules-split-progressive-disclosure"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/rules/execution-routing.md"
+          },
+          {
+            "type": "import",
+            "path": ".claude/rules/execution-routing.md"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/rules/execution-routing.md"
+          }
+        ]
+      }
     },
     {
       "id": "docs-management",
@@ -458,7 +872,25 @@
       ],
       "depends_on": [
         "rules-split-progressive-disclosure"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/rules/docs-management.md"
+          },
+          {
+            "type": "frontmatter_paths",
+            "path": ".claude/rules/docs-management.md"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/rules/docs-management.md"
+          }
+        ]
+      }
     },
     {
       "id": "converged-autonomy",
@@ -471,7 +903,23 @@
       "rubric_items": [],
       "depends_on": [
         "review-cycle-parameters"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules",
+            "pattern": "収束"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules",
+            "pattern": "収束型"
+          }
+        ]
+      }
     },
     {
       "id": "artifact-generator-attribution",
@@ -485,7 +933,23 @@
       "rubric_items": [
         30
       ],
-      "depends_on": []
+      "depends_on": [],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules/test-verify.md",
+            "pattern": "生成主体"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules/test-verify.md",
+            "pattern": "生成主体"
+          }
+        ]
+      }
     },
     {
       "id": "numeric-target-single-sot",
@@ -508,7 +972,23 @@
       "soft_depends_on": [
         "skill-repo-hygiene-patrol"
       ],
-      "note": "機械検査（repo-hygiene-patrol の numeric_target_drift）を入れるなら skill-repo-hygiene-patrol も選択する。本要素だけの採用は test-verify.md の条文のみ"
+      "note": "機械検査（repo-hygiene-patrol の numeric_target_drift）を入れるなら skill-repo-hygiene-patrol も選択する。本要素だけの採用は test-verify.md の条文のみ",
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules/test-verify.md",
+            "pattern": "SoT"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules/test-verify.md",
+            "pattern": "単一 SoT"
+          }
+        ]
+      }
     },
     {
       "id": "skill-mcp-quality-inheritance",
@@ -550,7 +1030,8 @@
       ],
       "rubric_items": [],
       "depends_on": [
-        "official-skills-core"
+        "official-skills-core",
+        "shared-anthropic-best-practices"
       ]
     },
     {
@@ -563,8 +1044,24 @@
       ],
       "rubric_items": [],
       "depends_on": [
-        "official-skills-core"
+        "official-skills-core",
+        "shared-anthropic-best-practices"
       ]
+    },
+    {
+      "id": "skill-harness-setup-review",
+      "kind": "skill",
+      "provenance": "official-derived",
+      "summary": "別プロジェクトへの setup 完了後に、選択した全観点が対象へ反映されているか（抜けゼロ）と非選択の著者嗜好が混入していないか（混入ゼロ）を、機械検査（provenance-check.sh --target）と別エージェントの突合レビュー（criteria/porting-reconciliation.json）で判定し、両方 PASS するまで setup を完了扱いにしない。移植元でのみ実行し対象へはコピーしない。",
+      "skills": [
+        "harness-setup-review"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "official-adversarial-review",
+        "shared-anthropic-best-practices"
+      ],
+      "portable": false
     },
     {
       "id": "review-commands",
@@ -577,7 +1074,8 @@
       ],
       "rubric_items": [],
       "depends_on": [
-        "separate-agent-review-cycle"
+        "separate-agent-review-cycle",
+        "shared-anthropic-best-practices"
       ],
       "files": [
         "workflows/software-development/review-changes.md",
@@ -786,7 +1284,23 @@
         "CLAUDE.md アップロードポリシー"
       ],
       "rubric_items": [],
-      "depends_on": []
+      "depends_on": [],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "アップロードポリシー"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "アップロードポリシー"
+          }
+        ]
+      }
     },
     {
       "id": "claude-md-response-rules",
@@ -797,7 +1311,17 @@
         "CLAUDE.md 応答ルール"
       ],
       "rubric_items": [],
-      "depends_on": []
+      "depends_on": [],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "完全パス"
+          }
+        ],
+        "when_unselected": []
+      }
     },
     {
       "id": "claude-md-add-before-check",
@@ -812,7 +1336,17 @@
       ],
       "depends_on": [
         "separate-agent-review-cycle"
-      ]
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "追加前"
+          }
+        ],
+        "when_unselected": []
+      }
     },
     {
       "id": "claude-md-citation-recommendation",
@@ -823,7 +1357,23 @@
         "CLAUDE.md 根拠明記の推奨"
       ],
       "rubric_items": [],
-      "depends_on": []
+      "depends_on": [],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "根拠明記"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "根拠明記"
+          }
+        ]
+      }
     },
     {
       "id": "claude-md-review-skill-index",
@@ -862,5 +1412,19 @@
       "depends_on": [],
       "portable": false
     }
-  ]
+  ],
+  "target_contract_schema": {
+    "description": "各要素の target_contract は、対象プロジェクトの生成物に対する決定的な契約。when_selected は選択時に必ず満たす条件、when_unselected は非選択時に必ず満たす条件（混入禁止）。provenance-check.sh --target <対象> が評価する（C12）。path は対象ルート基準の相対パス。契約に無い要素は突合レビュー（LLM）のみで判定する。skills[] / commands[] / files[] の存在・不在は契約に書かなくても自動で検査する。",
+    "check_types": {
+      "file_exists": "path のファイルが存在する",
+      "file_absent": "path が存在しない",
+      "dir_absent": "path のディレクトリが存在しない",
+      "grep": "path（ファイルまたはディレクトリ再帰）に pattern（正規表現）が現れる。path が無ければ違反",
+      "grep_absent": "path に pattern が現れない。path が無ければ合格",
+      "import": "CLAUDE.md に '@<path>' の行があり、かつ path が存在する",
+      "frontmatter_paths": "path の frontmatter に paths: がある（path-scope rules）",
+      "emphasis_max": "path 内の IMPORTANT / YOU MUST の出現が max 以下",
+      "gitignore": ".gitignore に pattern の行がある"
+    }
+  }
 }

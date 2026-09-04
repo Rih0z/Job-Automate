@@ -17,6 +17,8 @@ metadata:
 
 ## Anthropic公式ベストプラクティス基準
 
+> 基準の SoT は `.claude/skills/_shared/anthropic-best-practices.json`（`category: skills` の principle 群。取得日 `fetched` と再取得条件 `refetch_when` 付き）。監査開始時に `fetched` を確認し、`refetch_when` に該当すれば `source_url` を WebFetch して現行版と突合してから採点する。下記チェックリストは同ファイルの要約であり、食い違う場合は構造化データ側を正とする。
+
 ### 1. ファイル形式チェック
 - [ ] 新形式 `.claude/skills/<name>/SKILL.md` を使用しているか（旧形式 `.claude/commands/*.md` は非推奨）
 - [ ] YAMLフロントマター (`---` で囲まれた設定) が存在するか
@@ -79,6 +81,8 @@ Agent ツールの設定:
 [ここに対象ファイルの絶対パスを埋め込む]
 
 ## Anthropic公式ベストプラクティス基準
+
+> 基準の SoT は `.claude/skills/_shared/anthropic-best-practices.json`（`category: skills` の principle 群。取得日 `fetched` と再取得条件 `refetch_when` 付き）。監査開始時に `fetched` を確認し、`refetch_when` に該当すれば `source_url` を WebFetch して現行版と突合してから採点する。下記チェックリストは同ファイルの要約であり、食い違う場合は構造化データ側を正とする。
 
 ### 1. ファイル形式チェック
 - [ ] 新形式 `.claude/skills/<name>/SKILL.md` を使用しているか（旧形式 `.claude/commands/*.md` は非推奨）

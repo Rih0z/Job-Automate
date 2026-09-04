@@ -47,6 +47,6 @@ id 列と台帳の整合（双方向）は `scripts/provenance-check.sh` で機�
 | 31 | close 前検証 4 段（再現→pass / negative test / regression smoke / 証拠アーカイブ）が `test-verify.md` または issue lifecycle に明記されている | close-verification-4-steps |  |
 | 32 | 別エージェントレビューが 2〜4 本並列 + converged findings 抽出・TDD test-first・ループ上限（計画 3 / 実装 1）で `review.md` に明記され、レビュアに渡すのは**対象完全パス + レビュー用 skill のみ**になっている | review-cycle-parameters / separate-agent-review-cycle |  |
 | 33 | stale handoff（7 日以上前 / 完了済 / 次 session 不要）を提示時に注記し user が誤選択しないようにする設計が明記されている | handoff-management |  |
-| 34 | 公式（best-practices / skills / hooks）の文言・テーブル・数値・API 契約を本プロンプトに焼き込まず、生成・レビュー開始時に WebFetch で取得し現行版で判定する設計（焼き込み版が残っていない） | official-claude-md-core |  |
+| 34 | 公式（best-practices / skills / hooks）の文言・テーブル・数値・API 契約を本プロンプトに焼き込まず、`_shared/anthropic-best-practices.json`（取得日 `fetched` + `refetch_when` 付き）を参照し、該当時は WebFetch で現行版と突合する設計（日付・再取得条件の無い転記が残っていない） | shared-anthropic-best-practices |  |
 | 35 | reviewer への過剰報告抑制（reviewer は gap を過剰報告しがち → correctness と明示要件に関わる gap のみ採用）が明記されている | official-adversarial-review |  |
 | 36 | `test-verify.md` に数値目標の単一 SoT 化条文（閾値は強制する設定ファイルのみを SoT とし prose に重複記載しない。カバレッジ%が無い場合は合格率等に読み替え）があり、生成 CLAUDE.md / rules の prose に閾値の重複記載が無い | numeric-target-single-sot |  |

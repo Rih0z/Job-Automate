@@ -48,7 +48,7 @@ Claude Code でプロンプトを開発・改善するときのガイドです�
 
 | ドメイン | 例 |
 |---|---|
-| 汎用ガバナンス | `agent-harness-bootstrap`（CLAUDE.md/rules/hooks 一式生成）・`review-oss-contribution`・`skills-audit`・`skill-authoring-guide`・`stop-ai-slop-jp`（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・vendoring）・`review-gate`（工程別レビューゲート・観点はcriteria JSONで定義し育てる）・`single-session-tdd`（単一セッションTDD+独立レビュー）・`repo-hygiene-patrol`（ファイル構造衛生パトロール、2026-08-31 追加）・`blind-eval-harness`（複数サンプル盲検一括評価、2026-09-01 追加）・`issue-lifecycle-tracking`（ファイルベース状態遷移によるIssue追跡・数値目標の単一SoT化・N回連続FAILのIssue起票エスカレーション、2026-09-03 追加） |
+| 汎用ガバナンス | `agent-harness-bootstrap`（CLAUDE.md/rules/hooks 一式生成。由来台帳 `provenance.json` と公式ベストプラクティスの構造化データ `_shared/anthropic-best-practices.json` を参照）・`harness-setup-review`（setup 後の抜け・混入検査、2026-09-04 追加）・`review-oss-contribution`・`skills-audit`・`skill-authoring-guide`・`stop-ai-slop-jp`（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・vendoring）・`review-gate`（工程別レビューゲート・観点はcriteria JSONで定義し育てる）・`single-session-tdd`（単一セッションTDD+独立レビュー）・`repo-hygiene-patrol`（ファイル構造衛生パトロール、2026-08-31 追加）・`blind-eval-harness`（複数サンプル盲検一括評価、2026-09-01 追加）・`issue-lifecycle-tracking`（ファイルベース状態遷移によるIssue追跡・数値目標の単一SoT化・N回連続FAILのIssue起票エスカレーション、2026-09-03 追加） |
 | business-planning | `business-idea` / `business-proposal` / `generic-proposal` / `it-proposal` / `specification` / `ai-automation` とそれぞれの `review-*`・`multi-tenant-template-injector`（複数クライアント向けテンプレートのテナント分離、2026-09-01 追加） |
 | content-creation | `creative-text-art` / `slides-pro` / `review-blog` / `review-slides` |
 | ops-management | `year-end-adjustment-csv` / `server-automation` / `server-init` / `server-windows-standard` / `review-ops` |
@@ -152,10 +152,10 @@ workflows/software-development/review-implementation.md の内容 + 対象コー
 このリポジトリには **Anthropic 公式ベストプラクティス由来の要素**と**著者の運用嗜好**（issue フォルダ管理・handoff 規約・並走 4 軸 recheck・SessionStart hook 等）が同居している。別プロジェクトへ移す時に両者を混ぜたまま持ち込まないため、要素ごとの由来は `.claude/skills/agent-harness-bootstrap/provenance.json` を唯一の SoT として管理し（各 SKILL.md の frontmatter `metadata.provenance` は台帳の写し）、以下の手順で「何を取り込み、何を取り込まないか」を**ユーザーが決める**:
 
 1. `provenance.json` の全要素（本 CLAUDE.md の各セクションも `claude-md-*` 要素として登録済み）を列挙した**移植チェックリスト**を最初に作る（列挙の完全性は維持する。黙って省略しない）。チェックリストの実体は手順 4 で書く `harness-selection.json`（全要素分の entry）そのものであり、別ファイルは作らない。
-2. 各要素を由来ラベルで分けて提示する: `official`（公式由来・デフォルト採用）/ `official-derived`（公式原則の具体化・推奨、外せる）/ `author-preference` `third-party` `domain-prompt`（著者の嗜好等・**デフォルト非採用**、ユーザーが選んだものだけ採用）/ `repo-specific`（本リポジトリ固有・移植不可）。手順の本体は `.claude/skills/agent-harness-bootstrap/selection-flow.md`。
+2. 各要素を由来ラベルで分けて提示する: `official`（公式由来・**必ず採用、外せない**）/ `official-derived`（公式原則の具体化・推奨、外せる）/ `author-preference` `third-party` `domain-prompt`（著者の嗜好等・**デフォルト非採用**、ユーザーが選んだものだけ採用）/ `repo-specific`（本リポジトリ固有・移植不可）。手順の本体は `.claude/skills/agent-harness-bootstrap/selection-flow.md`。
 3. ユーザーに選択を取る（対話: `AskUserQuestion` / 非対話: `default_selection` のみ採用し、その旨を報告冒頭に明記。ユーザーの好みを推測で補わない）。`depends_on` を欠く選択は成立しないと示して選び直させ、`soft_depends_on` の欠落は警告のみで台帳の `note` に従う縮退形を採用する。
 4. 決定を対象の `.claude/harness-selection.json` に全要素分（非選択も `selected: false` で）記録し、以降の生成（`agent-harness-bootstrap` Step 1〜8）・skills コピー・criteria JSON の対象固有調整は選択済み要素だけを対象にする。**非選択の著者嗜好要素を「念のため」持ち込まない**。
-5. 移植完了後、**別エージェント**に突合レビューをさせる。渡すのは対象パス 3 点（移植元 `provenance.json`・対象 `harness-selection.json`・対象ルート）と観点定義 `.claude/skills/agent-harness-bootstrap/criteria/porting-reconciliation.json` のパスのみ。(a) 選択済み要素の抜けゼロ (b) 非選択要素の混入ゼロ (c) 選択記録の完全性（`provenance-check.sh --selection` で機械確認）を確認してから完了報告する。
+5. 移植完了後、**`harness-setup-review` skill を実行する（省略不可）**: (a) `provenance-check.sh --target <対象>` による決定的な契約検査（選択済み要素の抜けゼロ・非選択要素の混入ゼロ・選択記録の完全性）(b) **別エージェント**の突合レビュー（渡すのは対象パス 3 点と観点定義 `.claude/skills/agent-harness-bootstrap/criteria/porting-reconciliation.json` のみ）(c) 対象に既存 skills があれば `skills-audit` で公式準拠を監査。(a)(b) が両方 PASS するまで完了報告しない。移植元 clone の `.claude/settings.json` に登録した Stop hook が、検証前の終了を block して強制する。
 
 「数値目標の単一 SoT 化」条文（`test-verify.md`）について: 2026-09-01 制定時は N/A 判定不可の必須項目としていたが、2026-09-04 に `author-preference`（default `recommend` = 事前チェック済みだがユーザーが外せる）へ再分類した。公式根拠のない著者の運用判断であり、「採用の決定はユーザーが行う」という本節の趣旨と矛盾するため。採用時は機械検査として `repo-hygiene-patrol` の「数値目標の整合性ドリフト」check を持つ `skill-repo-hygiene-patrol` の選択を勧める（未選択なら `test-verify.md` の条文のみ。台帳 id: `numeric-target-single-sot`、`soft_depends_on`）。
 

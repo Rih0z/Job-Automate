@@ -13,6 +13,9 @@
 - [ ] 本スキル自身の手順（Step 7 の 3 回 FAIL 起票・Step 8 の handoff 保存）が、対象で `issue-lifecycle` / `handoff-management` 非選択の時に非選択要素のディレクトリを作らない分岐になっているか
 - [ ] author-preference の要素が Step 0（`selection-flow.md`）を経ずに Step 1〜8 で無条件生成される経路が無いか（「念のため」持ち込みの禁止）
 - [ ] 各 `.claude/skills/*/SKILL.md` の frontmatter `metadata.provenance` が台帳と一致しているか（provenance-check C6）
+- [ ] 新規要素に `target_contract`（選択時に生成物へ必ず現れる語句・ファイル / 非選択時に現れてはならないもの）を定義し、`provenance-check.test.sh` に `--target` のケースを足したか。`scripts/contract-selfcheck.sh` が PASS するか（契約同士の矛盾検出。T45 でも走る）
+- [ ] 公式ドキュメントを WebFetch した時、`_shared/anthropic-best-practices.json` の該当 principle と `fetched` を更新したか（差分が無くても `fetched` は進める）
+- [ ] Step 9（`harness-setup-review`）と Stop hook（`hook-stop-setup-gate.sh`）の state 遷移（selecting → generated → verified → done）が `harness-setup-state.sh` と一致しているか
 - [ ] emphasis（IMPORTANT / YOU MUST）が本スキル全体で 5 件以下か（語気強め「必須・禁止・削除不可・絶対」も平叙文化されているか）
 - [ ] 公式内容（文言・テーブル・数値・API 契約）を焼き込まず実行時 WebFetch 取得に統一されているか（verbatim・テーブル転記が残っていないか）
 - [ ] handoff 受領が user 明示指示駆動で、SessionStart hook がポインタ + verdict のみ注入（本文を注入しない）になっているか

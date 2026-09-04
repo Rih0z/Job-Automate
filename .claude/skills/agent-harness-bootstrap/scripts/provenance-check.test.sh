@@ -23,6 +23,8 @@
 #   T28-T30 skill-group の部分選択（skills[] 必須・部分集合）(C11)
 #   T31-T32 decided_by:excluded ⇔ repo-specific の対応 (C11)
 #   T33 cwd 非依存（別ディレクトリから絶対パスで実行）
+#   T34-T44 --target の契約検査 (C12): マーカー残存・混入・paths:・import・.setup-automate gitignore・official 必須・抜け
+#   T45 実台帳の契約自己検査（contract-selfcheck.sh が default 選択で PASS）
 # 実行: bash .claude/skills/agent-harness-bootstrap/scripts/provenance-check.test.sh
 
 set -uo pipefail
@@ -199,6 +201,46 @@ write_sel '"core":{"selected":true,"decided_by":"default"},"grp":{"selected":fal
 t "T32 群 D が excluded 以外なら FAIL" 1 "$(runs)"
 write_sel '"core":{"selected":true,"decided_by":"default"},"grp":{"selected":true,"decided_by":"user","skills":["alpha"]},"rs":{"selected":false,"decided_by":"excluded"}'
 t "T33 別 cwd（/）から絶対パス指定で実行しても PASS（cwd 非依存）" 0 "$(cd / && PROVENANCE_MANIFEST="$FIX/harness/provenance.json" PROVENANCE_RUBRIC="$FIX/harness/rubric.md" bash "$CHECK" --selection "$FIX/harness/sel.json" >/dev/null 2>&1; echo $?)"
+
+# C12: --target（生成物の契約検査）。beta は rs（repo-specific）が所有するので metadata を合わせる
+mkdir -p tgt/.claude/rules tgt/.claude/skills
+write_skill beta repo-specific
+write_manifest '{"id":"core","provenance":"official","rubric_items":[1,2,"28b"],"target_contract":{"when_selected":[{"type":"file_exists","path":"CLAUDE.md"},{"type":"grep_absent","path":"CLAUDE.md","pattern":"<!-- id:"},{"type":"emphasis_max","path":"CLAUDE.md","max":5}],"when_unselected":[]}},{"id":"split","provenance":"official","target_contract":{"when_selected":[{"type":"file_exists","path":".claude/rules/code-quality.md"},{"type":"import","path":".claude/rules/code-quality.md"},{"type":"frontmatter_paths","path":".claude/rules/review.md"}],"when_unselected":[]}},{"id":"issue","provenance":"author-preference","target_contract":{"when_selected":[{"type":"grep","path":".claude/rules","pattern":"issues/open"}],"when_unselected":[{"type":"grep_absent","path":"CLAUDE.md","pattern":"issues/open"},{"type":"dir_absent","path":"issues"}]}},{"id":"grp","kind":"skill-group","provenance":"author-preference","skills":["alpha"]},{"id":"rs","provenance":"repo-specific","skills":["beta"]}'
+write_sel_t() { printf '{"schema":"harness-selection/v1","decided_by":"user","selections":{%s}}' "$1" > tgt/.claude/harness-selection.json; }
+runt() { PROVENANCE_MANIFEST=harness/provenance.json PROVENANCE_RUBRIC=harness/rubric.md bash "$CHECK" --target tgt >/dev/null 2>&1; echo $?; }
+write_sel_t '"core":{"selected":true,"decided_by":"default"},"split":{"selected":true,"decided_by":"default"},"issue":{"selected":false,"decided_by":"user"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}'
+printf '# CLAUDE.md\n\n@.claude/rules/code-quality.md\n\n## ルート構成\nIMPORTANT: x\n' > tgt/CLAUDE.md
+printf -- '---\ndescription: cq\n---\n# cq\n' > tgt/.claude/rules/code-quality.md
+printf -- '---\ndescription: r\npaths:\n  - "**/*.ts"\n---\n# review\n' > tgt/.claude/rules/review.md
+t "T34 契約を満たす生成物は PASS" 0 "$(runt)"
+printf '# CLAUDE.md\n<!-- id: core -->\n@.claude/rules/code-quality.md\n' > tgt/CLAUDE.md
+t "T35 id マーカーが残っていれば FAIL" 1 "$(runt)"
+printf '# CLAUDE.md\n\n@.claude/rules/code-quality.md\n' > tgt/CLAUDE.md
+mkdir -p tgt/issues
+t "T36 非選択要素のディレクトリ（issues/）があれば FAIL（混入）" 1 "$(runt)"
+rmdir tgt/issues
+printf -- '---\ndescription: r\n---\n# review\n' > tgt/.claude/rules/review.md
+t "T37 path-scope rules に paths: が無ければ FAIL" 1 "$(runt)"
+printf -- '---\ndescription: r\npaths:\n  - "**/*.ts"\n---\n# review\n' > tgt/.claude/rules/review.md
+mkdir -p tgt/.claude/skills/alpha && echo "---" > tgt/.claude/skills/alpha/SKILL.md
+t "T38 非選択 skill が対象にあれば FAIL（混入）" 1 "$(runt)"
+rm -rf tgt/.claude/skills/alpha
+printf '# CLAUDE.md\n\n## x\n' > tgt/CLAUDE.md
+t "T39 選択要素の import 行が無ければ FAIL（名ばかり常時 load）" 1 "$(runt)"
+printf '# CLAUDE.md\n\n@.claude/rules/code-quality.md\n' > tgt/CLAUDE.md
+mkdir -p tgt/.setup-automate
+t "T40 .setup-automate/ があるのに .gitignore 未登録なら FAIL" 1 "$(runt)"
+printf '.setup-automate/\n' > tgt/.gitignore
+t "T41 .gitignore に登録すれば PASS" 0 "$(runt)"
+write_sel_t '"core":{"selected":false,"decided_by":"user"},"split":{"selected":true,"decided_by":"default"},"issue":{"selected":false,"decided_by":"user"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}'
+t "T42 official 要素を selected:false にすると FAIL（公式由来は外せない）" 1 "$(runt)"
+write_sel_t '"core":{"selected":true,"decided_by":"default"},"split":{"selected":true,"decided_by":"default"},"issue":{"selected":true,"decided_by":"user"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}'
+t "T43 選択した要素の契約語句（issues/open）が rules に無ければ FAIL（抜け）" 1 "$(runt)"
+printf -- '---\ndescription: iw\npaths:\n  - "issues/**"\n---\n# issue-workflow\nissues/open に起票\n' > tgt/.claude/rules/issue-workflow.md
+t "T44 契約語句を含めれば PASS" 0 "$(runt)"
+
+# 実台帳の契約自己検査（default 選択で契約が満たせる・矛盾しない）。fixture ではなく本リポジトリの台帳で走る
+t "T45 実台帳: default 選択の target_contract は満たせて矛盾しない（contract-selfcheck.sh）" 0 "$(env -u PROVENANCE_ROOT -u PROVENANCE_KNOWHOW bash "$(dirname "$CHECK")/contract-selfcheck.sh" >/dev/null 2>&1; echo $?)"
 
 echo "---"
 echo "PASS=$PASS FAIL=$FAIL"

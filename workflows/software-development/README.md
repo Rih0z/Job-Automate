@@ -11,6 +11,7 @@
 | Skill | 何をするか |
 |---|---|
 | [agent-harness-bootstrap](../../.claude/skills/agent-harness-bootstrap/SKILL.md) | 任意のプロジェクトに Anthropic ベストプラクティス準拠の `CLAUDE.md` + `.claude/rules/` + hooks 一式を生成・剪定する。要素ごとの由来（公式 / 公式原則の具体化 / 著者嗜好 / 第三者）を [provenance.json](../../.claude/skills/agent-harness-bootstrap/provenance.json) で分け、別プロジェクトへ適用する時は著者嗜好をデフォルト非採用にしてユーザーが取捨選択する（[selection-flow.md](../../.claude/skills/agent-harness-bootstrap/selection-flow.md)） |
+| [harness-setup-review](../../.claude/skills/harness-setup-review/SKILL.md) | 別プロジェクトへの setup 完了後に、選択した全観点の反映（抜けゼロ）と非選択の著者嗜好の不在（混入ゼロ）を機械検査 + 別エージェント突合で判定し、PASS するまで完了扱いにしない |
 | [review-oss-contribution](../../.claude/skills/review-oss-contribution/SKILL.md) | OSS貢献候補を独自性・先行技術・実現可能性・戦略の4基準で審査しGO/HOLD/REJECTを判定する |
 | [skills-audit](../../.claude/skills/skills-audit/SKILL.md) | リポジトリ内の全Skillsを一括監査しGOOD/MIGRATE/IMPROVE/SPLITを判定する |
 | [stop-ai-slop-jp](../../.claude/skills/stop-ai-slop-jp/SKILL.md) | AIで書いた日本語を人間の文章に戻す（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・Daichi Nagashima 作、vendoring） |

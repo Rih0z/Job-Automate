@@ -24,12 +24,18 @@
 #       decided_by が user/default/excluded/scale・selected:true の depends_on が全て selected:true・repo-specific / portable:false が非選択
 #       skill-group は selected:true なら skills[] が空でなく要素の skills の部分集合・repo-specific / portable:false ⇔ decided_by:excluded
 #       （soft_depends_on の欠落は WARN 表示のみ・違反に数えない）
-#   実行場所: cwd に依存しない（既定パスは本スクリプトの位置から解決。環境変数・--selection の相対パスは呼び出し時の cwd 基準）
+#       official の要素は selected:true が必須（公式由来は外せない）
+#   C12 --target <対象ルート> 指定時: 対象の生成物を台帳の target_contract と突合する（--selection 省略時は
+#       <対象>/.claude/harness-selection.json）。選択要素の when_selected / 非選択要素の when_unselected を全て評価し、
+#       skills[] / commands[] / files[] の存在・不在も自動で検査する。共通: <!-- id: --> マーカーの残存禁止、
+#       対象に .setup-automate/ があれば .gitignore に登録されていること
+#   実行場所: cwd に依存しない（既定パスは本スクリプトの位置から解決。環境変数・--selection・--target の相対パスは呼び出し時の cwd 基準）
 #
 # usage:
 #   bash .claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh            # check（違反あれば exit 1）
 #   bash .claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh --report   # 件数サマリーのみ（exit 0）
 #   bash .claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh --selection <対象>/.claude/harness-selection.json  # C11 も検査
+#   bash .claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh --target <対象ルート>   # C11 + C12（生成物の契約検査）
 
 set -uo pipefail
 # 既定パスは本スクリプトの位置（移植元リポジトリの skill ディレクトリ）から解決し、cwd に依存しない。
@@ -45,14 +51,20 @@ KNOWHOW="$(abs_list "${PROVENANCE_KNOWHOW:-$SKILL_DIR/operational-knowhow.md:$SK
 SKILLS_DIR="$(abs "${PROVENANCE_SKILLS_DIR:-$ROOT/.claude/skills}")"
 COMMANDS_DIR="$(abs "${PROVENANCE_COMMANDS_DIR:-$ROOT/.claude/commands}")"
 
-MODE="check"; SELECTION=""
+MODE="check"; SELECTION=""; TARGET=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --report) MODE="report"; shift ;;
     --selection) SELECTION="${2:-}"; [[ -n "$SELECTION" ]] || { echo "FAIL: --selection にはパスが必要" >&2; exit 1; }; SELECTION="$(abs "$SELECTION")"; shift 2 ;;
+    --target) TARGET="${2:-}"; [[ -n "$TARGET" ]] || { echo "FAIL: --target にはパスが必要" >&2; exit 1; }; TARGET="$(abs "$TARGET")"; shift 2 ;;
     *) echo "FAIL: 不明な引数 $1" >&2; exit 1 ;;
   esac
 done
+if [[ -n "$TARGET" ]]; then
+  [[ -d "$TARGET" ]] || { echo "FAIL: --target $TARGET がディレクトリでない" >&2; exit 1; }
+  [[ -n "$SELECTION" ]] || SELECTION="$TARGET/.claude/harness-selection.json"
+  [[ -f "$SELECTION" ]] || { echo "FAIL: 選択記録 $SELECTION が無い（Step 0 を経ていない生成物は検査できない）" >&2; exit 1; }
+fi
 [[ -z "$SELECTION" || -f "$SELECTION" ]] || { echo "FAIL: $SELECTION が存在しない" >&2; exit 1; }
 
 command -v python3 >/dev/null 2>&1 || { echo "FAIL: python3 が必要" >&2; exit 1; }
@@ -62,9 +74,9 @@ cd "$ROOT" || { echo "FAIL: ROOT $ROOT に cd できない" >&2; exit 1; }
 
 # Python 側で C1〜C11 をまとめて判定し、違反行を stdout に出す（1 行 1 違反。WARN 行は違反に数えない）。
 # 末尾に "SUMMARY elements=<n> skills=<n> violations=<n>" を出す。
-OUT=$(python3 - "$MANIFEST" "$RUBRIC" "$SKILLS_DIR" "$COMMANDS_DIR" "$KNOWHOW" "$SELECTION" <<'PY'
+OUT=$(python3 - "$MANIFEST" "$RUBRIC" "$SKILLS_DIR" "$COMMANDS_DIR" "$KNOWHOW" "$SELECTION" "$TARGET" <<'PY'
 import json, os, re, sys
-manifest, rubric, skills_dir, commands_dir, knowhow, selection = sys.argv[1:7]
+manifest, rubric, skills_dir, commands_dir, knowhow, selection, target = sys.argv[1:8]
 v = []
 warns = []
 try:
@@ -194,6 +206,8 @@ if selection:
                 v.append(f"C11 selection '{i}': repo-specific / portable:false の要素は decided_by:excluded にする")
             if not is_group_d and ent.get("decided_by") == "excluded":
                 v.append(f"C11 selection '{i}': decided_by:excluded は repo-specific / portable:false の要素にのみ使う")
+            if e.get("provenance") == "official" and ent.get("selected") is not True:
+                v.append(f"C11 selection '{i}': official（Anthropic 公式由来）の要素は外せない。selected:true にする")
             if not ent["selected"]:
                 continue
             if is_group_d:
@@ -215,6 +229,120 @@ if selection:
             for dep in e.get("soft_depends_on", []):
                 if not _sel(dep):
                     warns.append(f"WARN selection '{i}': soft_depends_on '{dep}' が非選択 → 縮退形で採用: {e.get('note', '(note なし)')}")
+
+# C12: --target 指定時、対象の生成物を target_contract と突合
+if target and selection:
+    try:
+        sel_doc = json.load(open(selection, encoding="utf-8"))
+        sels = sel_doc.get("selections", {}) if isinstance(sel_doc, dict) else {}
+    except Exception:
+        sels = {}
+    by_id = {e.get("id"): e for e in elements}
+    def tp(p):
+        return os.path.join(target, p)
+    def files_under(p):
+        if os.path.isfile(p):
+            return [p]
+        out = []
+        for root, _, fs in os.walk(p):
+            for f in fs:
+                if f.endswith((".md", ".json", ".sh", ".yaml", ".yml", ".ps1", ".txt")):
+                    out.append(os.path.join(root, f))
+        return out
+    def grep_any(p, pattern):
+        ap = tp(p)
+        if not os.path.exists(ap):
+            return None
+        rx = re.compile(pattern)
+        for f in files_under(ap):
+            try:
+                if rx.search(open(f, encoding="utf-8", errors="ignore").read()):
+                    return True
+            except OSError:
+                continue
+        return False
+    claude_md = ""
+    if os.path.isfile(tp("CLAUDE.md")):
+        claude_md = open(tp("CLAUDE.md"), encoding="utf-8", errors="ignore").read()
+    def run_check(c, eid, mode):
+        ty = c.get("type"); p = c.get("path", ""); pat = c.get("pattern", "")
+        ok, msg = True, ""
+        if ty == "file_exists":
+            ok = os.path.isfile(tp(p)); msg = f"{p} が無い"
+        elif ty == "file_absent":
+            ok = not os.path.exists(tp(p)); msg = f"{p} が存在する（非選択要素の混入）"
+        elif ty == "dir_absent":
+            ok = not os.path.isdir(tp(p)); msg = f"{p}/ が存在する（非選択要素の混入）"
+        elif ty == "grep":
+            r = grep_any(p, pat); ok = (r is True); msg = f"{p} に /{pat}/ が無い" + ("（path 自体が無い）" if r is None else "")
+        elif ty == "grep_absent":
+            r = grep_any(p, pat); ok = (r is not True); msg = f"{p} に /{pat}/ が現れている（非選択要素の混入）"
+        elif ty == "import":
+            ok = os.path.isfile(tp(p)) and re.search(r"^@" + re.escape(p) + r"\s*$", claude_md, re.M) is not None
+            msg = f"CLAUDE.md に '@{p}' の行が無いか {p} が無い（名ばかり常時 load）"
+        elif ty == "frontmatter_paths":
+            ap = tp(p); ok = False
+            if os.path.isfile(ap):
+                txt = open(ap, encoding="utf-8", errors="ignore").read()
+                m = re.match(r"^---\n(.*?)\n---", txt, re.S)
+                ok = bool(m and re.search(r"^paths:", m.group(1), re.M))
+            msg = f"{p} の frontmatter に paths: が無い（path-scope になっていない）"
+        elif ty == "emphasis_max":
+            ap = tp(p); n = 0
+            if os.path.isfile(ap):
+                n = len(re.findall(r"IMPORTANT|YOU MUST", open(ap, encoding="utf-8", errors="ignore").read()))
+            ok = n <= int(c.get("max", 5)); msg = f"{p} の emphasis が {n} 件（上限 {c.get('max', 5)}）"
+        elif ty == "gitignore":
+            gi = tp(".gitignore"); ok = False
+            if os.path.isfile(gi):
+                ok = any(l.strip() == pat for l in open(gi, encoding="utf-8", errors="ignore"))
+            msg = f".gitignore に '{pat}' の行が無い"
+        else:
+            ok = False; msg = f"未知の check type '{ty}'"
+        if not ok:
+            v.append(f"C12 {eid} [{mode}] {ty}: {msg}")
+    def is_selected(i):
+        d0 = sels.get(i)
+        return isinstance(d0, dict) and d0.get("selected") is True
+    required_files = set()
+    for e in elements:
+        if is_selected(e.get("id")):
+            required_files.update(e.get("files", []))
+    for e in elements:
+        eid = e.get("id"); selected = is_selected(eid)
+        contract = e.get("target_contract", {})
+        for c in contract.get("when_selected" if selected else "when_unselected", []):
+            run_check(c, eid, "selected" if selected else "unselected")
+        # skills / commands / files の自動検査
+        chosen = sels.get(eid, {}).get("skills") if isinstance(sels.get(eid), dict) else None
+        for s in e.get("skills", []):
+            want = selected and (e.get("kind") != "skill-group" or (isinstance(chosen, list) and s in chosen))
+            exists = os.path.isfile(tp(f".claude/skills/{s}/SKILL.md"))
+            if want and not exists:
+                v.append(f"C12 {eid} [selected] skill: .claude/skills/{s}/SKILL.md が無い")
+            if (not want) and exists:
+                v.append(f"C12 {eid} [unselected] skill: .claude/skills/{s}/ が存在する（非選択 skill の混入）")
+        for cmd in e.get("commands", []):
+            exists = os.path.isfile(tp(f".claude/commands/{cmd}.md"))
+            if selected and not exists:
+                v.append(f"C12 {eid} [selected] command: .claude/commands/{cmd}.md が無い")
+            if (not selected) and exists:
+                v.append(f"C12 {eid} [unselected] command: .claude/commands/{cmd}.md が存在する（非選択 command の混入）")
+        for f in e.get("files", []):
+            exists = os.path.exists(tp(f))
+            if selected and not exists:
+                v.append(f"C12 {eid} [selected] file: {f} が無い")
+            if (not selected) and exists and f not in required_files:
+                v.append(f"C12 {eid} [unselected] file: {f} が存在する（非選択要素の付随ファイルの混入）")
+    # 共通契約
+    if re.search(r"<!-- id:", claude_md):
+        v.append("C12 common: CLAUDE.md に <!-- id: --> マーカーが残っている")
+    if grep_any(".claude/rules", r"<!-- id:") is True:
+        v.append("C12 common: .claude/rules に <!-- id: --> マーカーが残っている")
+    if os.path.isdir(tp(".setup-automate")):
+        gi = tp(".gitignore")
+        if not (os.path.isfile(gi) and any(l.strip() == ".setup-automate/" for l in open(gi, encoding="utf-8", errors="ignore"))):
+            v.append("C12 common: .setup-automate/ があるのに .gitignore に '.setup-automate/' が無い")
 
 # C6: 各 SKILL.md の metadata.provenance と台帳の突合
 n_skills = 0

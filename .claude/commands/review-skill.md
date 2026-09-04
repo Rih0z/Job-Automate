@@ -5,6 +5,7 @@
 > 作成済みの Claude Code スラッシュコマンド / Claude.ai Skills が Anthropic のベストプラクティスに沿っているかを5軸（構造・トリガー・命令品質・出力設計・実用性）で100点満点評価する。
 > 詳細な評価基準は `workflows/software-development/review-skill.md` を参照。
 > 評価の根拠となるマニュアルは `workflows/software-development/skills-building-guide.md`。
+> 公式原則の構造化データ: `.claude/skills/_shared/anthropic-best-practices.json`（`category: skills` の principle 群。`fetched` と `refetch_when` を確認し、該当時は `source_url` を WebFetch して現行版と突合する）を判定基準の SoT として参照する。
 
 ---
 

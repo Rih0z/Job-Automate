@@ -4,7 +4,7 @@ AIを活用した業務自動化・開発効率化のためのプロンプトラ
 
 このリポジトリは 2 種類の知見を、由来を分けて持つ:
 
-- **Anthropic 公式ベストプラクティス**（"Write an effective CLAUDE.md" / Skills / hooks）を取り入れている。文言は焼き込まず、生成・レビューのたびに公式ドキュメントの現行版を取得して判定する。
+- **Anthropic 公式ベストプラクティス**（"Write an effective CLAUDE.md" / Skills / hooks）を全て取り入れている。原則は取得日と再取得条件付きの 1 つの構造化データ [anthropic-best-practices.json](.claude/skills/_shared/anthropic-best-practices.json) に保持し、各 skill が判定基準として参照する。該当時は公式ドキュメントの現行版で裏取りして更新する。
 - **日々 AI と開発しながら気づいた改善点**（レビューの別エージェント分離、issue フォルダ管理、handoff 規約、並走 recheck、数値目標の単一 SoT 化 等）を還元している。失敗パターンから得た運用ノウハウは、公式由来と混ざらないよう「著者の運用嗜好」として台帳 [provenance.json](.claude/skills/agent-harness-bootstrap/provenance.json) に登録する。
 
 別プロジェクトへは、公式由来をデフォルトで入れ、著者の運用嗜好はあなたが選んだものだけを入れる（下記クイックスタート）。どのプロジェクトでも同じ土台（公式準拠の生成 + 選択記録 + 別エージェントの突合レビュー）で CLAUDE.md を作るので、生成物は同じ基準で揃う。何がどこまで揃うかは「品質の保証範囲」を参照。
@@ -14,10 +14,11 @@ AIを活用した業務自動化・開発効率化のためのプロンプトラ
 | 揃うもの | 仕組み |
 |---|---|
 | 公式基準への準拠 | 生成時に公式ドキュメントを WebFetch し、別エージェントが 36 項目のルーブリックを全 Y になるまで判定する（`agent-harness-bootstrap` Step 7） |
-| 構成（何が入り、何が入らないか） | 選択記録 `harness-selection.json` を `provenance-check.sh --selection` で機械検証し、突合レビューで「選択済みの抜けゼロ・非選択の混入ゼロ」を must_pass 判定する |
+| 構成（何が入り、何が入らないか） | 台帳の各要素が持つ契約（選択時に必ず現れる語句・ファイル・`@import`・`paths:` / 非選択時に現れてはならないもの）を `provenance-check.sh --target` が**決定的に**検査し、別エージェントの突合レビューで「選択済みの抜けゼロ・非選択の混入ゼロ」を must_pass 判定する。両方 PASS するまで `harness-setup-review` が完了を認めず、Stop hook が終了を block する |
+| 既存 skills の公式準拠 | setup 前から対象にある skills を `skills-audit` が公式ベストプラクティス基準で監査し tier を報告する |
 | 台帳と実体の整合 | `provenance-check.sh` の 11 検査 + 33 件の regression test |
 
-保証しないもの: ルーブリック判定は LLM レビュアによる Y/N で、完全な決定性はない。生成後のドリフトは、governance.md や hooks を選んだ場合と再同期時にしか検出されない。プロジェクトごとに選ぶ著者嗜好の集合は異なるので、揃うのは「公式準拠の土台 + 記録された差分」であり、全プロジェクトが同一の CLAUDE.md になるわけではない。
+保証しないもの: 構造・語句の契約は決定的だが、条文の中身の良し悪し（ルーブリックの Y/N）は LLM レビュアの判定で、完全な決定性はない。生成後のドリフトは、governance.md や hooks を選んだ場合と再同期時にしか検出されない。プロジェクトごとに選ぶ著者嗜好の集合は異なるので、揃うのは「公式準拠の土台 + 記録された差分」であり、全プロジェクトが同一の CLAUDE.md になるわけではない。
 
 ---
 
@@ -47,11 +48,13 @@ git clone <このリポジトリの URL> .setup-automate && printf '.setup-autom
 cd .setup-automate   # ← ここで Claude Code を起動する
 ```
 
+この clone の `.claude/settings.json` には SessionStart / Stop の hook が登録されている。setup の進行中（選択 → 生成 → 検証）だけ動き、検証（`harness-setup-review`）を PASS する前に Claude が終了しようとすると block する。setup をしていない時は何もしない。
+
 ### 手順
 
 1. 上記のとおり `.setup-automate/` に clone し、**その中で** Claude Code を起動する（対象ルートで起動するとこのリポジトリの CLAUDE.md が読み込まれず、下記の指示が効かない）。clone するだけでは何も自動実行されない（Claude Code は明示的な指示なしにファイルを実行しない設計のため、次の一言だけは必要）。
 2. 「親ディレクトリ（`..`）をセットアップして」と伝える（表現は厳密でなくてよい。「ここの仕組みを `..` にも入れて」「`<対象の絶対パス>` をセットアップして」等でも同じ手順が走る — 詳細な発火条件は [CLAUDE.md](CLAUDE.md)「他プロジェクトのセットアップ依頼への対応」参照）。
-3. 以降は Claude Code が `CLAUDE.md` の**完全列挙 + 由来別選択ルール**を実行する: 全要素を載せた選択記録（= 移植チェックリスト）の作成 → **由来別（Anthropic 公式由来 / 公式原則の具体化 / 著者の運用嗜好 / 第三者 / 業務プロンプト）に提示し、何を取り込むかをあなたが選ぶ**（著者嗜好はデフォルト非採用） → 選択を対象の `.claude/harness-selection.json` に記録 → `.claude/skills/agent-harness-bootstrap` で対象 CLAUDE.md を生成 → 選択した skills をコピー → 別エージェントで「選択済みの抜けゼロ・非選択の混入ゼロ」を突合レビュー。由来の台帳は [provenance.json](.claude/skills/agent-harness-bootstrap/provenance.json)、選択手順は [selection-flow.md](.claude/skills/agent-harness-bootstrap/selection-flow.md)。
+3. 以降は Claude Code が `CLAUDE.md` の**完全列挙 + 由来別選択ルール**を実行する: 全要素を載せた選択記録（= 移植チェックリスト）の作成 → **由来別（Anthropic 公式由来 / 公式原則の具体化 / 著者の運用嗜好 / 第三者 / 業務プロンプト）に提示し、何を取り込むかをあなたが選ぶ**（著者嗜好はデフォルト非採用） → 選択を対象の `.claude/harness-selection.json` に記録 → `.claude/skills/agent-harness-bootstrap` で対象 CLAUDE.md を生成 → 選択した skills をコピー → `harness-setup-review` で「選択済みの抜けゼロ・非選択の混入ゼロ」を機械検査 + 別エージェント突合レビュー（両方 PASS するまで Stop hook が終了を block）→ 既存 skills があれば `skills-audit` で公式準拠を監査。由来の台帳は [provenance.json](.claude/skills/agent-harness-bootstrap/provenance.json)、選択手順は [selection-flow.md](.claude/skills/agent-harness-bootstrap/selection-flow.md)。
 4. 完了後、対象側で `CLAUDE.md`・`.claude/`・（採用時）`workflows/software-development/` をコミットする。`.setup-automate/` と `.tmp/` はコミットしない。
 
 ### 検証と再同期

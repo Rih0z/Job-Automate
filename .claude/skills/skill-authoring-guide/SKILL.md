@@ -8,6 +8,7 @@ metadata:
 # Claude Skills 作成マニュアル
 
 > **出典**: Anthropic "The Complete Guide to Building Skills for Claude" (PDF)
+> **構造化データ**: 公式原則の要約は `.claude/skills/_shared/anthropic-best-practices.json`（`category: skills`）が SoT。本文と食い違う場合は構造化データ側を正とし、`refetch_when` に該当すれば公式 docs を WebFetch して更新する。
 > **用途**: Skills の設計・作成・テスト・配布のリファレンス。`/review-skill` の評価基準として参照する。
 
 ---

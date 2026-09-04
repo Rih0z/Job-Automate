@@ -25,7 +25,11 @@ metadata:
 | `provenance.json` | 由来台帳（SoT）。全要素の provenance / default_selection / depends_on / rubric_items / 対応 skills | Step 0 / Step 5 / Step 7 / 本スキル改修時 |
 | `selection-flow.md` | Step 0 の手順: 由来別の提示・ユーザー選択の取り方・依存検証・対象への `harness-selection.json` 記録・突合レビュー | Step 0 |
 | `scripts/provenance-check.sh` | 台帳と実体（skills / commands / 付随 files の存在・rubric 番号と id 列の双方向・operational-knowhow の provenance 行・各 SKILL.md の `metadata.provenance`）の整合検査。`--selection <path>` で対象の `harness-selection.json` も検証（regression: `provenance-check.test.sh`） | Step 0-6 / 本スキル改修時 |
-| `criteria/porting-reconciliation.json` | 移植完了後の突合レビュー観点（review-gate 形式: 記録の完全性 / 抜けゼロ / 混入ゼロ / 依存整合 / 報告の開示） | Step 0 突合レビュー |
+| `scripts/contract-selfcheck.sh` | 台帳の `target_contract` が default 選択で満たせて矛盾しないことの自己検査（生成物の最小雛形を scratch に組み立てて `--target` を通す） | 本スキル改修時 |
+| `criteria/porting-reconciliation.json` | 移植完了後の突合レビュー観点（review-gate 形式: 記録の完全性 / 抜けゼロ / 混入ゼロ / 依存整合 / 報告の開示） | Step 9（`harness-setup-review`） |
+| `../_shared/anthropic-best-practices.json` | Anthropic 公式ベストプラクティスの構造化データ（取得日 + 再取得条件付き。全 skill 共通の判定基準 SoT） | 公式準拠の核 / Step 2 / Step 7 |
+| `scripts/harness-setup-state.sh` | 別プロジェクト setup の進行状態（selecting → generated → verified → done）。Stop hook の block 根拠 | Step 0 / Step 8 / Step 9 |
+| `scripts/hook-stop-setup-gate.sh` / `scripts/hook-session-start-setup.sh` | このリポジトリの `.claude/settings.json` に登録された hook。検証前の終了を block / 進行中 setup のポインタ通知 | 自動 |
 | `template.md` | CLAUDE.md 本体の出力テンプレート（雛形・ブロックごとに要素 id マーカー付き） | Step 4 |
 | `rubric.md` | 自己評価ルーブリック 36 項目（Y/N・要素 id 列付き。非選択要素の項目は opt-out 宣言で Y） | Step 5 / Step 7 |
 | `hooks-reference.md` | hooks 化判断・参考 6 hook 構成・settings.json 例・hook script 雛形（PowerShell / bash） | Step 8-3 |
@@ -48,7 +52,9 @@ metadata:
 | `https://code.claude.com/docs/en/skills` | SKILL.md 必須・frontmatter（`name` 任意 / `description` 推奨 / `description`+`when_to_use` の文字数上限）/ 本文の recurring token cost と簡潔性 / progressive disclosure（supporting files で参照分離）/ SKILL.md 行数の目安 / commands と skills の統合 / `disable-model-invocation` 等 |
 | `https://code.claude.com/docs/en/hooks`・`https://code.claude.com/docs/en/hooks-guide` | hook イベント別の出力契約（どの stdout が context 注入されるか / `exit 2` の意味 / `additionalContext` JSON / Stop の連続 block 上限など、hook 生成直前に現行仕様を確認） |
 
-取得後、冒頭に「取得日時 + 確認した現行原則の要点」を出力してから生成・レビューに進む。この WebFetch は省略しない。
+取得後、冒頭に「取得日時 + 確認した現行原則の要点」を出力してから生成・レビューに進む。
+
+**構造化データ（参照の SoT）**: 公式原則の要約は `.claude/skills/_shared/anthropic-best-practices.json` に 1 つの構造化データとして保持する（各原則に `id` / `source_url` / `statement` / `check` / `used_by`、ファイル全体に取得日 `fetched` と再取得条件 `refetch_when`）。本スキル・`harness-setup-review`・`skills-audit`・`skill-authoring-guide`・`review-skill` はこのファイルを判定基準として参照する。生成・レビュー開始時は `fetched` を確認し、`refetch_when` に該当すれば上記 URL を WebFetch して現行版と突合し、差分があれば同ファイルを更新して `fetched` を進める。WebFetch に失敗した場合、`fetched` が `max_age_days` 以内なら構造化データで判定を続け、報告に「公式現行版との突合未実施」と明記する。超過していれば取得できるまで中断する（日付と再取得条件を持たない転記だけが焼き込み禁止の対象）。
 
 ### 本スキル由来の独自運用基準（公式転記ではない・保持する）
 
@@ -95,17 +101,17 @@ metadata:
 
 ## 生成手順
 
-Step 0 で由来別の選択を確定し、次に**選択済み要素の範囲内で**「規模に応じたスケール調整」を行い（フル装備を上限に、該当条文の無い rules・毎回実行したい規律の無い hooks・採用判定を通らないオプションを落とす。落とした要素は `harness-selection.json` に `selected: false, decided_by: "scale"` で追記し、選択記録と生成物を一致させる）、Step 1〜8 へ進む。
+Step 0 で由来別の選択を確定し、次に**選択済み要素の範囲内で**「規模に応じたスケール調整」を行い（フル装備を上限に、該当条文の無い rules・毎回実行したい規律の無い hooks・採用判定を通らないオプションを落とす。落とした要素は `harness-selection.json` に `selected: false, decided_by: "scale"` で追記し、選択記録と生成物を一致させる）、Step 1〜8 で生成し、Step 9 の検証を PASS させて完了とする。対象が別プロジェクトの時、Step 0 の冒頭で `bash <本スキル dir>/scripts/harness-setup-state.sh start <対象の絶対パス>` を実行して state を作る（この clone の Stop hook が、Step 9 を PASS するまで終了を block する）。
 
 ### Step 0: 由来別の取捨選択（対象が別プロジェクトの時）
 
 手順の本体は `selection-flow.md`。要点:
 
-1. `provenance.json` を Read し、要素を 4 群で提示する: A `official`（デフォルト採用）/ B `official-derived`、および `default_selection_override: recommend` を持つ要素（推奨・事前チェック済み・外せる）/ C それ以外の `author-preference` `third-party` `domain-prompt`（**デフォルト非採用**・選んだものだけ）/ D `repo-specific`（移植不可・提示のみ）
-2. 対話可能なら `AskUserQuestion`（multiSelect）で C から取り込む要素を選ばせ、A・B から外す要素の有無を聞く。対話不可なら `default_selection` のみ採用し、その旨を最終報告の冒頭に明記する（ユーザーの好みを推測で補わない）
+1. `provenance.json` を Read し、要素を 4 群で提示する: A `official`（**必ず採用・外せない**。`provenance-check.sh` C11 が `selected: false` を拒否する）/ B `official-derived`、および `default_selection_override: recommend` を持つ要素（推奨・事前チェック済み・外せる）/ C それ以外の `author-preference` `third-party` `domain-prompt`（**デフォルト非採用**・選んだものだけ）/ D `repo-specific`（移植不可・提示のみ）
+2. 対話可能なら `AskUserQuestion`（multiSelect）で C から取り込む要素を選ばせ、B から外す要素の有無を聞く（A は聞かない）。対話不可なら `default_selection` のみ採用し、その旨を最終報告の冒頭に明記する（ユーザーの好みを推測で補わない）
 3. `depends_on` を欠く選択は成立しないことを示して再確認する
 4. 決定を対象の `.claude/harness-selection.json` に**全要素分**（非選択も `selected: false` で）記録する
-5. 以降の Step は選択済み要素だけを対象にする。非選択の author-preference 要素は rules 条文・hooks・template ブロック・skills コピー・付随 `files` のいずれにも現れてはならない
+5. 以降の Step は選択済み要素だけを対象にする。非選択の author-preference 要素は rules 条文・hooks・template ブロック・skills コピー・付随 `files` のいずれにも現れてはならない。逆に選択した要素は台帳の `target_contract`（契約語句・ファイル・`@import`・`paths:`）を生成物に必ず含める（Step 9 の `provenance-check.sh --target` が決定的に検査する）
 6. 記録を `bash <本スキル dir>/scripts/provenance-check.sh --selection <対象の絶対パス>/.claude/harness-selection.json` で機械検証する（全要素の網羅・`decided_by` の値域・`depends_on` の充足・repo-specific の非選択・skill-group の `skills[]`。cwd に依存しないので任意の場所から実行できる）
 
 Step 0 は省略しない。対話が取れない場合も `default_selection` で `harness-selection.json` を生成する（省略 = 非対話扱い）。rubric の opt-out 判定はこの記録だけを根拠にするため、記録の無い生成では author-preference 要素を全て検査対象として扱う（事実上の必須化）。唯一の例外はこのリポジトリ自身の CLAUDE.md 剪定（新しい生成物を作らない）。
@@ -205,7 +211,7 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 |---|---|---|---|---|
 | `meta.md` | 条インデックス（条見出し + 所在ファイル）+ **既知の制約（[claude-code Issue #23478](https://github.com/anthropics/claude-code/issues/23478) の path-scope auto-load Read 時のみ発火 bug を URL 付きで明記）**。`always-load-5kb-cap` 採用時のみ **常時 load ファイル 5KB soft cap 宣言** を加える | rules-split-progressive-disclosure / always-load-5kb-cap | なし | 常時 |
 | `code-quality.md` | コード変更規約（命名・import・型）の条文。`generic-discipline-menu` 採用時は Step 1 で採否判定を通った汎用規律条文を加える | rules-split-progressive-disclosure / generic-discipline-menu | `description` のみ | `@import` で常時 |
-| `test-verify.md` | テスト・自検証規約（ランナー・lint・受入基準）。採用時のみ加える条文: **close 前検証 4 段**［再現→pass / negative test / regression smoke / 証拠アーカイブ・`close-verification-4-steps`］・**成果物の生成主体明示**［LLM 生成物 vs script/lib 生成物の厳格区別・`artifact-generator-attribution`］・**数値目標の単一 SoT 化**［カバレッジ%・合格率等の閾値を prose に手書きせず、閾値を強制する設定ファイル（CI workflow・validator script 等）を唯一の SoT とする。宣言値と実際の強制値が食い違う／複数箇所に重複記載されて片方だけ更新され stale 化する、という観察済みの失敗パターンを防ぐ条文。`numeric-target-single-sot`・author-preference だが default `recommend`（事前チェック済み・ユーザーが外せる）。実コードのカバレッジ計測対象がないプロジェクトでは「合格率」「品質スコア」等の類似閾値に読み替える］ | rules-split-progressive-disclosure / close-verification-4-steps / artifact-generator-attribution / numeric-target-single-sot | `description` のみ | `@import` で常時 |
+| `test-verify.md` | テスト・自検証規約（ランナー・lint・受入基準）+ **機械検査対象データの構造化**［script / hook / レビュアが検査する閾値・基準・チェックリストは散文でなく構造化データ（JSON / YAML）で定義し検証スクリプトで強制する・`deterministic-enforcement-structured-data`］。採用時のみ加える条文: **close 前検証 4 段**［再現→pass / negative test / regression smoke / 証拠アーカイブ・`close-verification-4-steps`］・**成果物の生成主体明示**［LLM 生成物 vs script/lib 生成物の厳格区別・`artifact-generator-attribution`］・**数値目標の単一 SoT 化**［カバレッジ%・合格率等の閾値を prose に手書きせず、閾値を強制する設定ファイル（CI workflow・validator script 等）を唯一の SoT とする。宣言値と実際の強制値が食い違う／複数箇所に重複記載されて片方だけ更新され stale 化する、という観察済みの失敗パターンを防ぐ条文。`numeric-target-single-sot`・author-preference だが default `recommend`（事前チェック済み・ユーザーが外せる）。実コードのカバレッジ計測対象がないプロジェクトでは「合格率」「品質スコア」等の類似閾値に読み替える］ | rules-split-progressive-disclosure / deterministic-enforcement-structured-data / close-verification-4-steps / artifact-generator-attribution / numeric-target-single-sot | `description` のみ | `@import` で常時 |
 | `issue-workflow.md`（**選択依存**） | Issue 起票・handoff・/clear 規約の条文（`issue-lifecycle`）+ handoff 命名・保持・user 明示指示受領・stale handoff 誤受領防止・archive（`handoff-management`）+ **並走 agent 痕跡 4 軸 recheck**（`concurrent-agent-4-axis-recheck`）。選択された要素の条文だけを載せる | issue-lifecycle / handoff-management / concurrent-agent-4-axis-recheck | `paths: ["issues/**", ".tmp/**"]` | path-scope |
 | `review.md` | 別エージェントレビュー規約の条文（**渡すのは対象完全パス + レビュー用 skill のみ**・自己レビュー不可・skills 更新時の公式 Skills ガイド WebFetch レビュー = `separate-agent-review-cycle`）。`review-cycle-parameters` 採用時のみ **2〜4 本並列 + converged findings**・**TDD test-first**・ループ上限［計画 3 周 / 実装 1 周］・90 点合格・3 回 FAIL 中断を加える | separate-agent-review-cycle / official-adversarial-review / official-skills-core / review-cycle-parameters | `paths: ["**/*.<lang>", ".claude/commands/**"]` | path-scope |
 | `governance.md`（**選択依存**） | 肥大化防止・新項目追加規約の条文を **複数観点の項目群**（サイズ閾値 / 新項目ルーティング / 公式準拠 / 定期レビュー / 自動検証 / 常時 load ファイル cap 等・増減可）で記述。非採用時は official 由来の「新しい○○を追加する手順」（rubric 18）を CLAUDE.md 本体の 2〜3 行の節として残す | governance-multi-aspect | `paths: ["CLAUDE.md", ".claude/**"]` | path-scope |
@@ -226,6 +232,10 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 - **由来別の選択結果**（Step 0 実施時）: 群 C（著者嗜好・第三者・業務プロンプト）で採用した要素の一覧、群 A・B で外した要素と理由、対話不可で default のみ採用した場合はその旨
 - **スケール調整で意図的に落とした要素**（採用しなかった rules / hooks / オプションファイルと、その理由を 1 行ずつ）
 - レビュア合格の事実（公式項目 + rubric 全 Y）と、レビュアが冒頭に出力した WebFetch 取得日時
+
+### Step 9: setup 後レビュー（対象が別プロジェクトの時は必須・省略不可）
+
+生成が終わったら `bash <本スキル dir>/scripts/harness-setup-state.sh phase generated` を実行し、**`harness-setup-review` skill を実行する**。同 skill は (1) `provenance-check.sh --target <対象>` による決定的な契約検査（選択要素の抜け・非選択要素の混入・マーカー残存・`@import` と `paths:`）、(2) `criteria/porting-reconciliation.json` による別エージェントの突合レビュー、(3) 対象に既存 skills があれば `skills-audit` による公式ベストプラクティス準拠の監査、を行い、(1)(2) が両方 PASS した時だけ `harness-setup-state.sh verify --machine PASS --review PASS` → `done` で state を閉じる。この clone の Stop hook は `done` 前の終了を block する（3 回 FAIL で中断してユーザーに報告）。最終報告には Step 9 の機械検査出力・レビュー verdict・既存 skills の tier を含める。
 
 大タスク完了のため `/clear` を促す。対象で `handoff-management` が選択済みなら `/clear` 前に handoff を保存する（命名・保持・issue 連携の規約本体は「独自運用: handoff 管理」を正本とし、ここでは参照のみ）。非選択なら handoff は作らず、最終報告を引継ぎとする。
 
