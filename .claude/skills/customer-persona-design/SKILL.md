@@ -1,6 +1,8 @@
 ---
 name: customer-persona-design
 description: "Guides a structured customer-persona analysis (demographics, Jobs-to-be-Done, pain points) and converts the findings into concrete IBM Carbon-based design decisions (color palette, typography, UX patterns, information architecture). Use when the user asks to 'ペルソナ分析して', '顧客ペルソナを作って', 'ターゲットユーザーからデザイン方針を決めて', or is starting a new product/UI design from scratch."
+metadata:
+  provenance: domain-prompt
 ---
 
 # 顧客ペルソナ分析 → デザイン設計プロンプト

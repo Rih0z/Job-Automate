@@ -1,0 +1,866 @@
+{
+  "schema": "harness-provenance/v1",
+  "updated": "2026-09-04",
+  "purpose": "このリポジトリの harness 要素（原則・rules・hooks・skills・CLAUDE.md セクション）ごとに『Anthropic 公式ベストプラクティス由来』か『著者の運用嗜好』かの由来（provenance）を記録する唯一の SoT。別プロジェクトへのセットアップ時に selection-flow.md がこのファイルを読み、由来別にユーザーへ提示して取捨選択させる。両者を混ぜたまま他環境へ持ち込まないための分離台帳。",
+  "provenance_levels": {
+    "official": {
+      "label": "公式由来",
+      "default_selection": "include",
+      "description": "Anthropic 公式ドキュメント（best-practices / skills / hooks）に根拠がある要素。文言は焼き込まず、生成時に WebFetch で現行版を取得する。デフォルト採用。外す場合はユーザーが明示する。"
+    },
+    "official-derived": {
+      "label": "公式原則の具体化",
+      "default_selection": "recommend",
+      "description": "公式が示す原則（例: Writer/Reviewer 分離・progressive disclosure・hooks による決定的強制）を著者が具体的な手順・パラメータに落としたもの。原則は公式、実装は著者。推奨（事前チェック済み）だがユーザーが外せる。"
+    },
+    "author-preference": {
+      "label": "著者の運用嗜好",
+      "default_selection": "ask",
+      "description": "公式に根拠がない、著者の観察・失敗経験に基づく運用判断（issue フォルダ管理・handoff 規約・並走 recheck 等）。デフォルト非採用。ユーザーが明示的に選んだものだけ持ち込む。"
+    },
+    "third-party": {
+      "label": "第三者由来（vendoring）",
+      "default_selection": "ask",
+      "description": "外部作者の成果物を vendoring したもの。ライセンス表記を保ったまま、ユーザーが選んだ時のみコピーする。"
+    },
+    "domain-prompt": {
+      "label": "業務ドメインプロンプト",
+      "default_selection": "ask",
+      "description": "harness とは無関係な業務用プロンプト skill 群。対象プロジェクトの業務に該当するものだけをユーザーが選ぶ。"
+    },
+    "repo-specific": {
+      "label": "本リポジトリ固有",
+      "default_selection": "exclude",
+      "description": "Job-Automate 自身の構成・索引に依存し、他プロジェクトへ移植する意味がない要素。提示はするが採用不可。"
+    }
+  },
+  "selection_values": {
+    "include": "デフォルト採用。ユーザーが明示的に外した時のみ除外",
+    "recommend": "推奨。提示時に事前チェック済み。ユーザーが外せる",
+    "ask": "デフォルト非採用。ユーザーが明示的に選んだ時のみ採用",
+    "exclude": "採用不可。提示のみ"
+  },
+  "elements": [
+    {
+      "id": "official-claude-md-core",
+      "kind": "principle",
+      "provenance": "official",
+      "source": "https://code.claude.com/docs/en/best-practices",
+      "summary": "CLAUDE.md の行の要否判定（削除したら Claude が間違えるか）・Include/Exclude・簡潔さ・emphasis ガイダンス・5 配置 + @import・陳腐化情報の排除。文言は生成時に WebFetch で取得する。",
+      "applies_to": [
+        "SKILL.md 公式準拠の核",
+        "template.md"
+      ],
+      "rubric_items": [
+        1,
+        2,
+        3,
+        4,
+        16,
+        17,
+        18,
+        20,
+        34
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "official-skills-core",
+      "kind": "principle",
+      "provenance": "official",
+      "source": "https://code.claude.com/docs/en/skills",
+      "summary": "SKILL.md 構造・frontmatter・progressive disclosure・commands と skills の統合。時々しか使わない知識は skills へ逃がす。",
+      "applies_to": [
+        "SKILL.md Step 3"
+      ],
+      "rubric_items": [
+        16
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "official-hooks-contract",
+      "kind": "principle",
+      "provenance": "official",
+      "source": "https://code.claude.com/docs/en/hooks",
+      "summary": "hooks は決定的で毎回実行される。イベント別の出力契約は hook 生成直前に WebFetch で確認する。",
+      "applies_to": [
+        "hooks-reference.md 冒頭"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "official-adversarial-review",
+      "kind": "principle",
+      "provenance": "official",
+      "source": "https://code.claude.com/docs/en/best-practices",
+      "summary": "Writer/Reviewer 分離・adversarial review step・reviewer は gap を過剰報告しがち（correctness と明示要件に関わる gap のみ採用）。",
+      "applies_to": [
+        "SKILL.md Step 7",
+        "operational-knowhow.md 別エージェントレビューサイクル"
+      ],
+      "rubric_items": [
+        7,
+        35
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "emphasis-cap-5",
+      "kind": "principle",
+      "provenance": "official-derived",
+      "summary": "emphasis（IMPORTANT / YOU MUST）は最大 5 件目安。公式の emphasis 許容を著者が数値で引き締めたもの。",
+      "applies_to": [
+        "SKILL.md 本スキル由来の独自運用基準"
+      ],
+      "rubric_items": [
+        19
+      ],
+      "depends_on": [
+        "official-claude-md-core"
+      ]
+    },
+    {
+      "id": "no-line-count-gate",
+      "kind": "principle",
+      "provenance": "official-derived",
+      "summary": "行数による出力拒否ゲートを設けない。公式が数値閾値を持たないことを確認した上で、剪定は 'rules getting lost in the noise' 兆候を主基準にする。",
+      "applies_to": [
+        "SKILL.md Step 6"
+      ],
+      "rubric_items": [
+        1
+      ],
+      "depends_on": [
+        "official-claude-md-core"
+      ]
+    },
+    {
+      "id": "scale-adjustment",
+      "kind": "principle",
+      "provenance": "official-derived",
+      "summary": "標準セットは上限像。該当する条文・確実に毎回実行したい規律・採用判定を通ったオプションだけ生成する（過剰生成の回避）。公式の簡潔さ原則の運用化。",
+      "applies_to": [
+        "operational-knowhow.md 規模に応じたスケール調整"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "official-claude-md-core"
+      ]
+    },
+    {
+      "id": "rules-split-progressive-disclosure",
+      "kind": "structure",
+      "provenance": "official-derived",
+      "summary": ".claude/rules/*.md への規約分離（条文方式・通し番号）・meta.md の条インデックス・paths: と @import の二重防壁（claude-code Issue #23478 への補償）。公式の 5 配置 + @import を著者が構造化したもの。",
+      "applies_to": [
+        "SKILL.md Step 3 / Step 8-2",
+        "template.md ルール一覧",
+        "operational-knowhow.md 標準セット"
+      ],
+      "rubric_items": [
+        5,
+        6,
+        15,
+        22
+      ],
+      "depends_on": [
+        "official-claude-md-core"
+      ]
+    },
+    {
+      "id": "separate-agent-review-cycle",
+      "kind": "process",
+      "provenance": "official-derived",
+      "summary": "成果物は別エージェントのレビューを最低 1 回受け、レビュアには対象完全パスとレビュー用 skill の 2 点のみ渡す。自己レビュー不可。公式 Writer/Reviewer pattern の具体化。",
+      "applies_to": [
+        "SKILL.md Step 7",
+        "operational-knowhow.md 別エージェントレビューサイクル",
+        "生成 rules review.md"
+      ],
+      "rubric_items": [
+        7,
+        32
+      ],
+      "depends_on": [
+        "official-adversarial-review"
+      ]
+    },
+    {
+      "id": "review-cycle-parameters",
+      "kind": "process",
+      "provenance": "author-preference",
+      "summary": "レビューサイクルの著者パラメータ: 重要成果物は独立 2〜4 本並列 + converged findings、TDD test-first、ループ上限（計画 3 周 / 実装 1 周）、skills レビュー 90 点合格、3 回 FAIL で issue 起票・中断。",
+      "applies_to": [
+        "operational-knowhow.md 別エージェントレビューサイクル レビュー強度の運用基準",
+        "生成 rules review.md"
+      ],
+      "rubric_items": [
+        32
+      ],
+      "depends_on": [
+        "separate-agent-review-cycle"
+      ]
+    },
+    {
+      "id": "hooks-promotion-judgement",
+      "kind": "process",
+      "provenance": "official-derived",
+      "summary": "advisory ルールを deterministic な hook へ昇格する判断基準（毎回・例外なく実行すべきか、pass/fail が機械判定可能か）。公式の 'use hooks for actions that must happen every time' の運用化。",
+      "applies_to": [
+        "hooks-reference.md hooks 化候補の判断基準",
+        "operational-knowhow.md 規約の hooks 化判断"
+      ],
+      "rubric_items": [
+        21
+      ],
+      "depends_on": [
+        "official-hooks-contract"
+      ]
+    },
+    {
+      "id": "hooks-reference-set",
+      "kind": "hooks",
+      "provenance": "author-preference",
+      "summary": "参考 6 hook 構成（SessionStart ポインタ注入 / UserPromptSubmit docs 候補 / PreToolUse handoff 命名検証 / PostToolUse レビュー促し / 派生成果物再生成 / Stop handoff リマインド）と hook script 雛形。",
+      "applies_to": [
+        "hooks-reference.md 参考 hook 構成・hook scripts"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "hooks-promotion-judgement"
+      ]
+    },
+    {
+      "id": "size-guideline-100-lines",
+      "kind": "principle",
+      "provenance": "author-preference",
+      "summary": "CLAUDE.md 本体は概ね 100 行 / 10KB を剪定検討の目安とする参考値（硬性基準ではない）。",
+      "applies_to": [
+        "operational-knowhow.md サイズの目安",
+        "template.md サイズ運用"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "no-line-count-gate"
+      ]
+    },
+    {
+      "id": "always-load-5kb-cap",
+      "kind": "principle",
+      "provenance": "author-preference",
+      "summary": "meta.md と @import で常時 load される rules ファイル個別に 5KB soft cap を宣言する（常時 load 経由の context 汚染防止）。",
+      "applies_to": [
+        "operational-knowhow.md サイズの目安 / governance.md 項目群",
+        "生成 rules meta.md"
+      ],
+      "rubric_items": [
+        24
+      ],
+      "depends_on": [
+        "rules-split-progressive-disclosure"
+      ]
+    },
+    {
+      "id": "docs-read-declaration",
+      "kind": "process",
+      "provenance": "author-preference",
+      "summary": "タスク開始時に関連 docs を最低 1 つ読み、宣言の最初と最後の両方に『完全パス + 1 文要約 + タスク関連性 1 文』を出力する証跡二重化。",
+      "applies_to": [
+        "operational-knowhow.md 関連 docs 読込宣言",
+        "template.md 起動時手順 1"
+      ],
+      "rubric_items": [
+        25
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "lazy-rule-declaration",
+      "kind": "process",
+      "provenance": "author-preference",
+      "summary": "タスク該当ルールのみ宣言してから着手する lazy load 運用（全条一括宣言はしない）。",
+      "applies_to": [
+        "operational-knowhow.md 条文宣言の lazy load 運用",
+        "template.md 起動時手順 2"
+      ],
+      "rubric_items": [
+        26
+      ],
+      "depends_on": [
+        "rules-split-progressive-disclosure"
+      ]
+    },
+    {
+      "id": "governance-multi-aspect",
+      "kind": "rules",
+      "provenance": "author-preference",
+      "summary": "governance.md を複数観点（サイズ閾値 / 新項目ルーティング / 公式準拠 / 定期レビュー / 自動検証 / 常時 load cap / 新条文追加 5 段 / advisory→hook 昇格判断）で項目立てる。",
+      "applies_to": [
+        "operational-knowhow.md governance.md の項目群",
+        "生成 rules governance.md"
+      ],
+      "rubric_items": [
+        18,
+        23
+      ],
+      "depends_on": [
+        "rules-split-progressive-disclosure"
+      ]
+    },
+    {
+      "id": "generic-discipline-menu",
+      "kind": "rules",
+      "provenance": "author-preference",
+      "summary": "汎用規律条文の候補メニュー（モック / ハードコード禁止・バージョン番号付きファイル禁止・ルート直下への新規ファイル抑制・設定値の一元管理・根本解決・レガシー排除）。各々を採否判定して code-quality.md に載せる。",
+      "applies_to": [
+        "SKILL.md Step 1 汎用規律条文の採否",
+        "生成 rules code-quality.md"
+      ],
+      "rubric_items": [
+        5
+      ],
+      "depends_on": [
+        "rules-split-progressive-disclosure"
+      ]
+    },
+    {
+      "id": "issue-lifecycle",
+      "kind": "process",
+      "provenance": "author-preference",
+      "summary": "issues/ 配下のフォルダ移動（open → processing → (pending) → closed、git mv）でタスク・問題を状態管理する。問題発見即起票・1 issue = 1 目的・issue ファイル標準ヘッダ。",
+      "applies_to": [
+        "operational-knowhow.md issue ライフサイクル管理",
+        "生成 rules issue-workflow.md",
+        "template.md 起動時手順 3 の起票先"
+      ],
+      "skills": [
+        "issue-lifecycle-tracking"
+      ],
+      "rubric_items": [
+        11,
+        12,
+        13
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "close-verification-4-steps",
+      "kind": "process",
+      "provenance": "author-preference",
+      "summary": "close 前検証 4 段（再現→pass / negative test / regression smoke / 証拠アーカイブ）。『修正したつもり』を構造的に排除する。",
+      "applies_to": [
+        "operational-knowhow.md issue ライフサイクル管理",
+        "生成 rules test-verify.md"
+      ],
+      "rubric_items": [
+        31
+      ],
+      "depends_on": [],
+      "soft_depends_on": [
+        "issue-lifecycle"
+      ],
+      "note": "issue-lifecycle 非選択時は第 4 段の証拠アーカイブ先を issues/closed/ でなく PR 本文・テストログ等の実在する場所に置き換える"
+    },
+    {
+      "id": "handoff-management",
+      "kind": "process",
+      "provenance": "author-preference",
+      "summary": "handoff の命名規約（[YYYY-MM-DD]-issue-[ID]-[識別単語].md）・保持・issue 連携・user 明示指示でのみ受領・stale 注記・archive ローテーション。",
+      "applies_to": [
+        "operational-knowhow.md handoff 受領 / handoff 管理",
+        "template.md 起動時手順 4・5",
+        "生成 rules issue-workflow.md"
+      ],
+      "rubric_items": [
+        8,
+        9,
+        10,
+        33
+      ],
+      "depends_on": [],
+      "soft_depends_on": [
+        "issue-lifecycle"
+      ],
+      "note": "issue-lifecycle 非採用時は issue 紐付けなしの命名 [YYYY-MM-DD]-[識別単語].md のみを使う"
+    },
+    {
+      "id": "concurrent-agent-4-axis-recheck",
+      "kind": "process",
+      "provenance": "author-preference",
+      "summary": "複数 agent / session 並走時に、session 開始時と plan 起票前の 2 境界で commit・handoff/plan・worktree・uncommitted Edit の 4 軸を確認して衝突を防ぐ。",
+      "applies_to": [
+        "operational-knowhow.md 並走 agent 痕跡 4 軸 recheck",
+        "生成 rules issue-workflow.md"
+      ],
+      "rubric_items": [
+        29
+      ],
+      "depends_on": [
+        "handoff-management"
+      ],
+      "soft_depends_on": [
+        "issue-lifecycle"
+      ],
+      "note": "issue-lifecycle 非選択時は axis 1 の <issue_path> を作業対象ファイルのパスに読み替える"
+    },
+    {
+      "id": "session-restore-hook",
+      "kind": "hooks",
+      "provenance": "author-preference",
+      "summary": "SessionStart hook で中断作業のポインタ（handoff ファイル名 + processing issue タイトル）と並走 4 軸 verdict のみ注入し、本文は user 選択後に 1 件だけ Read する。",
+      "applies_to": [
+        "operational-knowhow.md PC 再起動・session 復元の自動化",
+        "hooks-reference.md hook-session-start"
+      ],
+      "rubric_items": [
+        14
+      ],
+      "depends_on": [
+        "handoff-management",
+        "issue-lifecycle",
+        "hooks-reference-set"
+      ],
+      "soft_depends_on": [
+        "concurrent-agent-4-axis-recheck"
+      ],
+      "note": "concurrent-agent-4-axis-recheck 非選択時は verdict を注入せずポインタのみ通知する"
+    },
+    {
+      "id": "execution-routing",
+      "kind": "rules",
+      "provenance": "author-preference",
+      "summary": "複数の実行主体・モデル格を使い分ける運用向けの execution-routing.md（司令塔 3 責務・振り分け表・高コスト主体抑制・escalation protocol）。",
+      "applies_to": [
+        "operational-knowhow.md 実行主体・モデル格の振り分け規約",
+        "生成 rules execution-routing.md"
+      ],
+      "rubric_items": [
+        28,
+        "28b"
+      ],
+      "depends_on": [
+        "rules-split-progressive-disclosure"
+      ]
+    },
+    {
+      "id": "docs-management",
+      "kind": "rules",
+      "provenance": "author-preference",
+      "summary": "docs/ 配下が概ね 5 section 以上ある時の docs-management.md（配置 mapping・新 docs 配置 flow・全 section README 必須化・同期更新義務・過時マーカー）。",
+      "applies_to": [
+        "operational-knowhow.md 標準セット docs-management 採用判定",
+        "生成 rules docs-management.md"
+      ],
+      "rubric_items": [
+        27
+      ],
+      "depends_on": [
+        "rules-split-progressive-disclosure"
+      ]
+    },
+    {
+      "id": "converged-autonomy",
+      "kind": "process",
+      "provenance": "author-preference",
+      "summary": "独立レビュー 2 本以上が収束した後は逐次の user 確認を待たず進行してよい運用。6 類の例外（破壊的操作・秘密情報・外部コスト・好み判断・大方針転換・非収束）は都度確認。",
+      "applies_to": [
+        "operational-knowhow.md 収束型自律前進"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "review-cycle-parameters"
+      ]
+    },
+    {
+      "id": "artifact-generator-attribution",
+      "kind": "process",
+      "provenance": "author-preference",
+      "summary": "成果物・テスト結果について LLM 生成物と script / library 生成物を厳格に区別して記録する（誤認防止）。",
+      "applies_to": [
+        "operational-knowhow.md 成果物の生成主体明示",
+        "生成 rules test-verify.md"
+      ],
+      "rubric_items": [
+        30
+      ],
+      "depends_on": []
+    },
+    {
+      "id": "numeric-target-single-sot",
+      "kind": "rules",
+      "provenance": "author-preference",
+      "default_selection_override": "recommend",
+      "summary": "カバレッジ%・合格率等の数値目標は、それを強制する設定ファイル（CI 閾値・validator 定数等）のみを SoT とし、prose に重複記載しない。対応する機械検査は repo-hygiene-patrol の numeric_target_drift。",
+      "applies_to": [
+        "SKILL.md Step 8-2 test-verify.md",
+        "CLAUDE.md 他プロジェクトのセットアップ依頼への対応（数値目標の単一 SoT 化の段落）"
+      ],
+      "rubric_items": [
+        36
+      ],
+      "depends_on": [],
+      "history": "2026-09-01 制定時は N/A 判定不可の必須項目。2026-09-04 に author-preference（recommend）へ再分類。公式根拠のない著者の運用判断であり、取捨選択はユーザーが決めるという本台帳の趣旨と矛盾するため。",
+      "related_skills": [
+        "repo-hygiene-patrol"
+      ],
+      "soft_depends_on": [
+        "skill-repo-hygiene-patrol"
+      ],
+      "note": "機械検査（repo-hygiene-patrol の numeric_target_drift）を入れるなら skill-repo-hygiene-patrol も選択する。本要素だけの採用は test-verify.md の条文のみ"
+    },
+    {
+      "id": "skill-mcp-quality-inheritance",
+      "kind": "process",
+      "provenance": "official-derived",
+      "summary": "対象プロジェクトが独自 skill / MCP ツールを新規作成する場合のみ、skill-authoring-guide / mcp-server-setup の観点をレビュー基準に継承する。",
+      "applies_to": [
+        "operational-knowhow.md 自作 skill / MCP ツールの品質基準の継承"
+      ],
+      "related_skills": [
+        "skill-authoring-guide",
+        "mcp-server-setup"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "official-skills-core"
+      ]
+    },
+    {
+      "id": "skill-review-gate",
+      "kind": "skill",
+      "provenance": "official-derived",
+      "summary": "工程別レビューゲート。別エージェントに criteria JSON の観点でレビューさせ PASS するまで次工程へ進ませない。criteria は対象プロジェクト固有に調整する。",
+      "skills": [
+        "review-gate"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "separate-agent-review-cycle"
+      ]
+    },
+    {
+      "id": "skill-skills-audit",
+      "kind": "skill",
+      "provenance": "official-derived",
+      "summary": "リポジトリ内の全 skills を Anthropic 公式ベストプラクティス基準で一括監査する。",
+      "skills": [
+        "skills-audit"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "official-skills-core"
+      ]
+    },
+    {
+      "id": "skill-skill-authoring-guide",
+      "kind": "skill",
+      "provenance": "official-derived",
+      "summary": "Anthropic 公式 Skills 作成ガイドに基づく設計・構造・テストのリファレンス。",
+      "skills": [
+        "skill-authoring-guide"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "official-skills-core"
+      ]
+    },
+    {
+      "id": "review-commands",
+      "kind": "command",
+      "provenance": "official-derived",
+      "summary": ".claude/commands/ の review-changes / review-skill。エージェント分離の原則は公式由来、評価軸・配点は著者設計（対象プロジェクトで調整する）。review-implementation はマネタイズ・ペルソナ軸を持つ業務依存のため別要素（command-review-implementation）。",
+      "commands": [
+        "review-changes",
+        "review-skill"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "separate-agent-review-cycle"
+      ],
+      "files": [
+        "workflows/software-development/review-changes.md",
+        "workflows/software-development/review-skill.md",
+        "workflows/software-development/skills-building-guide.md"
+      ],
+      "note": "各コマンドは files[] の評価基準ファイルを Read して使うため、同じ相対パスでコピーする（対象に workflows/software-development/ が生まれるが、台帳登録済みの付随物であり混入ではない）"
+    },
+    {
+      "id": "command-review-implementation",
+      "kind": "command",
+      "provenance": "domain-prompt",
+      "summary": ".claude/commands/review-implementation。テスト品質・処理の正確性・マネタイズ整合性・ペルソナ適合・UX の 5 軸レビュー。マネタイズ・ペルソナ軸と persona.md 参照を含む業務依存の評価設計のため、対象の業務に該当する時だけ選ぶ。",
+      "commands": [
+        "review-implementation"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "separate-agent-review-cycle"
+      ],
+      "files": [
+        "workflows/software-development/review-implementation.md",
+        "workflows/software-development/rules/coding-principles.md"
+      ],
+      "note": "persona.md / design-guidelines.md は対象プロジェクト側が用意する入力（無ければ推定評価）なので files[] に含めない"
+    },
+    {
+      "id": "skill-single-session-tdd",
+      "kind": "skill",
+      "provenance": "author-preference",
+      "summary": "単一セッションで Red → Green → Refactor を強制し、各工程で review-gate を通す TDD ワークフロー。",
+      "skills": [
+        "single-session-tdd"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "skill-review-gate"
+      ]
+    },
+    {
+      "id": "skill-three-agent-tdd-workflow",
+      "kind": "skill",
+      "provenance": "author-preference",
+      "summary": "リーダー / 実行 / レビューの 3 ターミナル分離型 TDD 開発システム。",
+      "skills": [
+        "three-agent-tdd-workflow"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "files": [
+        "workflows/software-development/three-agent/README.md",
+        "workflows/software-development/three-agent/leader.md",
+        "workflows/software-development/three-agent/executor.md",
+        "workflows/software-development/three-agent/reviewer.md",
+        "workflows/software-development/rules/coding-principles.md"
+      ],
+      "note": "SKILL.md は上記 files の全文貼付を前提にするため、skill 単体でなく files ごとコピーする"
+    },
+    {
+      "id": "skill-repo-hygiene-patrol",
+      "kind": "skill",
+      "provenance": "author-preference",
+      "summary": "ファイル構造衛生の機械検査（バージョン番号付きファイル・OS ゴミ・肥大化・.gitignore 漏れ・ルート散らかり・数値目標ドリフト）。",
+      "skills": [
+        "repo-hygiene-patrol"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "skill-blind-eval-harness",
+      "kind": "skill",
+      "provenance": "author-preference",
+      "summary": "複数サンプルの盲検一括評価を、新規 run dir + allow-list で汚染を防ぎながら起動する。",
+      "skills": [
+        "blind-eval-harness"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "skill-staged-investigation-workflow",
+      "kind": "skill",
+      "provenance": "author-preference",
+      "summary": "ゲート付き段階的調査ワークフロー（確信度キャップ・代替仮説の保持）。",
+      "skills": [
+        "staged-investigation-workflow"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "skill-source-verification-scan",
+      "kind": "skill",
+      "provenance": "author-preference",
+      "summary": "調査系成果物の非公開情報・伝聞・捏造導線のゼロトレランス検査。",
+      "skills": [
+        "source-verification-scan"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "skill-multi-tenant-template-injector",
+      "kind": "skill",
+      "provenance": "author-preference",
+      "summary": "複数クライアント向けテンプレートのテナント固有文面を設定ファイルから注入する構造設計。",
+      "skills": [
+        "multi-tenant-template-injector"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "skill-review-oss-contribution",
+      "kind": "skill",
+      "provenance": "author-preference",
+      "summary": "OSS 貢献候補の独自性・先行技術・実現可能性・戦略の審査（別エージェント実行）。",
+      "skills": [
+        "review-oss-contribution"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "separate-agent-review-cycle",
+        "shared-review-rubrics"
+      ]
+    },
+    {
+      "id": "skill-stop-ai-slop-jp",
+      "kind": "skill",
+      "provenance": "third-party",
+      "source": "https://github.com/iKora128/stop-ai-slop-jp",
+      "license": "MIT",
+      "summary": "AI 生成日本語を人間の文章に戻す（vendoring・MIT・LICENSE と作者表記を保ってコピーする）。",
+      "skills": [
+        "stop-ai-slop-jp"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "shared-review-rubrics",
+      "kind": "asset",
+      "provenance": "author-preference",
+      "summary": "レビュー系 skill が共有する verdict scale（S/A/B/C/D 等）と行動原則（証拠主義・引用義務・非破壊）の SoT ファイル。review-* 系 skill・review-oss-contribution を選ぶ時は必ず一緒にコピーする（無いと各 skill が参照先を失う）。",
+      "files": [
+        ".claude/skills/_shared/review-rubrics.yaml"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "domain-skills-group",
+      "kind": "skill-group",
+      "provenance": "domain-prompt",
+      "summary": "業務ドメインプロンプト skill 群（business-planning / content-creation / ops-management / research-intelligence / design・mcp 等）。harness とは無関係。対象プロジェクトの業務に該当するものだけ選ぶ。",
+      "skills": [
+        "ai-automation",
+        "avoid-ai-generated-design-look",
+        "blog-seo-growth-planner",
+        "business-idea",
+        "business-proposal",
+        "craft-beer-news-research",
+        "creative-text-art",
+        "customer-persona-design",
+        "general-news-research",
+        "generic-proposal",
+        "ibm-carbon-design-system",
+        "investment-portfolio-analysis",
+        "it-proposal",
+        "it-tech-news-research",
+        "mcp-server-setup",
+        "model-cost-optimization-routing",
+        "playwright-mcp-e2e-testing",
+        "research-deliverable-review",
+        "review-ai-automation",
+        "review-blog",
+        "review-business-idea",
+        "review-ops",
+        "review-persona-analysis",
+        "review-proposal",
+        "review-slides",
+        "review-specification",
+        "seo-keyword-article-planner",
+        "server-automation",
+        "server-init",
+        "server-windows-standard",
+        "slides-pro",
+        "specification",
+        "ui-design-guidelines",
+        "year-end-adjustment-csv"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "soft_depends_on": [
+        "shared-review-rubrics"
+      ],
+      "note": "review-* / research-deliverable-review を選ぶ時は shared-review-rubrics が必須（各 SKILL.md が .claude/skills/_shared/review-rubrics.yaml を参照する）"
+    },
+    {
+      "id": "claude-md-upload-policy",
+      "kind": "claude-md-section",
+      "provenance": "author-preference",
+      "summary": "CLAUDE.md『アップロードポリシー（公開リポジトリ）』: 特定の企業名・製品名・顧客名を含むものを公開リポジトリに載せない。公開リポジトリのみ該当。",
+      "applies_to": [
+        "CLAUDE.md アップロードポリシー"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "claude-md-response-rules",
+      "kind": "claude-md-section",
+      "provenance": "author-preference",
+      "summary": "CLAUDE.md『応答ルール』: 完了報告に編集ファイルの完全パスを明記・単純バグは直接修正・/compact 時に残す情報。",
+      "applies_to": [
+        "CLAUDE.md 応答ルール"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "claude-md-add-before-check",
+      "kind": "claude-md-section",
+      "provenance": "author-preference",
+      "summary": "CLAUDE.md『新しいワークフロー・スキルを追加するルール』のうち一般化可能な部分: 追加前に既存を検索して重複なら拡張・作成後は別エージェントレビューを 1 回以上。",
+      "applies_to": [
+        "CLAUDE.md 新しいワークフロー・スキルを追加するルール（追加前チェック）"
+      ],
+      "rubric_items": [
+        18
+      ],
+      "depends_on": [
+        "separate-agent-review-cycle"
+      ]
+    },
+    {
+      "id": "claude-md-citation-recommendation",
+      "kind": "claude-md-section",
+      "provenance": "author-preference",
+      "summary": "CLAUDE.md『根拠明記の推奨』: 事実主張に根拠資料の完全パス / URL を近接記載する advisory 推奨。",
+      "applies_to": [
+        "CLAUDE.md 根拠明記の推奨"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "claude-md-review-skill-index",
+      "kind": "claude-md-section",
+      "provenance": "repo-specific",
+      "summary": "CLAUDE.md『レビュースキル一覧』『/review-implementation を使う前に準備』『プロジェクト構成』: Job-Automate の索引。対象プロジェクトでは agent-harness-bootstrap が対象固有の索引を生成する。",
+      "applies_to": [
+        "CLAUDE.md レビュースキル一覧 / 準備 / プロジェクト構成"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "claude-md-workflow-structure",
+      "kind": "claude-md-section",
+      "provenance": "repo-specific",
+      "summary": "CLAUDE.md『新しいワークフロー・スキルを追加するルール』の workflows/ 配置・README 追記・workflow-coverage-and-structure による機械検査。Job-Automate のプロンプトライブラリ構造に依存。",
+      "applies_to": [
+        "CLAUDE.md 新しいワークフロー・スキルを追加するルール（workflows/ 配置）"
+      ],
+      "skills": [
+        "workflow-coverage-and-structure"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "claude-md-porting-rule",
+      "kind": "claude-md-section",
+      "provenance": "author-preference",
+      "summary": "CLAUDE.md『他プロジェクトのセットアップ依頼への対応』: 本台帳を使った完全列挙 + 由来別選択の手順そのもの。移植先には持ち込まない（移植元でのみ使う）。",
+      "applies_to": [
+        "CLAUDE.md 他プロジェクトのセットアップ依頼への対応"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "portable": false
+    }
+  ]
+}

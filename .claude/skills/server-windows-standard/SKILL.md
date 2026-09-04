@@ -9,6 +9,8 @@ description: |
   の5フェーズで進める。
   Trigger phrases: 'Windows クラッシュダンプ解析', 'WinDBG で原因特定', 'BSOD 原因調査',
   'カーネルクラッシュ 解析', 'windows crash dump analysis', 'stop code 解析'.
+metadata:
+  provenance: domain-prompt
 ---
 
 # Windows クラッシュダンプ解析 — 原因関数特定・修正支援 (MCP版)

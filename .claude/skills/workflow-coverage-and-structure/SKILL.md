@@ -3,6 +3,8 @@ name: workflow-coverage-and-structure
 description: このリポジトリの「テストカバレッジ」「プロジェクト構成」に相当する質問に即答する。プロンプトライブラリのため実コードのカバレッジ%は測定せず、代わりに workflows/ 配下の各ファイルが category README にドキュメント化されているか（drift 検出）を機械検査する。Use when user asks "テストカバレッジは?", "test coverage", "プロジェクト構成は?", "project structure", "workflows の網羅性", or after adding a new workflow prompt file / category.
 argument-hint: "<action: report|check> (省略時は report)"
 allowed-tools: Read Bash
+metadata:
+  provenance: repo-specific
 ---
 
 # ワークフロー ドキュメント網羅性・構成 Skill

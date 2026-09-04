@@ -1,6 +1,8 @@
 ---
 name: ibm-carbon-design-system
 description: "Generates or applies an IBM Carbon Design System-compliant design token set (color roles, typography scale, 8px spacing grid, Lucide iconography) plus Neo-Brutalist component specs (Button, Card, Loading states) for a new or existing frontend project. Use when the user asks to 'IBM Carbon準拠のデザインシステムを作って', 'デザイントークンを定義して', 'デザインシステムをセットアップして', or references design-system.md."
+metadata:
+  provenance: domain-prompt
 ---
 
 # Design System (IBM Carbon準拠) — Skill 概要

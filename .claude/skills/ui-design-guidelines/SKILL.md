@@ -1,6 +1,8 @@
 ---
 name: ui-design-guidelines
 description: "Applies a strict, anti-'AI slop' UI implementation checklist to new or existing web/app frontends: emoji ban with Lucide Icons replacement, WCAG 2.2 AA accessibility (contrast, focus indicators, touch targets), dark mode implementation, mobile-first responsive breakpoints, and a pre-deploy quality checklist. Use when the user asks to 'デザインガイドラインに従って実装して', 'UIの品質チェックリストを適用して', '絵文字をアイコンに置き換えて', 'ダークモード対応して', 'アクセシビリティ対応して', or references design-guidelines.md."
+metadata:
+  provenance: domain-prompt
 ---
 
 # Design Guidelines

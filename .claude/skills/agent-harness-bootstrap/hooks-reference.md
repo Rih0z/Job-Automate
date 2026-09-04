@@ -1,5 +1,8 @@
 # hooks 参考構成・hook script 雛形（cross-platform）
 
+> provenance: official-derived · id: hooks-promotion-judgement（「hooks 化候補の判断基準」「hooks 設計指針」「hooks 監査」の各節）
+> provenance: author-preference · id: hooks-reference-set（「参考 hook 構成（6 hook）」「settings.json への登録」「hook scripts」「外部規約のキャッシュ運用」の各節。Step 0 で選択された時のみ生成。個々の hook はさらに `session-restore-hook` / `handoff-management` 等の要素に依存するので、非選択要素に対応する hook は生成しない）
+
 SKILL.md 本体「独自運用: 規約の hooks 化判断」と生成手順 Step 8-3 から参照する。**hooks は「確実に毎回実行したい規律」が実在する時だけ導入する**（単発・並走なしの小規模開発では省略してよい）。各 hook イベントの出力契約（どの stdout が context 注入されるか / `additionalContext` JSON の要否 / `exit 2` の意味 / Stop の連続 block 上限）は **hook 生成直前に hooks reference を WebFetch で確認**する（焼き込まず現行仕様に従う）。
 
 ## hooks 化候補の判断基準

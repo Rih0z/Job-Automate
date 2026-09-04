@@ -1,6 +1,8 @@
 ---
 name: skill-authoring-guide
 description: "Reference manual (based on Anthropic's official 'The Complete Guide to Building Skills for Claude') for designing, structuring, and testing SKILL.md files and Claude Code slash commands: folder structure, YAML frontmatter rules, progressive disclosure, instruction-quality patterns, and a pre-publish checklist. Use when the user asks to 'Skillを作りたい', 'SKILL.mdの書き方を教えて', 'スキル作成のベストプラクティスを確認して', or is the evaluation basis for /review-skill."
+metadata:
+  provenance: official-derived
 ---
 
 # Claude Skills 作成マニュアル

@@ -4,6 +4,8 @@ description: Audit all custom skills in a repo for quality, structure, and Anthr
 disable-model-invocation: true
 allowed-tools: Glob Grep Read Agent
 argument-hint: "[skill-name or blank for all]"
+metadata:
+  provenance: official-derived
 ---
 
 # Skill Quality Audit

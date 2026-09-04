@@ -4,6 +4,8 @@ description: "Audit OSS contribution candidates in a candidates directory. Check
 disable-model-invocation: true
 allowed-tools: Read Grep Glob Agent
 argument-hint: "<candidates-dir> (省略時は ./oss-contributions/open/)"
+metadata:
+  provenance: author-preference
 ---
 
 # OSS貢献候補の審査（エージェント分離実行、2026-08-31 是正）

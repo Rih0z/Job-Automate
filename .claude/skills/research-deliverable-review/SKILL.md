@@ -6,6 +6,8 @@ description: >
   採点する。別エージェントを起動してレビューする(自己レビューしない)。
   Trigger phrases: 'リサーチ成果物 レビュー', 'ニュース収集結果を採点', 'SEO分析レポート レビュー',
   'research deliverable review', 'score this research output'.
+metadata:
+  provenance: domain-prompt
 ---
 
 # リサーチ・情報収集 品質レビュー（エージェント分離実行）

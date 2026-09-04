@@ -1,0 +1,75 @@
+{
+  "stage": "porting-reconciliation",
+  "stage_name": "移植突合",
+  "when": "別プロジェクトへのセットアップ（agent-harness-bootstrap Step 0〜8）完了直後。完了報告の前に必ず実施",
+  "inputs": [
+    "移植元 .claude/skills/agent-harness-bootstrap/provenance.json の完全パス",
+    "対象 .claude/harness-selection.json の完全パス",
+    "対象プロジェクトのルートの完全パス",
+    "本観点定義（criteria/porting-reconciliation.json）の完全パス"
+  ],
+  "reviewer_note": "まず provenance.json と harness-selection.json を通読して『何が選ばれ何が選ばれなかったか』を把握してから対象を読む。呼び出し元の実装意図・会話履歴は受け取らない。判定は対象に実在するファイルの内容のみを根拠にし、location を file:line で示す。用語検査は完全一致の語句のみを根拠にし、部分一致（例: 『条文』が『条文宣言』に含まれる）で誤検知しない。",
+  "pass_rule": {
+    "must_pass_all": true,
+    "min_score": 90
+  },
+  "criteria": [
+    {
+      "id": "record_complete",
+      "name": "選択記録の完全性",
+      "weight": 20,
+      "must_pass": true,
+      "checks": [
+        "harness-selection.json の selections に provenance.json の全要素 id が載っている（`bash <移植元>/.claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh --selection <対象の絶対パス>/.claude/harness-selection.json` を任意の cwd から実行し、結果を引用する）",
+        "各 entry に selected（boolean）と decided_by（user / default / excluded / scale のいずれか）がある。repo-specific / portable:false の要素だけが excluded",
+        "skill-group を selected:true にした entry は skills[] に採用した skill 名を列挙している（省略を全採用とみなしていない）",
+        "非対話で default のみ採用した場合、トップレベル decided_by が \"default\" になっている"
+      ]
+    },
+    {
+      "id": "no_omission",
+      "name": "選択済み要素の抜けゼロ",
+      "weight": 30,
+      "must_pass": true,
+      "checks": [
+        "selected:true の各要素について、applies_to に対応する条文・ブロック、skills / commands に対応するディレクトリ・ファイル、files に列挙された付随ファイル（同じ相対パス）が対象に実在する",
+        "provenance.json の summary / note で『対象固有に調整する』と明記された要素（例: skill-review-gate の criteria JSON）は、対象プロジェクトの実名詞（認証方式・主要サービス名・設計テーマ等）まで踏み込んで調整されている",
+        "third-party の要素は無改変で、LICENSE と作者表記が保たれている（対象固有への書換えは行わない）",
+        "生成 CLAUDE.md の @import 行とルール一覧テーブルが、実際に生成した rules ファイルと一致している（名ばかり常時 load が無い）"
+      ]
+    },
+    {
+      "id": "no_contamination",
+      "name": "非選択要素の混入ゼロ",
+      "weight": 30,
+      "must_pass": true,
+      "checks": [
+        "selected:false の各要素について、対応する rules 条文・hooks・template ブロック・skills・付随 files・ディレクトリ（issues/ や .tmp/handoffs/ 等）が対象に存在しない",
+        "生成 CLAUDE.md・rules に `<!-- id: ... -->` マーカーが残っていない",
+        "非選択の author-preference 要素に固有の語句（完全一致: handoff、issues/open、並走 4 軸 verdict、条文宣言、docs 読込宣言）が生成 CLAUDE.md・rules・hooks に現れていない",
+        "選択済み要素の files[] に列挙されたもの以外に、移植元リポジトリ固有の索引・パス（workflows/ 配下への参照等）が生成物に混入していない"
+      ]
+    },
+    {
+      "id": "dependency_consistency",
+      "name": "依存関係の整合",
+      "weight": 10,
+      "must_pass": false,
+      "checks": [
+        "selected:true の要素の depends_on が全て selected:true である",
+        "soft_depends_on が非選択の要素は、provenance.json の note に従う縮退形で生成されている（例: issue-lifecycle 非選択時の handoff 命名は issue 紐付けなし形式）"
+      ]
+    },
+    {
+      "id": "report_disclosure",
+      "name": "報告の開示",
+      "weight": 10,
+      "must_pass": false,
+      "checks": [
+        "最終報告に harness-selection.json の完全パス・群 C で採用した要素の一覧・群 A / B で外した要素と理由が含まれている",
+        "対話不可で default のみ採用した場合、その旨と『harness-selection.json を編集して再実行できる』案内が報告冒頭にある",
+        "スケール調整で落とした要素が decided_by:\"scale\" として記録され、報告の『意図的に落とした要素』と一致している"
+      ]
+    }
+  ]
+}

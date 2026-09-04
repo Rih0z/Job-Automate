@@ -1,6 +1,8 @@
 ---
 name: single-session-tdd
 description: "単一セッションで回すテスト駆動開発(TDD)ワークフロー。仕様確認→(曖昧ならユーザーに質問)→失敗するテスト(Red)→最小実装(Green)→リファクタの順を強制し、各工程の完了時に review-gate skill で別エージェントの独立レビューを受ける。ハードコード・テストごまかしの検出例つき。Use when the user asks to 'TDDで進めて', 'テスト駆動で開発して', 'テストファーストで実装して', or when starting implementation work in a project that mandates TDD. 3ターミナル分離で回す場合は three-agent-tdd-workflow を使う。"
+metadata:
+  provenance: author-preference
 ---
 
 # single-session-tdd — 単一セッションTDDワークフロー

@@ -1,6 +1,8 @@
 ---
 name: review-specification
 description: "specification skill で生成された技術仕様書を、要件の網羅性・正確性/アーキテクチャ・技術選定の妥当性/API・データ設計の品質/テスト・品質保証戦略/実装計画・運用設計の5軸・100点満点で客観的に採点する。別エージェントを起動してレビューする（自己レビューしない）。「この技術仕様書をレビューして」「仕様書を採点して」等で使用。"
+metadata:
+  provenance: domain-prompt
 ---
 
 # /review-specification — 技術仕様書 品質レビュー（エージェント分離実行）

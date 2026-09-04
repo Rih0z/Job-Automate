@@ -3,6 +3,8 @@ name: repo-hygiene-patrol
 description: "プロジェクトのファイル構造衛生を自動検査する。バージョン番号付きファイル(_v2/_old/_backup等)、OS由来のゴミファイル、肥大化ファイル、.gitignore漏れ、ルート直下の散らかりを検出する。汎用skillのため、対象プロジェクトのディレクトリ規約は実行時に確認する。Trigger phrases: 'ファイル構造をチェックして', 'リポジトリの衛生チェック', 'repo-hygiene-patrol', '散らかりを検出して'."
 disable-model-invocation: true
 allowed-tools: Read Grep Glob Bash
+metadata:
+  provenance: author-preference
 ---
 
 # リポジトリ衛生パトロール

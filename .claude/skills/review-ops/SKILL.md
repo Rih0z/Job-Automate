@@ -10,6 +10,8 @@ description: |
 disable-model-invocation: true
 allowed-tools: Read Bash Agent
 argument-hint: "<レビュー対象スクリプト/設定ファイルのパス>"
+metadata:
+  provenance: domain-prompt
 ---
 
 # 運用スクリプト・サーバー設定 品質レビュー（エージェント分離実行）

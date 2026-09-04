@@ -1,6 +1,8 @@
 ---
 name: review-business-idea
 description: "business-idea skill で発展させたビジネスアイデア文書を、独自性・競合克服戦略・市場性・実現可能性・ペルソナ明確性・エンゲージメント/リテンション設計・展開計画の6軸・100点満点で客観的に採点する。別エージェントを起動してレビューする（自己レビューしない）。「このビジネスアイデアをレビューして」「アイデアを採点して」「S/A/B/C/D判定して」等で使用。"
+metadata:
+  provenance: domain-prompt
 ---
 
 # /review-business-idea — ビジネスアイデア 品質レビュー（エージェント分離実行）

@@ -7,6 +7,8 @@ description: |
   CSVを生成、最終的に社員情報一致・金額一致の自己監査を行う。
   Trigger phrases: '年末調整 CSV作成', '年末調整システム インポート', '給与明細から年末調整CSV',
   '年末調整 インポート用CSV', 'year-end adjustment csv'.
+metadata:
+  provenance: domain-prompt
 ---
 
 # 年末調整システム インポート用CSV作成支援AI

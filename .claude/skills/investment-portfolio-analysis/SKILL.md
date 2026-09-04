@@ -6,6 +6,8 @@ description: >
   6ヶ月投資プラン・継続投資戦略・移行戦略を日本語で提案する。
   Trigger phrases: '投資ポートフォリオ 分析', '資産配分 見直し', 'ETF 配分 最適化',
   'investment portfolio analysis', 'asset allocation rebalancing plan'.
+metadata:
+  provenance: domain-prompt
 ---
 
 # 投資ポートフォリオ分析

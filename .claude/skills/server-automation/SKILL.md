@@ -9,6 +9,8 @@ description: |
   (UTF-8/文字化け) やキャラクター画像URL混在等の既知の失敗パターンの回避策を扱う。
   Trigger phrases: 'サーバー 自動化', 'WordPress 記事 一括更新', 'ブログ インプレース更新',
   'server automation', 'SSH ブログ管理', '既存記事の改善・ファクトチェック'.
+metadata:
+  provenance: domain-prompt
 ---
 
 # サーバー自動化 — WordPress管理システム構築・運用ワークフロー

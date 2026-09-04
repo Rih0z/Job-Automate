@@ -1,6 +1,8 @@
 ---
 name: mcp-server-setup
 description: "Adds Serena MCP (semantic codebase analysis via uvx) or a Windows build-server MCP (node-based, for allowed build paths and dev commands) to a project's .mcp.json. Use when the user asks to 'Serena MCPをセットアップして', 'Windowsビルドサーバーmcpを設定して', '.mcp.jsonにMCPサーバーを追加して', or references serena.md / windows-setup.md."
+metadata:
+  provenance: domain-prompt
 ---
 
 # MCPツール セットアップ

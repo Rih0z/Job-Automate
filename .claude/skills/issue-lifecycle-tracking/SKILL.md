@@ -1,9 +1,13 @@
 ---
 name: issue-lifecycle-tracking
 description: "発見した問題(バグ・改善点)をファイルベースの状態遷移(open→processing→(pending)→closed)で追跡する運用パターン。外部Issueトラッカーに頼らず、リポジトリ内のIssueファイルとgit履歴だけで発見・調査・解決・検証を一元管理する。レビュー合格点等『頻繁に変わる数値』は単一のSoTファイルへ分離し本体ドキュメントへ埋め込まない指針、N回連続レビューFAIL時に無限修正ループへ陥らずIssue起票へ切り替える指針も含む。Use when the user asks to '問題管理をファイルベースに一本化して', 'Issueをディレクトリ移動で管理して', 'issue-lifecycle-tracking', or 外部トラッカー無しでバグ/改善点を追跡する仕組みの設計相談を受けた場合."
+metadata:
+  provenance: author-preference
 ---
 
 # Issue ライフサイクル追跡（ファイルベース状態遷移）
+
+> 由来: **著者の運用嗜好**（frontmatter `metadata.provenance: author-preference`）。Anthropic 公式ベストプラクティスに根拠はない。別プロジェクトへ移す時は、`agent-harness-bootstrap` の Step 0（由来別の取捨選択）でユーザーが明示的に選んだ場合のみコピーする。デフォルトでは持ち込まない。台帳: `.claude/skills/agent-harness-bootstrap/provenance.json` の `issue-lifecycle`。
 
 ## 概要
 

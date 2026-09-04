@@ -4,6 +4,8 @@ description: "複数サンプルに対するAI生成物の盲検一括評価テ�
 disable-model-invocation: true
 allowed-tools: Read Bash Agent Glob
 argument-hint: "<テストカテゴリ一覧のパス、または評価対象サンプル群のディレクトリ>"
+metadata:
+  provenance: author-preference
 ---
 
 # 盲検一括評価ハーネス

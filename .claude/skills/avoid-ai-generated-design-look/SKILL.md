@@ -1,6 +1,8 @@
 ---
 name: avoid-ai-generated-design-look
 description: "Reference guide for making a web/app UI look human-designed instead of AI-generated: identifies telltale 'AI slop' visual/UX patterns to avoid (perfect symmetry, generic Material/Bootstrap colors, emoji icons, robotic copy) and prescribes counter-patterns (organic shapes, bold custom typography pairs, Neo-Brutalism, persona-derived brand tokens, micro-interactions, Nielsen's 10 usability heuristics). Use when the user says 'このデザインAIっぽい', 'テンプレ感をなくして', 'もっと人間らしいデザインにして', 'AI生成っぽさを消して', or asks for design inspiration/references before building a frontend."
+metadata:
+  provenance: domain-prompt
 ---
 
 # デザインリサーチ — AIっぽくないデザイン・優れたUX

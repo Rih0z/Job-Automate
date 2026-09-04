@@ -1,6 +1,8 @@
 ---
 name: playwright-mcp-e2e-testing
 description: "Sets up the Playwright MCP server (.mcp.json) and runs a comprehensive frontend+backend+integration E2E test pass (responsive screenshots, form/auth flows, browser compatibility, API CRUD, performance, security, error handling) with a structured screenshot-evidence naming convention and results report. Use when the user asks to 'Playwright MCPをセットアップして', 'E2Eテストを実行して', 'PlaywrightでUIテストして', or references playwright.md."
+metadata:
+  provenance: domain-prompt
 ---
 
 ## セットアップ

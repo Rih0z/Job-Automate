@@ -1,6 +1,8 @@
 ---
 name: review-gate
 description: "工程別レビューゲート。仕様・設計・テスト・実装・リリースの各工程が1つ進むごとに、成果物を別エージェントにJSON定義の観点でレビューさせ、PASSするまで次工程に進ませない品質ゲート。レビュアーが観点定義自体の抜け漏れも指摘し、criteria JSONを育てていく。Use when the user asks to '工程レビューして', 'レビューゲートを通して', '仕様/設計/テスト/実装をレビューして', or when a development stage (spec/design/test/implementation/release) has just been completed and needs independent review before proceeding."
+metadata:
+  provenance: official-derived
 ---
 
 # review-gate — 工程別レビューゲート

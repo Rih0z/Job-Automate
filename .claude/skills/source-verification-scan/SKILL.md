@@ -4,6 +4,8 @@ description: "調査・レポート・記事の成果物に、非公開情報・
 disable-model-invocation: true
 allowed-tools: Read Grep Glob WebFetch Agent
 argument-hint: "<検査対象ファイルのパス(複数可)>"
+metadata:
+  provenance: author-preference
 ---
 
 # ソース検証スキャン(非公開情報・伝聞・捏造導線チェック)

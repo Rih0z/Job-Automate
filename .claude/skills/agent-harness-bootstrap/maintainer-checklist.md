@@ -7,13 +7,19 @@
 - [ ] handoff 規約（ファイル名 `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、次 handoff 作成まで保持、issue ファイルへの完全パス記載）が一貫しているか
 - [ ] skills 更新時の公式 Skills ガイド WebFetch レビューが要件化されているか
 - [ ] 「公式準拠の核」と「独自運用」のラベル分離が崩れていないか
+- [ ] 新規要素（独自運用項目・rules・hooks・skills・CLAUDE.md セクション）を追加した時、`provenance.json` に id / provenance / rubric_items / depends_on を登録し、`bash .claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh` が PASS するか（regression: `scripts/provenance-check.test.sh`）
+- [ ] `rubric.md` の新規項目に要素 id 列が埋まっているか（非選択要素の項目が「opt-out 宣言済み → Y」になる経路が切れていないか）
+- [ ] `template.md` の新規ブロックに `<!-- id: ... -->` マーカーが付いているか。`operational-knowhow.md` の新規項目に `> provenance:` 行があるか（provenance-check C10 で機械検査）
+- [ ] 本スキル自身の手順（Step 7 の 3 回 FAIL 起票・Step 8 の handoff 保存）が、対象で `issue-lifecycle` / `handoff-management` 非選択の時に非選択要素のディレクトリを作らない分岐になっているか
+- [ ] author-preference の要素が Step 0（`selection-flow.md`）を経ずに Step 1〜8 で無条件生成される経路が無いか（「念のため」持ち込みの禁止）
+- [ ] 各 `.claude/skills/*/SKILL.md` の frontmatter `metadata.provenance` が台帳と一致しているか（provenance-check C6）
 - [ ] emphasis（IMPORTANT / YOU MUST）が本スキル全体で 5 件以下か（語気強め「必須・禁止・削除不可・絶対」も平叙文化されているか）
 - [ ] 公式内容（文言・テーブル・数値・API 契約）を焼き込まず実行時 WebFetch 取得に統一されているか（verbatim・テーブル転記が残っていないか）
 - [ ] handoff 受領が user 明示指示駆動で、SessionStart hook がポインタ + verdict のみ注入（本文を注入しない）になっているか
 - [ ] reviewer 過剰報告抑制（correctness / 明示要件に関わる gap のみ採用）が含まれているか
 - [ ] 行数による出力拒否ゲートが残っていないか（公式は数値閾値を持たない）
 - [ ] hooks 化判断が `hooks-reference.md` にあり、参考 6 hook 構成と監査手順（dead/無駄 hooks 検出）+ **OS 別 shell 実装（Windows PowerShell / Mac・Linux bash）**が含まれているか
-- [ ] スケール調整（小規模では rules / hooks / オプションを間引く）が生成手順の最初に位置づけられているか
+- [ ] スケール調整（小規模では rules / hooks / オプションを間引く）が Step 0 の後・選択済み要素の範囲内で行われ、落とした要素を `harness-selection.json` に `decided_by: "scale"` で記録する手順になっているか
 - [ ] PC 再起動・session 復元（SessionStart hook は processing scan をポインタ + verdict のみ注入＝本文非注入 → User 通知 + 選択後 1 件のみ Read + 並列委任）が含まれているか
 - [ ] Step 8 で採用セット（CLAUDE.md / コア rules / 採用オプション / settings.json hooks + hook scripts）の実生成手順と雛形が含まれているか
 - [ ] [claude-code Issue #23478](https://github.com/anthropics/claude-code/issues/23478) の path-scope auto-load Read 時のみ発火 bug が URL 付きで明示されているか

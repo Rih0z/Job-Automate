@@ -1,6 +1,8 @@
 ---
 name: three-agent-tdd-workflow
 description: "Guides a 3-role (Leader/Executor/Reviewer), TDD-first development workflow run across 3 separate AI sessions/terminals for objectivity: Leader plans a test-first iteration, Executor writes a failing test then minimal implementation, Reviewer scores the result out of 100 and either sends it back for revision or hands off to the Leader for the next iteration. Use when the user asks to 'three-agent開発システムで進めて', '3エージェント体制で開発して', 'リーダー/実行/レビューの3ターミナルで開発を回して', or is starting any new coding project ('このシステムはすべての開発の起点')."
+metadata:
+  provenance: author-preference
 ---
 
 # 3エージェント開発システム (TDD強化版) — Skill 概要

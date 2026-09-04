@@ -1,6 +1,8 @@
 ---
 name: model-cost-optimization-routing
 description: "Audits and updates a project's CLAUDE.md, rules, Skills, and custom agent configs to enforce cost-optimal model routing (orchestrator model decides difficulty/scope/risk/cost and delegates simple work to a cheap model, complex work to a high-capability model, using the high-cost model only when necessary). Use when the user asks to 'モデル選択を最適化して', 'Claudeのコストを最適化して', 'サブエージェントの役割分担を整理して', 'orchestrator/executor/specialist の振り分けルールを作って', or wants a model-routing policy added to CLAUDE.md."
+metadata:
+  provenance: domain-prompt
 ---
 
 # モデル選択・委任コスト最適化プロンプト

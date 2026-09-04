@@ -2,9 +2,13 @@
 
 SKILL.md 本体「本スキル独自の運用ノウハウ」の索引から参照する supporting file。公式には記述がない本スキルの設計判断であり、プロジェクトに合わせて緩めてよい。各項目は「何をするか」を主体に記す。
 
+各項目冒頭の `> provenance:` 行は、その項目が **公式原則の具体化（official-derived）** か **著者の運用嗜好（author-preference）** かと、`provenance.json` の要素 id を示す。author-preference の項目は、別プロジェクトへ適用する時 Step 0（`selection-flow.md`）でユーザーが明示的に選んだ場合のみ生成する（デフォルト非採用）。由来の SoT は `provenance.json`、本ファイルの行は参照用の写しで、整合は `scripts/provenance-check.sh`（C10）が機械検査する。
+
 ### 独自運用: 規模に応じたスケール調整（過剰生成を避ける）
 
-本スキルの構造は「フル装備」の上限像である。生成の最初に、以下のスケールダウン判断を明示的に行う（消したら Claude がミスする / 規律が失われる要素だけを残す）:
+> provenance: official-derived · id: scale-adjustment
+
+本スキルの構造は「フル装備」の上限像である。Step 0 で由来別の選択を確定した後、**選択済み要素の範囲内で**以下のスケールダウン判断を明示的に行う（消したら Claude がミスする / 規律が失われる要素だけを残す。落とした要素は `harness-selection.json` に `decided_by: "scale"` で記録する）:
 
 - **rules ファイルは、該当する条文が実際に存在するものだけ生成する**（条文ゼロのファイルを空作成しない。後で必要になったら追加する）
 - **hooks は「確実に毎回実行したい規律」が実在する時だけ導入する**（単発・並走なしの個人開発では SessionStart hook や並走痕跡検出は不要）
@@ -13,6 +17,8 @@ SKILL.md 本体「本スキル独自の運用ノウハウ」の索引から参�
 標準セットは**上限（あり得る最大構成）**であって**必須の下限ではない**。
 
 ### 独自運用: サイズの目安（参考値・硬性基準ではない）
+
+> provenance: author-preference · id: size-guideline-100-lines / always-load-5kb-cap
 
 | レベル | 対象 | 目安 | 対応 |
 |------|------|------|------|
@@ -23,6 +29,8 @@ SKILL.md 本体「本スキル独自の運用ノウハウ」の索引から参�
 判定は数値より「公式 *"rules getting lost in the noise"* 兆候の有無」を主基準にする。閾値を設定する場合は「早期気付き warning + 構造見直し fail の二段構え」が汎用的に有効（数値は硬性化しない）。
 
 ### 独自構造: 標準セット（フル装備・規模に応じて間引く）
+
+> provenance: official-derived · id: rules-split-progressive-disclosure（execution-routing / docs-management の採用判定は各 id 参照）
 
 CLAUDE.md は単体ではなく次のセットで構成しうる（あり得る最大構成・不要要素は落とす）:
 
@@ -35,16 +43,16 @@ CLAUDE.md は単体ではなく次のセットで構成しうる（あり得る�
 
 コア rules ファイルとオプションファイルの内訳:
 
-| ファイル | 役割 | load 戦略 |
-|---|---|---|
-| `meta.md` | 条番号インデックス・既知の制約（下記 Issue #23478 等） | 常時 load |
-| `code-quality.md` | コード変更時の規約 | `@import` で常時 load |
-| `test-verify.md` | テスト・自検証規約 | `@import` で常時 load |
-| `issue-workflow.md` | Issue 起票・handoff・`/clear` | `paths:` で path-scope |
-| `review.md` | 別エージェントレビュー規約 | `paths:` で path-scope |
-| `governance.md` | 肥大化防止・新項目追加規約 | `paths:` で path-scope |
-| `execution-routing.md`（**オプション**） | タスクをどの実行主体・モデル格に振るかの規約 | `@import` で常時 load |
-| `docs-management.md`（**オプション**） | docs 配置 mapping / 新 docs 配置 flow / 全 section README 必須化 + 同期更新義務 / 過時マーカー強制 | `paths:` で path-scope |
+| ファイル | 役割 | 要素 id（選択依存 = author-preference のみで構成） | load 戦略 |
+|---|---|---|---|
+| `meta.md` | 条番号インデックス・既知の制約（下記 Issue #23478 等） | rules-split-progressive-disclosure（5KB cap は always-load-5kb-cap） | 常時 load |
+| `code-quality.md` | コード変更時の規約 | rules-split-progressive-disclosure / generic-discipline-menu | `@import` で常時 load |
+| `test-verify.md` | テスト・自検証規約 | rules-split-progressive-disclosure / close-verification-4-steps / artifact-generator-attribution / numeric-target-single-sot | `@import` で常時 load |
+| `issue-workflow.md`（**選択依存**） | Issue 起票・handoff・`/clear` | issue-lifecycle / handoff-management / concurrent-agent-4-axis-recheck | `paths:` で path-scope |
+| `review.md` | 別エージェントレビュー規約 | separate-agent-review-cycle / official-adversarial-review / official-skills-core / review-cycle-parameters | `paths:` で path-scope |
+| `governance.md`（**選択依存**） | 肥大化防止・新項目追加規約 | governance-multi-aspect | `paths:` で path-scope |
+| `execution-routing.md`（**選択依存**） | タスクをどの実行主体・モデル格に振るかの規約 | execution-routing | `@import` で常時 load |
+| `docs-management.md`（**選択依存**） | docs 配置 mapping / 新 docs 配置 flow / 全 section README 必須化 + 同期更新義務 / 過時マーカー強制 | docs-management | `paths:` で path-scope |
 
 **`execution-routing.md` 採用判定**: 複数の実行主体（人手 / 複数 AI エージェント / 異なるモデル格）に振り分ける運用があるプロジェクトで採用する。単一実行主体の小規模プロジェクトは不要。
 
@@ -53,6 +61,8 @@ CLAUDE.md は単体ではなく次のセットで構成しうる（あり得る�
 `paths:` frontmatter を `@import` と併用する理由: path-scope rules auto-load が **Read 時のみ発火、Write/Create 時には発火しない**既知 bug（[claude-code Issue #23478](https://github.com/anthropics/claude-code/issues/23478)）への補償。`@import` を一次防御、タスク開始時の手動 Read を二次防御とする二重防壁にする。生成 rules の `meta.md` 末尾「既知の制約」にも Issue URL を明記する。
 
 ### 独自運用: 実行主体・モデル格の振り分け規約（`execution-routing.md`）
+
+> provenance: author-preference · id: execution-routing
 
 複数の実行主体・モデル格を使い分けるプロジェクトでは、採用時に以下の骨子を条文化する（命名・段階数は実態に合わせる）:
 
@@ -66,13 +76,19 @@ CLAUDE.md は単体ではなく次のセットで構成しうる（あり得る�
 
 ### 独自運用: 関連 docs 読込宣言
 
+> provenance: author-preference · id: docs-read-declaration
+
 Claude はタスク開始時に関連 docs を最低 1 つ読み、**宣言の最初と最後の両方**に **完全パス + 1 文要約 + タスク関連性 1 文** を出力する。最初 = 「何の根拠で動くか」、最後 = 「実際に何を踏まえたか」の証跡二重化。片方だけだと「宣言はしたが読んでいない / 途中で逸脱した」ケースを検出できない。
 
 ### 独自運用: 条文宣言の lazy load 運用
 
+> provenance: author-preference · id: lazy-rule-declaration
+
 「タスク該当ルールを宣言してから着手」と書く時、**全条一括宣言は不要**にする。`meta.md` の条番号インデックスを参照し、タスクに該当する条のみ宣言する。「念のため全条宣言」は宣言を長文化させ、Claude が自分の宣言を無視する原因になる。
 
 ### 独自運用: governance.md の項目群
+
+> provenance: author-preference · id: governance-multi-aspect
 
 `governance.md` を生成する時、肥大化防止規約は「サイズ」以外の腐敗経路も塞ぐよう複数観点を項目立てる（項目数は必要に応じ増減）:
 
@@ -91,6 +107,8 @@ Claude はタスク開始時に関連 docs を最低 1 つ読み、**宣言の�
 
 ### 独自運用: handoff 受領（user 明示指示駆動・本文は自動 Read しない）
 
+> provenance: author-preference · id: handoff-management
+
 handoff は **user の明示指示でのみ受領**する（① user が chat に paste、または ② 「handoff X を読んで」と指示）。**最新 handoff の本文を session 開始時に自動 Read しない**（無関係な最新 handoff の誤受領と、本文の毎 session 注入による context 汚染を防ぐ）。受領後は役割のみ実施・scope creep を避け、関連気付きは別 Issue 起票する。
 
 SessionStart hook は**本文を注入せず、ポインタと verdict のみ通知する**: 中断作業の一覧（issue タイトル + handoff ファイル名のみ）と並走 4 軸 verdict（clean / 痕跡あり）を提示し「どれを再開しますか？」と問う。**本文 Read は user が再開対象を選択した後にその 1 件だけ**行う。
@@ -98,6 +116,8 @@ SessionStart hook は**本文を注入せず、ポインタと verdict のみ通
 **stale handoff 誤受領防止**: 提示する handoff のうち **7 日以上前 / 既に「## 完了」marker 済 / 「次 session 不要」明記**のものは "stale" と注記する。**archive ローテーション**: 一定期間（例: 90 日）経過した handoff は `.tmp/archive/handoffs/` に退避し context 肥大化を防ぐ。
 
 ### 独自運用: 並走 agent 痕跡 4 軸 recheck（並走衝突防止）
+
+> provenance: author-preference · id: concurrent-agent-4-axis-recheck
 
 複数 agent / session が同一リポジトリで並走する運用では、着手前に並走痕跡を検出して衝突（同一作業の重複着手・成果物の相互破壊）を防ぐ。並走が起こり得ない単発運用では省略してよい。
 
@@ -117,6 +137,8 @@ SessionStart hook は**本文を注入せず、ポインタと verdict のみ通
 **読込宣言への統合**: 証跡 3 要素（完全パス + 1 文要約 + タスク関連性）に「**並走痕跡 4 軸 clean 確認済**」を 4th 要素として加える。4 軸全 clean 確認後のみ着手を継続する。enforcement は SessionStart hook（hook + 手動宣言の二重防壁）。
 
 ### 独自運用: issue ライフサイクル管理（open → processing → closed）
+
+> provenance: author-preference · id: issue-lifecycle / close-verification-4-steps
 
 タスク・問題は `issues/` 配下のフォルダで状態管理する。並走エージェント数・修正の重大度に応じて 3 段階（open→processing→closed）または 4 段階（下記オプション参照）を選ぶ:
 
@@ -162,6 +184,8 @@ handoff 更新のたびに該当 issue の「最新 handoff」行も同期更新
 
 ### 独自運用: PC 再起動・session 復元の自動化
 
+> provenance: author-preference · id: session-restore-hook
+
 PC 再起動 / session 切断後に進行中タスクを自動検出し、User に通知して並列委任できる仕組み。
 
 **SessionStart hook の責務**（matcher: `startup|resume|clear|compact`）:
@@ -173,6 +197,8 @@ PC 再起動 / session 切断後に進行中タスクを自動検出し、User �
 
 ### 独自運用: handoff 管理（命名・保持・issue 連携）
 
+> provenance: author-preference · id: handoff-management
+
 - ファイル名: `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`（issue 紐付けあり）／ `[YYYY-MM-DD]-[識別単語].md`（紐付けなし）。識別単語は 2〜4 語 kebab-case、作業内容が一目で分かるもの
 - 保持: 次の handoff を新規作成するまで前 handoff は削除しない。次 handoff 作成時に削除またはアーカイブする
 - issue 連携: `issues/open|processing/[ID].md` 本文冒頭に「進行中 handoff: [完全パス]」を記載。handoff 更新時は issue 側も同期更新する
@@ -181,9 +207,13 @@ PC 再起動 / session 切断後に進行中タスクを自動検出し、User �
 
 ### 独自運用: 規約の hooks 化判断（advisory → deterministic 昇格）
 
+> provenance: official-derived · id: hooks-promotion-judgement（参考 6 hook 構成は author-preference · hooks-reference-set）
+
 CLAUDE.md に書いた規約は advisory なので Claude が長文中で見落としうる。「確実に毎回動かしたい」規約は hook 化する。ただしスケール調整に従い、**該当する規律が実在する時だけ導入**する（単発・並走なしの小規模開発では省略してよい）。hooks 化候補の判断基準・設計指針・参考 6 hook 構成・監査手順・OS 別 shell 実装・hook script 雛形は **`hooks-reference.md` を参照**する。
 
 ### 独自運用: 自作 skill / MCP ツールの品質基準の継承（該当時のみ）
+
+> provenance: official-derived · id: skill-mcp-quality-inheritance
 
 対象プロジェクトが独自 skill（Step 3 表「時々しか使わない知識・ワークフロー」）や独自 MCP ツールを新規作成する場合、次を該当時のみ生成物に反映する（無関係なプロジェクトへの一律注入はしない）:
 
@@ -194,16 +224,19 @@ CLAUDE.md に書いた規約は advisory なので Claude が長文中で見落�
 
 ### 独自運用: 別エージェントレビューサイクル
 
+> provenance: official-derived · id: separate-agent-review-cycle（「レビュー強度の運用基準」の並列本数・TDD test-first・ループ上限・90 点合格・3 回 FAIL は author-preference · review-cycle-parameters。「対象別の評価基準」表と skills 更新時の公式 Skills ガイド WebFetch レビュー要件は公式準拠の核〈official-adversarial-review / official-skills-core〉に属し、review-cycle-parameters 非選択でも生成 review.md から落とさない）
+
 成果物（実装・設計・docs・**CLAUDE.md・skills**）は実行後に別エージェントからレビューを最低 1 回受ける。
 
 ```
 [実行] → [別エージェント レビュー] → 合格?
                                      ├─ Yes → 完了
                                      └─ No  → 修正して再レビュー（最大 3 回）
-                                                  3 回 FAIL → issues/open/[ID].md 起票・中断
+                                                  3 回 FAIL → 中断・ユーザーに報告
+                                                  （issue-lifecycle 採用時は issues/open/[ID].md 起票）
 ```
 
-レビュアに渡すのは **レビュー対象の完全パスと、適用するレビュー用 skill / コマンドの 2 点のみ**。レビュアは対象を自分で Read し（proof-by-presence で客観性確保）、評価基準は skill から取得する。実装意図・会話履歴・生成過程・本スキルは渡さない。公式の Writer/Reviewer pattern と整合する独自強化。
+レビュアに渡すのは **レビュー対象の完全パスと、適用するレビュー用 skill / コマンドの 2 点のみ**。レビュアは対象を自分で Read し（proof-by-presence で客観性確保）、評価基準は skill から取得する。実装意図・会話履歴・生成過程・本スキルは渡さない（例外: 対象に CLAUDE.md レビュー用 skill が無い時は SKILL.md Step 7「レビュアが必ず実施すること」4 項目だけを評価基準として渡す）。公式の Writer/Reviewer pattern と整合する独自強化。
 
 **レビュー強度の運用基準**:
 - **並列本数**: 重要成果物（CLAUDE.md / skills / 破壊的変更）は独立エージェント **2〜4 本を並列起動**し、**converged findings（複数エージェントで一致した指摘）**を抽出する。Blocker は次工程前に修正。軽微な変更は 1 本で可
@@ -225,9 +258,11 @@ CLAUDE.md に書いた規約は advisory なので Claude が長文中で見落�
 **IMPORTANT** — skills 更新時のレビュー要件:
 - skills（`.claude/skills/`、`~/.claude/skills/`、`.claude/commands/` 含む）を新規作成または更新したら、別エージェントに skill レビュー用の skill / コマンドでレビューを依頼する
 - レビュアは公式 Skills 作成ガイド（[skills](https://code.claude.com/docs/en/skills)）を WebFetch で取得して判定する（記憶ベースで判定しない）。構造・トリガー設計・命令品質・出力設計・実用性の 5 軸で 100 点満点採点
-- 90 点以上で合格。3 回 FAIL で `issues/open/[ID].md` 起票・中断
+- 90 点以上で合格。3 回 FAIL で中断・ユーザーに報告（`issue-lifecycle` 採用時は `issues/open/[ID].md` に起票。非採用時は起票せず報告のみ）
 
 ### 独自運用: 収束型自律前進（採用時のみ・オプション）
+
+> provenance: author-preference · id: converged-autonomy
 
 継続的に自律進行させたい運用（人手確認の都度待ちを減らしたいプロジェクト）でのみ採用する。単発・小規模で都度確認を好む運用では不要。
 
@@ -243,6 +278,8 @@ CLAUDE.md に書いた規約は advisory なので Claude が長文中で見落�
 この 6 類の例外は「全部直轄に戻す」「全部自律に倒す」のいずれの極端化も禁止する gameability 防壁として機能させる。
 
 ### 独自運用: 成果物の生成主体明示（誤認防止）
+
+> provenance: author-preference · id: artifact-generator-attribution
 
 テスト結果・成果物について、**LLM が生成したもの**か **script / template / library（pptxgenjs 等）が生成したもの**かを厳格に区別する:
 

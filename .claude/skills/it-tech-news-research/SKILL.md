@@ -6,6 +6,8 @@ description: >
   カテゴリ×地域別のMarkdown表として日本語で出力する。
   Trigger phrases: 'ITニュース リサーチ', 'テクノロジーニュース まとめ', 'AI業界 最新ニュース',
   'GAFAM 動向調査', 'it tech news roundup', 'microsoft trend research'.
+metadata:
+  provenance: domain-prompt
 ---
 
 # IT・テクノロジーニュースリサーチ

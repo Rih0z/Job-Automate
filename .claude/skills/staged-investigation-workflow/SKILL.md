@@ -4,6 +4,8 @@ description: "深い調査(障害原因分析・競合調査・技術検証等)�
 disable-model-invocation: true
 allowed-tools: Read Grep Glob Bash WebSearch WebFetch Agent
 argument-hint: "<調査対象・問い>"
+metadata:
+  provenance: author-preference
 ---
 
 # 段階的調査ワークフロー(ゲート付き反復)

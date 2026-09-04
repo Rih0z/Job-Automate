@@ -11,6 +11,8 @@ description: |
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Agent
 argument-hint: "<レビュー対象記事ファイルの絶対パス>"
+metadata:
+  provenance: domain-prompt
 ---
 
 # 汎用ブログ記事レビュープロンプト（エージェント分離実行）

@@ -6,6 +6,8 @@ description: >
   策定するブログ強化支援プロンプト。実行時点の最新トレンド・季節性を必ず調査に反映する汎用フレーム。
   Trigger phrases: 'ブログ 強化 戦略', 'ブログ SEO 見直し', 'ブログ 流入 増やす', 'コンテンツ戦略 立案',
   'blog growth strategy', 'blog SEO audit and plan'.
+metadata:
+  provenance: domain-prompt
 ---
 
 # ブログ強化支援プロンプト（改善版）

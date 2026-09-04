@@ -11,7 +11,7 @@ AIを活用した業務自動化・開発効率化のためのプロンプトラ
 1. このリポジトリを clone する。
 2. clone したディレクトリで Claude Code を起動する（**clone するだけでは何も自動実行されない** — Claude Code は明示的な指示なしにファイルを実行しない設計のため、次の一言だけは必要）。
 3. 「このリポジトリを使って `<対象ディレクトリの絶対パス>` をセットアップして」と伝える（表現は厳密でなくてよい。「ここの仕組みを別プロジェクトにも入れて」等でも同じ手順が走る — 詳細な発火条件は [CLAUDE.md](CLAUDE.md)「他プロジェクトのセットアップ依頼への対応」参照）。
-4. 以降は Claude Code が `CLAUDE.md` の**完全移植ルール**（全セクションの移植チェックリスト作成 → `.claude/skills/agent-harness-bootstrap` で対象 CLAUDE.md を生成 → 関連 skills をコピー → 別エージェントで移植の抜けゼロを突合レビュー）を自律的に実行する。
+4. 以降は Claude Code が `CLAUDE.md` の**完全列挙 + 由来別選択ルール**を実行する: 全要素を載せた選択記録（= 移植チェックリスト）の作成 → **由来別（Anthropic 公式由来 / 公式原則の具体化 / 著者の運用嗜好 / 第三者 / 業務プロンプト）に提示し、何を取り込むかをあなたが選ぶ**（著者嗜好はデフォルト非採用。issue フォルダ管理・handoff 規約・並走 recheck 等は選んだ時だけ入る）→ 選択を対象の `.claude/harness-selection.json` に記録 → `.claude/skills/agent-harness-bootstrap` で対象 CLAUDE.md を生成 → 選択した skills をコピー → 別エージェントで「選択済みの抜けゼロ・非選択の混入ゼロ」を突合レビュー。由来の台帳は [provenance.json](.claude/skills/agent-harness-bootstrap/provenance.json)、選択手順は [selection-flow.md](.claude/skills/agent-harness-bootstrap/selection-flow.md)。
 
 このリポジトリ自身をセットアップする場合（対象＝このリポジトリの中で作業したいだけの場合）は、上記は不要。clone して Claude Code で開けば `.claude/commands/` `.claude/skills/` は自動検出される（下記「Claude Code スラッシュコマンド／Skills」節）。
 
@@ -63,11 +63,12 @@ AIがどれだけ進化しても、**「何を良しとするか」の基準を�
 - この2点を含む「AIにharnessを作らせる時に人間が何を人間の役割として残すか」という考え方は、任意のプロジェクト向けにCLAUDE.md/harnessを生成するSkillである **`.claude/skills/agent-harness-bootstrap/SKILL.md`**（[本文へのリンク](.claude/skills/agent-harness-bootstrap/SKILL.md)）に体系化されている。同Skillが内蔵する主な原則:
   - **段階的開示（progressive disclosure）**: 頻繁には使わない知識をCLAUDE.md本体に書き込まず、`.claude/skills/` へ逃がして常時読み込みコストを下げる
   - **公式準拠の核と独自運用ノウハウのラベル分離**: Anthropic公式ドキュメントの内容は実行時にその都度取得し、Skill本体に転記・焼き込みしない（公式ドキュメントは更新されるため、転記は陳腐化する）
+  - **由来台帳による取捨選択 (2026-09-04 追加)**: harness の全要素を `provenance.json` で `official` / `official-derived` / `author-preference` / `third-party` / `domain-prompt` / `repo-specific` に分類し、別プロジェクトへ適用する時は著者の運用嗜好（issue フォルダ管理・handoff 規約等）をデフォルト非採用にしてユーザーが選ぶ。公式由来と著者嗜好を混ぜたまま他環境へ写さないための仕組みで、台帳と実体の整合は `scripts/provenance-check.sh` で機械検査する
   - **自己レビュー不可**: 生成したCLAUDE.md・Skillsは生成した本人（同一セッション）が合格判定を下さず、別エージェントに検証させる
   - **規模に応じたスケール調整**: 「フル装備」を上限として、そのプロジェクトに実在しない規律・不要なオプション要素は生成しない（過剰生成の回避）
   - **行の要否判定 / Include・Exclude 判定**: 各セクション候補に Anthropic 公式の判定基準（「削除したらClaudeが間違えるか」を問い、コードを読めば分かることは書かない・推測で誤動作しうる手順だけ残す 等）を適用してから採用する（用語・文言は公式ドキュメントの改訂で変わりうるため、本skill自体は文言を焼き込まず実行時にWebFetchで確認する）
   - **Adversarial review step**: 生成した CLAUDE.md・skills・hooks を、生成した本人と会話履歴を共有しない別エージェントに公式基準で採点させ、全項目合格するまで再生成する（自己レビュー不可の具体形）
-  - **数値目標の単一 SoT 化 (2026-09-01 追加)**: カバレッジ%・合格率等の数値目標は、それを実際に強制する設定ファイル（CI 閾値・validator 定数等）のみを SoT とし、CLAUDE.md や docs へ数値を重複記載しない。数値の宣言箇所と強制箇所が食い違ったまま放置される、という観察された失敗パターンへの対策で、生成される `test-verify.md` の必須条文になっている
+  - **数値目標の単一 SoT 化 (2026-09-01 追加)**: カバレッジ%・合格率等の数値目標は、それを実際に強制する設定ファイル（CI 閾値・validator 定数等）のみを SoT とし、CLAUDE.md や docs へ数値を重複記載しない。数値の宣言箇所と強制箇所が食い違ったまま放置される、という観察された失敗パターンへの対策。生成される `test-verify.md` の条文で、由来は著者の運用嗜好（default `recommend`: 事前チェック済みだがユーザーが外せる。2026-09-04 に必須から再分類）
 
 ---
 

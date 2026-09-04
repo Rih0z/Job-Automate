@@ -7,6 +7,8 @@ description: >
   第2段として選定キーワードの競合サイトを深掘り分析し勝利戦略を立案する。
   Trigger phrases: 'SEO キーワード選定', '記事構成 作成', 'キーワード選定 記事構成 一括',
   'seo keyword and article outline', 'competitive keyword content plan'.
+metadata:
+  provenance: domain-prompt
 ---
 
 # SEO キーワード選定→記事構成一括出力

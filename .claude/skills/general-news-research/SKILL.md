@@ -6,6 +6,8 @@ description: >
   カテゴリ×地域別のMarkdown表として日本語で出力する。
   Trigger phrases: '一般ニュース リサーチ', '地域ニュース まとめ', '政治・経済ニュース調査',
   'general news roundup', 'seattle usa japan news digest'.
+metadata:
+  provenance: domain-prompt
 ---
 
 # 一般ニュースリサーチ

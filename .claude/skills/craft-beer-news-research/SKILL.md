@@ -6,6 +6,8 @@ description: >
   地域別Markdown表 + Hop Culture掲載の年間ビアフェスティバル特集リサーチを日本語で出力する。
   Trigger phrases: 'クラフトビール ニュース', 'クラフトビール業界 リサーチ', 'ビアフェスティバル 調査',
   'craft beer news research', 'brewery industry news roundup'.
+metadata:
+  provenance: domain-prompt
 ---
 
 # クラフトビール業界ニュースリサーチ

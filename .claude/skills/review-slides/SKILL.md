@@ -10,6 +10,8 @@ description: |
 disable-model-invocation: true
 allowed-tools: Read Glob Grep Agent
 argument-hint: "<レビュー対象 HTML スライドファイルの絶対パス>"
+metadata:
+  provenance: domain-prompt
 ---
 
 # make-slide.md スライド 品質レビュープロンプト（エージェント分離実行）

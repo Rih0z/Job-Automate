@@ -10,6 +10,8 @@ description: |
   '16:9 プレゼンテーション作成', 'make-slide', 'HTMLスライド生成'.
 allowed-tools: Read Write
 argument-hint: "<企画書 md ファイルの絶対パス>"
+metadata:
+  provenance: domain-prompt
 ---
 
 # 企画書mdファイルからの16:9比率プレゼンテーションスライド生成プロンプト（プロフェッショナル版 v4.1）

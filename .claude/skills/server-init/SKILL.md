@@ -6,6 +6,8 @@ description: |
   ローカル環境で編集してから問題なければサーバーへアップロードする管理体制の環境構築を支援する。
   Trigger phrases: 'サーバー SSH接続 設定', 'レンタルサーバー ssh 設定方法', 'ブログをローカルで
   管理したい', 'server init', 'SSH環境構築', 'サーバー初期設定'.
+metadata:
+  provenance: domain-prompt
 ---
 
 # サーバー初期設定 — SSH接続環境構築

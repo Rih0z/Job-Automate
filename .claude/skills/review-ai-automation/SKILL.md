@@ -1,6 +1,8 @@
 ---
 name: review-ai-automation
 description: "ai-automation skill で生成されたAI自動化ビジネスモデル10案を、実現可能性/収益性・マネタイズ/自動化レベル/競合優位性・モート/エンゲージメント・リテンション/リスク管理・スケーラビリティの6軸・100点満点で各案を採点し、総合ランキングとTOP3推奨を出す。別エージェントを起動してレビューする（自己レビューしない）。「AI自動化ビジネスモデルをレビューして」「10案をランキングして」等で使用。"
+metadata:
+  provenance: domain-prompt
 ---
 
 # /review-ai-automation — AI自動化ビジネスモデル レビュー（エージェント分離実行）

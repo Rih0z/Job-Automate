@@ -1,6 +1,8 @@
 ---
 name: review-persona-analysis
 description: "Objectively scores a customer-persona analysis / design-decision document (produced by customer-persona-design) on a 100-point, 5-axis rubric (specificity/realism, needs depth, design alignment, segmentation/prioritization, verifiability) by dispatching an independent review agent. Use when the user asks to 'ペルソナ分析をレビューして', 'ペルソナ分析を採点して', or 'persona.md の成果物を評価して'."
+metadata:
+  provenance: domain-prompt
 ---
 
 # /review-persona-analysis — ペルソナ分析レビュー（エージェント分離実行）

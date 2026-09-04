@@ -1,6 +1,8 @@
 ---
 name: review-proposal
 description: "business-proposal / it-proposal / generic-proposal skill で作成された提案書・企画書を、構成・論理性/市場分析・競合克服戦略/ペルソナ適合性/根拠の明確性/エンゲージメント・リテンション設計/説得力・表現品質の6軸・100点満点で客観的に採点する。別エージェントを起動してレビューする（自己レビューしない）。「この提案書をレビューして」「企画書を採点して」等で使用。"
+metadata:
+  provenance: domain-prompt
 ---
 
 # /review-proposal — 提案書 品質レビュー（エージェント分離実行）

@@ -7,6 +7,8 @@ description: |
   Trigger phrases: '顔文字作って', 'ゴンベ顔文字', '可愛い顔文字を作成', 'かわいい顔文字',
   'kaomoji', 'テキストアート作成', '装飾的な絵文字を作って'.
 allowed-tools: Read
+metadata:
+  provenance: domain-prompt
 ---
 
 # 超高級ゴンベ顔文字作成プロンプト
