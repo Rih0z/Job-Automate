@@ -55,7 +55,8 @@ SKILL.md 本体の生成手順 Step 0 から参照する supporting file。対�
 - `selections` には**台帳の全要素**を載せる（選ばなかった要素も `selected: false` で残す。後で「あの観点は取り込めているか」と聞かれた時に、検討済みで外したのか未検討なのかを区別するため）。
 - 要素側 `decided_by` は `user` / `default` / `excluded`（群 D）/ `scale`（Step 0 後のスケール調整で落とした）のいずれか。
 - `skill-group` を `selected: true` にする時は `skills[]` に採用した skill 名を**必ず**列挙する（空・省略は不可。省略を全採用とみなさない — 「デフォルト非採用」の逆転を防ぐ）。
-- 書いたら機械検証する: `bash <本スキル dir>/scripts/provenance-check.sh --selection <対象の絶対パス>/.claude/harness-selection.json`（全要素の網羅・値域・`depends_on` 充足・repo-specific ⇔ excluded・skill-group の `skills[]` を検査。`soft_depends_on` の欠落は WARN として表示）。既定パスはスクリプトの位置から解決するので cwd はどこでもよい。
+- 書いたら機械検証する: `bash <本スキル dir>/scripts/provenance-check.sh --selection <対象の絶対パス>/.claude/harness-selection.json`（全要素の網羅・値域・`depends_on` 充足・repo-specific ⇔ excluded・skill-group の `skills[]` を検査。`soft_depends_on` の欠落は WARN として表示）。既定パスはスクリプトの位置から解決するので cwd はどこでもよい。推奨配置（移植元 clone が対象の `.setup-automate/` にある）なら対象ルートで `bash .setup-automate/.claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh --selection "$PWD/.claude/harness-selection.json"`。
+- **対象側のコミット / gitignore**: `harness-selection.json`・生成 CLAUDE.md・`.claude/rules|skills|commands|settings.json`・採用した `files[]`（`workflows/software-development/` 等）は対象にコミットする。移植元 clone の `.setup-automate/` と、handoff 規約採用時の `.tmp/` は `.gitignore` に追加する（未追加なら Step 8 で追記し、最終報告に明記する）。
 
 ## 0-5. 以降の手順との接続
 
@@ -68,7 +69,7 @@ SKILL.md 本体の生成手順 Step 0 から参照する supporting file。対�
 
 ## 0-6. 再セットアップ・同期時
 
-対象に `harness-selection.json` が既にある場合は先に Read し、`selected: false, decided_by: "user"` の要素を**再提案しない**（ユーザーが「再検討したい」と明示した時のみ再提示）。台帳側に新要素が増えていれば `--selection` 検証が「entry が無い」と報告するので、その新要素だけを提示して追記する。`decided_by: "scale"` で落とした要素は前提（規律の有無・規模）が変わりうるので再同期時に再提示してよい。
+再同期には移植元 clone が要る（`provenance.json` と `provenance-check.sh` はそこにしか無い）。推奨配置なら対象の `.setup-automate/` で `git pull` する。gitignore されているため無いメンバーは同じ場所に再 clone する。対象に `harness-selection.json` が既にある場合は先に Read し、`selected: false, decided_by: "user"` の要素を**再提案しない**（ユーザーが「再検討したい」と明示した時のみ再提示）。台帳側に新要素が増えていれば `--selection` 検証が「entry が無い」と報告するので、その新要素だけを提示して追記する。`decided_by: "scale"` で落とした要素は前提（規律の有無・規模）が変わりうるので再同期時に再提示してよい。
 
 ## 突合レビュー（移植完了後）
 

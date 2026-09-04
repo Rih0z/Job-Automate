@@ -221,7 +221,8 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
   - **進捗状況** — 現在のフェーズ（PoC / α / β / 本番運用 等）・直近マイルストーン・既知の未完了領域・進行中 Issue 件数（`issue-lifecycle` 採用時は `issues/processing/*.md` の実数。非採用時は外部トラッカーの件数か「該当なし」）
 - 生成内容の要約（3 行以内）
 - `> [要確認]` 残項目
-- **生成したファイル一覧（フルパス）**: CLAUDE.md / 採用 rules / settings.json / hook scripts / `.claude/harness-selection.json`（Step 0 実施時）
+- **生成したファイル一覧（フルパス）**: CLAUDE.md / 採用 rules / settings.json / hook scripts / `.claude/harness-selection.json`（Step 0 実施時）/ コピーした skills・commands・`files[]`
+- **対象側のコミット / gitignore の区分**: 上記生成物はコミット対象。移植元 clone（`.setup-automate/`）と handoff 採用時の `.tmp/` は `.gitignore` に追記済みか（未追記なら追記して報告）
 - **由来別の選択結果**（Step 0 実施時）: 群 C（著者嗜好・第三者・業務プロンプト）で採用した要素の一覧、群 A・B で外した要素と理由、対話不可で default のみ採用した場合はその旨
 - **スケール調整で意図的に落とした要素**（採用しなかった rules / hooks / オプションファイルと、その理由を 1 行ずつ）
 - レビュア合格の事実（公式項目 + rubric 全 Y）と、レビュアが冒頭に出力した WebFetch 取得日時

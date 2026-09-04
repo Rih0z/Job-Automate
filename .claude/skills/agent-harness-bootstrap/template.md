@@ -60,7 +60,7 @@
 <!-- id: official-claude-md-core -->
 ## ルート構成
 
-`[entry]` / `[dir1]/` / `[dir2]/` / 一時: `.tmp/` `.history/`（gitignore 推奨）。git 完全追跡の例外: [明記]
+`[entry]` / `[dir1]/` / `[dir2]/` / 一時: `.tmp/` `.history/`（gitignore 推奨）/ 移植元 clone: `.setup-automate/`（gitignore・再同期用）。git 完全追跡の例外: [明記]
 
 <!-- id: size-guideline-100-lines / governance-multi-aspect -->
 ## サイズ運用
