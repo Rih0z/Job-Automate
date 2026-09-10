@@ -10,19 +10,40 @@
     "agent-harness-bootstrap の Step 7 / harness-setup-review / skills-audit を新しい対象プロジェクトに初めて適用する"
   ],
   "sources": {
-    "best-practices": { "url": "https://code.claude.com/docs/en/best-practices", "fetched": "2026-09-04" },
-    "skills": { "url": "https://code.claude.com/docs/en/skills", "fetched": "2026-09-04" },
-    "hooks": { "url": "https://code.claude.com/docs/en/hooks", "fetched": "2026-09-04" },
-    "hooks-guide": { "url": "https://code.claude.com/docs/en/hooks-guide", "fetched": "2026-09-04" },
-    "memory": { "url": "https://code.claude.com/docs/en/memory", "fetched": null, "note": "CLAUDE.md の配置場所と @import 規則の正本。未取得。claude-md.imports の裏取り時に取得する" },
-    "skills-guide-pdf": { "title": "The Complete Guide to Building Skills for Claude (Anthropic, PDF)", "fetched": null, "note": "skill-authoring-guide / workflows/software-development/skills-building-guide.md の出典。本日は未再取得。skills.* のうち source がこれのものは docs 側で裏取りできた範囲のみ verified: true" }
+    "best-practices": {
+      "url": "https://code.claude.com/docs/en/best-practices",
+      "fetched": "2026-09-04"
+    },
+    "skills": {
+      "url": "https://code.claude.com/docs/en/skills",
+      "fetched": "2026-09-04"
+    },
+    "hooks": {
+      "url": "https://code.claude.com/docs/en/hooks",
+      "fetched": "2026-09-04"
+    },
+    "hooks-guide": {
+      "url": "https://code.claude.com/docs/en/hooks-guide",
+      "fetched": "2026-09-04"
+    },
+    "memory": {
+      "url": "https://code.claude.com/docs/en/memory",
+      "fetched": null,
+      "note": "CLAUDE.md の配置場所と @import 規則の正本。未取得。claude-md.imports の裏取り時に取得する"
+    },
+    "skills-guide-pdf": {
+      "title": "The Complete Guide to Building Skills for Claude (Anthropic, PDF)",
+      "fetched": null,
+      "note": "skill-authoring-guide / workflows/software-development/skills-building-guide.md の出典。本日は未再取得。skills.* のうち source がこれのものは docs 側で裏取りできた範囲のみ verified: true"
+    }
   },
   "used_by_index": {
     "agent-harness-bootstrap": "公式準拠の核（Step 2 の行の要否判定・Step 7 レビュー・hooks 生成）",
     "harness-setup-review": "criteria/porting-reconciliation.json の判定と skills-audit 連携",
     "skills-audit": "既存 skills の一括監査基準",
     "skill-authoring-guide": "Skill 設計リファレンスの正本",
-    "review-skill": "/review-skill の評価根拠"
+    "review-skill": "/review-skill の評価根拠",
+    "harness-compliance-audit": "直近変更分（CLAUDE.md/rules/skills/commands/agents/hooks）の機械検査＋独立エージェント判定の判定 SoT（全 category を照合）"
   },
   "principles": [
     {
@@ -34,7 +55,11 @@
       "quote": "Would removing this cause Claude to make mistakes?",
       "check": "生成 CLAUDE.md の各行にこの問いを適用し、一般論・コードから分かること・自明な実践が残っていない（rubric 1, 2）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "harness-setup-review"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "claude-md.include-exclude",
@@ -45,7 +70,11 @@
       "quote": "Information that changes frequently",
       "check": "生成 CLAUDE.md の各行が Include 側に該当し Exclude 側に該当しない（rubric 2, 3, 20）。公式文言そのものの転記（頻繁に変わる情報）を CLAUDE.md や skill に焼き込んでいない",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "harness-setup-review"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "claude-md.concise-no-numeric-threshold",
@@ -56,7 +85,10 @@
       "quote": "keep it short and human-readable",
       "check": "行数による出力拒否ゲートを設けない。剪定判断は『ルールが埋もれる兆候』を主基準にし、数値（例: 100 行）は参考値に留める",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "claude-md.emphasis-single-line",
@@ -67,7 +99,12 @@
       "quote": "If you emphasize many lines, none of them stands out.",
       "check": "IMPORTANT / YOU MUST の出現が少数に絞られている（本リポジトリの運用値: 5 件以下。数値は著者の引き締め）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "harness-setup-review", "skills-audit"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "skills-audit",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "claude-md.on-demand-goes-to-skills",
@@ -78,7 +115,12 @@
       "quote": "Claude loads them on demand without bloating every conversation.",
       "check": "手順・長文リファレンス・オンデマンド知識が CLAUDE.md 本体でなく .claude/skills/ か docs へのリンクに逃がされている（rubric 16）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "skills-audit", "skill-authoring-guide"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "skills-audit",
+        "skill-authoring-guide",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "claude-md.imports",
@@ -89,7 +131,11 @@
       "quote": "@path/to/import",
       "check": "生成 CLAUDE.md の @import 行が実在ファイルを指し、常時 load させたい rules は @import で、特定作業時のみの rules は paths: で分けられている（rubric 22, 28b）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "harness-setup-review"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "claude-md.treat-like-code",
@@ -100,7 +146,10 @@
       "quote": "Treat CLAUDE.md like code",
       "check": "governance（定期レビュー・新項目の振り分け）が rules か CLAUDE.md 本体にあり、CLAUDE.md がコミット対象になっている（rubric 18）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "claude-md.overspecified-prune-or-hook",
@@ -111,7 +160,10 @@
       "quote": "If Claude already does something correctly without the instruction, delete it or convert it to a hook.",
       "check": "毎回例外なく実行したい規律だけが hook 化候補として識別されている（rubric 21）。advisory のままで済む文脈依存判断を hook にしていない",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "claude-md.compaction-instructions",
@@ -122,7 +174,10 @@
       "quote": "When compacting, always preserve the full list of modified files and any test commands",
       "check": "対象プロジェクトが長時間セッションを想定するなら、/compact 時に残す項目の指示が CLAUDE.md にある（任意）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "hooks.deterministic-zero-exceptions",
@@ -133,7 +188,11 @@
       "quote": "Use hooks for actions that must happen every time with zero exceptions.",
       "check": "『必ず』『例外なく』と書かれた規律のうち、毎回実行すべきで pass/fail が機械判定できるものは hook 化されている（advisory→hook 昇格判断）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "harness-setup-review"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "hooks.stop-gate-and-block-cap",
@@ -144,7 +203,11 @@
       "quote": "Claude Code overrides the hook and ends the turn after 8 consecutive blocks.",
       "check": "Stop hook で強制するゲートは自前の上限（本リポジトリは 3 回）を持ち、上限到達時はユーザーに未検証である旨を返す",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "harness-setup-review"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "hooks.stop-hook-active-loop-guard",
@@ -155,7 +218,10 @@
       "quote": "stop_hook_active",
       "check": "Stop hook スクリプトが stop_hook_active を parse し、無限に block しない",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "hooks.stop-json-decision-block",
@@ -166,7 +232,10 @@
       "quote": "{\"decision\": \"block\", \"reason\": \"Not allowed\"}",
       "check": "Stop hook の block は JSON decision で返している（exit 2 の stderr は Stop ではユーザー/デバッグ向けで Claude に届く保証が無い）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "hooks.pretooluse-block-exit2",
@@ -177,7 +246,10 @@
       "quote": "exit 2 = block the action",
       "check": "reject 分岐が実際に exit 2（または deny の JSON）に到達している（ログ出力だけで素通りしていない）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "hooks.userpromptsubmit-additionalcontext",
@@ -188,7 +260,10 @@
       "quote": "hookSpecificOutput.additionalContext",
       "check": "UserPromptSubmit / PostToolUse の context 注入が hookSpecificOutput の中にある",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "hooks.sessionstart-stdout-is-context",
@@ -199,7 +274,10 @@
       "quote": "startup|resume|clear|compact",
       "check": "SessionStart hook は本文を注入せずポインタと verdict のみを stdout に出す（context 汚染防止は著者判断、stdout が context に入る事実は公式）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "hooks.config-locations",
@@ -210,7 +288,10 @@
       "quote": "$CLAUDE_PROJECT_DIR",
       "check": "共有したい hook は .claude/settings.json にあり、スクリプトは $CLAUDE_PROJECT_DIR 基準の相対パスで呼ばれている",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "skills.file-location-and-precedence",
@@ -221,7 +302,12 @@
       "quote": ".claude/skills/<skill-name>/SKILL.md",
       "check": "新形式 .claude/skills/<name>/SKILL.md を使い、同名の personal skill に上書きされない名前になっている（skills-audit 1）",
       "verified": true,
-      "used_by": ["skills-audit", "skill-authoring-guide", "agent-harness-bootstrap"]
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "skills.frontmatter-fields",
@@ -232,7 +318,12 @@
       "quote": "1,536-character cap",
       "check": "description + when_to_use が 1,536 文字以内。metadata は map。paths 等の予約 key を metadata 配下に再利用していない（skills-audit 2）",
       "verified": true,
-      "used_by": ["skills-audit", "skill-authoring-guide", "review-skill"]
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "skills.description-key-use-case-first",
@@ -243,7 +334,12 @@
       "quote": "Put the key use case first",
       "check": "description の先頭が主用途で、トリガー文言や除外条件が続く（skills-audit 2 / review-skill トリガー軸）",
       "verified": true,
-      "used_by": ["skills-audit", "review-skill", "skill-authoring-guide"]
+      "used_by": [
+        "skills-audit",
+        "review-skill",
+        "skill-authoring-guide",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "skills.side-effect-workflows-manual",
@@ -254,7 +350,11 @@
       "quote": "disable-model-invocation: true",
       "check": "副作用のある skill に disable-model-invocation があり、背景知識 skill に user-invocable: false がある（skills-audit 2）",
       "verified": true,
-      "used_by": ["skills-audit", "review-skill"]
+      "used_by": [
+        "skills-audit",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "skills.progressive-disclosure",
@@ -265,7 +365,12 @@
       "quote": "loads only when it's used",
       "check": "SKILL.md 本体は簡潔で、詳細は references / scripts / assets に分離されている（skills-audit 1, 3）",
       "verified": true,
-      "used_by": ["skills-audit", "skill-authoring-guide", "agent-harness-bootstrap"]
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "skills.dynamic-context-and-arguments",
@@ -276,7 +381,11 @@
       "quote": "!`git diff HEAD`",
       "check": "引数を取る skill は $ARGUMENTS と argument-hint を持ち、同梱スクリプトは ${CLAUDE_SKILL_DIR} で参照している（skills-audit 3, 4）",
       "verified": true,
-      "used_by": ["skills-audit", "skill-authoring-guide"]
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "skills.spec-fields-outside-claude-code",
@@ -287,7 +396,11 @@
       "quote": "Allowed properties are: allowed-tools, compatibility, description, license, metadata, name",
       "check": "Claude Code 外へ配布する skill は 6 フィールドに収める（Claude Code 内のみなら全フィールド可）",
       "verified": true,
-      "used_by": ["skills-audit", "skill-authoring-guide"]
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "skills.nested-and-live-reload",
@@ -298,7 +411,11 @@
       "quote": "nested `.claude/skills/`",
       "check": "対象プロジェクトの skills はルートの .claude/skills/ に置く（monorepo の package 固有 skill のみ nested）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "skills-audit"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "skills-audit",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "skills.body-length-guideline",
@@ -310,7 +427,12 @@
       "check": "SKILL.md が 500 行以下、kebab-case、name に claude / anthropic 不含（skills-audit 1）",
       "verified": false,
       "note": "PDF ガイド由来。docs 側には行数の数値が無いことを 2026-09-04 に確認。数値は目安として扱う",
-      "used_by": ["skills-audit", "review-skill", "skill-authoring-guide"]
+      "used_by": [
+        "skills-audit",
+        "review-skill",
+        "skill-authoring-guide",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "review.adversarial-subagent",
@@ -321,7 +443,13 @@
       "quote": "sees only the diff and the criteria you give it",
       "check": "レビュアには対象の完全パスと評価基準（skill / criteria JSON）だけを渡し、会話履歴・実装意図・生成過程を渡していない（rubric 7, 32）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "harness-setup-review", "review-skill", "skills-audit"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "review-skill",
+        "skills-audit",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "review.over-report-caution",
@@ -332,7 +460,13 @@
       "quote": "flag only gaps that affect correctness or the stated requirements",
       "check": "レビュー依頼文に『correctness / 明示要件に関わる gap のみ findings、他は optional』が含まれている（rubric 35）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "harness-setup-review", "review-skill", "skills-audit"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "review-skill",
+        "skills-audit",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "review.writer-reviewer-separate-sessions",
@@ -343,7 +477,12 @@
       "quote": "Writer/Reviewer pattern",
       "check": "自己レビューで合格判定していない（別 subagent か別セッションでレビュー）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "harness-setup-review", "review-skill"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "verification.give-a-check-and-show-evidence",
@@ -354,7 +493,11 @@
       "quote": "Have Claude show evidence rather than asserting success",
       "check": "生成 rules の test-verify に『動かさずにできたと言わない』『証拠を添付する』があり、setup の完了報告に機械検査の出力が引用されている",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap", "harness-setup-review"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "workflow.explore-plan-code",
@@ -365,7 +508,10 @@
       "quote": "If you could describe the diff in one sentence, skip the plan.",
       "check": "生成 rules が全変更に計画を強制していない（規模で使い分ける）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "context.clear-between-tasks",
@@ -376,7 +522,10 @@
       "quote": "After two failed corrections, `/clear`",
       "check": "大タスク完了時に /clear を促す運用があり、引継ぎ情報が別ファイル（handoff 採用時）か最終報告に残る",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "context.subagents-for-investigation",
@@ -387,7 +536,10 @@
       "quote": "use subagents to investigate X",
       "check": "生成 rules / skills で広範な調査を subagent に委譲する導線がある（任意）",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     },
     {
       "id": "interview.askuserquestion-spec",
@@ -398,7 +550,10 @@
       "quote": "Interview me in detail using the AskUserQuestion tool.",
       "check": "Step 0 の取捨選択を AskUserQuestion で行い、決定を記録（harness-selection.json）してから生成に入る",
       "verified": true,
-      "used_by": ["agent-harness-bootstrap"]
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
     }
   ]
 }
