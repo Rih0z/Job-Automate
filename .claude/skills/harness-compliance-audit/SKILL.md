@@ -1,6 +1,6 @@
 ---
 name: harness-compliance-audit
-description: "CLAUDE.md・.claude/rules・.claude/skills・.claude/commands・.claude/agents・hooks 設定を新規作成または編集した直後に、その変更分が Anthropic 公式ベストプラクティス（リポジトリ内の構造化キャッシュ anthropic-best-practices.yaml|json）に従っているかを監査する。機械検査 script と、変更ファイルごとの独立エージェント判定（principle id 付き）の 2 段で PASS/FAIL を出す。全 skill の一括 tier 判定は skills-audit、単一 skill の 5 軸採点は /review-skill が担当で、本 skill は直近の変更分に限定する。"
+description: "CLAUDE.md・.claude/rules・.claude/skills・.claude/commands・.claude/agents・hooks 設定を新規作成または編集した直後に、その変更分が Anthropic 公式ベストプラクティス（リポジトリ内の構造化キャッシュ anthropic-best-practices.yaml|json）に従っているかを監査する。機械検査 script と、変更ファイルごとの独立エージェント判定（principle id 付き）の 2 段で PASS/FAIL を出す。skill 新規作成直後・CLAUDE.md や rules の編集直後に使う。全 skill の一括監査（skills-audit または audit-skill-system）と単一 skill の 5 軸採点（/review-skill）は別 skill で、本 skill は直近の変更分に限定する。"
 when_to_use: >
   skill を新しく作った直後、CLAUDE.md・rules・commands・agents・hooks 設定を編集した直後、
   「ベストプラクティスに沿っているか確認して」「公式準拠監査」「harness-compliance-audit」と言われたとき、
@@ -13,7 +13,7 @@ metadata:
 
 # harness-compliance-audit — 変更分の公式ベストプラクティス監査
 
-**何をするか**: 直近に変更した「ハーネス」ファイル（CLAUDE.md・`.claude/rules/**`・`.claude/skills/**`・`.claude/commands/**`・`.claude/agents/**`・`.claude/settings*.json`）だけを対象に、公式原則との適合を判定する。全体監査ではない（それは `skills-audit`）。
+**何をするか**: 直近に変更した「ハーネス」ファイル（CLAUDE.md・`.claude/rules/**`・`.claude/skills/**`・`.claude/commands/**`・`.claude/agents/**`・`.claude/settings*.json`）だけを対象に、公式原則との適合を判定する。全体監査ではない（それはリポジトリの一括監査 skill＝`skills-audit` または `audit-skill-system`）。
 **判定の SoT**: `.claude/skills/_shared/anthropic-best-practices.yaml` または `.json`（取得日 `fetched`・再取得条件 `refetch_when` 付き）。本文に基準を再掲しない。SoT と本 skill の記述が食い違えば SoT を正とする。
 **実行主体**: 手順 2 の判定は、変更を行ったセッションではなく `Agent` tool で起動した別エージェントが行う（自己レビュー禁止）。呼び出し元は対象パスと SoT のパスだけを渡し、会話履歴・変更意図を渡さない。
 
@@ -81,4 +81,4 @@ reviewer の出力（JSON のみ）:
 
 - 対象ファイルの編集（監査のみ）。
 - 公式に無い著者の運用嗜好を「非準拠」として減点すること（由来台帳 `provenance` が author-preference と分類する要素は、公式原則との矛盾がない限り指摘しない）。
-- 全 skill の一括 tier 判定・単一 skill の 5 軸採点（それぞれ `skills-audit`・`/review-skill`）。
+- 全 skill の一括監査・単一 skill の 5 軸採点（それぞれ `skills-audit`／`audit-skill-system`・`/review-skill`）。
