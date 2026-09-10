@@ -164,6 +164,7 @@ AIがどれだけ進化しても、**「何を良しとするか」の基準を�
 | [.claude/skills/agent-harness-bootstrap/SKILL.md](.claude/skills/agent-harness-bootstrap/SKILL.md) | 任意のプロジェクトに Anthropic ベストプラクティス準拠の `CLAUDE.md` + `.claude/rules/` + hooks 一式を生成・剪定する（= CLAUDE.md を作成するprompt本体） |
 | [.claude/skills/review-oss-contribution/SKILL.md](.claude/skills/review-oss-contribution/SKILL.md) | OSS貢献候補を独自性・先行技術・実現可能性・戦略の4基準で審査しGO/HOLD/REJECTを判定する |
 | [.claude/skills/skills-audit/SKILL.md](.claude/skills/skills-audit/SKILL.md) | リポジトリ内の全Skillsを一括監査しGOOD/MIGRATE/IMPROVE/SPLITを判定する |
+| [.claude/skills/harness-compliance-audit/SKILL.md](.claude/skills/harness-compliance-audit/SKILL.md) | CLAUDE.md・rules・skills・commands・agents・hooks の直近の変更分を Anthropic 公式ベストプラクティス（`_shared/anthropic-best-practices.json`）に照らして監査する（機械検査 script + 変更ファイルごとの独立エージェント判定・PASS/FAIL） |
 | [.claude/skills/stop-ai-slop-jp/SKILL.md](.claude/skills/stop-ai-slop-jp/SKILL.md) | AIで書いた日本語を人間の文章に戻す（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・Daichi Nagashima 作、vendoring） |
 
 **他のプロジェクトでもコマンドを使いたい場合:**
