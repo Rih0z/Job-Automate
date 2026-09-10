@@ -1,6 +1,6 @@
 {
   "schema": "harness-provenance/v1",
-  "updated": "2026-09-04",
+  "updated": "2026-09-10",
   "purpose": "このリポジトリの harness 要素（原則・rules・hooks・skills・CLAUDE.md セクション）ごとに『Anthropic 公式ベストプラクティス由来』か『著者の運用嗜好』かの由来（provenance）を記録する唯一の SoT。別プロジェクトへのセットアップ時に selection-flow.md がこのファイルを読み、由来別にユーザーへ提示して取捨選択させる。両者を混ぜたまま他環境へ持ち込まないための分離台帳。",
   "provenance_levels": {
     "official": {
@@ -118,7 +118,7 @@
       "kind": "asset",
       "provenance": "official",
       "source": "https://code.claude.com/docs/en/best-practices / https://code.claude.com/docs/en/skills / https://code.claude.com/docs/en/hooks",
-      "summary": "Anthropic 公式ベストプラクティス（CLAUDE.md / Skills / hooks / adversarial review）の原則を、取得日と再取得条件付きの 1 つの構造化データとして保持するファイル。agent-harness-bootstrap・harness-setup-review・skills-audit・skill-authoring-guide・review-skill が判定基準の SoT として参照し、refetch_when に該当する時は各 source_url の現行版で裏取りして更新する。",
+      "summary": "Anthropic 公式ベストプラクティス（CLAUDE.md / Skills / hooks / adversarial review）の原則を、取得日と再取得条件付きの 1 つの構造化データとして保持するファイル。agent-harness-bootstrap・harness-setup-review・skills-audit・harness-compliance-audit・skill-authoring-guide・review-skill が判定基準の SoT として参照し、refetch_when に該当する時は各 source_url の現行版で裏取りして更新する。",
       "files": [
         ".claude/skills/_shared/anthropic-best-practices.json"
       ],
@@ -1031,6 +1031,21 @@
       "rubric_items": [],
       "depends_on": [
         "official-skills-core",
+        "shared-anthropic-best-practices"
+      ]
+    },
+    {
+      "id": "skill-harness-compliance-audit",
+      "kind": "skill",
+      "provenance": "official-derived",
+      "summary": "CLAUDE.md・rules・skills・commands・agents・hooks 設定を新規作成または編集した直後に、その変更分だけを公式ベストプラクティスの構造化データに照らして監査する（機械検査 script + 変更ファイルごとの独立エージェント判定・review-result JSON）。全 skill の一括監査（skills-audit）と単一 skill の 5 軸採点（review-skill）を補完し、変更のたびに走らせる用途。",
+      "skills": [
+        "harness-compliance-audit"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "official-skills-core",
+        "official-adversarial-review",
         "shared-anthropic-best-practices"
       ]
     },

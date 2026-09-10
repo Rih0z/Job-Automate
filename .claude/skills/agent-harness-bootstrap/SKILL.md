@@ -54,7 +54,7 @@ metadata:
 
 取得後、冒頭に「取得日時 + 確認した現行原則の要点」を出力してから生成・レビューに進む。
 
-**構造化データ（参照の SoT）**: 公式原則の要約は `.claude/skills/_shared/anthropic-best-practices.json` に 1 つの構造化データとして保持する（各原則に `id` / `source_url` / `statement` / `check` / `used_by`、ファイル全体に取得日 `fetched` と再取得条件 `refetch_when`）。本スキル・`harness-setup-review`・`skills-audit`・`skill-authoring-guide`・`review-skill` はこのファイルを判定基準として参照する。生成・レビュー開始時は `fetched` を確認し、`refetch_when` に該当すれば上記 URL を WebFetch して現行版と突合し、差分があれば同ファイルを更新して `fetched` を進める。WebFetch に失敗した場合、`fetched` が `max_age_days` 以内なら構造化データで判定を続け、報告に「公式現行版との突合未実施」と明記する。超過していれば取得できるまで中断する（日付と再取得条件を持たない転記だけが焼き込み禁止の対象）。
+**構造化データ（参照の SoT）**: 公式原則の要約は `.claude/skills/_shared/anthropic-best-practices.json` に 1 つの構造化データとして保持する（各原則に `id` / `source_url` / `statement` / `check` / `used_by`、ファイル全体に取得日 `fetched` と再取得条件 `refetch_when`）。本スキル・`harness-setup-review`・`skills-audit`・`harness-compliance-audit`・`skill-authoring-guide`・`review-skill` はこのファイルを判定基準として参照する。生成・レビュー開始時は `fetched` を確認し、`refetch_when` に該当すれば上記 URL を WebFetch して現行版と突合し、差分があれば同ファイルを更新して `fetched` を進める。WebFetch に失敗した場合、`fetched` が `max_age_days` 以内なら構造化データで判定を続け、報告に「公式現行版との突合未実施」と明記する。超過していれば取得できるまで中断する（日付と再取得条件を持たない転記だけが焼き込み禁止の対象）。
 
 ### 本スキル由来の独自運用基準（公式転記ではない・保持する）
 

@@ -78,7 +78,7 @@ SKILL.md 本体の生成手順 Step 0 から参照する supporting file。対�
 
 1. **機械検査**: `bash <本 clone>/.claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh --target <対象の絶対パス>`（C11 + C12。決定的）
 2. **別エージェントの突合レビュー**: 渡すのは **対象パス 3 点と観点定義のパスの計 4 点のみ**（このリポジトリの `provenance.json` / 対象の `harness-selection.json` / 対象ルート / `criteria/porting-reconciliation.json`）。会話履歴・実装意図・本スキルの他の部分は渡さない。レビュアは `review-gate` と同じ手順で criteria を検証し JSON で結果を返す（must_pass 全合格かつ min_score 以上で PASS）
-3. **既存 skills の監査**: 対象に setup 前から `.claude/skills/` があれば `skills-audit` で公式準拠を監査し、tier を報告に添える
+3. **既存 skills の監査**: 対象に setup 前から `.claude/skills/` があれば `skills-audit` で公式準拠を監査し、tier を報告に添える（setup 後にハーネスを編集した際の変更分監査は `harness-compliance-audit`）
 4. 1 と 2 の両方 PASS で `harness-setup-state.sh verify --machine PASS --review PASS` → `done`。FAIL なら findings を修正して 1 から再実行。3 回 FAIL で中断してユーザーに報告する（対象で `issue-lifecycle` が選択済みなら起票、非選択なら報告のみ）
 
 強制: この clone の Stop hook（`scripts/hook-stop-setup-gate.sh`）が `done` 前の終了を block する。
