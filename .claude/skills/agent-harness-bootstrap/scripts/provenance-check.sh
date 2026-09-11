@@ -29,6 +29,13 @@
 #       <対象>/.claude/harness-selection.json）。選択要素の when_selected / 非選択要素の when_unselected を全て評価し、
 #       skills[] / commands[] / files[] の存在・不在も自動で検査する。共通: <!-- id: --> マーカーの残存禁止、
 #       対象に .setup-automate/ があれば .gitignore に登録されていること
+#       deferred: entry に {"selected": true, "deferred": true, "issue": "<対象内の issue ファイル>"} があれば
+#       長期計画として扱い、契約（when_selected / when_unselected）と skills/commands/files の検査を skip する。
+#       issue ファイルの実在は検査する（C11）。突合レビューは deferred 要素を「計画済み・未実装」として報告する
+#       既存プロジェクト向け: 選択記録トップレベルの path_map {"契約パス": "実在パス"} で契約の path を読み替える
+#       （例 ".claude/rules/review.md" → "docs/protocols/rules-development.md"）。path が "CLAUDE.md" の grep /
+#       grep_absent は CLAUDE.md 本文に加えて @import 先（深さ 1）も検索対象にする。読み替えた path の
+#       frontmatter_paths 検査は skip する（load 戦略は対象プロジェクト側の設計に従う）
 #   実行場所: cwd に依存しない（既定パスは本スクリプトの位置から解決。環境変数・--selection・--target の相対パスは呼び出し時の cwd 基準）
 #
 # usage:
@@ -230,6 +237,14 @@ if selection:
                 v.append(f"C11 selection '{i}': decided_by:excluded は repo-specific / portable:false の要素にのみ使う")
             if e.get("provenance") == "official" and ent.get("selected") is not True:
                 v.append(f"C11 selection '{i}': official（Anthropic 公式由来）の要素は外せない。selected:true にする")
+            if ent.get("deferred"):
+                if not ent.get("selected"):
+                    v.append(f"C11 selection '{i}': deferred は selected:true と組み合わせる（採用するが長期計画で実装）")
+                iss = ent.get("issue")
+                if not isinstance(iss, str) or not iss:
+                    v.append(f"C11 selection '{i}': deferred には issue（対象内の issue ファイルパス）が必要")
+                elif target and not os.path.isfile(os.path.join(target, iss)):
+                    v.append(f"C11 selection '{i}': deferred の issue '{iss}' が対象に存在しない")
             if not ent["selected"]:
                 continue
             if is_group_d:
@@ -260,8 +275,16 @@ if target and selection:
     except Exception:
         sels = {}
     by_id = {e.get("id"): e for e in elements}
+    path_map = sel_doc.get("path_map", {}) if isinstance(sel_doc, dict) else {}
+    if not isinstance(path_map, dict):
+        v.append("C12 common: path_map が object でない"); path_map = {}
+    for k_, v_ in path_map.items():
+        if not os.path.exists(os.path.join(target, str(v_))):
+            v.append(f"C12 common: path_map '{k_}' → '{v_}' の実在パスが無い")
+    def mp(p):
+        return path_map.get(p, p)
     def tp(p):
-        return os.path.join(target, p)
+        return os.path.join(target, mp(p))
     def files_under(p):
         if os.path.isfile(p):
             return [p]
@@ -276,7 +299,8 @@ if target and selection:
         if not os.path.exists(ap):
             return None
         rx = re.compile(pattern)
-        for f in files_under(ap):
+        targets = files_under(ap) + (import_files if p == "CLAUDE.md" else [])
+        for f in targets:
             try:
                 if rx.search(open(f, encoding="utf-8", errors="ignore").read()):
                     return True
@@ -286,6 +310,12 @@ if target and selection:
     claude_md = ""
     if os.path.isfile(tp("CLAUDE.md")):
         claude_md = open(tp("CLAUDE.md"), encoding="utf-8", errors="ignore").read()
+    # CLAUDE.md の @import 先（深さ 1・実在するもの）。path=CLAUDE.md の grep はこれらも検索する
+    import_files = []
+    for m_ in re.finditer(r"^@([^\s]+)\s*$", claude_md, re.M):
+        ip = os.path.join(target, m_.group(1))
+        if os.path.isfile(ip):
+            import_files.append(ip)
     def run_check(c, eid, mode):
         ty = c.get("type"); p = c.get("path", ""); pat = c.get("pattern", "")
         ok, msg = True, ""
@@ -300,9 +330,11 @@ if target and selection:
         elif ty == "grep_absent":
             r = grep_any(p, pat); ok = (r is not True); msg = f"{p} に /{pat}/ が現れている（非選択要素の混入）"
         elif ty == "import":
-            ok = os.path.isfile(tp(p)) and re.search(r"^@" + re.escape(p) + r"\s*$", claude_md, re.M) is not None
-            msg = f"CLAUDE.md に '@{p}' の行が無いか {p} が無い（名ばかり常時 load）"
+            ok = os.path.isfile(tp(p)) and re.search(r"^@" + re.escape(mp(p)) + r"\s*$", claude_md, re.M) is not None
+            msg = f"CLAUDE.md に '@{mp(p)}' の行が無いか {mp(p)} が無い（名ばかり常時 load）"
         elif ty == "frontmatter_paths":
+            if p in path_map:
+                return  # 読み替え先は対象プロジェクトの load 戦略に従う（paths: を要求しない）
             ap = tp(p); ok = False
             if os.path.isfile(ap):
                 txt = open(ap, encoding="utf-8", errors="ignore").read()
@@ -326,12 +358,17 @@ if target and selection:
     def is_selected(i):
         d0 = sels.get(i)
         return isinstance(d0, dict) and d0.get("selected") is True
+    def is_deferred(i):
+        d0 = sels.get(i)
+        return isinstance(d0, dict) and d0.get("deferred") is True
     required_files = set()
     for e in elements:
-        if is_selected(e.get("id")):
+        if is_selected(e.get("id")) and not is_deferred(e.get("id")):
             required_files.update(e.get("files", []))
     for e in elements:
         eid = e.get("id"); selected = is_selected(eid)
+        if is_deferred(eid):
+            continue  # 長期計画: issue の実在は C11 で確認済み。契約・付随物の検査は実装時に行う
         contract = e.get("target_contract", {})
         for c in contract.get("when_selected" if selected else "when_unselected", []):
             run_check(c, eid, "selected" if selected else "unselected")

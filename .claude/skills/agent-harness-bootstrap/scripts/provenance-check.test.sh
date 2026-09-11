@@ -25,6 +25,8 @@
 #   T33 cwd 非依存（別ディレクトリから絶対パスで実行）
 #   T34-T44 --target の契約検査 (C12): マーカー残存・混入・paths:・import・.setup-automate gitignore・official 必須・抜け
 #   T45 実台帳の契約自己検査（contract-selfcheck.sh が default 選択で PASS）
+#   T46-T49 path_map（契約パスの読み替え）と CLAUDE.md grep の @import 先解決
+#   T50-T52 deferred（長期計画）: issue 実在の要求・契約 skip・selected:true 必須
 # 実行: bash .claude/skills/agent-harness-bootstrap/scripts/provenance-check.test.sh
 
 set -uo pipefail
@@ -238,6 +240,32 @@ write_sel_t '"core":{"selected":true,"decided_by":"default"},"split":{"selected"
 t "T43 選択した要素の契約語句（issues/open）が rules に無ければ FAIL（抜け）" 1 "$(runt)"
 printf -- '---\ndescription: iw\npaths:\n  - "issues/**"\n---\n# issue-workflow\nissues/open に起票\n' > tgt/.claude/rules/issue-workflow.md
 t "T44 契約語句を含めれば PASS" 0 "$(runt)"
+
+# path_map: 既存プロジェクトの実在ファイルへ契約パスを読み替え / CLAUDE.md の grep は @import 先も見る
+mkdir -p tgt/docs/protocols
+printf -- '---\ndescription: dev\npaths:\n  - "**/*"\n---\n# dev rules\n' > tgt/docs/protocols/rules-dev.md
+rm -f tgt/.claude/rules/review.md
+printf '{"schema":"harness-selection/v1","decided_by":"user","path_map":{".claude/rules/review.md":"docs/protocols/rules-dev.md"},"selections":{"core":{"selected":true,"decided_by":"default"},"split":{"selected":true,"decided_by":"default"},"issue":{"selected":true,"decided_by":"user"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}}}' > tgt/.claude/harness-selection.json
+t "T46 path_map で frontmatter_paths の対象を実在ファイルに読み替えれば PASS" 0 "$(runt)"
+printf '{"schema":"harness-selection/v1","decided_by":"user","path_map":{".claude/rules/review.md":"docs/protocols/ghost.md"},"selections":{"core":{"selected":true,"decided_by":"default"},"split":{"selected":true,"decided_by":"default"},"issue":{"selected":true,"decided_by":"user"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}}}' > tgt/.claude/harness-selection.json
+t "T47 path_map の読み替え先が無ければ FAIL" 1 "$(runt)"
+write_sel_t '"core":{"selected":true,"decided_by":"default"},"split":{"selected":true,"decided_by":"default"},"issue":{"selected":false,"decided_by":"user"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}'
+printf -- '---\ndescription: r\npaths:\n  - "**/*.ts"\n---\n# review\n' > tgt/.claude/rules/review.md
+printf '# CLAUDE.md\n\n@.claude/rules/code-quality.md\n@docs/protocols/rules-dev.md\n' > tgt/CLAUDE.md
+printf -- '---\ndescription: dev\n---\n# dev\nissues/open に起票する\n' > tgt/docs/protocols/rules-dev.md
+t "T48 非選択要素の語句が @import 先にあっても FAIL（CLAUDE.md の grep は import 先を含む）" 1 "$(runt)"
+printf -- '---\ndescription: dev\n---\n# dev\n' > tgt/docs/protocols/rules-dev.md
+t "T49 import 先から語句を消せば PASS" 0 "$(runt)"
+
+# deferred（長期計画）: 契約を skip し issue の実在を要求する
+printf '{"schema":"harness-selection/v1","decided_by":"user","selections":{"core":{"selected":true,"decided_by":"default"},"split":{"selected":true,"decided_by":"default"},"issue":{"selected":true,"decided_by":"user","deferred":true,"issue":"docs/issues/open/x.md"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}}}' > tgt/.claude/harness-selection.json
+rm -f tgt/.claude/rules/issue-workflow.md
+t "T50 deferred で issue ファイルが無ければ FAIL" 1 "$(runt)"
+mkdir -p tgt/docs/issues/open && echo "# issue" > tgt/docs/issues/open/x.md
+t "T51 deferred + issue 実在なら契約未充足でも PASS（実装は長期計画）" 0 "$(runt)"
+printf '{"schema":"harness-selection/v1","decided_by":"user","selections":{"core":{"selected":true,"decided_by":"default"},"split":{"selected":true,"decided_by":"default"},"issue":{"selected":false,"decided_by":"user","deferred":true,"issue":"docs/issues/open/x.md"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}}}' > tgt/.claude/harness-selection.json
+t "T52 deferred は selected:true が必要（false なら FAIL）" 1 "$(runt)"
+write_sel_t '"core":{"selected":true,"decided_by":"default"},"split":{"selected":true,"decided_by":"default"},"issue":{"selected":false,"decided_by":"user"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}'
 
 # 実台帳の契約自己検査（default 選択で契約が満たせる・矛盾しない）。fixture ではなく本リポジトリの台帳で走る
 t "T45 実台帳: default 選択の target_contract は満たせて矛盾しない（contract-selfcheck.sh）" 0 "$(env -u PROVENANCE_ROOT -u PROVENANCE_KNOWHOW bash "$(dirname "$CHECK")/contract-selfcheck.sh" >/dev/null 2>&1; echo $?)"
