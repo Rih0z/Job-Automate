@@ -651,6 +651,10 @@
       "depends_on": [
         "rules-split-progressive-disclosure"
       ],
+      "soft_depends_on": [
+        "harness-compliance-roadmap-seed"
+      ],
+      "note": "harness-compliance-roadmap-seed 非選択時は「定期レビュー」「自動検証」を公式ドリフト検出・サイズ/命名 hook のみの従来の意味で生成する（縮退形）。選択時は同要素が生成する harness-compliance-roadmap.md の二段 cadence を明示的に参照する一文を両項目に加える。",
       "target_contract": {
         "when_selected": [
           {
@@ -1352,6 +1356,48 @@
       ],
       "rubric_items": [],
       "depends_on": []
+    },
+    {
+      "id": "harness-compliance-roadmap-seed",
+      "kind": "process",
+      "provenance": "author-preference",
+      "default_selection_override": "recommend",
+      "summary": "セットアップ完了直後に、対象自身の `.claude/harness-selection.json` から選択済みの選択依存ファイル（governance.md / agent-design.md / issue-workflow.md 等）を種にした実質再検証ロードマップ `.claude/skills/_shared/harness-compliance-roadmap.md` を生成する。Job-Automate 自身の `shared-compliance-roadmap`（repo-specific・移植不可）と同じ二段 cadence 構造（軽量 harness_check.sh スイープ / 四半期 skills-audit・harness-compliance-audit フル判定）を、対象自身の findings で満たした移植可能版。skills-audit / harness-compliance-audit という『監査能力』は既定で移植されるが、セットアップ後にそれを定期的に再実行する運用そのものの足場が無かったギャップを埋める。",
+      "applies_to": [
+        "SKILL.md Step 8-4 harness-compliance-roadmap.md",
+        "operational-knowhow.md governance.md の項目群",
+        "operational-knowhow.md ハーネス実質再監査ロードマップ"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "skill-skills-audit",
+        "skill-harness-compliance-audit"
+      ],
+      "note": "生成先ファイル名は Job-Automate 自身の shared-compliance-roadmap（.claude/skills/_shared/compliance-roadmap.md）とは意図的に別名（harness-compliance-roadmap.md）にする。同名にすると provenance-check.sh の C12（files[] の不在検査）が、常に非選択の shared-compliance-roadmap 側で『非選択要素の混入』を誤検知する（files[] の所有は element ごとに dedup されないため）。",
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/skills/_shared/harness-compliance-roadmap.md"
+          },
+          {
+            "type": "grep",
+            "path": ".claude/skills/_shared/harness-compliance-roadmap.md",
+            "pattern": "harness_check"
+          },
+          {
+            "type": "grep",
+            "path": ".claude/skills/_shared/harness-compliance-roadmap.md",
+            "pattern": "skills-audit"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/skills/_shared/harness-compliance-roadmap.md"
+          }
+        ]
+      }
     },
     {
       "id": "domain-skills-group",

@@ -88,7 +88,7 @@ Claude はタスク開始時に関連 docs を最低 1 つ読み、**宣言の�
 
 ### 独自運用: governance.md の項目群
 
-> provenance: author-preference · id: governance-multi-aspect
+> provenance: author-preference · id: governance-multi-aspect / harness-compliance-roadmap-seed
 
 `governance.md` を生成する時、肥大化防止規約は「サイズ」以外の腐敗経路も塞ぐよう複数観点を項目立てる（項目数は必要に応じ増減）:
 
@@ -97,13 +97,25 @@ Claude はタスク開始時に関連 docs を最低 1 つ読み、**宣言の�
 | サイズ閾値 | CLAUDE.md 本体の warning / fail 行数・KB | 早期 warning + 分割 fail の二段 |
 | 新項目ルーティング | 「CLAUDE.md に書きたくなった」時の振り分け先 | 原則→rules / 手順→docs / オンデマンド→skills / 過渡→`.tmp/` / 全タスク必須のみ CLAUDE.md 直接記入可 |
 | 公式準拠 | 新 `.claude/` subdir は公式定義（rules/skills/commands/agents）のいずれかに限定 | `docs/`, `tmp/` 等を `.claude/` 直下に作らない |
-| 定期レビュー | 公式 docs ドリフト検出のための定期点検 | 定期的に公式 Best Practices を WebFetch + ドリフト改修計画 |
-| 自動検証 | サイズ閾値・命名規約の hook / CI 検証 | `PreToolUse(Write)` で命名検証、`PostToolUse(Edit)` でサイズ警告 |
+| 定期レビュー | 公式 docs ドリフト検出のための定期点検。`harness-compliance-roadmap-seed` 採用時は、同要素が生成する `harness-compliance-roadmap.md` の四半期フル判定（`skills-audit` / `harness-compliance-audit`）も同じ定期点検の一部として明記する（非採用時は公式 Best Practices ドリフト検出のみ） | 定期的に公式 Best Practices を WebFetch + ドリフト改修計画（+ 採用時は上記フル判定） |
+| 自動検証 | サイズ閾値・命名規約の hook / CI 検証。`harness-compliance-roadmap-seed` 採用時は、`harness-compliance-roadmap.md` の軽量 `harness_check.sh` スイープも自動検証の一部として明記する（非採用時は hook のみ） | `PreToolUse(Write)` で命名検証、`PostToolUse(Edit)` でサイズ警告（+ 採用時は上記スイープ） |
 | 常時 load ファイルの cap | `meta.md` + `@import` で常時 load される rules 個別の cap | 各 5KB soft cap、超えたら path-scope rules に逃がす |
 | 新条文追加手順 | 新しい規約を rules に足す前に踏む 5 段（既存条の重複・言い換えでないか確認 → 配置先を項目性質で判定 → 公式ドキュメントと矛盾しないか確認 → 影響する自動検証（hook/CI）があれば同時更新 → 独立レビュー 2 本以上を収束させてから確定）。重複ならまず既存条の拡張を優先し新設しない | 追加提案のたびにこの 5 段をチェックリストとして踏ませる |
 | advisory → hook 昇格判断 | 公式は明記する: 「hooks are deterministic and guarantee the action happens... Use hooks for actions that must happen every time with zero exceptions」。rules 条文に「必ず」「例外なく」等の zero-exception 語気を使う時は、(a) 毎回・例外なく実行されるべきか (b) pass/fail が機械的に判定可能か の両方を満たす規律だけ hook 化を検討する（両方満たさない文脈依存の判断は advisory のまま rules に残してよい） | 既存規約の一斉 hook 化はしない。新条文追加時と定期レビュー時に候補判定するのみ |
 
 サイズ閾値だけでは `@import` 常時 load rules 経由の context 汚染を防げない。「常時 load ファイルの cap」観点が context 汚染を構造的に塞ぐ最も効く一手になる。「新条文追加手順」観点は、規約が場当たり的に増殖し公式からドリフトする経路を構造的に塞ぐ。「advisory → hook 昇格判断」観点は、公式の zero-exception ガイダンスへの non-compliance (advisory 文言だけで済ませてしまう) を構造的に防ぐ。
+
+### 独自運用: ハーネス実質再監査ロードマップ（該当時のみ）
+
+> provenance: author-preference · id: harness-compliance-roadmap-seed
+
+`skills-audit` / `harness-compliance-audit` は既定で対象へ移植される「監査能力」だが、それをセットアップ後いつ・何に対して再実行するかの足場が無いというギャップがある。`harness-setup-review`（`provenance-check.sh --target` の文言レベル契約検査 + 別エージェント突合レビュー）は移植元でのみ実行され対象へはコピーされないため、対象は自分が元々どの選択依存ファイルにどの契約語句を持たせたかの記録を setup 完了後に失う。
+
+このギャップを埋めるのが `harness-compliance-roadmap-seed`: セットアップ完了直後に、対象自身の `.claude/harness-selection.json` から `selected: true` の選択依存ファイル生成要素を拾い、各要素の `target_contract.when_selected` の grep パターンをそのまま「再検証すべき契約語句」として記録した `.claude/skills/_shared/harness-compliance-roadmap.md` を生成する。二段 cadence（軽量 `harness_check.sh` 全ファイルスイープを頻繁に / 四半期ごとか軽量スイープが新規異常を見つけた時にフル判定）は、Job-Automate 自身が自分用に運用している `compliance-roadmap.md` の cadence と同一構造だが、findings は対象自身のものだけで構成する（Job-Automate 自身の findings 内容は移植しない）。
+
+**生成先ファイル名は Job-Automate 自身の `shared-compliance-roadmap`（`.claude/skills/_shared/compliance-roadmap.md`）とは意図的に別名にする**: 同名にすると、対象では常に非選択（`repo-specific`）の `shared-compliance-roadmap` 要素側で、`provenance-check.sh` の C12 が「ファイルは存在するが非選択要素の `files[]` に無い」＝非選択要素の混入と誤検知する（`files[]` の所有権は要素ごとに dedup されないため）。
+
+**hook 化しない**: 「十分な時間が経過したので再監査すべきか」は zero-exception・機械的 pass/fail 判定が可能な規律ではなく（`advisory → hook 昇格判断` の 2 条件を満たさない）、プロジェクトがどれだけ変化したかという判断を要する。Job-Automate 自身も自分の `compliance-roadmap.md` cadence を hook 化せず、prose として運用し人手で追従している。移植版だけを hook 化する理由はなく、一貫性を優先してドキュメント + 生成済み seed ファイルの手法に留める。
 
 ### 独自運用: handoff 受領（user 明示指示駆動・本文は自動 Read しない）
 
