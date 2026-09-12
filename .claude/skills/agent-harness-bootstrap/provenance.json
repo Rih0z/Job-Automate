@@ -340,6 +340,106 @@
       }
     },
     {
+      "id": "agent-design-crash-resilient-manifest",
+      "kind": "process",
+      "provenance": "author-preference",
+      "summary": "長時間・並列 subagent 運用でコーディネーターがクラッシュ/再起動しても、各 subagent が進捗を構造化 manifest（JSON）として節目ごとに書き出していれば、未完了分だけを既存 manifest を種に再開できる。ツール単発リトライやコーディネーターの --resume だけでは各 subagent の内部進捗までは復元できない。Workflow ツールの resumeFromRunId とは併用（同一 (prompt, opts) 単位でしか再利用できないため代替にならない）。",
+      "applies_to": [
+        "SKILL.md Step 8-2 agent-design.md",
+        "生成 rules agent-design.md",
+        "operational-knowhow.md マルチエージェント/subagent 設計原則"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "rules-split-progressive-disclosure"
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/rules/agent-design.md"
+          },
+          {
+            "type": "frontmatter_paths",
+            "path": ".claude/rules/agent-design.md"
+          },
+          {
+            "type": "grep",
+            "path": ".claude/rules/agent-design.md",
+            "pattern": "manifest"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/rules/agent-design.md"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-design-metadata-preserving-handoff",
+      "kind": "principle",
+      "provenance": "author-preference",
+      "summary": "複数の調査・取得系 subagent の結果をコーディネーターが別の統合（synthesis）エージェントへ中継する構成では、各結果の出典（URL・ファイルパス等）を本文と分離した構造化データとして保持したまま渡す。平文で要点だけ抜き出して渡すと、統合エージェントに出典を引用する材料が失われ、根拠のない主張を含む成果物になる。取得系 subagent 自体が正しく出典を返していても、中継部分で構造が失われれば無意味。review.md の実装コンテキスト遮断・アンカリング防止（separate-agent-review-cycle）とは別軸（あちらはレビュー時の入力設計、これはコーディネーターの中継設計）。",
+      "applies_to": [
+        "SKILL.md Step 8-2 agent-design.md",
+        "生成 rules agent-design.md",
+        "operational-knowhow.md マルチエージェント/subagent 設計原則"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "rules-split-progressive-disclosure"
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules/agent-design.md",
+            "pattern": "メタデータ"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules/agent-design.md",
+            "pattern": "メタデータ"
+          }
+        ]
+      }
+    },
+    {
+      "id": "agent-design-tool-scope-limit",
+      "kind": "principle",
+      "provenance": "author-preference",
+      "summary": "1 subagent の allowed-tools は 4〜5 個・単一ロールを目安にする。全く異なる専門領域（コード分析・セキュリティスキャン・デプロイ検証等）を 1 エージェントに詰め込むと選択精度が落ちる。複数領域を横断する必要がある場合は、対象単位（ファイル1件・工程1件等）ごとにロール別のエージェントを分けて起動する。",
+      "applies_to": [
+        "SKILL.md Step 8-2 agent-design.md",
+        "生成 rules agent-design.md",
+        "operational-knowhow.md マルチエージェント/subagent 設計原則"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "rules-split-progressive-disclosure"
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/rules/agent-design.md",
+            "pattern": "ツールスコープ"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": ".claude/rules/agent-design.md",
+            "pattern": "ツールスコープ"
+          }
+        ]
+      }
+    },
+    {
       "id": "hooks-promotion-judgement",
       "kind": "process",
       "provenance": "official-derived",
@@ -1080,10 +1180,10 @@
     },
     {
       "id": "review-commands",
-      "kind": "command",
+      "kind": "skill",
       "provenance": "official-derived",
-      "summary": ".claude/commands/ の review-changes / review-skill。エージェント分離の原則は公式由来、評価軸・配点は著者設計（対象プロジェクトで調整する）。review-implementation はマネタイズ・ペルソナ軸を持つ業務依存のため別要素（command-review-implementation）。",
-      "commands": [
+      "summary": ".claude/skills/ の review-changes / review-skill（旧 .claude/commands/、2026-09-11 に SKILL.md 形式へ移行）。エージェント分離の原則は公式由来、評価軸・配点は著者設計（対象プロジェクトで調整する）。review-implementation はマネタイズ・ペルソナ軸を持つ業務依存のため別要素（command-review-implementation）。",
+      "skills": [
         "review-changes",
         "review-skill"
       ],
@@ -1101,10 +1201,10 @@
     },
     {
       "id": "command-review-implementation",
-      "kind": "command",
+      "kind": "skill",
       "provenance": "domain-prompt",
-      "summary": ".claude/commands/review-implementation。テスト品質・処理の正確性・マネタイズ整合性・ペルソナ適合・UX の 5 軸レビュー。マネタイズ・ペルソナ軸と persona.md 参照を含む業務依存の評価設計のため、対象の業務に該当する時だけ選ぶ。",
-      "commands": [
+      "summary": ".claude/skills/review-implementation（旧 .claude/commands/review-implementation.md、2026-09-11 に SKILL.md 形式へ移行）。テスト品質・処理の正確性・マネタイズ整合性・ペルソナ適合・UX の 5 軸レビュー。マネタイズ・ペルソナ軸と persona.md 参照を含む業務依存の評価設計のため、対象の業務に該当する時だけ選ぶ。",
+      "skills": [
         "review-implementation"
       ],
       "rubric_items": [],
@@ -1238,6 +1338,17 @@
       "summary": "レビュー系 skill が共有する verdict scale（S/A/B/C/D 等）と行動原則（証拠主義・引用義務・非破壊）の SoT ファイル。review-* 系 skill・review-oss-contribution を選ぶ時は必ず一緒にコピーする（無いと各 skill が参照先を失う）。",
       "files": [
         ".claude/skills/_shared/review-rubrics.yaml"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "shared-compliance-roadmap",
+      "kind": "asset",
+      "provenance": "repo-specific",
+      "summary": "Job-Automate 自身の Anthropic 公式ベストプラクティス逸脱・改善バックログの監査履歴・再監査手順。ported プロジェクトは自分自身の監査を実行して自分の roadmap を作る（このファイルの具体的な findings 内容は移植不可）。",
+      "files": [
+        ".claude/skills/_shared/compliance-roadmap.md"
       ],
       "rubric_items": [],
       "depends_on": []

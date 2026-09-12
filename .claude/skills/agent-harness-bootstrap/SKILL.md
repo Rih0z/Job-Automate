@@ -83,6 +83,7 @@ metadata:
 - **handoff 管理** — 命名規約・保持・issue 連携
 - **規約の hooks 化判断** — advisory → deterministic 昇格の判断基準（詳細は `hooks-reference.md`）
 - **自作 skill / MCP ツールの品質基準の継承**（該当時のみ）— 対象プロジェクトが独自 skill / MCP ツールを新規作成する場合、`skill-authoring-guide`（few-shot 設計・決定的強制・個人カスタマイズ）/ `mcp-server-setup`（構造化エラー応答設計）の観点をレビュー基準に含める
+- **マルチエージェント/subagent 設計原則**（該当時のみ）— クラッシュ耐性 state manifest・コーディネーター中継のメタデータ保持・ツールスコープの限定（`agent-design.md`）。レビュー時の実装コンテキスト遮断・並列アンカリングは別エージェントレビューサイクル（`review.md`）側に属し重複させない
 - **別エージェントレビューサイクル** — 対象完全パス + レビュー用 skill のみ渡す、並列本数・TDD test-first・ループ上限・自己レビュー不可・過剰報告の抑制
 - **収束型自律前進**（オプション）— 独立レビュー 2 本以上収束後は user 確認を待たず進行可。6 類の例外は必須確認
 - **成果物の生成主体明示** — LLM 生成物 vs script/lib 生成物を厳格に区別
@@ -130,6 +131,7 @@ Step 0 は省略しない。対話が取れない場合も `default_selection` �
 - **汎用規律条文の採否**（候補メニュー。各々を「削除したら Claude が間違えるか」の基準に照らし、プロジェクトが実際に採る規律だけを `code-quality.md` の条文にする）: モック / ハードコード禁止・バージョン番号付きファイル（`v2`/`_new`/`_old`）禁止・ルート直下への新規ファイル作成抑制・設定値の一元管理・一時しのぎでなく超長期的な根本解決・**レガシー排除**（後方互換シム・二重経路・旧スクリプトを残さず、置換が完了した旧経路は同一作業内で削除する。Git 履歴がバックアップになるため保険的に残さない）
 - **実行主体の使い分けの有無**（複数の AI エージェント / モデル格 / 人手を振り分ける運用があるか → あれば `execution-routing.md` 採用）
 - **独自 skill / MCP ツールの新規作成有無**（該当すれば「自作 skill / MCP ツールの品質基準の継承」を Step 7 レビュー観点に追加）
+- **複数 subagent / マルチエージェント構成の新規実装有無**（対象プロジェクトが複数 subagent を並列・逐次で起動するオーケストレーション機能を新規実装するか → あれば `agent-design.md` 採用。単一エージェント運用のみのプロジェクトでは非採用）
 - **プロジェクトの目的**（何を解決しようとしているのか — 1〜2 文の課題定義）
 - **進捗状況**（現在のフェーズ・主要マイルストーン達成状況・既知の未完了領域 — README / 外部 Issue トラッカー / commit 履歴、`issue-lifecycle` 採用時は `issues/processing/*.md` からも、事実ベースで抽出）
 
@@ -148,7 +150,7 @@ CLAUDE.md 本体に直接書かず、規約本文は採用した rules ファイ
 | 内容 | 逃がし先 |
 |------|---------|
 | 全タスク共通の規約（コード品質・テスト方針） | `.claude/rules/code-quality.md` / `test-verify.md`（`@import` 常時 load） |
-| 特定タスク時のみのルール（Issue・review・governance） | `.claude/rules/issue-workflow.md` / `review.md` / `governance.md`（`paths:` path-scope） |
+| 特定タスク時のみのルール（Issue・review・governance・マルチエージェント設計） | `.claude/rules/issue-workflow.md` / `review.md` / `governance.md` / `agent-design.md`（採用時のみ・`paths:` path-scope） |
 | 実行主体・モデル格の振り分け規約（採用時） | `.claude/rules/execution-routing.md`（`@import` 常時 load） |
 | 条番号インデックスと既知の制約 | `.claude/rules/meta.md`（常時 load） |
 | 詳細手順・長文 | `docs/[topic].md` → リンクのみ |
@@ -217,6 +219,7 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 | `governance.md`（**選択依存**） | 肥大化防止・新項目追加規約の条文を **複数観点の項目群**（サイズ閾値 / 新項目ルーティング / 公式準拠 / 定期レビュー / 自動検証 / 常時 load ファイル cap 等・増減可）で記述。非採用時は official 由来の「新しい○○を追加する手順」（rubric 18）を CLAUDE.md 本体の 2〜3 行の節として残す | governance-multi-aspect | `paths: ["CLAUDE.md", ".claude/**"]` | path-scope |
 | `execution-routing.md`（**選択依存**） | 司令塔の 3 責務 + 振り分け表（定型→低コスト / 高難度→高コスト / 方針→司令塔）+ 高コスト主体抑制（dispatch 5 点明示）+ escalation protocol | execution-routing | `description` のみ | `@import` で常時 |
 | `docs-management.md`（**選択依存**: `docs/` 配下に概ね 5 section 以上） | docs 配置 mapping + 新 docs 配置 flow + 全 section README 必須化 + **同期更新義務**（構造的事実を複数箇所に重複保持せざるを得ない時は、コピー先を rule 本文に全て列挙し、コピー間の自動 diff/整合チェックを用意する — 単一 SoT を宣言して残りを放置しない）+ 過時マーカー "as of YYYY-MM-DD" 強制 | docs-management | `paths: ["docs/**/README.md", "docs/**/*.md", "CLAUDE.md", ".claude/rules/governance.md"]` | path-scope |
+| `agent-design.md`（**選択依存**: 複数 subagent 構成を新規実装するプロジェクトのみ） | 複数 subagent / マルチエージェント構成向けの設計原則の条文: **クラッシュ耐性 state manifest**［長時間・並列 subagent 運用でコーディネーターが再起動しても、各 subagent が進捗を `<作業ディレクトリ>/<subagent 名>.json`（manifest）へ節目ごとに書き出していれば未完了分だけ再開できる（Workflow ツールの `resumeFromRunId` と併用）・`agent-design-crash-resilient-manifest`］・**コーディネーター中継のメタデータ保持**［複数の調査系 subagent の結果を統合エージェントへ中継する時、出典（URL・ファイルパス）をメタデータとして本文と分離保持したまま渡す（平文要約に潰さない）・`agent-design-metadata-preserving-handoff`］・**ツールスコープの限定**［1 エージェントの allowed-tools は 4〜5 個・単一ロールを目安にし、複数専門領域は対象単位ごとの別エージェントに分割する・`agent-design-tool-scope-limit`］。冒頭に、レビュー時の実装コンテキスト遮断・並列アンカリング防止は `review.md`（`separate-agent-review-cycle` / `official-adversarial-review`）を参照する旨を一行明記し重複させない。選択された要素の条文だけを載せる | agent-design-crash-resilient-manifest / agent-design-metadata-preserving-handoff / agent-design-tool-scope-limit | `paths: [".claude/agents/**", ".claude/skills/**/SKILL.md"]` | path-scope |
 
 **3. `settings.json` の hooks セット + hook scripts**（採用時のみ） — 参考 6 hook 構成・settings.json 例（Windows PowerShell / Mac・Linux bash）・hook script（該当するもののみ生成）の役割と生成方法は **`hooks-reference.md` を参照**する。既存設定がある場合は `hooks` フィールドのみ追記（permissions / model 等は保持）。
 

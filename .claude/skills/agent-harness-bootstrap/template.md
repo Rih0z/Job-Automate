@@ -54,8 +54,8 @@
 <!-- id: governance-multi-aspect -->
 | CLAUDE.md/.claude 編集 | `governance.md` (path-scope) | [該当条] |
 
-<!-- id: execution-routing / docs-management -->
-（採用時の追加は load 戦略で扱いが異なる。**`execution-routing.md` を採用した場合**: 上の `@import` ブロックに `@.claude/rules/execution-routing.md` の行を追加**し**、ルール一覧テーブルにも行を追加する（`@import` 忘れは「テーブル上は常時 load と書いてあるが実際は読み込まれない」既知の失敗パターンなので両方必須）。**`docs-management.md` を採用した場合**: テーブルに行を追加するのみ（`@import` 不要、`paths:` で path-scope）。）
+<!-- id: execution-routing / docs-management / agent-design-crash-resilient-manifest / agent-design-metadata-preserving-handoff / agent-design-tool-scope-limit -->
+（採用時の追加は load 戦略で扱いが異なる。**`execution-routing.md` を採用した場合**: 上の `@import` ブロックに `@.claude/rules/execution-routing.md` の行を追加**し**、ルール一覧テーブルにも行を追加する（`@import` 忘れは「テーブル上は常時 load と書いてあるが実際は読み込まれない」既知の失敗パターンなので両方必須）。**`docs-management.md` を採用した場合**: テーブルに行を追加するのみ（`@import` 不要、`paths:` で path-scope）。**`agent-design.md` を採用した場合**: テーブルに行を追加するのみ（`@import` 不要、`paths:` で path-scope）。）
 
 <!-- id: official-claude-md-core -->
 ## ルート構成

@@ -268,8 +268,8 @@
 
 **Claude Code での使い方（スラッシュコマンド）:**
 ```
-/review-skill                          ← リポジトリ内の全スキルをレビュー
-/review-skill .claude/commands/xxx.md  ← 特定スキルをレビュー
+/review-skill                            ← リポジトリ内の全スキルをレビュー
+/review-skill .claude/skills/xxx/SKILL.md  ← 特定スキルをレビュー
 ```
 
 **手動で使う場合:**

@@ -1,3 +1,18 @@
+---
+name: review-skill
+description: |
+  作成済みの Claude Code Skills / スラッシュコマンドを、別エージェントに構造・トリガー設計・
+  命令品質・出力設計・実用性の5軸・100点満点で Anthropic ベストプラクティス準拠を客観評価
+  させる（自己レビューしない）。
+  Trigger phrases: 'Skillをレビューして', 'skill品質チェック', 'review-skill',
+  'ベストプラクティス準拠確認', '公式準拠レビュー'.
+disable-model-invocation: true
+allowed-tools: Read, Glob, Grep, Agent
+argument-hint: "[ファイルパス...（省略時はリポジトリ内の全 skill）]"
+metadata:
+  provenance: official-derived
+---
+
 # /review-skill — Skills 品質レビュー（エージェント分離実行）
 
 > **このコマンドは別エージェントを起動してレビューを行う。現在のセッションでは直接レビューしない。**
@@ -19,15 +34,15 @@
 収集対象:
 1. スキル作成マニュアル: workflows/software-development/skills-building-guide.md の内容（評価基準の根拠）
 2. 詳細評価基準: workflows/software-development/review-skill.md の内容
-3. 対象スキルファイル: 引数で指定されたファイル、または .claude/commands/*.md の全ファイルの内容
+3. 対象スキルファイル: 引数で指定されたファイル、または .claude/skills/*/SKILL.md の全ファイルの内容
 4. 関連ドキュメント: 対象スキルが参照している workflows/*/review-*.md 等のファイルの内容
-5. CLAUDE.md のスキル一覧テーブル
-6. README.md のドキュメント反映状況
+5. README.md の「Claude Code スラッシュコマンド／Skills」節のスキル一覧テーブル
+6. 対象スキルが上記5のテーブル（および該当ワークフローの README.md）に実際に記載されているかどうか
 ```
 
 ### 引数によるスコープ制御
 
-- 引数なし → `.claude/commands/` 内の全スキルをレビュー
+- 引数なし → `.claude/skills/` 内の全スキルをレビュー
 - ファイルパス指定 → そのファイルのみレビュー
 - 複数ファイル指定 → 指定ファイル群をレビュー
 
@@ -67,11 +82,12 @@ Anthropic 公式ガイド「The Complete Guide to Building Skills for Claude」�
 ## 関連ドキュメント
 [ここに対象スキルが参照している workflows/*/review-*.md 等の内容を埋め込む]
 
-## CLAUDE.md スキル一覧テーブル
+## README.md スキル一覧テーブル
 [ここに該当部分を埋め込む]
 
-## README.md ドキュメント反映状況
-[ここに該当部分を埋め込む]
+## README.md への反映確認
+[対象スキルが上記テーブルに実際に記載されているか（OK/NG）を埋め込む。記載が無ければ NG として
+「Anthropic ベストプラクティスとの差分」表の該当行に反映すること]
 
 ## 評価軸（5項目・各20点 = 100点満点）
 
@@ -189,6 +205,11 @@ Anthropic 公式ガイド「The Complete Guide to Building Skills for Claude」�
 要約や解釈を加えない（レビューの客観性を維持するため）。
 
 ---
+
+## Examples
+
+- ユーザー: 「新しく作ったスキルをレビューして」→ `/review-skill .claude/skills/my-new-skill/SKILL.md` → skills-building-guide.md の基準に照らして別エージェントが5軸採点。
+- 引数なし → `.claude/skills/` 内の全スキルを対象にレビュー（`skills-audit` の一括監査と役割が近いが、本スキルは1〜数ファイルへの深掘り採点、`skills-audit` はリポジトリ全体を GOOD/MIGRATE/IMPROVE/SPLIT で高速に一次仕分けする用途で使い分ける）。
 
 ## 注意事項
 

@@ -12,7 +12,7 @@
 | 確認項目 | 確認内容 |
 |----------|----------|
 | **このプロダクトは何のためにあるか？** | 解決する課題を1〜2文で言語化できるか |
-| **誰が使うか？（ペルソナ）** | `dev/design/persona.md` に基づく対象ユーザーが定義されているか |
+| **誰が使うか？（ペルソナ）** | `workflows/software-development/design/persona.md` に基づく対象ユーザーが定義されているか |
 | **どうやって収益化するか？** | 収益モデル・価格設定が明文化されているか |
 | **テスト戦略は何か？** | TDD / BDD / E2E など、どのテスト方針で開発したか |
 
@@ -119,7 +119,7 @@
 
 ### 4. ペルソナ・クライアント適合実装 【配点：20点】
 
-> **目的：** 実装が `dev/design/persona.md` で定義したペルソナの実際の使い方・ITリテラシー・使用シーンに適合しているかを確認する。
+> **目的：** 実装が `workflows/software-development/design/persona.md` で定義したペルソナの実際の使い方・ITリテラシー・使用シーンに適合しているかを確認する。
 
 #### ペルソナ定義との整合確認
 - [ ] ペルソナのITリテラシーに合わせた複雑さになっているか（高ITリテラシー向けに作ったものを低リテラシー向けに提供していないか）
@@ -149,7 +149,7 @@
 
 ### 5. UX品質 【配点：20点】
 
-> **目的：** `dev/design/` のデザインシステム・ガイドラインに基づき、ユーザーが迷わず目的を達成できる品質になっているかを確認する。
+> **目的：** `workflows/software-development/design/` のデザインシステム・ガイドラインに基づき、ユーザーが迷わず目的を達成できる品質になっているかを確認する。
 
 #### インタラクション品質
 - [ ] ユーザーの操作に対してフィードバック（ローディング・成功・エラー）が即時に返るか
@@ -157,7 +157,7 @@
 - [ ] 操作の取り消し（Undo）・確認ダイアログが破壊的操作に対して実装されているか
 
 #### ビジュアル・レイアウト品質
-- [ ] `dev/design/design-guidelines.md` の禁止事項（絵文字禁止等）が守られているか
+- [ ] `workflows/software-development/design/design-guidelines.md` の禁止事項（絵文字禁止等）が守られているか
 - [ ] IBM Carbon Design System のデザイントークン・コンポーネントが正しく使われているか
 - [ ] レスポンシブ対応が適切か（モバイル・タブレット・デスクトップ）
 - [ ] ダークモード対応が必要な場合に実装されているか
@@ -202,7 +202,7 @@
 - プロジェクト名：
 - レビュー日：
 - 対象イテレーション/コミット：
-- ペルソナ定義の参照先：（dev/design/persona.md または未定義）
+- ペルソナ定義の参照先：（workflows/software-development/design/persona.md または未定義）
 - 収益モデル：（例: SaaS月額 / 従量課金 / 未定義）
 - テスト戦略：（TDD / 後付けテスト / なし）
 
@@ -277,7 +277,7 @@
 1. このプロンプトをClaude Codeセッションに貼り付ける
 2. 「このプロジェクトの実装をレビューしてください」と依頼する
 3. 必要に応じて以下の情報を提供する：
-   - `dev/design/persona.md` の内容
+   - `workflows/software-development/design/persona.md` の内容
    - 収益モデル・マネタイズ方針
    - テスト戦略
 
@@ -285,7 +285,7 @@
 
 | タイミング | 目的 |
 |----------|------|
-| 各イテレーション完了後 | `dev/three-agent/reviewer.md` と併用して品質を確認 |
+| 各イテレーション完了後 | `workflows/software-development/three-agent/reviewer.md` と併用して品質を確認 |
 | リリース前 | 総合評価でS/A判定を確認 |
 | 重大バグ修正後 | 修正が他の観点に悪影響を与えていないか確認 |
 | ペルソナ変更後 | 実装がペルソナ変更を反映しているか確認 |
@@ -296,10 +296,10 @@
 
 | ドキュメント | 用途 |
 |------------|------|
-| `dev/three-agent/reviewer.md` | TDDコードレビュー（技術的品質）|
-| `dev/design/persona.md` | ペルソナ定義 |
-| `dev/design/design-system.md` | IBM Carbon デザイントークン |
-| `dev/design/design-guidelines.md` | デザイン禁止事項・チェックリスト |
-| `dev/rules/coding-principles.md` | コーディング規約 |
-| `docs/review-business-idea.md` | ビジネスアイデアレビュー |
-| `docs/review-proposal.md` | 提案書レビュー |
+| `workflows/software-development/three-agent/reviewer.md` | TDDコードレビュー（技術的品質）|
+| `workflows/software-development/design/persona.md` | ペルソナ定義 |
+| `workflows/software-development/design/design-system.md` | IBM Carbon デザイントークン |
+| `workflows/software-development/design/design-guidelines.md` | デザイン禁止事項・チェックリスト |
+| `workflows/software-development/rules/coding-principles.md` | コーディング規約 |
+| `workflows/business-planning/review-business-idea.md` | ビジネスアイデアレビュー |
+| `workflows/business-planning/review-proposal.md` | 提案書レビュー |

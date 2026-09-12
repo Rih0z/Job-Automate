@@ -24,7 +24,7 @@ AIを活用した業務自動化・開発効率化のためのプロンプトラ
 
 ## クイックスタート: 別プロジェクトへ移植する (2026-09-01 制定・2026-09-04 改訂)
 
-このリポジトリの `CLAUDE.md`・`.claude/skills/`・`.claude/commands/` の仕組み（レビュー基準・エージェント分離・harness設計）を、別のプロジェクトにも使いたい場合。**Anthropic 公式由来の要素はデフォルトで入り、著者の運用嗜好（issue フォルダ管理・handoff 規約・並走 recheck 等）はあなたが選んだものだけ入る**。
+このリポジトリの `CLAUDE.md`・`.claude/skills/` の仕組み（レビュー基準・エージェント分離・harness設計）を、別のプロジェクトにも使いたい場合。**Anthropic 公式由来の要素はデフォルトで入り、著者の運用嗜好（issue フォルダ管理・handoff 規約・並走 recheck 等）はあなたが選んだものだけ入る**。
 
 ### 配置と gitignore（先に決める）
 
@@ -35,7 +35,7 @@ AIを活用した業務自動化・開発効率化のためのプロンプトラ
 ├── .setup-automate/                 # このリポジトリの clone。gitignore する。再同期は中で git pull
 ├── .claude/
 │   ├── harness-selection.json       # コミットする（何を取り込み何を外したかの記録 = 移植チェックリスト）
-│   ├── rules/  skills/  commands/   # 選択した要素だけが入る
+│   ├── rules/  skills/              # 選択した要素だけが入る
 │   └── settings.json                # hooks を選んだ時のみ
 ├── CLAUDE.md                        # 生成物（コミットする）
 ├── .tmp/                            # handoff 規約を選んだ時のみ生成。gitignore する
@@ -68,7 +68,7 @@ bash .setup-automate/.claude/skills/agent-harness-bootstrap/scripts/provenance-c
 
 このリポジトリが更新されたら `.setup-automate/` 内で `git pull` し、同じ指示をもう一度伝える。前回 `selected: false` にした要素は再提案されず、台帳に増えた新要素だけが提示される。`.setup-automate/` は gitignore されているので、他のメンバーが再同期する時は同じ場所に再 clone する（`.claude/harness-selection.json` がコミットされていれば選択は引き継がれる）。
 
-このリポジトリ自身をセットアップする場合（対象＝このリポジトリの中で作業したいだけの場合）は、上記は不要。clone して Claude Code で開けば `.claude/commands/` `.claude/skills/` は自動検出される（下記「Claude Code スラッシュコマンド／Skills」節）。
+このリポジトリ自身をセットアップする場合（対象＝このリポジトリの中で作業したいだけの場合）は、上記は不要。clone して Claude Code で開けば `.claude/skills/` は自動検出される（下記「Claude Code スラッシュコマンド／Skills」節）。
 
 ---
 
@@ -147,31 +147,37 @@ AIがどれだけ進化しても、**「何を良しとするか」の基準を�
 
 このリポジトリをクローンして Claude Code で開くだけで、リポジトリ直下の `.claude/` が自動検出されて使える。
 
-### `.claude/commands/` — スラッシュコマンド
+### 主要スラッシュコマンド（`.claude/skills/`）
 
-| コマンド | コマンド本体 | 何をするか |
+| コマンド | Skill本体 | 何をするか |
 |---------|-------------|-----------|
-| `/review-implementation` | [.claude/commands/review-implementation.md](.claude/commands/review-implementation.md) | 実装を5軸（テスト・正確性・マネタイズ・ペルソナ・UX）で100点満点評価 |
-| `/review-changes` | [.claude/commands/review-changes.md](.claude/commands/review-changes.md) | 直近の変更差分を4軸（実装正確性・テストカバレッジ・テスト品質/戦略・追跡可能性）で100点満点評価。**別エージェントで実行**し客観性を確保 |
-| `/review-skill` | [.claude/commands/review-skill.md](.claude/commands/review-skill.md) | 作成済みSkillsをAnthropicベストプラクティスに基づき5軸（構造・トリガー・命令品質・出力設計・実用性）で100点満点評価 |
+| `/review-implementation` | [.claude/skills/review-implementation/SKILL.md](.claude/skills/review-implementation/SKILL.md) | 実装を5軸（テスト・正確性・マネタイズ・ペルソナ・UX）で100点満点評価 |
+| `/review-changes` | [.claude/skills/review-changes/SKILL.md](.claude/skills/review-changes/SKILL.md) | 直近の変更差分を4軸（実装正確性・テストカバレッジ・テスト品質/戦略・追跡可能性）で100点満点評価。**別エージェントで実行**し客観性を確保 |
+| `/review-skill` | [.claude/skills/review-skill/SKILL.md](.claude/skills/review-skill/SKILL.md) | 作成済みSkillsをAnthropicベストプラクティスに基づき5軸（構造・トリガー・命令品質・出力設計・実用性）で100点満点評価 |
 
-> `/review-changes` は実装セッションとは別のエージェントを自動起動してレビューする。詳細は [agents.md](agents.md) 参照。
+> `/review-changes` は実装セッションとは別のエージェントを自動起動してレビューする。詳細は [agents.md](agents.md) 参照。すべて `disable-model-invocation: true` のため自動発動せず、スラッシュコマンドとしてのみ起動する。
 
 ### `.claude/skills/` — 自動発動するSkills
 
-| Skill本体（フルパス） | 何をするか |
+このリポジトリの `workflows/` 配下のプロンプトは全て `.claude/skills/<name>/SKILL.md` として skill 化されている。該当する話題を話した時に自動発動するか、`/<name>` で直接呼び出せる。個別の説明・トリガー文言は各 SKILL.md の frontmatter `description` に集約されており、本表では重複記載しない。
+
+| ドメイン | 例 |
 |---|---|
-| [.claude/skills/agent-harness-bootstrap/SKILL.md](.claude/skills/agent-harness-bootstrap/SKILL.md) | 任意のプロジェクトに Anthropic ベストプラクティス準拠の `CLAUDE.md` + `.claude/rules/` + hooks 一式を生成・剪定する（= CLAUDE.md を作成するprompt本体） |
-| [.claude/skills/review-oss-contribution/SKILL.md](.claude/skills/review-oss-contribution/SKILL.md) | OSS貢献候補を独自性・先行技術・実現可能性・戦略の4基準で審査しGO/HOLD/REJECTを判定する |
-| [.claude/skills/skills-audit/SKILL.md](.claude/skills/skills-audit/SKILL.md) | リポジトリ内の全Skillsを一括監査しGOOD/MIGRATE/IMPROVE/SPLITを判定する |
-| [.claude/skills/harness-compliance-audit/SKILL.md](.claude/skills/harness-compliance-audit/SKILL.md) | CLAUDE.md・rules・skills・commands・agents・hooks の直近の変更分を Anthropic 公式ベストプラクティス（`_shared/anthropic-best-practices.json`）に照らして監査する（機械検査 script + 変更ファイルごとの独立エージェント判定・PASS/FAIL） |
-| [.claude/skills/stop-ai-slop-jp/SKILL.md](.claude/skills/stop-ai-slop-jp/SKILL.md) | AIで書いた日本語を人間の文章に戻す（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・Daichi Nagashima 作、vendoring） |
+| 汎用ガバナンス | `agent-harness-bootstrap`（CLAUDE.md/rules/hooks 一式生成。由来台帳 `provenance.json` と公式ベストプラクティスの構造化データ `_shared/anthropic-best-practices.json` を参照）・`harness-setup-review`（setup 後の抜け・混入検査）・`harness-compliance-audit`（CLAUDE.md/rules/skills/commands/agents/hooks の直近変更分を `_shared/anthropic-best-practices.json` に照らして監査。機械検査 script + 変更ファイル別の独立エージェント判定）・`review-oss-contribution`・`skills-audit`・`skill-authoring-guide`・`stop-ai-slop-jp`（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・vendoring）・`review-gate`（工程別レビューゲート・観点はcriteria JSONで定義し育てる）・`single-session-tdd`（単一セッションTDD+独立レビュー）・`repo-hygiene-patrol`（ファイル構造衛生パトロール）・`blind-eval-harness`（複数サンプル盲検一括評価）・`issue-lifecycle-tracking`（ファイルベース状態遷移によるIssue追跡・数値目標の単一SoT化・N回連続FAILのIssue起票エスカレーション） |
+| business-planning | `business-idea` / `business-proposal` / `generic-proposal` / `it-proposal` / `specification` / `ai-automation` とそれぞれの `review-*`・`multi-tenant-template-injector`（複数クライアント向けテンプレートのテナント分離） |
+| content-creation | `creative-text-art` / `slides-pro` / `review-blog` / `review-slides` / `thumbnail-generation` / `review-thumbnail`（Gemini等の画像生成AI + Claudeの3ラウンド分業によるサムネイル画像生成） |
+| ops-management | `year-end-adjustment-csv` / `server-automation` / `server-init` / `server-windows-standard` / `review-ops` |
+| research-intelligence | `craft-beer-news-research` / `it-tech-news-research` / `general-news-research` / `investment-portfolio-analysis` / `seo-keyword-article-planner` / `blog-seo-growth-planner` / `research-deliverable-review` / `source-verification-scan`（非公開情報・捏造導線スキャン） / `staged-investigation-workflow`（ゲート付き段階的調査） |
+| software-development (design/mcp/その他) | `ui-design-guidelines` / `ibm-carbon-design-system` / `avoid-ai-generated-design-look` / `customer-persona-design` / `review-persona-analysis` / `playwright-mcp-e2e-testing` / `mcp-server-setup` / `model-cost-optimization-routing` / `three-agent-tdd-workflow`（3ターミナル分離型。単一セッション版は `single-session-tdd`） |
+
+既知の公式ベストプラクティス逸脱・改善バックログと再監査手順は [.claude/skills/_shared/compliance-roadmap.md](.claude/skills/_shared/compliance-roadmap.md) を参照。
 
 **他のプロジェクトでもコマンドを使いたい場合:**
 ```bash
-mkdir -p ~/.claude/commands
-cp .claude/commands/*.md ~/.claude/commands/
+mkdir -p ~/.claude/skills
+cp -r .claude/skills/review-changes .claude/skills/review-implementation .claude/skills/review-skill ~/.claude/skills/
 ```
+詳細な評価基準（`workflows/software-development/review-*.md` / `skills-building-guide.md`）も一緒にコピーすると、各スキルが埋め込みの簡易基準ではなく詳細なチェックリストを使って評価する。
 
 > 詳細は `CLAUDE.md` を参照。
 
@@ -338,9 +344,9 @@ Job-Automate/
 3. `workflows/<workflow-name>/README.md` に目的・使用順序・関連skills/commandsを書く
 4. `workflows/README.md` の一覧表と、本ファイルに追記する（追記漏れは `.claude/skills/workflow-coverage-and-structure/SKILL.md` で機械検査できる）
 
-### Claude Code Skill/Command として追加（自動発動させたい場合）
+### Claude Code Skill として追加（自動発動・スラッシュコマンド呼び出しさせたい場合）
 
-1. `.claude/commands/[コマンド名].md`（対話的スラッシュコマンド）または `.claude/skills/[name]/SKILL.md`（条件発動）を作成する
+1. `.claude/skills/[name]/SKILL.md` を作成する（YAML frontmatter 必須。対話的スラッシュコマンド専用にしたい場合は `disable-model-invocation: true` を付ける。`.claude/commands/*.md` の旧形式は使わない — commands は skills に統合済み）
 2. 自己完結にする（他ワークフローのパスをハードコードしない）
 3. 本ファイルの「Claude Code スラッシュコマンド／Skills」節に追記する
 4. エージェント分離が必要な場合は `agents.md` にも追記する

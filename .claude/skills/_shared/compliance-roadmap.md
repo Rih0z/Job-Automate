@@ -1,0 +1,38 @@
+# Job-Automate — Anthropic 公式ベストプラクティス準拠ロードマップ
+
+> Job-Automate 自身（このリポジトリ）の公式ベストプラクティス逸脱・改善バックログを追跡する living document。`.claude/skills/_shared/anthropic-best-practices.json`（34 原則）を判定基準の SoT とする。ported プロジェクトはこのファイルの中身を持ち込まず、自分自身の監査を実行して自分の roadmap を作る（`provenance.json` の `shared-compliance-roadmap` 要素は `portable: false`）。
+
+## 再監査手順
+
+2 段階に分ける（毎回フル判定にすると one-subagent-per-file の fan-out コストが常に発生するため）。
+
+- **軽量スイープ（機械検査のみ・頻繁に実行可）**: `.claude/` / `CLAUDE.md` に触れるセッション開始時、または最低月次で実行。
+  ```bash
+  bash .claude/skills/harness-compliance-audit/scripts/harness_check.sh $(find .claude CLAUDE.md -type f)
+  ```
+  純粋にパス・内容ベースの決定的チェックなので、このリポジトリの規模（約60ファイル）なら全件実行しても軽い。実行日と FAIL/WARN 件数をこの表の「最終確認」列に記録する。
+- **フル判定スイープ（別エージェント判定つき・低頻度）**: 四半期に一度、または軽量スイープで新規 FAIL が出た時。`skills-audit`（リポジトリ全体）または `harness-compliance-audit`（特定ファイル指定）を実行し、新規の finding をこの表に追記する。
+
+## Findings
+
+| ID | Finding | 原則 | 優先度 | 状態 | 備考 |
+|---|---|---|---|---|---|
+| CR-01 | `.claude/commands/*.md`（3件、旧形式・frontmatter無し）が公式ガイダンス「commands は skills に統合済み」に反する | `skills.file-location-and-precedence` | High | **done**（2026-09-11） | `.claude/skills/{review-changes,review-implementation,review-skill}/SKILL.md` へ移行。`provenance.json` の `review-commands`/`command-review-implementation` を `kind:"command"→"skill"` に更新。移行後の別エージェントレビュー（review-skill 自身）で B(78)/A(86)/A(81) を確認、指摘（後述 CR-06〜08）は反映済み |
+| CR-02 | 34/53 skills の `description` が 250 文字超（本リポジトリ独自の `skill-authoring-guide` 目安。公式の上限は description+when_to_use 合計 1,536 文字で、いずれも遠く及ばない） | `skills.description-key-use-case-first`（style 目安であり違反ではない） | Low | open / backlog | 他の理由でそのスキルを触る時に機会があれば整える。一括修正はしない |
+| CR-03 | 3 skills（`skill-authoring-guide`/`three-agent-tdd-workflow`/`ui-design-guidelines`）が副作用語検出で `disable-model-invocation` 欠如を機械的に疑われたが、実地確認の結果いずれも「pre-publish checklist」等のチェックリスト名称・内部シミュレーション上の hand-off であり実際の副作用ではない | `skills.side-effect-workflows-manual` | Low | **done**（false positive 確認済み・編集不要） | 再監査時に再度浮上したら同じ結論を確認するだけでよい |
+| CR-04 | `CLAUDE.md` の「レビュースキル一覧」節が全体の約46%（常時 load） | `claude-md.on-demand-goes-to-skills` | Medium | **done**（2026-09-11） | README.md へ集約しポインタ化。174行→99行（公式目標 <200 行に対し余裕あり） |
+| CR-05 | `.claude/skills/agent-harness-bootstrap/provenance.json` が1,447行で skill ツリー中最大。移植レビュー等で全文がエージェントに渡る場面がある | （SKILL.md 500行ルールは非該当。structured lookup data） | Low / long-term | open / backlog | `provenance-check.test.sh`（52 tests）がこのファイルの厳密な構造に依存するため、再構成は「意味を変えずに分割する」計画と再テストが前提。今は着手しない |
+| CR-06 | `workflows/software-development/review-changes.md`・`review-implementation.md` に `dev/`・`docs/` 配下への死んだパス参照が多数残存（2026-07-31 の `workflows/` 構造への再編で取り残された既存債務）。これらのファイルはレビューエージェントへのプロンプトに丸ごと埋め込まれるため、修正前は実際に誤ったパスをエージェントに渡していた | （公式原則の直接該当なし。品質・正確性の一般論） | High | **done**（2026-09-11、CR-01 移行時の別エージェントレビューで発見・即修正） | 全 `dev/design/*`・`dev/three-agent/*`・`dev/rules/*`・`docs/review-*.md` を `workflows/` 配下の実在パスへ修正済み。修正後の残存チェック済み（grep 0件） |
+| CR-07 | `review-skill/SKILL.md` の収集項目「README.md のドキュメント反映状況」が README.md に存在しない節を指す実行不能な指示だった | `skills.progressive-disclosure` の実用性側面 | High | **done**（2026-09-11） | 「対象スキルが一覧テーブルに実際に記載されているか」という具体的な確認項目に書き換え |
+| CR-08 | `review-changes/SKILL.md` に出力テンプレートが無く、他2件（review-implementation/review-skill）と非対称だった。3件とも `## Examples` 節が0件だった | `skills.progressive-disclosure`（構造の一貫性） | Medium | **done**（2026-09-11） | review-changes に採点表+出力フォーマットを追加。3件とも Examples 節・相互の対象範囲の違いを追記 |
+| CR-09 | `harness_check.sh` の `fm_get()`（shell の単一行 grep ベース）が YAML block scalar（`description: \|`）を正しく読めず、`S05`/`S06` を誤判定する（実測: 文字数が実際は数百文字のところ「1 文字」と出る） | （ツール自体の限界。原則 `skills.frontmatter-fields` の検査手段の不備） | Low | open / backlog | `review-ops` 等、本リポジトリの確立された記法（block scalar）を使う全スキルで同じ誤検知が起きる。ツール側（Python の YAML parser 等への置換）の改修は別タスク。現状は WARN どまりで FAIL にはならないため急がない |
+| CR-10 | `.claude/skills/specification/SKILL.md` が commit/push/deploy 系の語を含むが `disable-model-invocation` が無い（closing sweep で新規検出） | `skills.side-effect-workflows-manual` | Low | open / backlog | 実際に副作用を実行するか要確認の上、該当すれば `disable-model-invocation: true` を追加。今回の A/B/C の対象範囲外のため未着手 |
+| CR-11 | 11 skills の frontmatter に山括弧プレースホルダ（`<...>` 等）があり、XML 風タグを拒否する一部配布経路（claude.ai アップロード等）で問題になり得る | `skills.spec-fields-outside-claude-code` | Low | open / backlog | Claude Code 専用利用なら実害なし。claude.ai 等への配布を計画する時にまとめて対応 |
+
+## 直近の監査ログ
+
+| 日時 | 種別 | 結果 |
+|---|---|---|
+| 2026-09-11 | 軽量スイープ（`harness_check.sh` 移行対象ファイルのみ） | FAIL=0 WARN=7（CR-09 起因の S06 ×3、BP02 ×1、既知の残存WARN） |
+| 2026-09-11 | フル判定（`/review-skill` を CR-01 移行対象3件に実行） | B(78)/A(86)/A(81) → 指摘反映後 再検証は軽量スイープで完了（CR-06〜08 参照） |
+| 2026-09-11 | 軽量スイープ（`harness_check.sh` 全リポジトリ・98 targets、本ロードマップ運用の初回ベースライン） | FAIL=0 WARN=49（S06 ×35 = CR-09、S10 ×11 = CR-11、S08 ×1 = CR-10、H01 ×1 python 未検出・BP02 ×1） |

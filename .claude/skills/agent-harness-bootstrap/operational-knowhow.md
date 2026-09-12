@@ -289,3 +289,15 @@ CLAUDE.md に書いた規約は advisory なので Claude が長文中で見落�
 - 成果物のメタデータ（PPTX の `dc:creator`、生成ログ等）と主張内容を突合して検証する
 
 曖昧な記述・ごまかしを避け、「動かさずにできたと言わない」（自検証）と対で運用する。
+
+### 独自運用: マルチエージェント / subagent 設計原則（該当時のみ）
+
+> provenance: author-preference · id: agent-design-crash-resilient-manifest / agent-design-metadata-preserving-handoff / agent-design-tool-scope-limit
+
+対象プロジェクトが複数 subagent を並列・逐次で起動するオーケストレーション機能を新規実装する場合のみ採用する。レビュー時の実装コンテキスト遮断・並列起動時のアンカリング防止（`review.md` の `separate-agent-review-cycle` / `official-adversarial-review`）とは別軸であり、ここでは重複させない。
+
+**クラッシュ耐性 state manifest**: 長時間・並列 subagent 運用でコーディネーター自身が再起動・クラッシュすると、再実行時にどこまで終わっていたか再現できず全 subagent をやり直しがちになる。各 subagent に、完了を待たず進捗を構造化データとして節目ごとに `<作業ディレクトリ>/<subagent 名>.json`（manifest）へ書き出させる。コーディネーターは再起動後まず manifest 群を読み、未完了の subagent だけを既存 manifest の内容を種に再起動する。Workflow ツールの `resumeFromRunId` は同一 (prompt, opts) 呼び出し単位でしか再利用できないため、manifest 書き出しと併用する。
+
+**コーディネーター中継のメタデータ保持**: 複数の調査・取得系 subagent の結果を、コーディネーターが別の統合（synthesis）エージェントへ引き渡す構成では、各結果の出典（URL・ファイルパス・文書名等）を本文内容と分離した構造化データとして保持したまま渡す（`{content, source_url, source_path}` 等）。「要点だけ」を平文で抜き出して渡すと、統合エージェントに出典を引用する材料が失われ、根拠のない主張を含む成果物が生成される。取得系 subagent 自体が正しく出典を返していても、この中継部分で構造が失われれば無意味になる。
+
+**ツールスコープの限定**: 1 エージェントの `allowed-tools` は 4〜5 個・単一ロールを目安にする。全く異なる専門領域（コード分析・セキュリティスキャン・デプロイ検証等）を 1 エージェントに詰め込むと選択精度が落ちるため、対象単位（ファイル1件・工程1件等）ごとにロール別のエージェントを分けて起動する。

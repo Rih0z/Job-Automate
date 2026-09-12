@@ -196,7 +196,7 @@ it.todo('should handle edge case - blocked by #123')
 ```
 ターミナル1 (実装者): コードを書く・テストを書く
 ターミナル2 (レビュアー): 新しい Claude Code セッションを開き、
-  docs/review-changes.md を読み込ませてレビューを依頼
+  workflows/software-development/review-changes.md を読み込ませてレビューを依頼
 ```
 
 ### 静的分析の制約
@@ -214,7 +214,7 @@ CI結果やテスト実行ログが利用可能な場合は、その情報も参
 
 | ドキュメント | 用途 |
 |------------|------|
-| `docs/review-implementation.md` | プロジェクト全体の総合レビュー |
-| `dev/three-agent/reviewer.md` | TDD特化レビュー（three-agent用） |
-| `dev/rules/coding-principles.md` | コーディング規約 |
-| `dev/design/design-guidelines.md` | デザインガイドライン |
+| `workflows/software-development/review-implementation.md` | プロジェクト全体の総合レビュー |
+| `workflows/software-development/three-agent/reviewer.md` | TDD特化レビュー（three-agent用） |
+| `workflows/software-development/rules/coding-principles.md` | コーディング規約 |
+| `workflows/software-development/design/design-guidelines.md` | デザインガイドライン |
