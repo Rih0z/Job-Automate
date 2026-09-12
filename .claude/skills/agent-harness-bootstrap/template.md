@@ -35,6 +35,11 @@
 <!-- id: handoff-management / issue-lifecycle -->
 5. handoff 規約: ファイル名 `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、次 handoff 作成まで保持、`issues/open|processing/[ID].md` 冒頭に進行中 handoff の完全パス記載（詳細 `issue-workflow.md`）
 
+<!-- id: claude-md-tdd-order -->
+## 実装の工程順序
+
+コードを書く・直す作業は 設計 → テスト設計 → テスト実装(Red) → 実装(Green→Refactor) の順で行い、各工程を別エージェントのレビューで終える（設計とテスト設計は 1 回のゲートでまとめて審査する。Red を確認していないテストは後付け扱い・自己レビューで通過扱いにしない）。手順の本体は TDD ワークフロー / レビューゲートの skill を参照。
+
 <!-- id: rules-split-progressive-disclosure -->
 ## ルール一覧
 

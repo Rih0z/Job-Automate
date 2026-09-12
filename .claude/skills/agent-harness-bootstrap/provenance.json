@@ -1225,7 +1225,7 @@
       "id": "skill-single-session-tdd",
       "kind": "skill",
       "provenance": "author-preference",
-      "summary": "単一セッションで Red → Green → Refactor を強制し、各工程で review-gate を通す TDD ワークフロー。",
+      "summary": "単一セッションで 設計 → テスト設計 → テスト実装(Red) → 実装(Green → Refactor) の順序を強制し、各工程で review-gate を通す（PASS まで次工程に進まない）TDD ワークフロー。",
       "skills": [
         "single-session-tdd"
       ],
@@ -1238,12 +1238,16 @@
       "id": "skill-three-agent-tdd-workflow",
       "kind": "skill",
       "provenance": "author-preference",
-      "summary": "リーダー / 実行 / レビューの 3 ターミナル分離型 TDD 開発システム。",
+      "summary": "リーダー / 実行 / レビューの 3 ターミナル分離型 TDD 開発システム。イテレーション内は 設計 → テスト設計 → テスト実装(Red) → 実装 の順序を固定する。",
       "skills": [
         "three-agent-tdd-workflow"
       ],
       "rubric_items": [],
       "depends_on": [],
+      "soft_depends_on": [
+        "skill-review-gate"
+      ],
+      "note": "skill-review-gate 非選択時は SKILL.md「イテレーション内の工程順序」末尾の review-gate 参照の 1 文を落とす（3 ターミナル分離のレビューだけで回す）",
       "files": [
         "workflows/software-development/three-agent/README.md",
         "workflows/software-development/three-agent/leader.md",
@@ -1495,6 +1499,37 @@
           }
         ],
         "when_unselected": []
+      }
+    },
+    {
+      "id": "claude-md-tdd-order",
+      "kind": "claude-md-section",
+      "provenance": "author-preference",
+      "summary": "CLAUDE.md『応答ルール』内の工程順序の段落: コードを書く作業は 設計 → テスト設計 → テスト実装(Red) → 実装(Green→Refactor) の順で行い、各工程を別エージェントのレビューで終える（設計とテスト設計は 1 回のゲートでまとめて審査）。段落は入口だけを置き、手順の本体は TDD skill 側に持たせる。",
+      "applies_to": [
+        "CLAUDE.md 応答ルール（工程順序の段落）",
+        "template.md「## 実装の工程順序」節"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "skill-single-session-tdd"
+      ],
+      "note": "段落が指す手順の本体は single-session-tdd / review-gate skill にあるため depends_on で必須化する。これらを選択しない対象では本要素も選択できず、段落ごと落とす。本リポジトリでは応答ルール内の段落、生成テンプレートでは独立節。どちらでもよい",
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "設計 → テスト設計"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "設計 → テスト設計"
+          }
+        ]
       }
     },
     {

@@ -7,17 +7,21 @@ metadata:
 
 # review-gate — 工程別レビューゲート
 
-各工程の成果物は、**次の工程に進む前に必ず別エージェントのレビューを受ける**。自分の成果物を自分でレビューして通過扱いにすることを禁止する（self-review 禁止）。
+各工程の成果物は、**次のゲートに進む前に必ず別エージェントのレビューを受ける**（ゲートの単位は下表の5つ。設計とテスト設計は design ゲート1回でまとめて審査する）。自分の成果物を自分でレビューして通過扱いにすることを禁止する（self-review 禁止）。
 
 ## 工程と観点ファイルの対応
 
 | 工程 | タイミング | 観点ファイル |
 |---|---|---|
 | 仕様 | 仕様書を書いた/変えた直後、テスト作成前 | [criteria/spec.json](criteria/spec.json) |
-| 設計 | 設計・スキーマ・APIを書いた/変えた直後、実装前 | [criteria/design.json](criteria/design.json) |
-| テスト | テストを書きRed確認直後、実装(Green)前 | [criteria/test.json](criteria/test.json) |
+| 設計 | 設計・スキーマ・API と機能ごとの「テスト戦略」の節が揃った直後、テストコード作成前（設計だけの段階では回さない） | [criteria/design.json](criteria/design.json) |
+| テスト | テストコードを書きRed(失敗)を実行確認した直後、実装(Green)前 | [criteria/test.json](criteria/test.json) |
 | 実装 | Green+リファクタ完了直後、コミット前 | [criteria/implementation.json](criteria/implementation.json) |
 | リリース | デプロイ・本番反映の直前 | [criteria/release.json](criteria/release.json) |
+
+工程の順序は **仕様 → 設計 → テスト設計 → テスト実装(Red) → 実装(Green→Refactor) → リリース** に固定する。用語は「工程名 = テスト設計、その成果物として設計書に書く節名 = テスト戦略」。
+
+テスト設計(どのケースを検証するか・テスト名・期待値とその独立導出・E2E/手動確認に回す範囲)は設計工程の成果物なので、**design ゲートは設計とテスト戦略の節が揃ってから1回だけ回す**(`test_strategy` は must_pass のため、テスト設計前に回すと必ずFAILする)。PASSしないうちはテストコードを書かない。次のいずれかに当たる場合は design ゲートを再実行する: 本規則の導入前にPASSさせた設計にテスト設計を足す/`test_strategy` を N/A としてPASSさせた設計にテスト設計を足す/**PASS後にテスト戦略のケースを追加・変更した**(運用ノート「PASS後のfindings対応」の再レビュー不要の例外には当たらない: 新しい判断を足す修正のため)。テストゲートは Red の失敗ログ(`red_evidence` 観点)がなければPASSさせない。
 
 ## 手順
 
@@ -27,13 +31,16 @@ metadata:
    ```
    あなたは独立レビュアー。次の観点定義に従い、対象を批判的にレビューせよ。
    観点定義: <criteria JSONのパス。読み込ませる>
-   レビュー対象: <対象ファイルのパス一覧。文脈に必要な仕様書・設計書も含める>
+   レビュー対象: <対象ファイルのパス一覧。文脈に必要な仕様書・設計書も含める
+     （設計書を持たない変更では、テスト戦略を書いた変更計画・issue ファイルのパス、または本文そのもの）>
+   この変更に存在しない成果物: <無ければ「なし」。例: 設計書を持たないスクリプト1本の修正>
    まず対象全体を一度通読し、criterion単位の採点に入る前に全体として破綻がないか
    (目的と実装の乖離・致命的な欠落等)を把握せよ(個別criterionから先に読むと、
    最初に見た項目に評価が引きずられるため、全体像の把握を先に行う)。
    その上で各criterionを checks に沿って検証し、weightに基づき100点満点で採点。
    甘い採点を禁止する。判断に迷ったら減点し findings に書く。
-   プロジェクトに該当しない criterion は N/A とし、残りの weight で按分して100点換算する。
+   プロジェクトまたはこの変更に該当しない criterion は N/A とし、残りの weight で按分して100点換算する。
+   N/A にした criterion は理由つきで na_criteria に列挙せよ(must_pass も同じ扱い)。
    さらに「この観点定義自体に抜けている観点はないか」を考え、あれば missing_perspectives に提案せよ。
    出力は次のJSONのみ(説明文なし):
    {
@@ -41,15 +48,19 @@ metadata:
      "score": 0-100,
      "verdict": "PASS" | "FAIL",
      "must_pass_failures": ["criterion_id", ...],
+     "na_criteria": [{"criterion_id": "...", "reason": "..."}],
      "findings": [{"criterion_id": "...", "severity": "high|medium|low", "comment": "...", "location": "file:line"}],
      "missing_perspectives": [{"proposed_criterion": "...", "reason": "..."}]
    }
    ```
 
 3. **判定**: must_pass の criterion がすべて合格、かつ score ≥ pass_rule.min_score で PASS。
+   - **must_pass を N/A にできる条件**: その criterion が対象とする成果物の種類が、その変更に存在しない場合に限る(例: 設計書を持たないスクリプト1本の修正)。依頼時に「この変更に存在しない成果物」として宣言し、レビュアーが N/A と判定し、**`na_criteria` に理由つきで現れている**ものだけを合格扱いとする。存在するのに書いていない場合は N/A にせず FAIL とする。
    - FAIL → findings を修正して同じ工程を再レビュー。PASSするまで次工程に進まない。
    - PASS → 次工程へ。コミットメッセージ末尾に `review-gate:<stage> PASS <score>` を1行入れる。
 4. **観点の自己更新**: レビュアーの `missing_perspectives` に妥当な提案があれば、または開発中に観点の抜け漏れに気づいたら、その場で criteria JSON に criterion を追加してコミットする(weightは既存とのバランスで調整し合計100を維持)。スキルは育てるもの。
+
+   **weightを動かした記録 (2026-09-11)**: テスト設計の審査を入れるため design に `test_strategy`(10)・test に `red_evidence`(10) を新設し、その分 design の simplicity・testability と test の coverage_normal・independence を各 10→5 に下げた(合計100を維持)。
 
    **観点の自己検証 (2026-08-31 追加)**: criteria JSON の checks を「厳格」と称する前に、意図的に劣化させたサンプル(基準を満たさないよう壊した対象)を実際にレビュアーへ通し、当該 criterion が FAIL することを確認する。FAIL しない check は基準が緩すぎるため、checks の記述を締め直してからコミットする。**孤立チェックの点検 (2026-09-01 追加)**: 上記に加え、criteria JSON 内の各 criterion が実際に score/verdict へ反映されているか（採点ロジックから参照されない孤立した check がないか）も定期的に確認する。checks を追加・変更した際、それが `weight` 計算や `must_pass` 判定のどちらにも紐付いていなければ、レビュアーがそのcriterionを検証しても結果が採点に反映されない不整合となる。
 
@@ -61,4 +72,6 @@ metadata:
 - **PASS後のfindings対応**: PASSした上で残ったfindingsを修正する編集が「レビュアーの指摘をそのまま反映するだけで新しい意思決定を含まない」場合、即時の再レビューは不要。次にその工程を通るときのレビューで検証する(無限ループ防止)。新しい判断を足す修正はこの例外に当たらない。
 - レビュアーには結論だけでなく location を出させ、修正を機械的に適用できるようにする。
 - 同一工程で3回FAILしたら、観点かレビュー粒度に問題がある可能性を疑い、ユーザーに相談する。
+- **手続きとcriteriaの突き合わせ (2026-09-11 追加)**: 規則文書が別ゲートの通過を手続きとして指示する場合、そのゲートの criteria の must_pass と両立するか(指示どおり進めると必ずFAILする順序になっていないか)を突き合わせる。
+- **強制の限界**: このゲートはレビュアーの判定に依るので確率的で、機械的に保証されるものではない。決定的な検査にする案は `.claude/skills/_shared/compliance-roadmap.md` の backlog にある。
 - 単一セッションでの開発フロー全体は `single-session-tdd` skill、3ターミナル分離で回す場合は `three-agent-tdd-workflow` skill を参照。

@@ -25,6 +25,8 @@ Claude Code でプロンプトを開発・改善するときのガイドです�
 
 バグ修正時: エラーメッセージが修正箇所を明確に示している単純な修正はそのまま直接修正する。依存関係や他ファイルとの整合確認が必要な修正は、着手前に対象が依存する workflow・skill・設定ファイルを洗い出し、その旨を明示する。複数ファイルにまたがる変更や設計判断を伴う複雑な修正は、実装に入る前に Plan Mode で依存関係の洗い出しと計画・レビューを行ってから着手する。洗い出した依存関係は、関連する `workflows/<name>/README.md` に一言残し、後から参照できるようにする。
 
+コード・スクリプトを書く・直す作業は **設計 → テスト設計 → テスト実装(Red) → 実装(Green→Refactor)** の順で行う（テスト設計 = 検証ケース・テスト名・期待値の導出・自動化しない範囲を決める工程。成果物は設計書の「テスト戦略」の節）。各工程は別エージェントのレビューで終え、PASS するまで次工程に着手しない（設計とテスト設計は 1 回のゲートでまとめて審査する。テストを書く前に実装コードを書かない・Red を確認していないテストは後付け扱い・自己レビューで通過扱いにしない）。手順とテスト設計の中身は [single-session-tdd](.claude/skills/single-session-tdd/SKILL.md) skill、工程別の観点は [review-gate](.claude/skills/review-gate/SKILL.md) skill の `criteria/*.json`、3ターミナル分離で回す場合は [three-agent-tdd-workflow](.claude/skills/three-agent-tdd-workflow/SKILL.md) skill。
+
 `/compact` 実行時は必ず以下を残す: 編集・作成した全ファイルの完全パス、対象の workflow/skill 名、実行したテスト・検証コマンドと結果。
 
 ---
@@ -43,7 +45,7 @@ Claude Code 環境で使えるレビュー系コマンド／Skills の全一覧�
 |------|-----------|---------|
 | ペルソナ定義 | `workflows/software-development/design/persona.md` | 推定ユーザーを仮定して評価（スコアに注記あり） |
 | 収益モデル | README に記載 | マネタイズ観点をN/Aとして除外し80点満点に換算 |
-| テスト戦略 | `jest.config.*` 等 | テストファイルを探して判断 |
+| テスト基盤（ランナー設定） | `jest.config.*` 等 | テストファイルを探して判断 |
 | デザインガイドライン | `workflows/software-development/design/design-guidelines.md` | 一般的なUXベストプラクティスで評価 |
 
 ---

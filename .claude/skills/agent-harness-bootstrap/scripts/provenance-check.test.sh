@@ -27,6 +27,7 @@
 #   T45 実台帳の契約自己検査（contract-selfcheck.sh が default 選択で PASS）
 #   T46-T49 path_map（契約パスの読み替え）と CLAUDE.md grep の @import 先解決
 #   T50-T52 deferred（長期計画）: issue 実在の要求・契約 skip・selected:true 必須
+#   T53-T55 実台帳の claude-md-tdd-order: CLAUDE.md の工程順序の段落の契約 (C12) と depends_on (C11)
 # 実行: bash .claude/skills/agent-harness-bootstrap/scripts/provenance-check.test.sh
 
 set -uo pipefail
@@ -269,6 +270,57 @@ write_sel_t '"core":{"selected":true,"decided_by":"default"},"split":{"selected"
 
 # 実台帳の契約自己検査（default 選択で契約が満たせる・矛盾しない）。fixture ではなく本リポジトリの台帳で走る
 t "T45 実台帳: default 選択の target_contract は満たせて矛盾しない（contract-selfcheck.sh）" 0 "$(env -u PROVENANCE_ROOT -u PROVENANCE_KNOWHOW bash "$(dirname "$CHECK")/contract-selfcheck.sh" >/dev/null 2>&1; echo $?)"
+
+# 実台帳の claude-md-tdd-order（工程順序の段落）: 契約語句の抜け検出 (C12) と depends_on の成立条件 (C11)
+REAL_MANIFEST="$(cd "$(dirname "$CHECK")/.." && pwd)/provenance.json"
+PY=""; for c in python3 python py; do pp="$(command -v "$c" 2>/dev/null)" || continue
+  case "$pp" in */WindowsApps/*) continue ;; esac
+  if "$c" -c "print(1)" >/dev/null 2>&1; then PY="$c"; break; fi; done
+gen_real_sel() { # $1=出力パス $2=selected:true を強制する id(カンマ区切り) $3=selected:false を強制する id
+  "$PY" - "$REAL_MANIFEST" "$1" "$2" "$3" <<'PY'
+import json, sys
+man, out, force_true, force_false = sys.argv[1:5]
+els = json.load(open(man, encoding="utf-8"))["elements"]
+by = {e["id"]: e for e in els}
+ft = [x for x in force_true.split(",") if x]
+ff = set(x for x in force_false.split(",") if x)
+sel = set()
+def add(i):
+    if i in sel or i in ff:
+        return
+    sel.add(i)
+    for dep in by[i].get("depends_on", []):
+        add(dep)
+for e in els:
+    if e["provenance"] == "official":
+        add(e["id"])
+for i in ft:
+    add(i)
+out_sel = {}
+for e in els:
+    i = e["id"]
+    if e["provenance"] == "repo-specific" or e.get("portable") is False:
+        out_sel[i] = {"selected": False, "decided_by": "excluded"}
+    elif i in sel:
+        ent = {"selected": True, "decided_by": "default"}
+        if e.get("kind") == "skill-group":
+            ent["skills"] = e.get("skills", [])[:1]
+        out_sel[i] = ent
+    else:
+        out_sel[i] = {"selected": False, "decided_by": "user"}
+json.dump({"schema": "harness-selection/v1", "decided_by": "user", "selections": out_sel},
+          open(out, "w", encoding="utf-8"), ensure_ascii=False)
+PY
+}
+runreal() { env -u PROVENANCE_ROOT -u PROVENANCE_KNOWHOW bash "$CHECK" "$@" 2>&1 | grep -c "claude-md-tdd-order"; }
+mkdir -p real/.claude
+gen_real_sel real/.claude/harness-selection.json claude-md-tdd-order ""
+printf '# CLAUDE.md\n\n## 応答ルール\n完全パスを明記する。\n' > real/CLAUDE.md
+t "T53 claude-md-tdd-order を選択して CLAUDE.md に工程順序の語句が無ければ違反として報告される" 1 "$(runreal --target real)"
+printf '# CLAUDE.md\n\n## 実装の工程順序\n設計 → テスト設計 → テスト実装(Red) → 実装 の順で行う。\n' > real/CLAUDE.md
+t "T54 語句を含めれば claude-md-tdd-order の違反は出ない" 0 "$(runreal --target real)"
+gen_real_sel real/.claude/harness-selection.json claude-md-tdd-order skill-single-session-tdd
+t "T55 claude-md-tdd-order を選び skill-single-session-tdd を外すと depends_on で違反" 1 "$(runreal --selection real/.claude/harness-selection.json)"
 
 echo "---"
 echo "PASS=$PASS FAIL=$FAIL"

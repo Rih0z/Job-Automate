@@ -28,6 +28,7 @@
 | CR-09 | `harness_check.sh` の `fm_get()`（shell の単一行 grep ベース）が YAML block scalar（`description: \|`）を正しく読めず、`S05`/`S06` を誤判定する（実測: 文字数が実際は数百文字のところ「1 文字」と出る） | （ツール自体の限界。原則 `skills.frontmatter-fields` の検査手段の不備） | Low | open / backlog | `review-ops` 等、本リポジトリの確立された記法（block scalar）を使う全スキルで同じ誤検知が起きる。ツール側（Python の YAML parser 等への置換）の改修は別タスク。現状は WARN どまりで FAIL にはならないため急がない |
 | CR-10 | `.claude/skills/specification/SKILL.md` が commit/push/deploy 系の語を含むが `disable-model-invocation` が無い（closing sweep で新規検出） | `skills.side-effect-workflows-manual` | Low | open / backlog | 実際に副作用を実行するか要確認の上、該当すれば `disable-model-invocation: true` を追加。今回の A/B/C の対象範囲外のため未着手 |
 | CR-11 | 11 skills の frontmatter に山括弧プレースホルダ（`<...>` 等）があり、XML 風タグを拒否する一部配布経路（claude.ai アップロード等）で問題になり得る | `skills.spec-fields-outside-claude-code` | Low | open / backlog | Claude Code 専用利用なら実害なし。claude.ai 等への配布を計画する時にまとめて対応 |
+| CR-12 | 工程順序（設計 → テスト設計 → テスト実装(Red) → 実装）の強制がレビュアー判定のみで、機械的な検査がない。ゲートを飛ばしても検出されない | `hooks.deterministic-zero-exceptions` | Medium | open / backlog | 候補: `review-gate/SKILL.md` が定めるコミットメッセージ規約 `review-gate:<stage> PASS <score>` を commit 直前の hook で検査する（該当工程の行が無ければ block）。誤検出（docs のみの変更・規約導入前のコミット）の除外条件を先に決める必要がある。次のフル判定スイープ（四半期）で再検討。それまでは `review-gate/SKILL.md` の「強制の限界」の表記で運用する |
 
 ## 直近の監査ログ
 
