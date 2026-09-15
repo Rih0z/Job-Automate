@@ -28,7 +28,23 @@ metadata:
 
 ## スキャン手順(別エージェント実行)
 
+**過去レビュー記録の参照**: スキャン起動前に以下を実行し、同一対象の過去レビュー記録（このskillに限らず research-deliverable-review 等の記録も含む）を検索する。ヒットした場合は該当ファイルを Read し、前回の BLOCKER/指摘内容を検査エージェントへのプロンプトに含める。
+
+```bash
+python .claude/skills/_shared/scripts/list_review_records.py --target "<対象ファイル名またはタイトルの一部>"
+```
+
 呼び出し元セッションの意図・執筆過程は渡さず、対象ファイルのパスと `criteria/categories.json` のパスのみを渡して別エージェントに検査させる(自己レビュー禁止)。出力形式(hit単位のフォーマット・converged BLOCKER要件)は同 JSON の `output_format` を参照。BLOCKERが0件になるまで公開しない。
+
+## 永続化
+
+検査エージェントには `output_format.persisted_record` が指す review-record/v1 JSON（`skill: "source-verification-scan"`, `verdict`: BLOCKER 0件なら `"PASS"`、1件以上残るなら `"FAIL"`, `criteria` にカテゴリA-Gごとのhit有無を記録）も出力させる。受け取ったJSONを一時ファイルに保存し、以下を実行して永続化する:
+
+```bash
+python .claude/skills/_shared/scripts/append_review_record.py <一時JSONファイルのパス>
+```
+
+このスクリプトが成功するまで公開判断（BLOCKER 0件の確定報告）を完了として扱わない。検証エラー時はエラー内容に従いJSONを修正して再実行する（強制の限界: プロンプト指示による実行そのものは確率的だが、スクリプト自体のスキーマ検証は決定的）。
 
 ## 対応アクション
 

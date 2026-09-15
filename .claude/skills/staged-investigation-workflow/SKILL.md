@@ -60,7 +60,22 @@ while 終了条件を満たさない:
 
 ## レビュー連携
 
+**過去レビュー記録の参照(Phase 0で行う)**: Phase 0(状況把握)の一部として、以下を実行し過去の同種調査の記録を検索する。ヒットすれば所見の入力として使う。
+
+```bash
+python .claude/skills/_shared/scripts/list_review_records.py --target "<調査対象>"
+```
+
 Phase 2の方針とPhase 5のレポートは、別エージェント(自己レビューではない)によるレビューを経てから次段階へ進む。
+
+**永続化(Phase 5完了時)**: Phase 5のレビュー結果は、以下の review-record/v1 JSON（スキーマ: `.claude/skills/_shared/review-record.schema.json`）としても出力させ、`.claude/review-history/staged-investigation-workflow/` へ永続化する（「状態を保存せず中断しない」の具体化。各段階=Phase 4の逐次記録はレポート本文側で行い、永続化はPhase 5完了時の1回でよい）。`skill: "staged-investigation-workflow"`, `verdict` はレポートのレビューがPASS/FAILのどちらか、`criteria` は「事実/解釈の分離」「代表仮説の有無」等のレビュー観点、`sources_cited` は調査で参照した一次情報・URL一覧を入れる。
+
+```bash
+# レビューエージェントが出力したJSONを一時ファイルに保存した上で:
+python .claude/skills/_shared/scripts/append_review_record.py <一時JSONファイルのパス>
+```
+
+**このスクリプトが成功（書き込み先パスを標準出力）するまで調査完了として報告しない**。検証エラー（必須フィールド欠落等で非ゼロ終了）の場合は、エラー内容に従ってJSONを修正し再実行する（強制の限界: プロンプト指示による実行そのものは確率的だが、スクリプト自体のスキーマ検証は決定的）。
 
 ## やってはいけないこと
 

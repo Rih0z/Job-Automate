@@ -43,6 +43,7 @@
   "allowed_sources": "一次情報源(公式ドキュメント・公式ブログ・公開カンファレンス発表・vendor公式docs・原典URL明記の報道・公開書籍/論文)、および検証済み・permalink付き・literal確認済みの公式SNS発言(条件はカテゴリCのexception参照)。二次情報源のみを一次として扱わない。",
   "output_format": {
     "per_hit": ["行番号 + literal quote", "該当カテゴリ(A-G)", "判定: 公開OK / 非公開NG", "推奨処置: 出典URL追加 / 行ごと削除 / 表現の中立化"],
-    "final": "converged BLOCKER リストとサマリ。BLOCKERが0件になるまで公開しない"
+    "final": "converged BLOCKER リストとサマリ。BLOCKERが0件になるまで公開しない",
+    "persisted_record": "上記に加え review-record/v1 準拠JSON（スキーマ: .claude/skills/_shared/review-record.schema.json）を出力し、SKILL.md『永続化』節の手順で .claude/review-history/source-verification-scan/ へ保存する"
   }
 }

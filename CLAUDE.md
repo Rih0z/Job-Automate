@@ -37,6 +37,8 @@ Claude Code 環境で使えるレビュー系コマンド／Skills の全一覧�
 
 既知の公式ベストプラクティス逸脱・改善バックログと再監査手順は [.claude/skills/_shared/compliance-roadmap.md](.claude/skills/_shared/compliance-roadmap.md) を参照。
 
+調査系レビュー結果の構造化永続化（観点別合否・出典・要約をJSONで保存し後から見返す仕組み）は、対象 skill 自身（`research-deliverable-review` 等）と [.claude/skills/_shared/review-record.schema.json](.claude/skills/_shared/review-record.schema.json) を参照（2026-09-14 追加）。
+
 ---
 
 ## `/review-implementation` を使う前に準備しておくと精度が上がるもの

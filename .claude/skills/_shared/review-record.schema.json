@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "review-record/v1",
+  "title": "Review Record v1",
+  "description": "調査・リサーチ系レビュー結果（観点別合否・出典URL・要約）を永続化するための共有スキーマ。harness-compliance-audit の review-result/v1（原則ID・blocker/major/minor判定用）とは別目的・別スキーマ。保存先は append_review_record.py 経由で .claude/review-history/<skill>/ 配下。",
+  "type": "object",
+  "required": ["schema", "skill", "reviewed_at", "target", "verdict", "summary"],
+  "properties": {
+    "schema": { "const": "review-record/v1" },
+    "skill": {
+      "type": "string",
+      "description": "このレコードを生成した skill 名（例: research-deliverable-review）"
+    },
+    "reviewed_at": {
+      "type": "string",
+      "description": "ISO8601 タイムスタンプ（例: 2026-09-14T03:00:00+09:00）"
+    },
+    "target": {
+      "type": "object",
+      "required": ["description"],
+      "properties": {
+        "description": { "type": "string", "description": "レビュー対象の説明（タイトル等）" },
+        "path_or_url": { "type": ["string", "null"], "description": "対象ファイルの絶対パス、または対象URL（無ければ null）" }
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "description": "そのskillが採用するverdict scale上の判定（例: S/A/B/C/D、PASS/FAIL、GO/HOLD/REJECT等）。scale自体は各skillのSoT（review-rubrics.yaml等）に従う"
+    },
+    "score": {
+      "type": ["number", "null"],
+      "description": "数値スコアを使うskillのみ設定。数値スコアを持たないverdict scaleではnull"
+    },
+    "criteria": {
+      "type": "array",
+      "description": "観点別の結果。観点が無い/該当しないレビューでは空配列を許容する（該当しない場合にrequiredにしない — 捏造誘発防止）",
+      "items": {
+        "type": "object",
+        "required": ["id", "result"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": ["string", "null"] },
+          "result": { "type": "string", "description": "例: pass/fail、または得点(文字列化して記録してもよい)" },
+          "summary": { "type": ["string", "null"] },
+          "source_urls": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "この観点の判定根拠となった出典URL・ファイルパス。無ければ空配列"
+          }
+        }
+      }
+    },
+    "sources_cited": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "レビュー全体を通じて引用された出典URL・ファイルパスの一覧。無ければ空配列"
+    },
+    "summary": {
+      "type": "string",
+      "description": "レビュー結果の要約（1〜数文）"
+    },
+    "prior_records_referenced": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "このレビューを行う前に list_review_records.py で参照した過去レコードのファイルパス一覧。参照しなかった/該当なしの場合は空配列"
+    }
+  }
+}
