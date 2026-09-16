@@ -1484,7 +1484,7 @@
       "id": "claude-md-response-rules",
       "kind": "claude-md-section",
       "provenance": "author-preference",
-      "summary": "CLAUDE.md『応答ルール』: 完了報告に編集ファイルの完全パスを明記・単純バグは直接修正・/compact 時に残す情報。",
+      "summary": "CLAUDE.md『応答ルール』: 完了報告に編集ファイルの完全パスを明記・単純バグは直接修正・/compact 時に残す情報・作業中に気づいた別件はその場で一言報告した上で `.tmp/discovery-log.md` へ即append(README『ハーネスを組むループ』の即時報告原則と整合、イテレーション完了/`/compact`前に drain)。",
       "applies_to": [
         "CLAUDE.md 応答ルール"
       ],
@@ -1496,6 +1496,11 @@
             "type": "grep",
             "path": "CLAUDE.md",
             "pattern": "完全パス"
+          },
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "discovery-log"
           }
         ],
         "when_unselected": []
