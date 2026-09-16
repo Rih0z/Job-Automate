@@ -47,7 +47,26 @@ else
 fi
 
 frontmatter() { awk 'NR==1{ if($0!="---") exit; next } /^---$/{ exit } { print }' "$1"; }
-fm_get() { frontmatter "$1" | grep -E "^$2:" | head -1 | sed -E "s/^$2:[[:space:]]*//; s/^\"(.*)\"$/\\1/"; }
+# key: の値を返す。単一行スカラー（例: name: foo, description: "text"）はそのまま返す。
+# YAML block scalar（description: | / |- / |+ / > / >- / >+）は、次の桁0キー（^[A-Za-z_-]+:）
+# または EOF まで続くインデント行を半角スペースで連結して1行文字列にする
+# （非対応: `|2` 等の数字付きインデント指定子。本リポジトリに実例なし）。
+fm_get() {
+  frontmatter "$1" | awk -v k="$2" '
+    inblock {
+      if ($0 ~ /^[A-Za-z_-]+:/) { exit }
+      line=$0; sub(/^[[:space:]]+/, "", line)
+      out = (out=="" ? line : out" "line)
+      next
+    }
+    $0 ~ "^"k":" {
+      rest=$0; sub("^"k":[[:space:]]*","",rest)
+      if (rest ~ /^[|>][+-]?[[:space:]]*$/) { inblock=1; next }
+      print rest; exit
+    }
+    END { if (inblock) print out }
+  ' | sed -E '1{s/^"(.*)"$/\1/}'
+}
 count_lines() { wc -l < "$1" | tr -d ' '; }
 charlen() { printf '%s' "$1" | wc -m | tr -d ' '; }
 
@@ -79,7 +98,7 @@ for f in "${TARGETS[@]}"; do
       [ "$name" = "$dir" ] && emit S02 PASS "$f" "name=$name" || emit S02 FAIL "$f" "name '$name' がディレクトリ名 '$dir' と不一致"
       echo "$name" | grep -qE '^[a-z0-9]+(-[a-z0-9]+)*$' && emit S03 PASS "$f" "kebab-case" || emit S03 FAIL "$f" "name が kebab-case でない"
       echo "$name" | grep -qiE 'claude|anthropic' && emit S04 FAIL "$f" "name に claude/anthropic を含む（予約語）" || emit S04 PASS "$f" "予約語なし"
-      d=$(fm_get "$f" description); w=$(frontmatter "$f" | awk '/^when_to_use:/{flag=1;next} flag&&/^[a-z_-]+:/{flag=0} flag{print}' | tr -d '\n')
+      d=$(fm_get "$f" description); w=$(fm_get "$f" when_to_use)
       if [ -z "$d" ]; then emit S05 FAIL "$f" "description が無い"; else
         len=$(charlen "$d$w"); [ "$len" -le 1536 ] && emit S05 PASS "$f" "description+when_to_use ${len} 文字" || emit S05 FAIL "$f" "description+when_to_use ${len} 文字（上限 1536）"
         echo "$d" | grep -qiE 'use when|とき|時に|場合|依頼|when ' && emit S06 PASS "$f" "いつ使うかの記述あり" || emit S06 WARN "$f" "description に『いつ使うか』が読み取れない"
