@@ -74,13 +74,13 @@ bash .setup-automate/.claude/skills/agent-harness-bootstrap/scripts/provenance-c
 
 ## このプロンプト集の設計思想
 
-### 作成プロンプトは短く、AIに自由を与える
+### 作成プロンプトの分量
 
 作成（実行）プロンプトを細かく指示しすぎると、**AIの可能性を狭めて結果を悪化させるリスクがある**。AIは日々進化しており、昨日まで必要だった細かな指示が、今日のモデルでは足かせになることがある。
 
 作成プロンプトでは、**ゴール・制約・品質基準を簡潔に示し、具体的な手順はAIに委ねる**。文字数を削って余白を残すことで、AIがあらゆるアプローチを探索できる状態を作る。これが最良の成果物を引き出す設計原則である。
 
-### レビュープロンプトこそが本質
+### レビュープロンプトの価値
 
 **本当に価値があるのはレビュープロンプトである。**
 
@@ -93,7 +93,7 @@ bash .setup-automate/.claude/skills/agent-harness-bootstrap/scripts/provenance-c
 
 AIがどれだけ進化しても、**「何を良しとするか」の基準を決めるのは人間**である。作成プロンプトはAIの進化に合わせて陳腐化するが、レビュープロンプトは人間の知見が詰まっているからこそ価値が持続する。
 
-### レビュープロンプトはチームで練り上げる
+### レビュープロンプトの運用（チームでの練り上げ）
 
 レビュープロンプトは個人で完結させず、**チームで共有し、議論し、継続的に改善する**べきものである。
 
@@ -109,7 +109,7 @@ AIがどれだけ進化しても、**「何を良しとするか」の基準を�
 
 成果物の種類（プレゼン／文書／コード等）ではなく、**業務ワークフロー単位**でプロンプトを束ねる考え方。1つの `workflows/<name>/` フォルダが1つの完結したハーネスであり、目的・作成プロンプト・レビュープロンプト・使用順序・関連する Claude Code Skills/Commands を1つの `README.md` に定義する。新しい業務が生まれたら、既存の分類に無理に押し込めず新しいワークフローフォルダを追加する。詳細・一覧・追加手順は [workflows/README.md](workflows/README.md) を参照。
 
-### ハーネスを組むループ — 作成プロンプトも人間は書かない
+### ハーネス自体の組み立て方
 
 このリポジトリ自身のharness（`CLAUDE.md`・`workflows/*/README.md`・Skills）を組み立てる時も、上記の設計思想をそのまま適用する。
 
@@ -169,6 +169,8 @@ AIがどれだけ進化しても、**「何を良しとするか」の基準を�
 | ops-management | `year-end-adjustment-csv` / `server-automation` / `server-init` / `server-windows-standard` / `review-ops` |
 | research-intelligence | `craft-beer-news-research` / `it-tech-news-research` / `general-news-research` / `investment-portfolio-analysis` / `seo-keyword-article-planner` / `blog-seo-growth-planner` / `research-deliverable-review` / `source-verification-scan`（非公開情報・捏造導線スキャン） / `staged-investigation-workflow`（ゲート付き段階的調査） |
 | software-development (design/mcp/その他) | `ui-design-guidelines` / `ibm-carbon-design-system` / `avoid-ai-generated-design-look` / `customer-persona-design` / `review-persona-analysis` / `playwright-mcp-e2e-testing` / `mcp-server-setup` / `model-cost-optimization-routing` / `three-agent-tdd-workflow`（3ターミナル分離型。単一セッション版は `single-session-tdd`） |
+
+上表は用途別の索引であり、移植時の採否を表すものではない。「汎用ガバナンス」のうち `agent-harness-bootstrap` / `harness-setup-review` / `harness-compliance-audit` / `skills-audit` / `skill-authoring-guide` / `review-gate` は公式由来として既定で移植されるが、それ以外（TDD運用の各流儀・`repo-hygiene-patrol` 等の著者嗜好、および business-planning / content-creation / research-intelligence / ops-management と software-development 内デザイン系の業務ドメインプロンプト）は既定では移植されない**サンプル**である。このリポジトリの実運用から生まれた実例として同梱しているだけで、`provenance.json` の由来台帳に従いユーザーが選んだものだけ採用される。汎用的な harness 基盤だけが目的なら無視してよい。
 
 既知の公式ベストプラクティス逸脱・改善バックログと再監査手順は [.claude/skills/_shared/compliance-roadmap.md](.claude/skills/_shared/compliance-roadmap.md) を参照。
 

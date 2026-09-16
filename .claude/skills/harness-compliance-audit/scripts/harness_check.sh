@@ -65,7 +65,7 @@ fm_get() {
       print rest; exit
     }
     END { if (inblock) print out }
-  ' | sed -E '1{s/^"(.*)"$/\1/}'
+  ' | sed -E '1 s/^"(.*)"$/\1/'
 }
 count_lines() { wc -l < "$1" | tr -d ' '; }
 charlen() { printf '%s' "$1" | wc -m | tr -d ' '; }
