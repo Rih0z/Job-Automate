@@ -132,6 +132,7 @@ Step 0 は省略しない。対話が取れない場合も `default_selection` �
 - **実行主体の使い分けの有無**（複数の AI エージェント / モデル格 / 人手を振り分ける運用があるか → あれば `execution-routing.md` 採用）
 - **独自 skill / MCP ツールの新規作成有無**（該当すれば「自作 skill / MCP ツールの品質基準の継承」を Step 7 レビュー観点に追加）
 - **複数 subagent / マルチエージェント構成の新規実装有無**（対象プロジェクトが複数 subagent を並列・逐次で起動するオーケストレーション機能を新規実装するか → あれば `agent-design.md` 採用。単一エージェント運用のみのプロジェクトでは非採用）
+- **changelog 運用を望むか**（既存の `CHANGELOG.md` があれば追記運用に合流、無ければ `changelog-practice` 採用時のみ新規作成）
 - **プロジェクトの目的**（何を解決しようとしているのか — 1〜2 文の課題定義）
 - **進捗状況**（現在のフェーズ・主要マイルストーン達成状況・既知の未完了領域 — README / 外部 Issue トラッカー / commit 履歴、`issue-lifecycle` 採用時は `issues/processing/*.md` からも、事実ベースで抽出）
 
@@ -224,6 +225,8 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 **3. `settings.json` の hooks セット + hook scripts**（採用時のみ） — 参考 6 hook 構成・settings.json 例（Windows PowerShell / Mac・Linux bash）・hook script（該当するもののみ生成）の役割と生成方法は **`hooks-reference.md` を参照**する。既存設定がある場合は `hooks` フィールドのみ追記（permissions / model 等は保持）。
 
 **4. `.claude/skills/_shared/harness-compliance-roadmap.md`**（**選択依存**: `harness-compliance-roadmap-seed`） — セットアップ完了直後に、対象自身の `.claude/harness-selection.json` を読み、`selected: true` の選択依存ファイル生成要素（`governance-multi-aspect` / `agent-design-*` 3件 / `issue-lifecycle` 系 3件 / `review-cycle-parameters` / `execution-routing` / `docs-management` 等）を1行ずつ拾い、各要素自身の `target_contract.when_selected` の grep パターンをそのまま「再検証すべき契約語句」列に転記した findings 表を生成する（新しい語彙は作らない）。冒頭に二段 cadence（軽量 `harness_check.sh` 全ファイルスイープ / 四半期 `skills-audit`・`harness-compliance-audit` フル判定）を明記し、末尾に setup 完了日 + `provenance-check.sh --target PASS`（Step 9）の1行を監査ログの初期エントリとして入れる。**生成先ファイル名は Job-Automate 自身の `.claude/skills/_shared/compliance-roadmap.md` とは意図的に別名にする**（同名だと非選択の `shared-compliance-roadmap` 要素側で C12 が「非選択要素の混入」を誤検知するため）。非採用時はファイルを作らない。
+
+**5. `CHANGELOG.md`**（**選択依存**: `changelog-practice`） — 対象の**リポジトリルート**に生成する（`docs/` を採用しているかに依存させない）。ヘッダー1行 + setup 完了日を種として1エントリ（例:「<日付>: harness セットアップ完了」）を記す。既存の `CHANGELOG.md` があれば新規作成せずそこへ追記する運用に合流する。非採用時はファイルを作らない。
 
 **ユーザーへの最終報告**:
 - **プロジェクト概要**（プロジェクト未読の第三者が読んでも理解できるレベルで書く。Step 1 で収集した事実のみを使い推測・捏造はしない）:

@@ -440,6 +440,37 @@
       }
     },
     {
+      "id": "changelog-practice",
+      "kind": "process",
+      "provenance": "author-preference",
+      "summary": "harness（CLAUDE.md / rules / skills）に変更を加えるたび、日付付きの短い1行エントリを CHANGELOG.md に追記する運用。本文中に「(2026-09-XX 追加)」のような日付注記を散在させる代わりに、変更履歴を1箇所に集約する。Anthropic 公式ベストプラクティスに直接の根拠はなく、著者の運用嗜好。",
+      "applies_to": [
+        "SKILL.md Step 8-4",
+        "operational-knowhow.md 変更履歴運用"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": "CHANGELOG.md"
+          },
+          {
+            "type": "grep",
+            "path": "CHANGELOG.md",
+            "pattern": "^#"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": "CHANGELOG.md"
+          }
+        ]
+      }
+    },
+    {
       "id": "hooks-promotion-judgement",
       "kind": "process",
       "provenance": "official-derived",
