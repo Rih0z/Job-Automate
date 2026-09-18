@@ -1,6 +1,6 @@
 {
   "schema": "harness-provenance/v1",
-  "updated": "2026-09-10",
+  "updated": "2026-09-17",
   "purpose": "このリポジトリの harness 要素（原則・rules・hooks・skills・CLAUDE.md セクション）ごとに『Anthropic 公式ベストプラクティス由来』か『著者の運用嗜好』かの由来（provenance）を記録する唯一の SoT。別プロジェクトへのセットアップ時に selection-flow.md がこのファイルを読み、由来別にユーザーへ提示して取捨選択させる。両者を混ぜたまま他環境へ持ち込まないための分離台帳。",
   "provenance_levels": {
     "official": {
@@ -1233,6 +1233,16 @@
         "workflows/software-development/skills-building-guide.md"
       ],
       "note": "各コマンドは files[] の評価基準ファイルを Read して使うため、同じ相対パスでコピーする（対象に workflows/software-development/ が生まれるが、台帳登録済みの付随物であり混入ではない）"
+    },
+    {
+      "id": "skill-debate-proposal",
+      "kind": "skill",
+      "provenance": "author-preference",
+      "summary": ".claude/skills/debate-proposal — 新規実装案・設計提案・方針転換案を採用前に、推進側/反対側/OSS前例調査+中立裁定の3本の独立エージェントに同じ一次資料だけを渡して議論させ、既存実装との重複・前提の事実検証・OSS前例・5観点で採否を裁定する。エージェント分離と proof-by-presence の原則は公式由来だが、3役の構成・5観点・数値照合の手順は著者の運用経験 (2026-09-17 ローカルAI基盤 repo での実例) に基づくため author-preference。",
+      "skills": ["debate-proposal"],
+      "rubric_items": [],
+      "depends_on": ["separate-agent-review-cycle"],
+      "note": "設計判断を伴う議論のため、対象プロジェクトで最上位モデルの subagent が使える場合はそれを指定する。実装は行わず裁定のみ (採用時は review-gate の設計工程へ接続)。"
     },
     {
       "id": "command-review-implementation",

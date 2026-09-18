@@ -9,6 +9,7 @@ Anthropic 公式ベストプラクティスへの逸脱・改善バックログ�
 ## 2026-09
 
 - **09-17**: README.md を `docs/` へ分割し、最小限のポインタに縮小。変更履歴の一元化（`changelog-practice`）を制定し、移植先プロジェクトにも `CHANGELOG.md` として伝播するようにした。
+- **09-17**: `debate-proposal` skill を追加（新規提案を推進側/反対側/OSS前例調査+中立裁定の3エージェントで議論・裁定。`author-preference`、`provenance.json` 登録、`agents.md` / `docs/skills-index.md` に追記）。
 - **09-16**: `harness_check.sh` の `fm_get()` に残っていた BSD sed 非互換（macOS で全 skills が誤って FAIL 判定される不具合）を修正。README.md に AI 文体レビュー（`stop-ai-slop-jp`）を適用し、業務ドメイン系 skills がサンプルである旨を明記。
 - **09-15**: `fm_get()` を YAML block scalar（`description: |` 等）対応に修正。
 - **09-11〜09-14**: `harness-setup-review` / `harness-compliance-audit` を追加。マルチエージェント設計原則（クラッシュ耐性 manifest・メタデータ保持・ツールスコープ限定）を移植先へ伝播する `agent-design.md` の仕組みを追加。移植先の継続的な実質再監査ロードマップ（`harness-compliance-roadmap-seed`）を追加。`.claude/commands/*` の3コマンドを `.claude/skills/*/SKILL.md` 形式へ移行。discovery-log の JSON 構造化・レビュー結果永続化機構（review-record）を追加。

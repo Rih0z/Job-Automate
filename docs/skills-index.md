@@ -11,6 +11,7 @@
 | `/review-implementation` | [.claude/skills/review-implementation/SKILL.md](../.claude/skills/review-implementation/SKILL.md) | 実装を5軸（テスト・正確性・マネタイズ・ペルソナ・UX）で100点満点評価 |
 | `/review-changes` | [.claude/skills/review-changes/SKILL.md](../.claude/skills/review-changes/SKILL.md) | 直近の変更差分を4軸（実装正確性・テストカバレッジ・テスト品質/戦略・追跡可能性）で100点満点評価。**別エージェントで実行**し客観性を確保 |
 | `/review-skill` | [.claude/skills/review-skill/SKILL.md](../.claude/skills/review-skill/SKILL.md) | 作成済みSkillsを構造化データ基準で5軸（構造・トリガー・命令品質・出力設計・実用性）で100点満点評価 |
+| `/debate-proposal` | [.claude/skills/debate-proposal/SKILL.md](../.claude/skills/debate-proposal/SKILL.md) | 新規実装案・設計提案・方針転換案を採用前に、推進側/反対側/OSS前例調査+中立裁定の3本の独立エージェントに同じ一次資料だけを渡して議論させ、既存実装との重複・前提の事実検証・OSS前例・5観点で採否を裁定。**別エージェントで実行**し実装は行わない |
 
 `/review-changes` は実装セッションとは別のエージェントを自動起動してレビューする（詳細は [agents.md](../agents.md)）。すべて `disable-model-invocation: true` のため自動発動せず、スラッシュコマンドとしてのみ起動する。
 
