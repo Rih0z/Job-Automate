@@ -1,6 +1,6 @@
 {
   "schema": "harness-provenance/v1",
-  "updated": "2026-09-17",
+  "updated": "2026-09-18",
   "purpose": "このリポジトリの harness 要素（原則・rules・hooks・skills・CLAUDE.md セクション）ごとに『Anthropic 公式ベストプラクティス由来』か『著者の運用嗜好』かの由来（provenance）を記録する唯一の SoT。別プロジェクトへのセットアップ時に selection-flow.md がこのファイルを読み、由来別にユーザーへ提示して取捨選択させる。両者を混ぜたまま他環境へ持ち込まないための分離台帳。",
   "provenance_levels": {
     "official": {
@@ -1651,6 +1651,17 @@
       ],
       "skills": [
         "workflow-coverage-and-structure"
+      ],
+      "rubric_items": [],
+      "depends_on": []
+    },
+    {
+      "id": "schema-nullable-fields",
+      "kind": "principle",
+      "provenance": "author-preference",
+      "summary": "構造化データ（JSON等）のスキーマは、値が不明な可能性のあるフィールドに null（または unknown）を許容する。null を禁止して必須項目にすると、AI は不明な値でも何らかの数値・文字列を埋めるしかなくなり、根拠のない値を正直な注記付きで返した場合でも、その注記は後工程（別プログラム・別AI・表計算ソフトへの取り込み）で失われ、あたかも実測値であるかのようなデータが一人歩きする。Anthropic 公式ドキュメントに直接の根拠はなく、著者が実機テスト（OneNEC記事 110_cc_best、2026-09-17実施：popularity_value を null 禁止にすると根拠のない推定値 3000/15000 が返る一方、null 許容時は正直に未取得と報告された）で確認した運用判断。",
+      "applies_to": [
+        "構造化データを扱う skill / rules 全般（出力スキーマ設計時）"
       ],
       "rubric_items": [],
       "depends_on": []
