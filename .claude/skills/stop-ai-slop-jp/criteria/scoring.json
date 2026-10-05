@@ -2,6 +2,7 @@
   "stage": "ja-writing-quality",
   "stage_name": "日本語文章のAI臭スコアリング",
   "pass_rule": { "min_total": 35, "max_total": 50 },
+  "scope_note": "採点範囲は文体のみ。事実主張の実測・突合はしない。範囲の定義は SKILL.md「採点範囲」節を参照",
   "criteria": [
     {
       "id": "stance",

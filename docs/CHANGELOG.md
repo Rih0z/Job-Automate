@@ -6,6 +6,10 @@ harness（`CLAUDE.md` / `.claude/rules/` / `.claude/skills/`）への変更を�
 
 Anthropic 公式ベストプラクティスへの逸脱・改善バックログの追跡は別ファイル → [.claude/skills/_shared/compliance-roadmap.md](../.claude/skills/_shared/compliance-roadmap.md)（CR-01〜）。
 
+## 2026-10
+
+- **10-04**: `stop-ai-slop-jp` に「採点範囲」節を追加（文体だけを採点し、事実の実測・突合は別エージェントのレビューへ分離。気づいた食い違いは範囲外メモで返す）。`issue-lifecycle-tracking` に、close 時の検証記録を条件で書き、件数・列挙・コマンド出力を記録ファイルへ置く指針を追加。
+
 ## 2026-09
 
 - **09-17**: README.md を `docs/` へ分割し、最小限のポインタに縮小。変更履歴の一元化（`changelog-practice`）を制定し、移植先プロジェクトにも `CHANGELOG.md` として伝播するようにした。
