@@ -8,6 +8,7 @@ Anthropic 公式ベストプラクティスへの逸脱・改善バックログ�
 
 ## 2026-10
 
+- **10-06**: `anthropic-best-practices.json` を公式 docs（best-practices・skills・hooks・hooks-guide・memory）の現行版で再取得し、取得日を 2026-10-06 に進めた。9 principle を更新した（CLAUDE.md の行数の目安 200 行未満、Stop hook の連続 block の上限、PreToolUse の permissionDecision、skills の frontmatter 項目など）。principle の数は 34 のまま
 - **10-04**: `stop-ai-slop-jp` に「採点範囲」節を追加（文体だけを採点し、事実の実測・突合は別エージェントのレビューへ分離。気づいた食い違いは範囲外メモで返す）。`issue-lifecycle-tracking` に、close 時の検証記録を条件で書き、件数・列挙・コマンド出力を記録ファイルへ置く指針を追加。
 
 ## 2026-09

@@ -1,6 +1,6 @@
 {
   "schema": "anthropic-best-practices/v1",
-  "fetched": "2026-09-04",
+  "fetched": "2026-10-06",
   "max_age_days": 30,
   "policy": "Anthropic 公式ドキュメントの原則を、各 skill が共通に参照できる 1 つの構造化データとして保持する。statement は原文の転記でなく要約（quote は判定に使う短い原文のみ）。日付と再取得条件を持つキャッシュであり、焼き込み禁止（日付・再取得条件の無い転記）には当たらない。判定に使う skill は fetched を確認し、refetch_when に該当すれば各 source の url を WebFetch して現行版と突合し、差分があれば principle を更新して fetched を進める。公式に無い著者の運用判断は本ファイルに入れない（それらは agent-harness-bootstrap/provenance.json の author-preference 要素）。",
   "refetch_when": [
@@ -12,24 +12,26 @@
   "sources": {
     "best-practices": {
       "url": "https://code.claude.com/docs/en/best-practices",
-      "fetched": "2026-09-04"
+      "fetched": "2026-10-06"
     },
     "skills": {
       "url": "https://code.claude.com/docs/en/skills",
-      "fetched": "2026-09-04"
+      "fetched": "2026-10-06",
+      "note": "2026-10-06 取得（全文を 3 回に分けて読了）。WebFetch は要約を経由するため、quote の逐語は厳密には保証できない"
     },
     "hooks": {
       "url": "https://code.claude.com/docs/en/hooks",
-      "fetched": "2026-09-04"
+      "fetched": "2026-10-06",
+      "note": "2026-10-06 取得。ページ後半約 5 万字は未読で、hooks ページ由来の quote は逐語を保証できない（hooks-guide は全文を逐語確認）"
     },
     "hooks-guide": {
       "url": "https://code.claude.com/docs/en/hooks-guide",
-      "fetched": "2026-09-04"
+      "fetched": "2026-10-06"
     },
     "memory": {
       "url": "https://code.claude.com/docs/en/memory",
-      "fetched": null,
-      "note": "CLAUDE.md の配置場所と @import 規則の正本。未取得。claude-md.imports の裏取り時に取得する"
+      "fetched": "2026-10-06",
+      "note": "CLAUDE.md の配置場所と @import 規則、サイズの目安（200 行未満）の正本。2026-10-06 に全文取得し、claude-md.imports と claude-md.concise-no-numeric-threshold を裏取り済み"
     },
     "skills-guide-pdf": {
       "title": "The Complete Guide to Building Skills for Claude (Anthropic, PDF)",
@@ -81,9 +83,9 @@
       "category": "claude-md",
       "source": "best-practices",
       "section": "Write an effective CLAUDE.md",
-      "statement": "短く人間が読める形に保つ。必須のフォーマットは無く、行数の数値閾値も公式には無い。ルールを守らない症状が出たら『長すぎてルールが埋もれている』と疑い剪定する。",
+      "statement": "短く人間が読める形に保つ。best-practices は『必須のフォーマットは無いが短く読みやすく』と述べ、memory ページは『CLAUDE.md 1 ファイルあたり 200 行未満を目安にする。長いと context を消費し遵守率が下がる』という数値の目安を示している（強制ゲートではなく target）。ルールを守らない症状は『長すぎてルールが埋もれている』兆候。部分的にしか要らない指示は path-scoped rules へ移す。なお imports は整理に役立つが context コストは減らさない（import 先も起動時に load される）。",
       "quote": "keep it short and human-readable",
-      "check": "行数による出力拒否ゲートを設けない。剪定判断は『ルールが埋もれる兆候』を主基準にし、数値（例: 100 行）は参考値に留める",
+      "check": "行数による出力拒否ゲートを設けない。公式の目安（target）は 1 ファイル 200 行未満。剪定判断は『ルールが埋もれる兆候』を主基準にし、数値は目安に留める",
       "verified": true,
       "used_by": [
         "agent-harness-bootstrap",
@@ -200,7 +202,7 @@
       "source": "best-practices",
       "section": "Give Claude a way to verify its work",
       "statement": "Stop hook でチェックスクリプトを走らせ、PASS するまでターンの終了を block できる（決定的なゲート）。連続 8 回 block すると Claude Code が hook を上書きして終了する。",
-      "quote": "Claude Code overrides the hook and ends the turn after 8 consecutive blocks.",
+      "quote": "a Stop hook runs your check as a script and blocks the turn from ending until it passes.",
       "check": "Stop hook で強制するゲートは自前の上限（本リポジトリは 3 回）を持ち、上限到達時はユーザーに未検証である旨を返す",
       "verified": true,
       "used_by": [
@@ -214,7 +216,7 @@
       "category": "hooks",
       "source": "hooks-guide",
       "section": "Stop hook hits the block cap",
-      "statement": "Stop hook は入力 JSON の stop_hook_active（既に自分の block で継続中か）を読んで無限ループを避ける。公式例は true なら early exit。本リポジトリの hook-stop-setup-gate.sh は同フラグで再 block 回数を数え 3 回で許可する（有界化という趣旨は同じ・引き締めは著者判断）。",
+      "statement": "Stop hook は入力 JSON の stop_hook_active を読み、true なら early exit して無限ループを避ける（公式例）。Claude Code は Stop hook が、Claude の tool call を挟まず 8 回連続で block した後に上書きして止める。8 回を超える収束が必要なら環境変数 CLAUDE_CODE_STOP_HOOK_BLOCK_CAP で上限を上げられる。本リポジトリの hook-stop-setup-gate.sh は同フラグで再 block 回数を数え 3 回で許可する（有界化の趣旨は同じ・引き締めは著者判断）。",
       "quote": "stop_hook_active",
       "check": "Stop hook スクリプトが stop_hook_active を parse し、無限に block しない",
       "verified": true,
@@ -228,9 +230,9 @@
       "category": "hooks",
       "source": "hooks-guide",
       "section": "Hook output",
-      "statement": "Stop と PostToolUse は stdout の JSON でトップレベル {\"decision\": \"block\", \"reason\": \"...\"} を返して block する。exit 2 + stderr で block する方式と exit 0 + JSON の方式は 1 つの hook でどちらか一方に揃える。stderr は JSON を汚さないので debug ログ用に使う。",
+      "statement": "Stop と PostToolUse は stdout の JSON でトップレベル {\"decision\": \"block\", \"reason\": \"...\"} を返して block する。exit 2 + stderr で block する方式と exit 0 + JSON の方式は 1 つの hook でどちらか一方を選ぶ。stderr は debug ログにも使える。なお Stop で exit 2 の stderr も Claude に届く。PostToolUse は block 不可で、exit 2 は stderr を Claude に見せるだけ（ツールは実行済み）。",
       "quote": "{\"decision\": \"block\", \"reason\": \"Not allowed\"}",
-      "check": "Stop hook の block は JSON decision で返している（exit 2 の stderr は Stop ではユーザー/デバッグ向けで Claude に届く保証が無い）",
+      "check": "Stop hook の block は JSON decision（または exit 2 + stderr のどちらか一方）で返し、1 つの hook で方式を混ぜていない",
       "verified": true,
       "used_by": [
         "agent-harness-bootstrap",
@@ -242,7 +244,7 @@
       "category": "hooks",
       "source": "hooks-guide",
       "section": "Hook output",
-      "statement": "PreToolUse は exit 2 でツール呼び出しを block し、stderr が Claude へのフィードバックになる。構造化制御は JSON の permissionDecision（allow / deny）を使う。",
+      "statement": "PreToolUse は exit 2 でツール呼び出しを block し、stderr が Claude へのフィードバックになる。構造化制御は hookSpecificOutput.permissionDecision（allow / deny / ask / defer。defer は -p の非対話モードで使う）を使う。複数 hook の結果は最も制限の強い順（deny, defer, ask, allow）で決まる。",
       "quote": "exit 2 = block the action",
       "check": "reject 分岐が実際に exit 2（または deny の JSON）に到達している（ログ出力だけで素通りしていない）",
       "verified": true,
@@ -271,7 +273,7 @@
       "source": "hooks",
       "section": "SessionStart",
       "statement": "SessionStart は exit 0 の plain-text stdout がそのまま Claude の context に入る。matcher は startup / resume / clear / compact / fork。",
-      "quote": "startup|resume|clear|compact",
+      "quote": "Claude Code adds stdout it treats as plain text to Claude's context.",
       "check": "SessionStart hook は本文を注入せずポインタと verdict のみを stdout に出す（context 汚染防止は著者判断、stdout が context に入る事実は公式）",
       "verified": true,
       "used_by": [
@@ -284,7 +286,7 @@
       "category": "hooks",
       "source": "hooks",
       "section": "Configuration Locations",
-      "statement": "hooks は ~/.claude/settings.json（全プロジェクト・非共有）/ .claude/settings.json（プロジェクト・コミットして共有）/ .claude/settings.local.json（非共有）/ managed policy / plugin hooks.json / skill・subagent frontmatter に置ける。$CLAUDE_PROJECT_DIR はセッション開始時のプロジェクトルート。",
+      "statement": "hooks は ~/.claude/settings.json（全プロジェクト・非共有）/ .claude/settings.json（プロジェクト・コミットして共有可）/ .claude/settings.local.json（非共有・gitignore）/ managed policy settings（組織全体）/ plugin の hooks/hooks.json / skill・subagent の frontmatter に置ける。${CLAUDE_PROJECT_DIR} はセッション開始時のプロジェクトルートを指し、worktree に入っても動かない。",
       "quote": "$CLAUDE_PROJECT_DIR",
       "check": "共有したい hook は .claude/settings.json にあり、スクリプトは $CLAUDE_PROJECT_DIR 基準の相対パスで呼ばれている",
       "verified": true,
@@ -314,7 +316,7 @@
       "category": "skills",
       "source": "skills",
       "section": "Frontmatter reference",
-      "statement": "全フィールド任意。description のみ推奨（省略時は本文の最初の段落）。name は表示名のみ（ディレクトリ名がコマンド）。when_to_use は description に追記され合計 1,536 文字の上限に算入。argument-hint / disable-model-invocation / user-invocable / allowed-tools / disallowed-tools / model / context: fork（+ agent）/ hooks / paths / shell / metadata（自由な map。Claude Code は解釈しない。予約 key と同名を使わない）/ license / compatibility。",
+      "statement": "全フィールド任意。description のみ推奨（省略時は本文の最初の空でない行）。name は / メニューに出るコマンド名で、省略時はディレクトリ名（name と入力名の関係は公式『How a skill gets its command name』節を参照）。when_to_use は description に追記され、description と合わせて 1,536 文字で切り詰められる（上限は設定 skillListingMaxDescChars で変更可）。項目: name / description / when_to_use / argument-hint / arguments / disable-model-invocation / user-invocable / allowed-tools / disallowed-tools / model / effort / context / agent / background / hooks / paths / shell / metadata / license / compatibility。metadata は自由な map（Claude Code は解釈せず、map 以外の値は捨てる。paths 等の予約名を key に使わない）。",
       "quote": "1,536-character cap",
       "check": "description + when_to_use が 1,536 文字以内。metadata は map。paths 等の予約 key を metadata 配下に再利用していない（skills-audit 2）",
       "verified": true,
@@ -407,8 +409,8 @@
       "category": "skills",
       "source": "skills",
       "section": "Where skills live",
-      "statement": "起動ディレクトリから repo ルートまでの .claude/skills/ が起動時に読まれ、下位ディレクトリの .claude/skills/ はそのディレクトリのファイルを最初に読んだ時に読まれる。SKILL.md の変更は同セッション内で反映される。",
-      "quote": "nested `.claude/skills/`",
+      "statement": "下位ディレクトリの .claude/skills/ は起動時には読まれず、そのディレクトリのファイルを最初に読む・編集した時に読まれる。skill の追加・編集・削除は同セッション内で検知される（検知対象は SKILL.md の本文のみ。セッション開始後に新規作成したトップレベルの skills ディレクトリは /reload-skills が必要）。",
+      "quote": "They load the first time Claude reads or edits a file in that subdirectory and stay available for the rest of the session.",
       "check": "対象プロジェクトの skills はルートの .claude/skills/ に置く（monorepo の package 固有 skill のみ nested）",
       "verified": true,
       "used_by": [
