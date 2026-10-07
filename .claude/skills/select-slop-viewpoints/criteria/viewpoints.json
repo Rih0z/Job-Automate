@@ -1,0 +1,202 @@
+{
+  "schema": "slop-viewpoints/v1",
+  "updated": "2026-10-07",
+  "description": "stop-ai-slop-jp の観点（コアルール 14 項目・採点 5 軸・blocker）の目録。規則の本文は stop-ai-slop-jp/SKILL.md が正本で、ここへは見出し語と 1〜2 文の要約だけを持つ。軸の質問文と anchor は stop-ai-slop-jp/criteria/scoring.json（と criteria/axes.json）が正本で、書き写さない。資料の種類ごとにどの観点を使うかは doc-types.json が決める。",
+  "limits": {
+    "treatments": [
+      "apply",
+      "skip",
+      "modify",
+      "conditional"
+    ],
+    "max_skip": 5,
+    "never_skip": [
+      "R01",
+      "R11",
+      "R12",
+      "R14"
+    ],
+    "never_skip_reason": "false agency、偏愛語・必殺技造語、横文字メタファー、記号のアーティファクトは、資料の種類によらず読み手の信頼を下げる。種類ごとに外してよい規則は、構造や口調が種類の約束事と食い違うものに限る。"
+  },
+  "rules": [
+    {
+      "id": "R01",
+      "number": 1,
+      "group": "A 主体と立場",
+      "name": "false agency を潰す",
+      "source_title": "false agencyを潰す",
+      "summary": "モノに人間の動詞をさせない。誰が何をしたかを名指しで書く。"
+    },
+    {
+      "id": "R02",
+      "number": 2,
+      "group": "A 主体と立場",
+      "name": "反証可能な主張を持つ",
+      "source_title": "反証可能な主張を持つ",
+      "summary": "「重要だ」「本質的だ」で終わらず、誰かが反論できる具体に降りる。降りられない文は削る。"
+    },
+    {
+      "id": "R03",
+      "number": 3,
+      "group": "A 主体と立場",
+      "name": "強度を一段下げ、中間温度を混ぜる",
+      "source_title": "強度を一段下げ、中間温度を混ぜる",
+      "summary": "全部を最上級にせず、「悪くない」「まあまあ」のような中間の温度を混ぜる。"
+    },
+    {
+      "id": "R04",
+      "number": 4,
+      "group": "A 主体と立場",
+      "name": "断定を押し付けず、伝聞を残す",
+      "source_title": "断定を押し付けず、伝聞を残す",
+      "summary": "調べた事実には伝聞（らしい、そうです）を混ぜ、辞書のような断定型を避ける。"
+    },
+    {
+      "id": "R05",
+      "number": 5,
+      "group": "A 主体と立場",
+      "name": "遠くから語らない",
+      "source_title": "遠くから語らない",
+      "summary": "「人々は」「現代社会において」をやめ、「自分は」「あなたは」で書く。"
+    },
+    {
+      "id": "R06",
+      "number": 6,
+      "group": "A 主体と立場",
+      "name": "両論併記を捨て、毒を許す",
+      "source_title": "両論併記を捨て、毒を許す",
+      "summary": "全方位肯定の両論併記で判断を放棄せず、自分が選んだもの・選ばなかったものを書く。"
+    },
+    {
+      "id": "R07",
+      "number": 7,
+      "group": "B 構造",
+      "name": "命題型 H2 を避ける",
+      "source_title": "命題型H2を避ける",
+      "summary": "見出しは主題の名詞句で立て、「○○は△△だ」型で各節を小さな講演にしない。"
+    },
+    {
+      "id": "R08",
+      "number": 8,
+      "group": "B 構造",
+      "name": "二項対比を直接 Y に変える",
+      "source_title": "二項対比を直接Yに変える",
+      "summary": "「AではなくBだ」を「Bだ」と直接書く。"
+    },
+    {
+      "id": "R09",
+      "number": 9,
+      "group": "B 構造",
+      "name": "ムラを入れる",
+      "source_title": "ムラを入れる",
+      "summary": "段落の長さ・トーン・結論の有無・文末を意図的にバラけさせる。"
+    },
+    {
+      "id": "R10",
+      "number": 10,
+      "group": "B 構造",
+      "name": "3 項目並列を疑う",
+      "source_title": "3項目並列を疑う",
+      "summary": "「3 つのポイント」を 2 つか 1 つに削れないか考える。"
+    },
+    {
+      "id": "R11",
+      "number": 11,
+      "group": "C 語彙と記号",
+      "name": "偏愛語・必殺技造語・副詞を撒かない",
+      "source_title": "偏愛語・必殺技造語・副詞を撒かない",
+      "summary": "AI が好む語と、個人の話を膨らませる造語、強調の副詞の重ねを避ける。"
+    },
+    {
+      "id": "R12",
+      "number": 12,
+      "group": "C 語彙と記号",
+      "name": "横文字メタファーを日本語に戻す",
+      "source_title": "横文字メタファーを日本語に戻す",
+      "summary": "「思考の OS をアップデート」のような横文字の比喩を、普通の日本語に戻す。"
+    },
+    {
+      "id": "R13",
+      "number": 13,
+      "group": "C 語彙と記号",
+      "name": "形容詞や心情に「」を使わない",
+      "source_title": "形容詞や心情に「」を使わない",
+      "summary": "固有名詞と直接引用以外で「」を使わない。"
+    },
+    {
+      "id": "R14",
+      "number": 14,
+      "group": "C 語彙と記号",
+      "name": "記号のアーティファクトを潰す",
+      "source_title": "記号のアーティファクトを潰す",
+      "summary": "全角ダッシュ、中黒の 3 項目並列、強調記号の残骸、装飾絵文字の等間隔の撒布を直す。"
+    }
+  ],
+  "axes": [
+    {
+      "id": "stance",
+      "name": "立場",
+      "source": "stop-ai-slop-jp/criteria/scoring.json の criteria"
+    },
+    {
+      "id": "rhythm",
+      "name": "リズム",
+      "source": "stop-ai-slop-jp/criteria/scoring.json の criteria"
+    },
+    {
+      "id": "agency",
+      "name": "主体性",
+      "source": "stop-ai-slop-jp/criteria/scoring.json の criteria"
+    },
+    {
+      "id": "concreteness",
+      "name": "具体性",
+      "source": "stop-ai-slop-jp/criteria/scoring.json の criteria"
+    },
+    {
+      "id": "reduction",
+      "name": "削減",
+      "source": "stop-ai-slop-jp/criteria/scoring.json の criteria"
+    },
+    {
+      "id": "attribution",
+      "name": "帰属と限定",
+      "source": "select-slop-viewpoints/criteria/axes.json（stance の置き換え。報告・記録型の文書向け）"
+    }
+  ],
+  "blockers": [
+    {
+      "id": "misattribution",
+      "name": "帰属誤り",
+      "check": "ある方針・決定を、実際の発案者・決定者ではない第三者が「指定した」「求めた」等と書いていないか。読み手を勝手な肩書・立場で呼んでいないか。"
+    },
+    {
+      "id": "audience_underassertion",
+      "name": "属性の過小断定",
+      "check": "ツール・製品・サービスの対象者を、提供元の位置づけだけから「〜専用」「〜だけのもの」と狭く断定していないか。"
+    },
+    {
+      "id": "instruction_echo",
+      "name": "指示文のメモ書き化",
+      "check": "依頼者の指示にある言い回し、作業中の呼び名、生成物の内部の語が、読み手向けの語に直されないまま本文に出ていないか。例: 見出しや語句に付いた括弧書きのラベル、画面の案内だけで文が成り立つ注記、作業用のファイル名。生成 script の固定の見出し・固定文も対象に含める。見つけたら、読み手向けの語に直すか、コピーされない場所へ移すよう求める。",
+      "added_by_this_skill": true,
+      "note": "stop-ai-slop-jp の scoring.json の汎用版には無く、この skill が追加した blocker。生成物や AI が書いた文章で、依頼文の言い回しや作業用の語が漏れる誤りを、全ての種類で点に関わらず是正するために置く。"
+    }
+  ],
+  "procedure": {
+    "verdict_rule": {
+      "runs": 3,
+      "independent": true,
+      "method": "median",
+      "pass_if": "3 回の合計点の中央値が pass_rule.min_total 以上",
+      "on_fail": "中央値が不合格なら不合格として扱い、直して再採点する。同じ指摘が続いたら、採点基準と生成の仕方の食い違いを疑い、根拠を付けて構造化データ側を直す。",
+      "note": "同じ文書でも採点者により合計点がぶれるため、1 回の点で合否を決めない。合格点は変えない。"
+    },
+    "scoring_scope": [
+      "採点するのは文体（軸）だけ。本文の事実主張（件数、コマンドの結果、他文書との一致）を実行・実測して突合しない。",
+      "実物と照らさないと確かめられない食い違いに気づいたら、点と合否に入れず、結果の末尾に「範囲外メモ」として逐語で書く。",
+      "採点基準と採点対象の条件が矛盾する時は、矛盾を点に含めず範囲外メモで返す。基準を緩めるだけで合格させない（stop-ai-slop-jp/criteria/scoring.json に conflict_policy があればそれに従い、無ければこの項を最低限の規定とする）。"
+    ],
+    "rebuttal": "反論の手順は、stop-ai-slop-jp/criteria/scoring.json に profiles.<profile>.rebuttal_rule があればそれに従う。無ければ反論は受け付けない。"
+  }
+}
