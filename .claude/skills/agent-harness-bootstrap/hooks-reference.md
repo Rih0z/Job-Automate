@@ -26,12 +26,12 @@ SKILL.md 本体「独自運用: 規約の hooks 化判断」と生成手順 Step
 
 | イベント | 用途 | reject/notify |
 |---|---|---|
-| `SessionStart` | **ポインタと verdict のみ注入**: `.tmp/handoffs/` 最新の**ファイル名** + `issues/processing/*.md` 全 scan（タイトル + handoff ファイル名）+ 並走 4 軸 **verdict**（clean / 痕跡あり）。**本文は注入しない**（汚染防止）。再開対象は user 選択後にその 1 件のみ Read | notify |
+| `SessionStart` | **ポインタと verdict のみ注入**: `.tmp/handoffs/` 最新の**ファイル名** + `issues/processing/*.md` 全 scan（タイトル + handoff ファイル名）+ 並走 4 軸 **verdict**（clean / 痕跡あり）+ 作業中マーカー（`work_status: in_progress`）が閾値（既定 4h）超で残る handoff の**ファイル名**（中断の疑い）。**本文は注入しない**（汚染防止）。再開対象は user 選択後にその 1 件のみ Read | notify |
 | `UserPromptSubmit` | `docs/*.md` 直近 3 ファイルを候補として注入し関連 docs 宣言を促す | notify |
 | `PreToolUse(Write)` | `.tmp/handoffs/` への Write 時に命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` を検証 | reject (`exit 2`) |
 | `PostToolUse(Edit\|Write\|MultiEdit)` | CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 更新時に公式 WebFetch + 別エージェントレビューを促す | notify (additionalContext JSON) |
 | `PostToolUse(Edit\|Write\|MultiEdit)`（派生成果物の自動再生成） | 監視対象ファイル（例: CLAUDE.md）の編集を検知し、そこから派生する成果物（生成 README / 目次 / 索引等）を **advisory reminder ではなく hook 自身が再生成する**。複数 generator を実行する場合は各 exit code を実行直後に退避し OR 結合する（後発の成功が先発の失敗を隠さないようにする） | notify（再生成結果 or 失敗詳細を additionalContext に含める） |
-| `Stop` | 最新 handoff が 1 時間以上未更新なら更新リマインド | notify |
+| `Stop` | 最新 handoff が 1 時間以上未更新なら更新リマインド。未 commit の handoff があれば終了を block して commit + push を促す | notify / block |
 
 ## 外部規約のキャッシュ運用（任意・PostToolUse レビュー系 hook 向け）
 
@@ -100,6 +100,6 @@ Mac / Linux（bash）の例 — 各 command を bash script 呼び出しに置�
 - `hook-pre-tool-use-handoff` — handoff 命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` 検証、違反なら `exit 2` + stderr で reject
 - `hook-post-tool-use` — CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 編集時に `hookSpecificOutput.additionalContext` JSON で公式 WebFetch レビュー reminder
 - `hook-post-tool-use-regen`（**任意**・監視対象ファイルから派生成果物を生成している時のみ） — 監視対象の編集を検知し派生成果物を実際に再生成、各 generator の exit code を OR 結合して失敗を隠さず報告
-- `hook-stop` — 1 時間以上未更新 handoff があれば更新リマインド
+- `hook-stop` — 1 時間以上未更新 handoff があれば更新リマインド。`git status --porcelain --untracked-files=all -- .tmp/handoffs` に出る未 commit の handoff があれば block
 
 各 script 冒頭で標準入力の JSON から `tool_name` / `tool_input.file_path` を取り、エラー抑制は個別コマンド単位で局所化する（PowerShell: `[Console]::In.ReadToEnd() | ConvertFrom-Json` + `-ErrorAction SilentlyContinue` / bash: `input=$(cat)` + `jq` または `python3` で parse + 各コマンド `2>/dev/null`）。
