@@ -59,7 +59,7 @@ metadata:
 - 合格点は `scoring.json` の `pass_rule.min_total` と同値で、種類ごとに変えない。
 - `agency`・`concreteness` は読み替えない規定（`stop-ai-slop-jp` の G3）がある repo では、その軸を調整する種類を `scoring.json` の G3 の `exceptions` に根拠付きで残す。残っていなければ検査が落とす。
 - 種類が `inherit_profile` を持つ時は、その profile の `guards`・`finding_labels`・`scope`・`rebuttal_rule` が出力 JSON の `inherited_profile` に入り、採点者に渡す JSON だけで足りる。
-- blocker は全ての種類で残る。帰属誤り・属性の過小断定は `stop-ai-slop-jp` の定義で、指示文のメモ書き化（`instruction_echo`。依頼文の言い回しや作業用の語の漏れ）はこの skill が追加した blocker。
+- blocker は全ての種類で残る。帰属誤り・属性の過小断定は `stop-ai-slop-jp` の定義で、指示文のメモ書き化（`instruction_echo`。依頼文の言い回しや作業用の語の漏れ）はこの skill が追加した blocker。意味の一意性（`single_meaning`。文の読み方が 2 通りに割れて、読み手が別の事実に取る誤り）は `stop-ai-slop-jp` の `blocker_checks` と同じ定義。
 - `skip` にできるのは最大 5 規則。false agency・偏愛語・横文字メタファー・記号のアーティファクト（R01・R11・R12・R14）は、`skip` にも `modify`・`conditional` にもできない（`apply` のみ）。基本の 5 軸を別の軸に置き換える時は、根拠（`axis_replacements`）が要る。
 - 種類の調整は根拠と反例が無ければ検査が落とす。基準を緩めるだけで合格させない（`scoring.json` に `conflict_policy` があればそれに従い、無ければ `procedure.scoring_scope` の 3 項目目に従う）。
 
