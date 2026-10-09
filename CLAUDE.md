@@ -34,7 +34,7 @@ Claude Code でプロンプトを開発・改善するときのガイドです�
   `{"ts": "<ISO8601日時>", "summary": "<気づいた内容を1文で>", "location": "<手がかりとなるファイル:行 または文脈>", "status": "queued"}`
 - **位置づけ**: 正式なタスク化・修正の代わりではなく、人間が直すかどうか・いつ直すかを判断するまでの一時的な備忘バッファ。
 - **見返し（drain）のタイミング**: イテレーション完了時、`/compact` 実行前、**引継ぎ資料 (`.tmp/handoffs/`) を作成する時点を含む**。
-- **drain の判断**: `status` を `"done"`（対応済み）に更新するか、本リポジトリの Issue 相当物である `.claude/skills/_shared/compliance-roadmap.md` の CR-xx backlog へ新規行として切り出し `status` を `"issued"` にした上で発行した CR-id を併記するかを決めてから当該行を消す（残したまま「完了」と報告しない）。
+- **drain の判断**: `status` を `"done"`（対応済み）に更新するか、本リポジトリの Issue 相当物である `.claude/skills/_shared/compliance-status.json` の `findings` へ CR-xx として追加し `status` を `"issued"` にした上で発行した CR-id を併記するかを決めてから当該行を消す（残したまま「完了」と報告しない）。
 - **引継ぎ資料作成時の gate**: 作成前に `status: "queued"` のまま残っているエントリが無いことを確認する（残っていれば先に `"done"`/`"issued"` のいずれかへ倒してから作成する）。
 
 コード・スクリプトを書く・直す作業は **設計 → テスト設計 → テスト実装(Red) → 実装(Green→Refactor)** の順で行う（テスト設計 = 検証ケース・テスト名・期待値の導出・自動化しない範囲を決める工程。成果物は設計書の「テスト戦略」の節）。各工程は別エージェントのレビューで終え、PASS するまで次工程に着手しない（設計とテスト設計は 1 回のゲートでまとめて審査する。テストを書く前に実装コードを書かない・Red を確認していないテストは後付け扱い・自己レビューで通過扱いにしない）。手順とテスト設計の中身は [single-session-tdd](.claude/skills/single-session-tdd/SKILL.md) skill、工程別の観点は [review-gate](.claude/skills/review-gate/SKILL.md) skill の `criteria/*.json`、3ターミナル分離で回す場合は [three-agent-tdd-workflow](.claude/skills/three-agent-tdd-workflow/SKILL.md) skill。
@@ -47,7 +47,7 @@ Claude Code でプロンプトを開発・改善するときのガイドです�
 
 Claude Code 環境で使えるレビュー系コマンド／Skills の全一覧（用途・評価軸）は [README.md](README.md)「Claude Code スラッシュコマンド／Skills」節に、エージェント分離の起動手順は [agents.md](agents.md) に集約されている（本ファイルでは重複記載しない）。個別の一覧は `.claude/skills/` を `ls` するか `/skills` コマンドで確認。Claude Code 以外（Claude.ai 等）で使う場合の元プロンプト直接貼り付けの対応表は README.md「レビュープロンプトの違い」表を参照。
 
-既知の公式ベストプラクティス逸脱・改善バックログと再監査手順は [.claude/skills/_shared/compliance-roadmap.md](.claude/skills/_shared/compliance-roadmap.md) を参照。
+既知の公式ベストプラクティス逸脱・改善バックログ（公式原則ごとの採用状況と CR-xx）は構造化データ [.claude/skills/_shared/compliance-status.json](.claude/skills/_shared/compliance-status.json)、再監査手順は [.claude/skills/_shared/compliance-roadmap.md](.claude/skills/_shared/compliance-roadmap.md) を参照。
 
 調査系レビュー結果の構造化永続化（観点別合否・出典・要約をJSONで保存し後から見返す仕組み）は、対象 skill 自身（`research-deliverable-review` 等）と [.claude/skills/_shared/review-record.schema.json](.claude/skills/_shared/review-record.schema.json) を参照（2026-09-14 追加）。
 
@@ -92,15 +92,13 @@ Claude Code 環境で使えるレビュー系コマンド／Skills の全一覧�
 
 **発火条件 (2026-09-01 拡張)**: 「このリポジトリを使って `<対象>` をセットアップして」のような精密な言い回しに限定しない。ただし**必須条件は「このリポジトリ以外の別ディレクトリ/別リポジトリが対象と明確に読み取れること」**（対象パスの明示、「別プロジェクト」「他のリポジトリ」等の明示、のいずれか）。この条件を満たす依頼は表現を問わず本節を適用する: 「親ディレクトリ（`..`）をセットアップして」（推奨配置: このリポジトリが対象の `.setup-automate/` に clone されている場合。対象 = `..` の絶対パス）「ここの仕組みを別プロジェクトにも入れて」「このリポジトリの CLAUDE.md/skills/rules を〈他リポジトリ〉に移植して」「clone した内容を〈対象パス〉で使えるようにして」等。**対象が明示されない「セットアップして」「使えるようにして」は本節を発火させない**（このリポジトリ自身の中で作業したいだけの依頼と区別できないため。この場合は通常の応答＝リポジトリ内での作業支援として扱う）。対象は明示されたが依頼が曖昧な場合のみ「対象ディレクトリはどこか」を確認する（適用するかどうか自体は聞き返さない）。
 
-このリポジトリには **Anthropic 公式ベストプラクティス由来の要素**と**著者の運用嗜好**（issue フォルダ管理・handoff 規約・並走 4 軸 recheck・SessionStart hook 等）が同居している。別プロジェクトへ移す時に両者を混ぜたまま持ち込まないため、要素ごとの由来は `.claude/skills/agent-harness-bootstrap/provenance.json` を唯一の SoT として管理し（各 SKILL.md の frontmatter `metadata.provenance` は台帳の写し）、以下の手順で「何を取り込み、何を取り込まないか」を**ユーザーが決める**:
+このリポジトリには **Anthropic 公式ベストプラクティス由来の要素**と**著者の運用嗜好**（issue フォルダ管理・handoff 規約・並走 4 軸 recheck・SessionStart hook 等）が同居している。別プロジェクトへ移す時に両者を混ぜたまま持ち込まないため、要素ごとの由来は `.claude/skills/agent-harness-bootstrap/provenance.json` を唯一の SoT として管理し（各 SKILL.md の frontmatter `metadata.provenance` は台帳の写し）、次の 3 点を守って「何を取り込み、何を取り込まないか」を**ユーザーが決める**:
 
-1. `provenance.json` の全要素（本 CLAUDE.md の各セクションも `claude-md-*` 要素として登録済み）を列挙した**移植チェックリスト**を最初に作る（列挙の完全性は維持する。黙って省略しない）。チェックリストの実体は手順 4 で書く `harness-selection.json`（全要素分の entry）そのものであり、別ファイルは作らない。
-2. 各要素を由来ラベルで分けて提示する: `official`（公式由来・**必ず採用、外せない**）/ `official-derived`（公式原則の具体化・推奨、外せる）/ `author-preference` `third-party` `domain-prompt`（著者の嗜好等・**デフォルト非採用**、ユーザーが選んだものだけ採用）/ `repo-specific`（本リポジトリ固有・移植不可）。手順の本体は `.claude/skills/agent-harness-bootstrap/selection-flow.md`。
-3. ユーザーに選択を取る（対話: `AskUserQuestion` / 非対話: `default_selection` のみ採用し、その旨を報告冒頭に明記。ユーザーの好みを推測で補わない）。`depends_on` を欠く選択は成立しないと示して選び直させ、`soft_depends_on` の欠落は警告のみで台帳の `note` に従う縮退形を採用する。
-4. 決定を対象の `.claude/harness-selection.json` に全要素分（非選択も `selected: false` で）記録し、以降の生成（`agent-harness-bootstrap` Step 1〜8）・skills コピー・criteria JSON の対象固有調整は選択済み要素だけを対象にする。**非選択の著者嗜好要素を「念のため」持ち込まない**。
-5. 移植完了後、**`harness-setup-review` skill を実行する（省略不可）**: (a) `provenance-check.sh --target <対象>` による決定的な契約検査（選択済み要素の抜けゼロ・非選択要素の混入ゼロ・選択記録の完全性）(b) **別エージェント**の突合レビュー（渡すのは対象パス 3 点と観点定義 `.claude/skills/agent-harness-bootstrap/criteria/porting-reconciliation.json` のみ）(c) 対象に既存 skills があれば `skills-audit` で公式準拠を監査。(a)(b) が両方 PASS するまで完了報告しない。移植元 clone の `.claude/settings.json` に登録した Stop hook が、検証前の終了を block して強制する。
+- **列挙は完全に**: `provenance.json` の全要素（本 CLAUDE.md の各セクションも `claude-md-*` 要素）を載せた選択記録（対象の `.claude/harness-selection.json`、非選択も `selected: false` で記録）を移植チェックリストの実体とする。黙って省略しない。
+- **採用はユーザーが決める**: `official` は必ず採用（外せない）/ `official-derived` は推奨（外せる）/ `author-preference` `third-party` `domain-prompt` はデフォルト非採用（選んだものだけ）/ `repo-specific` は移植不可。非対話なら `default_selection` のみ採用し、その旨を報告冒頭に明記する（好みを推測で補わない）。非選択の著者嗜好要素を「念のため」持ち込まない。
+- **検証は省略不可**: 移植完了後に `harness-setup-review` skill（`provenance-check.sh --target` の契約検査と別エージェントの突合レビュー。対象に既存 skills があれば `skills-audit` も）を実行し、両方 PASS するまで完了報告しない。移植元 clone の Stop hook が検証前の終了を block する。
 
-「数値目標の単一 SoT 化」条文（`test-verify.md`）について: 2026-09-01 制定時は N/A 判定不可の必須項目としていたが、2026-09-04 に `author-preference`（default `recommend` = 事前チェック済みだがユーザーが外せる）へ再分類した。公式根拠のない著者の運用判断であり、「採用の決定はユーザーが行う」という本節の趣旨と矛盾するため。採用時は機械検査として `repo-hygiene-patrol` の「数値目標の整合性ドリフト」check を持つ `skill-repo-hygiene-patrol` の選択を勧める（未選択なら `test-verify.md` の条文のみ。台帳 id: `numeric-target-single-sot`、`soft_depends_on`）。
+手順の本体（提示の仕方・`AskUserQuestion` の分割・`depends_on` / `soft_depends_on` の扱い・記録の書式・生成との接続）は `.claude/skills/agent-harness-bootstrap/selection-flow.md`、検証の本体は `.claude/skills/harness-setup-review/SKILL.md`。個々の要素の採否の経緯（例: `numeric-target-single-sot` を 2026-09-04 に author-preference へ再分類）は台帳の `history` / `note` にある。
 
 背景: セットアップ時に一部の観点だけ移植され、後から「あの観点は取り込めているか」という確認・追加依頼が繰り返される失敗パターンへの対策として**列挙の完全性**は維持する。一方で、公式由来と著者嗜好が区別されないまま全部持ち込まれ、移植先に不要な運用が混入する失敗パターンへの対策として、**採用の決定**はユーザーに委ねる。完全性は依頼者の記憶でなくチェックリスト・選択記録・突合レビューで担保する。
 

@@ -19,6 +19,7 @@ Claude Code から自動検出される実行可能な Skills（`.claude/skills/
 | [research-intelligence/](research-intelligence/README.md) | ニュース収集・SEO分析などのリサーチ |
 | [software-development/](software-development/README.md) | コーディング・3エージェント開発システム・デザインシステム・Skills品質レビュー |
 | [ops-management/](ops-management/README.md) | サーバー運用・HR等の管理業務 |
+| [customer-support/](customer-support/README.md) | 顧客対応チャットボットの運用設計（有人への引き継ぎ・ガードレール・評価）とレビュー |
 
 ## 新しいワークフローを追加する手順
 

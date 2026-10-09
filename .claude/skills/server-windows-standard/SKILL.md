@@ -17,8 +17,10 @@ metadata:
 
 ## 前提: 利用可能なMCPツール
 
-- **WinDBG解析**: `open_windbg_dump`, `run_windbg_cmd`, `list_windbg_dumps`, `close_windbg_dump`
-- **Microsoft公式情報**: `microsoft_docs_search`, `microsoft_docs_fetch`
+Claude Code 上の MCP ツール名は `mcp__<.mcp.json に登録したサーバー名>__<ツール名>` の完全修飾名になる。登録名は環境ごとに違うので、作業開始時に `/mcp` で実際のサーバー名とツール名を確認し、以降はその完全修飾名で呼ぶ（サーバー名無しで呼ぶと tool not found になり得る）。
+
+- **WinDBG解析**（WinDBG MCP サーバー）: `open_windbg_dump`, `run_windbg_cmd`, `list_windbg_dumps`, `close_windbg_dump`
+- **Microsoft公式情報**（Microsoft Learn docs MCP サーバー）: `microsoft_docs_search`, `microsoft_docs_fetch`
 
 ## 最終目標
 

@@ -30,20 +30,21 @@ cp -r .claude/skills/review-changes .claude/skills/review-implementation .claude
 |---|---|
 | 汎用ガバナンス | `agent-harness-bootstrap`（CLAUDE.md/rules/hooks 一式生成。由来台帳 `provenance.json` と構造化データ `_shared/anthropic-best-practices.json` を参照）・`harness-setup-review`（setup 後の抜け・混入検査）・`harness-compliance-audit`（直近変更分の機械検査 + 別エージェント判定）・`review-oss-contribution`・`skills-audit`・`skill-authoring-guide`・`stop-ai-slop-jp`（[iKora128/stop-ai-slop-jp](https://github.com/iKora128/stop-ai-slop-jp) 着想・MIT・vendoring）・`review-gate`（工程別レビューゲート）・`single-session-tdd`・`repo-hygiene-patrol`・`blind-eval-harness`・`issue-lifecycle-tracking`・`workflow-coverage-and-structure`（README/workflows 追記漏れの機械検査。本リポジトリ固有・移植不可） |
 | business-planning | `business-idea` / `business-proposal` / `generic-proposal` / `it-proposal` / `specification` / `ai-automation` とそれぞれの `review-*`・`multi-tenant-template-injector` |
-| content-creation | `creative-text-art` / `slides-pro` / `review-blog` / `review-slides` / `thumbnail-generation` / `review-thumbnail` |
+| content-creation | `creative-text-art` / `slides-pro` / `review-blog` / `review-slides` / `thumbnail-generation` / `review-thumbnail` / `select-slop-viewpoints`（資料の種類に応じて `stop-ai-slop-jp` の観点を選び JSON で返す）|
 | ops-management | `year-end-adjustment-csv` / `server-automation` / `server-init` / `server-windows-standard` / `review-ops` |
+| customer-support | `chatbot-operation-design` / `review-chatbot-operation-design`（観点は JSON `criteria/chatbot-operation.json`。Anthropic 公式資料に出典のあるものと、公式根拠の無い運用慣行を区別して保持） |
 | research-intelligence | `craft-beer-news-research` / `it-tech-news-research` / `general-news-research` / `investment-portfolio-analysis` / `seo-keyword-article-planner` / `blog-seo-growth-planner` / `research-deliverable-review` / `source-verification-scan` / `staged-investigation-workflow` |
 | software-development (design/mcp/その他) | `ui-design-guidelines` / `ibm-carbon-design-system` / `avoid-ai-generated-design-look` / `customer-persona-design` / `review-persona-analysis` / `playwright-mcp-e2e-testing` / `mcp-server-setup` / `model-cost-optimization-routing` / `three-agent-tdd-workflow`（単一セッション版は `single-session-tdd`） |
 
-上表は用途別の索引であり、移植時の採否を表すものではない。「汎用ガバナンス」のうち `agent-harness-bootstrap` / `harness-setup-review` / `harness-compliance-audit` / `skills-audit` / `skill-authoring-guide` / `review-gate` は公式由来として既定で移植される。それ以外（TDD運用の各流儀・`repo-hygiene-patrol` 等の著者嗜好、`workflow-coverage-and-structure` のような本リポジトリ固有のもの、および business-planning / content-creation / research-intelligence / ops-management と software-development 内デザイン系の業務ドメインプロンプト）は既定では移植されない**サンプル**である。このリポジトリの実運用から生まれた実例として同梱しているだけで、[provenance.json](../.claude/skills/agent-harness-bootstrap/provenance.json) の由来台帳に従いユーザーが選んだものだけ採用される。汎用的な harness 基盤だけが目的なら無視してよい。
+上表は用途別の索引であり、移植時の採否を表すものではない。「汎用ガバナンス」のうち `agent-harness-bootstrap` / `harness-setup-review` / `harness-compliance-audit` / `skills-audit` / `skill-authoring-guide` / `review-gate` は公式由来として既定で移植される。それ以外（TDD運用の各流儀・`repo-hygiene-patrol` 等の著者嗜好、`workflow-coverage-and-structure` のような本リポジトリ固有のもの、および business-planning / content-creation / research-intelligence / ops-management / customer-support と software-development 内デザイン系の業務ドメインプロンプト）は既定では移植されない**サンプル**である。このリポジトリの実運用から生まれた実例として同梱しているだけで、[provenance.json](../.claude/skills/agent-harness-bootstrap/provenance.json) の由来台帳に従いユーザーが選んだものだけ採用される。汎用的な harness 基盤だけが目的なら無視してよい。
 
-既知の公式ベストプラクティス逸脱・改善バックログと再監査手順は [.claude/skills/_shared/compliance-roadmap.md](../.claude/skills/_shared/compliance-roadmap.md) を参照。
+既知の公式ベストプラクティス逸脱・改善バックログ（公式原則ごとの採用状況と CR-xx）は構造化データ [.claude/skills/_shared/compliance-status.json](../.claude/skills/_shared/compliance-status.json)、再監査手順は [.claude/skills/_shared/compliance-roadmap.md](../.claude/skills/_shared/compliance-roadmap.md) を参照。subagent 定義は [.claude/agents/readonly-reviewer.md](../.claude/agents/readonly-reviewer.md)（レビュアー・論者用。書き込み系ツールを持たない）。
 
 ## workflows/ ごとの推奨AIサービス
 
 | カテゴリ | 推奨サービス |
 |---|---|
-| 全般（`workflows/content-creation` / `business-planning` / `ops-management`） | [Claude](https://claude.ai) / [ChatGPT](https://chatgpt.com) / [Gemini](https://gemini.google.com) |
+| 全般（`workflows/content-creation` / `business-planning` / `ops-management` / `customer-support`） | [Claude](https://claude.ai) / [ChatGPT](https://chatgpt.com) / [Gemini](https://gemini.google.com) |
 | リサーチ・ニュース収集（`workflows/research-intelligence`） | [Perplexity](https://www.perplexity.ai) / [Grok](https://grok.com) / [Gemini](https://gemini.google.com) |
 | 開発（`workflows/software-development`） | [Claude Code](https://docs.anthropic.com/ja/docs/claude-code/overview) / [Cursor](https://www.cursor.com) / [Cline](https://cline.bot) |
 

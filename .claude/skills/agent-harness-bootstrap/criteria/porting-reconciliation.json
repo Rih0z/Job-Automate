@@ -35,7 +35,9 @@
         "selected:true の各要素について、applies_to に対応する条文・ブロック、skills / commands に対応するディレクトリ・ファイル、files に列挙された付随ファイル（同じ相対パス）が対象に実在する",
         "provenance.json の summary / note で『対象固有に調整する』と明記された要素（例: skill-review-gate の criteria JSON）は、対象プロジェクトの実名詞（認証方式・主要サービス名・設計テーマ等）まで踏み込んで調整されている",
         "third-party の要素は無改変で、LICENSE と作者表記が保たれている（対象固有への書換えは行わない）",
-        "生成 CLAUDE.md の @import 行とルール一覧テーブルが、実際に生成した rules ファイルと一致している（名ばかり常時 load が無い）"
+        "生成 CLAUDE.md のルール一覧テーブルが実際に生成した rules ファイルと一致し、テーブルで『常時』とした rules の frontmatter に paths: が無い（名ばかり常時 load が無い）。@import 行があれば実在ファイルを指している",
+        "対象ルートに AGENTS.md がある場合、生成 CLAUDE.md に @AGENTS.md の行がある（official-agents-md-import。CLAUDE.md があると既定では AGENTS.md が読まれなくなるため）。AGENTS.md が無ければ本項目は該当なし",
+        "生成した rules の frontmatter に paths 以外のキー（name / description 等）が無い（Claude Code は paths 以外を読まない）"
       ]
     },
     {

@@ -60,7 +60,7 @@ metadata:
 
 ```
 Agent ツールの設定:
-- subagent_type: "general-purpose"
+- subagent_type: "readonly-reviewer"（`.claude/agents/readonly-reviewer.md`。書き込み系ツールを持たない。定義が無い環境・新設直後で未読込のセッションでは "general-purpose" で起動し、prompt 冒頭に「ファイルを作成・変更・削除しない」と明記する）
 - description: "Audit skill file <対象ファイル名>"
 - prompt: 以下のテンプレートに対象ファイルの絶対パスを埋め込む
 ```

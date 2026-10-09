@@ -28,6 +28,7 @@
 #   T46-T49 path_map（契約パスの読み替え）と CLAUDE.md grep の @import 先解決
 #   T50-T52 deferred（長期計画）: issue 実在の要求・契約 skip・selected:true 必須
 #   T53-T55 実台帳の claude-md-tdd-order: CLAUDE.md の工程順序の段落の契約 (C12) と depends_on (C11)
+#   T56-T59（T58b 含む）no_frontmatter_paths（常時 load rules に frontmatter の paths: が無い）(C12)
 # 実行: bash .claude/skills/agent-harness-bootstrap/scripts/provenance-check.test.sh
 
 set -uo pipefail
@@ -267,6 +268,27 @@ t "T51 deferred + issue 実在なら契約未充足でも PASS（実装は長期
 printf '{"schema":"harness-selection/v1","decided_by":"user","selections":{"core":{"selected":true,"decided_by":"default"},"split":{"selected":true,"decided_by":"default"},"issue":{"selected":false,"decided_by":"user","deferred":true,"issue":"docs/issues/open/x.md"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}}}' > tgt/.claude/harness-selection.json
 t "T52 deferred は selected:true が必要（false なら FAIL）" 1 "$(runt)"
 write_sel_t '"core":{"selected":true,"decided_by":"default"},"split":{"selected":true,"decided_by":"default"},"issue":{"selected":false,"decided_by":"user"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}'
+
+# no_frontmatter_paths（常時 load の rules に paths: が無いこと。grep_absent は MULTILINE 無しで ^ が効かないため専用 type）
+write_manifest '{"id":"core","provenance":"official","rubric_items":[1,2,"28b"]},{"id":"np","provenance":"official","target_contract":{"when_selected":[{"type":"no_frontmatter_paths","path":".claude/rules/always.md"}],"when_unselected":[]}},{"id":"grp","kind":"skill-group","provenance":"author-preference","skills":["alpha"]},{"id":"rs","provenance":"repo-specific","skills":["beta"]}'
+write_sel_t '"core":{"selected":true,"decided_by":"default"},"np":{"selected":true,"decided_by":"default"},"grp":{"selected":false,"decided_by":"user"},"rs":{"selected":false,"decided_by":"excluded"}'
+printf '# CLAUDE.md\n\n## ルート構成\n' > tgt/CLAUDE.md
+printf -- '---\npaths:\n  - "**/*.ts"\n---\n# always\n' > tgt/.claude/rules/always.md
+t "T56 no_frontmatter_paths: frontmatter に paths: があれば FAIL" 1 "$(runt)"
+printf -- '---\nfoo: bar\n---\n# always\n' > tgt/.claude/rules/always.md
+t "T57 no_frontmatter_paths: frontmatter に paths: が無ければ PASS" 0 "$(runt)"
+printf '# always\n\npaths: は本文の説明文にだけ出る\n' > tgt/.claude/rules/always.md
+t "T58 no_frontmatter_paths: 本文にだけ paths: がある（frontmatter 無し）なら PASS" 0 "$(runt)"
+printf -- '---
+foo: bar
+---
+# always
+
+paths: 本文の説明
+' > tgt/.claude/rules/always.md
+t "T58b no_frontmatter_paths: frontmatter はあるが paths: は本文にだけある → PASS" 0 "$(runt)"
+rm -f tgt/.claude/rules/always.md
+t "T59 no_frontmatter_paths: 対象ファイルが無ければ FAIL" 1 "$(runt)"
 
 # 実台帳の契約自己検査（default 選択で契約が満たせる・矛盾しない）。fixture ではなく本リポジトリの台帳で走る
 t "T45 実台帳: default 選択の target_contract は満たせて矛盾しない（contract-selfcheck.sh）" 0 "$(env -u PROVENANCE_ROOT -u PROVENANCE_KNOWHOW bash "$(dirname "$CHECK")/contract-selfcheck.sh" >/dev/null 2>&1; echo $?)"

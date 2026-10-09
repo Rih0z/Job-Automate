@@ -35,7 +35,8 @@
 #       既存プロジェクト向け: 選択記録トップレベルの path_map {"契約パス": "実在パス"} で契約の path を読み替える
 #       （例 ".claude/rules/review.md" → "docs/protocols/rules-development.md"）。path が "CLAUDE.md" の grep /
 #       grep_absent は CLAUDE.md 本文に加えて @import 先（深さ 1）も検索対象にする。読み替えた path の
-#       frontmatter_paths 検査は skip する（load 戦略は対象プロジェクト側の設計に従う）
+#       frontmatter_paths / no_frontmatter_paths 検査は skip する（load 戦略は対象プロジェクト側の設計に従う）
+#       no_frontmatter_paths: path のファイルが存在し、frontmatter に paths: が無い（= 起動時に常時 load される rules）
 #   実行場所: cwd に依存しない（既定パスは本スクリプトの位置から解決。環境変数・--selection・--target の相対パスは呼び出し時の cwd 基準）
 #
 # usage:
@@ -341,6 +342,16 @@ if target and selection:
                 m = re.match(r"^---\n(.*?)\n---", txt, re.S)
                 ok = bool(m and re.search(r"^paths:", m.group(1), re.M))
             msg = f"{p} の frontmatter に paths: が無い（path-scope になっていない）"
+        elif ty == "no_frontmatter_paths":
+            # 常時 load の担保: frontmatter（先頭の --- 〜 ---）に paths: が無いこと。本文中の paths: は対象外
+            if p in path_map:
+                return  # 読み替え先は対象プロジェクトの load 戦略に従う
+            ap = tp(p); ok = False
+            if os.path.isfile(ap):
+                txt = open(ap, encoding="utf-8", errors="ignore").read()
+                m = re.match(r"^---\n(.*?)\n---", txt, re.S)
+                ok = not (m and re.search(r"^paths:", m.group(1), re.M))
+            msg = f"{p} が無いか、frontmatter に paths: がある（常時 load になっていない）"
         elif ty == "emphasis_max":
             ap = tp(p); n = 0
             if os.path.isfile(ap):

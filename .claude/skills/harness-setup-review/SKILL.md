@@ -25,7 +25,7 @@ metadata:
    ```
 
    C11（選択記録: 全要素網羅・official は必ず selected・依存充足・skill-group の skills[]）と C12（生成物: 選択要素の契約語句・ファイル・`@import`・`paths:` の存在、非選択要素の語句・ファイル・ディレクトリ・skill の不在、`<!-- id: -->` マーカー残存禁止、`.setup-automate/` の gitignore）を評価する。FAIL 行があればそれが修正対象。
-2. **突合レビュー（別エージェント）**: `Agent`（`general-purpose`）を起動し、次の 4 点の完全パス**のみ**を渡す（会話履歴・実装意図・本 skill の本文は渡さない）:
+2. **突合レビュー（別エージェント）**: `Agent`（`readonly-reviewer`（`.claude/agents/readonly-reviewer.md`。定義が無い環境・未読込のセッションでは `general-purpose` で起動し、prompt 冒頭に「ファイルを作成・変更・削除しない」と明記する））を起動し、次の 4 点の完全パス**のみ**を渡す（会話履歴・実装意図・本 skill の本文は渡さない）:
    - 移植元 `.claude/skills/agent-harness-bootstrap/provenance.json`
    - 対象 `.claude/harness-selection.json`
    - 対象ルート
@@ -41,7 +41,8 @@ metadata:
 
    - 両方 PASS → `phase=verified`。続けて `harness-setup-state.sh done` を実行し、完了報告へ進む。
    - いずれか FAIL → findings（file:line）を修正し、手順 1 から再実行する。`verify` は FAIL のたびに `fail_count` を進め、**3 回 FAIL で中断してユーザーに報告する**（対象で `issue-lifecycle` が選択済みなら `issues/open/` に起票、非選択なら報告のみ）。
-5. **完了報告**: 機械検査の出力（PASS 行または FAIL 行）、突合レビューの score / verdict / findings、手順 3 の tier 一覧、`harness-selection.json` の完全パス、修正した箇所の完全パスを含める。
+5. **読み込みの確認（ユーザーに依頼）**: 対象ルートで Claude Code を新しく起動して `/context` を実行し、Memory files に生成した `CLAUDE.md` と常時 load の rules（frontmatter に `paths:` の無いもの）が載っていることを確かめてもらう（対話操作のため本 skill からは実行できない。依頼した事実と、結果を受け取った場合はその内容を完了報告に含める）。対象に `AGENTS.md` がある場合は、CLAUDE.md の `@AGENTS.md` で取り込まれていることも併せて確認してもらう。
+6. **完了報告**: 機械検査の出力（PASS 行または FAIL 行）、突合レビューの score / verdict / findings、手順 3 の tier 一覧、手順 5 の確認依頼、`harness-selection.json` の完全パス、修正した箇所の完全パスを含める。
 
 ## 禁止事項
 
@@ -52,4 +53,4 @@ metadata:
 
 ## 強制の仕組み
 
-移植元 clone の `.claude/settings.json` に登録された Stop hook（`hook-stop-setup-gate.sh`）が、state の `phase` が `selecting` / `generated` の間は Claude の終了を block し、本 skill の実行を促す。SessionStart hook（`hook-session-start-setup.sh`）は進行中 setup のポインタを通知する。中断する場合は `harness-setup-state.sh clear` で state を消し、ユーザーに未検証である旨を報告する。
+移植元 clone の `.claude/settings.json` に登録された Stop hook（`hook-stop-setup-gate.sh`）が、state の `phase` が `selecting` / `generated` の間は Claude の終了を block し、本 skill の実行を促す。block は 1 turn あたり 3 回までで、上限に達すると終了を許し、検証未完了である旨を `systemMessage` でユーザーに表示する（カウンタは次の turn で 0 に戻るので、ゲートは再び働く）。python が見つからない環境ではゲートを評価できない旨を表示して終了を許す。SessionStart hook（`hook-session-start-setup.sh`）は進行中 setup のポインタを通知する。中断する場合は `harness-setup-state.sh clear` で state を消し、ユーザーに未検証である旨を報告する。

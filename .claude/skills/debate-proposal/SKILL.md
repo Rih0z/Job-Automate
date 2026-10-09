@@ -77,7 +77,7 @@ metadata:
 
 ### Step 2: 3 論者の並列起動 (Agent tool、1 メッセージで 3 本同時)
 
-全員 `subagent_type: general-purpose` (設計判断を伴う分析のため、利用可能なら最上位モデルを指定)。
+全員 `subagent_type: readonly-reviewer`（`.claude/agents/readonly-reviewer.md`。定義が無い環境・未読込のセッションでは `general-purpose` で起動し、prompt 冒頭に「ファイルを作成・変更・削除しない」と明記する）。論者はファイルを書かず、分析結果を応答で返す（保存は呼び出し元）。設計判断を伴う分析のため、利用可能なら最上位モデルを指定する。
 **会話履歴・本セッションの見立て・依頼者の原文は渡さない**。共通部 + 役割部で構成する。
 
 **共通部 (3 本に同一)**:

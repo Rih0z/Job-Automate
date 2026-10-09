@@ -1,12 +1,12 @@
 {
   "schema": "harness-provenance/v1",
-  "updated": "2026-09-18",
+  "updated": "2026-09-25",
   "purpose": "このリポジトリの harness 要素（原則・rules・hooks・skills・CLAUDE.md セクション）ごとに『Anthropic 公式ベストプラクティス由来』か『著者の運用嗜好』かの由来（provenance）を記録する唯一の SoT。別プロジェクトへのセットアップ時に selection-flow.md がこのファイルを読み、由来別にユーザーへ提示して取捨選択させる。両者を混ぜたまま他環境へ持ち込まないための分離台帳。",
   "provenance_levels": {
     "official": {
       "label": "公式由来",
       "default_selection": "include",
-      "description": "Anthropic 公式ドキュメント（best-practices / skills / hooks）に根拠がある要素。文言は焼き込まず、生成時に WebFetch で現行版を取得する。デフォルト採用。外す場合はユーザーが明示する。"
+      "description": "Anthropic 公式ドキュメント（best-practices / memory / skills / sub-agents / hooks / settings / permissions / skill authoring）に根拠がある要素。文言は焼き込まず、生成時に WebFetch で現行版を取得する。デフォルト採用。外す場合はユーザーが明示する。"
     },
     "official-derived": {
       "label": "公式原則の具体化",
@@ -182,7 +182,7 @@
       "id": "no-line-count-gate",
       "kind": "principle",
       "provenance": "official-derived",
-      "summary": "行数による出力拒否ゲートを設けない。公式が数値閾値を持たないことを確認した上で、剪定は 'rules getting lost in the noise' 兆候を主基準にする。",
+      "summary": "行数による出力拒否ゲートを設けない。公式の行数（memory docs の Size 記述。2026-09-25 時点では 1 ファイル 200 行未満）は目標であって出力拒否の閾値ではないことを取得時に確認し、超過時は分割先を検討する。剪定は 'rules getting lost in the noise' 兆候も合わせて見る。",
       "applies_to": [
         "SKILL.md Step 6"
       ],
@@ -210,7 +210,7 @@
       "id": "rules-split-progressive-disclosure",
       "kind": "structure",
       "provenance": "official-derived",
-      "summary": ".claude/rules/*.md への規約分離（条文方式・通し番号）・meta.md の条インデックス・paths: と @import の二重防壁（claude-code Issue #23478 への補償）。公式の 5 配置 + @import を著者が構造化したもの。",
+      "summary": ".claude/rules/*.md への規約分離（条文方式・通し番号）・meta.md の条インデックスと load 戦略（paths: 無し = 起動時に常時 load・@import 不要 / paths: 付き = 一致ファイルの Read 時に load する公式仕様 / compaction 後にディスクから再注入されるのはルート CLAUDE.md で、paths: 付き rules は該当ファイルを再び読むまで戻らない）。公式の rules 仕様を著者が構造化したもの。",
       "applies_to": [
         "SKILL.md Step 3 / Step 8-2",
         "template.md ルール一覧",
@@ -240,17 +240,17 @@
             "path": ".claude/rules/test-verify.md"
           },
           {
-            "type": "import",
+            "type": "no_frontmatter_paths",
             "path": ".claude/rules/code-quality.md"
           },
           {
-            "type": "import",
+            "type": "no_frontmatter_paths",
             "path": ".claude/rules/test-verify.md"
           },
           {
             "type": "grep",
             "path": ".claude/rules/meta.md",
-            "pattern": "23478"
+            "pattern": "常時 load"
           },
           {
             "type": "grep",
@@ -412,7 +412,7 @@
       "id": "agent-design-tool-scope-limit",
       "kind": "principle",
       "provenance": "author-preference",
-      "summary": "1 subagent の allowed-tools は 4〜5 個・単一ロールを目安にする。全く異なる専門領域（コード分析・セキュリティスキャン・デプロイ検証等）を 1 エージェントに詰め込むと選択精度が落ちる。複数領域を横断する必要がある場合は、対象単位（ファイル1件・工程1件等）ごとにロール別のエージェントを分けて起動する。",
+      "summary": "1 subagent のツール（subagent 定義の tools / disallowedTools。skill の allowed-tools は事前承認であって制限ではない）は 4〜5 個・単一ロールを目安にする。全く異なる専門領域（コード分析・セキュリティスキャン・デプロイ検証等）を 1 エージェントに詰め込むと選択精度が落ちる。複数領域を横断する必要がある場合は、対象単位（ファイル1件・工程1件等）ごとにロール別のエージェントを分けて起動する。",
       "applies_to": [
         "SKILL.md Step 8-2 agent-design.md",
         "生成 rules agent-design.md",
@@ -571,7 +571,7 @@
       "id": "always-load-5kb-cap",
       "kind": "principle",
       "provenance": "author-preference",
-      "summary": "meta.md と @import で常時 load される rules ファイル個別に 5KB soft cap を宣言する（常時 load 経由の context 汚染防止）。",
+      "summary": "常時 load される rules ファイル（frontmatter に paths: の無い meta.md / code-quality.md / test-verify.md 等）個別に 5KB soft cap を宣言する（常時 load 経由の context 汚染防止）。",
       "applies_to": [
         "operational-knowhow.md サイズの目安 / governance.md 項目群",
         "生成 rules meta.md"
@@ -981,7 +981,7 @@
             "path": ".claude/rules/execution-routing.md"
           },
           {
-            "type": "import",
+            "type": "no_frontmatter_paths",
             "path": ".claude/rules/execution-routing.md"
           }
         ],
@@ -1094,7 +1094,7 @@
       "summary": "カバレッジ%・合格率等の数値目標は、それを強制する設定ファイル（CI 閾値・validator 定数等）のみを SoT とし、prose に重複記載しない。対応する機械検査は repo-hygiene-patrol の numeric_target_drift。",
       "applies_to": [
         "SKILL.md Step 8-2 test-verify.md",
-        "CLAUDE.md 他プロジェクトのセットアップ依頼への対応（数値目標の単一 SoT 化の段落）"
+        "本要素の history（再分類の経緯。2026-09-25 に CLAUDE.md の段落から台帳へ一本化）"
       ],
       "rubric_items": [
         36
@@ -1448,7 +1448,7 @@
       "id": "domain-skills-group",
       "kind": "skill-group",
       "provenance": "domain-prompt",
-      "summary": "業務ドメインプロンプト skill 群（business-planning / content-creation / ops-management / research-intelligence / design・mcp 等）。harness とは無関係。対象プロジェクトの業務に該当するものだけ選ぶ。",
+      "summary": "業務ドメインプロンプト skill 群（business-planning / content-creation / ops-management / research-intelligence / customer-support / design・mcp 等）。harness とは無関係。対象プロジェクトの業務に該当するものだけ選ぶ。",
       "skills": [
         "ai-automation",
         "avoid-ai-generated-design-look",
@@ -1485,7 +1485,9 @@
         "thumbnail-generation",
         "review-thumbnail",
         "ui-design-guidelines",
-        "year-end-adjustment-csv"
+        "year-end-adjustment-csv",
+        "chatbot-operation-design",
+        "review-chatbot-operation-design"
       ],
       "rubric_items": [],
       "depends_on": [],
@@ -1667,6 +1669,70 @@
       "depends_on": []
     },
     {
+      "id": "official-agents-md-import",
+      "kind": "principle",
+      "provenance": "official",
+      "source": "https://code.claude.com/docs/en/memory",
+      "summary": "対象ルートに AGENTS.md がある時は、生成 CLAUDE.md に @AGENTS.md を置いて取り込む（CLAUDE.md があると既定では AGENTS.md が読まれない。言葉で『読め』と書くだけでは読まれる保証が無い）。AGENTS.md の無い対象では何もしない。",
+      "applies_to": [
+        "SKILL.md Step 1 AGENTS.md の有無"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "official-claude-md-core"
+      ],
+      "note": "条件付き（AGENTS.md がある時だけ）の契約は target_contract の check type で表せないため、突合レビュー（criteria/porting-reconciliation.json）で判定する"
+    },
+    {
+      "id": "permissions-deny-sensitive",
+      "kind": "principle",
+      "provenance": "official-derived",
+      "source": "https://code.claude.com/docs/en/permissions",
+      "summary": "settings.json の permissions.deny に機密ファイルの Read deny（Read(./.env) / Read(./.env.*) / Read(./secrets/**) 等。対象に実在する鍵ファイル等があれば追加）を置く。該当ファイルが今は無くても害は無く、後から置かれた時の防壁になる。CLAUDE.md の『読むな』は advisory で、強制は Claude Code の permissions が行う（公式: Permission rules are enforced by Claude Code, not by the model）。",
+      "applies_to": [
+        "SKILL.md Step 1 機密ファイルの有無 / Step 8-3"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": ".claude/settings.json",
+            "pattern": "Read\\(\\./\\.env\\)"
+          }
+        ],
+        "when_unselected": []
+      }
+    },
+    {
+      "id": "agent-readonly-reviewer",
+      "kind": "asset",
+      "provenance": "official-derived",
+      "source": "https://code.claude.com/docs/en/sub-agents",
+      "summary": "別エージェントレビュー用の subagent 定義（tools: Read, Grep, Glob, Bash, WebFetch, WebSearch / disallowedTools: Edit, Write, NotebookEdit）。review-* / skills-audit / harness-compliance-audit / harness-setup-review / review-gate / debate-proposal がレビュアー・論者を subagent_type: readonly-reviewer で起動し、書き込み禁止を依頼文でなくツール制限で強制する。公式『同じ worker を繰り返し起動するなら custom subagent を定義』『tools で制約を強制』の具体化。",
+      "files": [
+        ".claude/agents/readonly-reviewer.md"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "note": "非選択でも、コピーした skill は『readonly-reviewer が無い環境では general-purpose + 書き込み禁止の明記』で動く（縮退形）"
+    },
+    {
+      "id": "shared-compliance-status",
+      "kind": "asset",
+      "provenance": "repo-specific",
+      "summary": "Job-Automate 自身の、公式原則（anthropic-best-practices.json）ごとの採用状況・findings（CR-xx）・監査ログを構造化データで持つファイルと、その全単射・実在・enum を検査するスクリプト。ported プロジェクトは自分自身の監査で自分の状況ファイルを作る（内容は移植不可）。",
+      "files": [
+        ".claude/skills/_shared/compliance-status.json",
+        ".claude/skills/_shared/scripts/check_compliance_status.py",
+        ".claude/skills/_shared/scripts/test_check_compliance_status.py"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "portable": false
+    },
+    {
       "id": "claude-md-porting-rule",
       "kind": "claude-md-section",
       "provenance": "author-preference",
@@ -1689,6 +1755,7 @@
       "grep_absent": "path に pattern が現れない。path が無ければ合格",
       "import": "CLAUDE.md に '@<path>' の行があり、かつ path が存在する",
       "frontmatter_paths": "path の frontmatter に paths: がある（path-scope rules）",
+      "no_frontmatter_paths": "path が存在し、その frontmatter に paths: が無い（起動時に常時 load される rules）。本文中の paths: は対象外",
       "emphasis_max": "path 内の IMPORTANT / YOU MUST の出現が max 以下",
       "gitignore": ".gitignore に pattern の行がある"
     }

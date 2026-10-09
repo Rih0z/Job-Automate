@@ -1,12 +1,21 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)"
+    ]
+  },
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup|resume|clear|compact",
+        "matcher": "startup|resume|clear|compact|fork",
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/skills/agent-harness-bootstrap/scripts/hook-session-start-setup.sh"
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/skills/agent-harness-bootstrap/scripts/hook-session-start-setup.sh",
+            "timeout": 30
           }
         ]
       }
@@ -16,7 +25,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/skills/agent-harness-bootstrap/scripts/hook-stop-setup-gate.sh"
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/skills/agent-harness-bootstrap/scripts/hook-stop-setup-gate.sh",
+            "timeout": 30
           }
         ]
       }

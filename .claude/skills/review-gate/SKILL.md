@@ -26,7 +26,7 @@ metadata:
 ## 手順
 
 1. 該当工程の criteria JSON を読む。
-2. `Agent` ツール(`general-purpose`、`run_in_background: false`)で独立レビュアーを起動する。レビュアーには対象ファイルと観点定義のパスだけを渡し、呼び出し元セッションの実装意図・設計判断は渡さない。プロンプト:
+2. `Agent` ツール(`readonly-reviewer`、`run_in_background: false`)で独立レビュアーを起動する（`.claude/agents/readonly-reviewer.md`。定義が無い環境・未読込のセッションでは `general-purpose` で起動し、prompt 冒頭に「ファイルを作成・変更・削除しない」と明記する）。観点定義（criteria JSON）の更新は呼び出し元が行い、レビュアーは追加すべき観点を応答で提案するだけにする。レビュアーには対象ファイルと観点定義のパスだけを渡し、呼び出し元セッションの実装意図・設計判断は渡さない。プロンプト:
 
    ```
    あなたは独立レビュアー。次の観点定義に従い、対象を批判的にレビューせよ。
@@ -73,5 +73,5 @@ metadata:
 - レビュアーには結論だけでなく location を出させ、修正を機械的に適用できるようにする。
 - 同一工程で3回FAILしたら、観点かレビュー粒度に問題がある可能性を疑い、ユーザーに相談する。
 - **手続きとcriteriaの突き合わせ (2026-09-11 追加)**: 規則文書が別ゲートの通過を手続きとして指示する場合、そのゲートの criteria の must_pass と両立するか(指示どおり進めると必ずFAILする順序になっていないか)を突き合わせる。
-- **強制の限界**: このゲートはレビュアーの判定に依るので確率的で、機械的に保証されるものではない。決定的な検査にする案は `.claude/skills/_shared/compliance-roadmap.md` の backlog にある。
+- **強制の限界**: このゲートはレビュアーの判定に依るので確率的で、機械的に保証されるものではない。決定的な検査にする案は Job-Automate の `.claude/skills/_shared/compliance-status.json` の findings（CR-12・backlog）にある。
 - 単一セッションでの開発フロー全体は `single-session-tdd` skill、3ターミナル分離で回す場合は `three-agent-tdd-workflow` skill を参照。

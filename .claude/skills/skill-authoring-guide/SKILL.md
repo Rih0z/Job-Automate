@@ -91,7 +91,12 @@ description: What it does. Use when user asks to [specific phrases].
 `context` frontmatter フィールドに `fork` を指定すると、そのskillは分離された会話コンテキストで実行される（冗長な出力をメインセッションのコンテキストに残さない用途）。上表は必須/主要フィールドのみを列挙しており `context` を含まないが、実在するオプションフィールドである。**分離されるのはモデルの会話コンテキスト（記憶）のみ**であり、**ファイルシステムは分離しない**。fork内で `Write` / `Edit` 等のツールを実行すると、その結果は実際のファイルシステムに直接反映される。
 
 - **誤り**: fork内で処理した結果を一度メインセッションの応答として返し、メイン側で改めてファイルへ書き出す（不要な回り道）
-- **正しい**: `allowed-tools` に書き込み系ツールを含め、fork内で直接ファイルへ書く（会話コンテキストが分離されていても、書き込みは即座に反映される）
+- **正しい**: fork内で直接ファイルへ書く（会話コンテキストが分離されていても、書き込みは即座に反映される）。確認プロンプトを減らしたい時は `allowed-tools` に書き込み系ツールを入れるが、これは**事前承認であってツールの制限・付与ではない**（使えるツールを絞りたい時は subagent 定義の `tools` / `disallowedTools` か permissions の deny を使う）
+- **既定は background 実行**: fork した subagent は既定で background で走り、結果は完了時に会話へ届く。呼んだ turn で結果を待って続きの手順に使うなら frontmatter に `background: false` を書く。background の fork の編集は checkpoint の外で行われ `/rewind` では戻らない（git で戻す）
+
+### skill 本文のライフサイクル（常設の指示として書く）
+
+呼ばれた skill の本文は 1 つのメッセージとして会話に残り、以後の turn で再読込されない。「最初の 1 回だけ」を前提にした書き方ではなく、作業全体に効く**常設の指示**として書く。auto-compaction 後は各 skill の最新呼び出しが先頭から一定量だけ再添付されるので、重要な指示は本文の先頭に置く。本文中の `` !`command` `` は失敗すると skill の起動全体が中断されるので、失敗し得るコマンドは `|| true` 等で吸収する。skill のディレクトリ名に予約名（`anthropic-skills` など）を使わない。（観点の SoT: `anthropic-best-practices.json` の `skills.content-persists-standing-instructions` / `skills.dynamic-context-and-arguments` / `skills.reserved-names` / `skills.allowed-tools-is-preapproval` / `skills.context-fork-runs-in-background`）
 
 ### description の書き方
 
@@ -285,6 +290,11 @@ Should NOT trigger:
 - 失敗した API 呼び出し数
 - 消費トークン数
 
+#### 評価を先に作る（公式 authoring の推奨）
+- 長い本文を書く前に、skill 無しで Claude が失敗する点から**最低 3 件の評価シナリオ**を作り、skill 無しの baseline を記録する。前の会話の文脈が評価を甘くするので、比較は新しいセッションで行う
+- Claude Code では skill-creator plugin の evals や `claude plugin eval` で比較を自動化できる
+- 使う予定の**すべてのモデル**（Haiku / Sonnet / Opus 等）で試す。効き方はモデルで変わる
+
 ### フィードバックに基づく反復
 
 | シグナル | 原因 | 対処 |
@@ -303,6 +313,7 @@ Should NOT trigger:
 - [ ] フォルダ構造を計画
 
 ### 開発中
+（各項目の根拠は `anthropic-best-practices.json` の `skills.*` / `authoring.*` principle。文言を変える時はそちらを先に更新する）
 - [ ] フォルダ名が kebab-case
 - [ ] SKILL.md が正確な綴り
 - [ ] YAML フロントマターに `---` デリミタ
@@ -312,9 +323,21 @@ Should NOT trigger:
 - [ ] 命令が明確でアクション可能
 - [ ] エラーハンドリング含む
 - [ ] 例を提供
-- [ ] 参照ファイルを明示
+- [ ] 参照ファイルを明示し、SKILL.md から 1 段で直接リンクしている（参照先からさらに辿らせない）
+- [ ] 100 行を超える参照ファイルの先頭に目次がある
+- [ ] Claude が既に知っている一般論を書いていない（簡潔さ）
+- [ ] 指示の具体度を作業の壊れやすさに合わせている（壊れやすい操作は厳密な手順・スクリプト、判断作業は方針）
+- [ ] description は三人称（日本語は主語を省いた常体・体言止め）で、「私は」「あなたは」を使っていない
+- [ ] 1 つの概念に 1 つの用語を使っている
+- [ ] 選択肢を並べすぎず、既定の 1 つを示している
+- [ ] 日付で分岐する手順（「〇月以前は旧方式」等）を本文に書いていない（必要なら「Old patterns」節に隔離）
+- [ ] 同梱スクリプトはエラーを自分で処理し、定数には根拠を書いている（理由の無い定数を置かない）
+- [ ] MCP ツールはサーバー名込みの完全修飾名で書いている（Claude Code では `mcp__<server>__<tool>`）
+- [ ] パスは forward slash で書いている
 
 ### テスト
+- [ ] 最低 3 件の評価シナリオと skill 無し baseline の比較記録がある
+- [ ] 使う予定のすべてのモデルで試した
 - [ ] 明示的なタスクでトリガーされる
 - [ ] 言い換えでもトリガーされる
 - [ ] 無関係なトピックではトリガーされない
@@ -325,18 +348,11 @@ Should NOT trigger:
 
 ---
 
-## 9. Claude Code コマンド形式との対応
+## 9. Claude Code での扱い（commands は skills に統合済み）
 
-本ガイドは Claude.ai の SKILL.md 形式について記述しているが、
-Claude Code のスラッシュコマンド（`.claude/commands/*.md`）にも以下の原則が適用される:
+Claude Code では custom commands は skills に統合されている。`.claude/commands/x.md` と `.claude/skills/x/SKILL.md` はどちらも `/x` を作るが、本リポジトリでは新規作成・移行ともに `.claude/skills/<name>/SKILL.md` に統一する（旧 `.claude/commands/*.md` は 2026-09-11 に移行済み）。本ガイドの原則はそのまま適用される。Claude Code 固有の frontmatter（`argument-hint` / `arguments` / `disable-model-invocation` / `user-invocable` / `allowed-tools` / `model` / `effort` / `context: fork` + `agent` / `background` / `paths` / `hooks` 等）は skills docs の Frontmatter reference を参照する。
 
-| SKILL.md の原則 | Claude Code コマンドでの適用 |
-|----------------|---------------------------|
-| 具体的な description | コマンドファイル冒頭の説明文 |
-| ステップバイステップ命令 | コマンド本文の手順 |
-| エラーハンドリング | トラブルシューティングセクション |
-| Progressive Disclosure | 詳細基準を `docs/review-*.md` に分離 |
-| ユースケース定義 | コマンドの目的・対象を明確化 |
+繰り返し起動するレビュアーや調査役は skill 本文に指示を毎回書くより、`.claude/agents/<name>.md` に subagent として定義し、`tools` / `disallowedTools` で書き込み等を禁止する（本リポジトリでは `.claude/agents/readonly-reviewer.md`）。
 
 ---
 
@@ -350,4 +366,4 @@ Claude Code のスラッシュコマンド（`.claude/commands/*.md`）にも以
 
 ## 出典・関連
 
-原文: `workflows/software-development/skills-building-guide.md`。`.claude/commands/review-skill.md`（`/review-skill`）の評価基準本体としても参照される。本リポジトリの `.claude/skills/skills-audit/SKILL.md` と役割が近接するため、重複が疑われる場合はメンテナンスIssueで整理すること。
+原文: `workflows/software-development/skills-building-guide.md`。`.claude/skills/review-skill/SKILL.md`（`/review-skill`）の評価基準本体としても参照される。本リポジトリの `.claude/skills/skills-audit/SKILL.md` と役割が近接するため、重複が疑われる場合はメンテナンスIssueで整理すること。

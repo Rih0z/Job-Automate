@@ -20,12 +20,12 @@
 - [ ] 公式内容（文言・テーブル・数値・API 契約）を焼き込まず実行時 WebFetch 取得に統一されているか（verbatim・テーブル転記が残っていないか）
 - [ ] handoff 受領が user 明示指示駆動で、SessionStart hook がポインタ + verdict のみ注入（本文を注入しない）になっているか
 - [ ] reviewer 過剰報告抑制（correctness / 明示要件に関わる gap のみ採用）が含まれているか
-- [ ] 行数による出力拒否ゲートが残っていないか（公式は数値閾値を持たない）
+- [ ] 行数による出力拒否ゲートが残っていないか（公式は 200 行未満を『目標』として示すが、出力拒否の閾値ではない）
 - [ ] hooks 化判断が `hooks-reference.md` にあり、参考 6 hook 構成と監査手順（dead/無駄 hooks 検出）+ **OS 別 shell 実装（Windows PowerShell / Mac・Linux bash）**が含まれているか
 - [ ] スケール調整（小規模では rules / hooks / オプションを間引く）が Step 0 の後・選択済み要素の範囲内で行われ、落とした要素を `harness-selection.json` に `decided_by: "scale"` で記録する手順になっているか
 - [ ] PC 再起動・session 復元（SessionStart hook は processing scan をポインタ + verdict のみ注入＝本文非注入 → User 通知 + 選択後 1 件のみ Read + 並列委任）が含まれているか
 - [ ] Step 8 で採用セット（CLAUDE.md / コア rules / 採用オプション / settings.json hooks + hook scripts）の実生成手順と雛形が含まれているか
-- [ ] [claude-code Issue #23478](https://github.com/anthropics/claude-code/issues/23478) の path-scope auto-load Read 時のみ発火 bug が URL 付きで明示されているか
+- [ ] rules の load 戦略（`paths:` 無し = 起動時に常時 load・`@import` 不要 / `paths:` 付き = 一致ファイルの Read 時に load する公式仕様 / compaction 後にディスクから再注入されるのはルート CLAUDE.md で、path-scope rules は該当ファイルを再び読むまで戻らない）が `meta.md` 生成指示に含まれているか。path-scope の Read 時発火を「bug」と書いていないか
 - [ ] `governance.md` 生成指示が複数観点の項目群（増減可）で記述されているか
 - [ ] 常時 load rules ファイル個別の 5KB soft cap が明示されているか
 - [ ] `execution-routing.md` / `docs-management.md` のオプション扱い（採用判定基準と生成内容）が明示されているか

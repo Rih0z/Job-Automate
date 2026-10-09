@@ -15,7 +15,7 @@
 | 起動時手順 4 | 「並走 4 軸 verdict」 | concurrent-agent-4-axis-recheck | 語句を削除 |
 | 起動時手順 5 | 「`issues/open\|processing/[ID].md` 冒頭に…」「`issue-[ID]-`」 | issue-lifecycle | 命名を `[YYYY-MM-DD]-[識別単語].md` に、issue 連携の句を削除 |
 | ルール一覧 | `governance.md` 行 | governance-multi-aspect | 行を削除し、代わりに official 由来の「新しい○○を追加する手順」（rubric 18）を CLAUDE.md 本体に 2〜3 行の節として残す |
-| サイズ運用 | 「概ね 100 行を剪定検討の目安」 | size-guideline-100-lines | 「公式は数値閾値を持たない。新項目は rules / docs / skills に振り分ける」のみ残す |
+| サイズ運用 | 「概ね 100 行を剪定検討の目安」 | size-guideline-100-lines | 「公式目標（取得した memory docs の Size 記述。2026-09-25 時点では 1 ファイル 200 行未満）に収める。新項目は rules / docs / skills に振り分ける」のみ残す |
 
 ````markdown
 # CLAUDE.md - [プロジェクト名]
@@ -43,10 +43,7 @@
 <!-- id: rules-split-progressive-disclosure -->
 ## ルール一覧
 
-`meta.md` は常時 load。下記は CLAUDE.md `@import` で常時 load（path-scope auto-load 不安定への補償）。他は YAML `paths:` で Read 時のみ load:
-
-@.claude/rules/code-quality.md
-@.claude/rules/test-verify.md
+frontmatter に `paths:` の無い rules（`meta.md` / `code-quality.md` / `test-verify.md`）は起動時に自動で常時 load される（`@import` は不要。書くと同じ内容を二重に指定するだけになる）。`paths:` 付きの rules は、一致するファイルを Claude が Read した時に load される（公式仕様）:
 
 | タスク種別 | rules | 含む条 |
 |-----------|-------|-------|
@@ -60,7 +57,7 @@
 | CLAUDE.md/.claude 編集 | `governance.md` (path-scope) | [該当条] |
 
 <!-- id: execution-routing / docs-management / agent-design-crash-resilient-manifest / agent-design-metadata-preserving-handoff / agent-design-tool-scope-limit -->
-（採用時の追加は load 戦略で扱いが異なる。**`execution-routing.md` を採用した場合**: 上の `@import` ブロックに `@.claude/rules/execution-routing.md` の行を追加**し**、ルール一覧テーブルにも行を追加する（`@import` 忘れは「テーブル上は常時 load と書いてあるが実際は読み込まれない」既知の失敗パターンなので両方必須）。**`docs-management.md` を採用した場合**: テーブルに行を追加するのみ（`@import` 不要、`paths:` で path-scope）。**`agent-design.md` を採用した場合**: テーブルに行を追加するのみ（`@import` 不要、`paths:` で path-scope）。）
+（採用時の追加は load 戦略で扱いが異なる。**`execution-routing.md` を採用した場合**: frontmatter に `paths:` を書かずに生成し（= 常時 load）、ルール一覧テーブルに「(常時)」として行を追加する（`paths:` を付けると「テーブル上は常時 load と書いてあるが実際は該当ファイルを読むまで読み込まれない」状態になる）。**`docs-management.md` / `agent-design.md` を採用した場合**: `paths:` 付きで生成し、テーブルに「(path-scope)」として行を追加する。）
 
 <!-- id: official-claude-md-core -->
 ## ルート構成
@@ -70,7 +67,7 @@
 <!-- id: size-guideline-100-lines / governance-multi-aspect -->
 ## サイズ運用
 
-公式は数値閾値を持たない（"Keep it concise"）。本プロジェクトは概ね 100 行を剪定検討の目安とする。新項目は rules / docs / skills / .tmp に振り分け、CLAUDE.md 直接記入は避ける（詳細 `.claude/rules/governance.md`）。
+公式目標は 1 ファイル 200 行未満（memory docs の Size 記述）。本プロジェクトは概ね 100 行を剪定検討の目安とする。新項目は rules / docs / skills / .tmp に振り分け、CLAUDE.md 直接記入は避ける（詳細 `.claude/rules/governance.md`）。
 
 セットアップ: [quick_start](docs/...) / 検証: [...](docs/...) / ロードマップ: [...](docs/...)
 

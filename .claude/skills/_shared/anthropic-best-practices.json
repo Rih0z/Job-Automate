@@ -1,6 +1,6 @@
 {
   "schema": "anthropic-best-practices/v1",
-  "fetched": "2026-10-06",
+  "fetched": "2026-09-25",
   "max_age_days": 30,
   "policy": "Anthropic 公式ドキュメントの原則を、各 skill が共通に参照できる 1 つの構造化データとして保持する。statement は原文の転記でなく要約（quote は判定に使う短い原文のみ）。日付と再取得条件を持つキャッシュであり、焼き込み禁止（日付・再取得条件の無い転記）には当たらない。判定に使う skill は fetched を確認し、refetch_when に該当すれば各 source の url を WebFetch して現行版と突合し、差分があれば principle を更新して fetched を進める。公式に無い著者の運用判断は本ファイルに入れない（それらは agent-harness-bootstrap/provenance.json の author-preference 要素）。",
   "refetch_when": [
@@ -12,31 +12,45 @@
   "sources": {
     "best-practices": {
       "url": "https://code.claude.com/docs/en/best-practices",
-      "fetched": "2026-10-06"
+      "fetched": "2026-09-25"
     },
     "skills": {
       "url": "https://code.claude.com/docs/en/skills",
-      "fetched": "2026-10-06",
-      "note": "2026-10-06 取得（全文を 3 回に分けて読了）。WebFetch は要約を経由するため、quote の逐語は厳密には保証できない"
+      "fetched": "2026-09-25"
     },
     "hooks": {
       "url": "https://code.claude.com/docs/en/hooks",
-      "fetched": "2026-10-06",
-      "note": "2026-10-06 取得。ページ後半約 5 万字は未読で、hooks ページ由来の quote は逐語を保証できない（hooks-guide は全文を逐語確認）"
+      "fetched": "2026-09-25"
     },
     "hooks-guide": {
       "url": "https://code.claude.com/docs/en/hooks-guide",
-      "fetched": "2026-10-06"
+      "fetched": "2026-09-25"
     },
     "memory": {
       "url": "https://code.claude.com/docs/en/memory",
-      "fetched": "2026-10-06",
-      "note": "CLAUDE.md の配置場所と @import 規則、サイズの目安（200 行未満）の正本。2026-10-06 に全文取得し、claude-md.imports と claude-md.concise-no-numeric-threshold を裏取り済み"
+      "fetched": "2026-09-25"
     },
     "skills-guide-pdf": {
       "title": "The Complete Guide to Building Skills for Claude (Anthropic, PDF)",
       "fetched": null,
-      "note": "skill-authoring-guide / workflows/software-development/skills-building-guide.md の出典。本日は未再取得。skills.* のうち source がこれのものは docs 側で裏取りできた範囲のみ verified: true"
+      "note": "skill-authoring-guide / workflows/software-development/skills-building-guide.md の出典。2026-09-25 以降、同内容は skill-authoring（Web 版）と skills docs で裏取りする"
+    },
+    "sub-agents": {
+      "url": "https://code.claude.com/docs/en/sub-agents",
+      "fetched": "2026-09-25"
+    },
+    "settings": {
+      "url": "https://code.claude.com/docs/en/settings",
+      "fetched": "2026-09-25"
+    },
+    "permissions": {
+      "url": "https://code.claude.com/docs/en/permissions",
+      "fetched": "2026-09-25"
+    },
+    "skill-authoring": {
+      "url": "https://platform.claude.com/docs/en/agents-and-tools/agent-skills/best-practices",
+      "fetched": "2026-09-25",
+      "note": "Agent Skills 全般（claude.ai / API / Claude Code 共通）の authoring 指針。skills-guide-pdf の数値（500 行等）の裏取り先"
     }
   },
   "used_by_index": {
@@ -79,16 +93,17 @@
       ]
     },
     {
-      "id": "claude-md.concise-no-numeric-threshold",
+      "id": "claude-md.size-target-200",
       "category": "claude-md",
-      "source": "best-practices",
-      "section": "Write an effective CLAUDE.md",
-      "statement": "短く人間が読める形に保つ。best-practices は『必須のフォーマットは無いが短く読みやすく』と述べ、memory ページは『CLAUDE.md 1 ファイルあたり 200 行未満を目安にする。長いと context を消費し遵守率が下がる』という数値の目安を示している（強制ゲートではなく target）。ルールを守らない症状は『長すぎてルールが埋もれている』兆候。部分的にしか要らない指示は path-scoped rules へ移す。なお imports は整理に役立つが context コストは減らさない（import 先も起動時に load される）。",
-      "quote": "keep it short and human-readable",
-      "check": "行数による出力拒否ゲートを設けない。公式の目安（target）は 1 ファイル 200 行未満。剪定判断は『ルールが埋もれる兆候』を主基準にし、数値は目安に留める",
+      "source": "memory",
+      "section": "Write effective instructions",
+      "statement": "CLAUDE.md は 1 ファイルあたり 200 行未満を目標にする。長いほど context を消費し遵守率が下がる。大きくなったら path-scoped rules や skill に分ける。必須のフォーマットは無く、短く人間が読める形に保つ（best-practices）。",
+      "quote": "target under 200 lines per CLAUDE.md file",
+      "check": "CLAUDE.md が 200 行未満（超過は WARN）。行数だけで出力を拒否するゲートは設けず、超過時は分割先（rules / skills）を検討する（harness_check C01）",
       "verified": true,
       "used_by": [
         "agent-harness-bootstrap",
+        "harness-setup-review",
         "harness-compliance-audit"
       ]
     },
@@ -127,11 +142,11 @@
     {
       "id": "claude-md.imports",
       "category": "claude-md",
-      "source": "best-practices",
-      "section": "Write an effective CLAUDE.md",
-      "statement": "CLAUDE.md は @path/to/import 構文で別ファイルを取り込める。取り込み規則と CLAUDE.md を置ける場所の正本は memory ドキュメント。",
-      "quote": "@path/to/import",
-      "check": "生成 CLAUDE.md の @import 行が実在ファイルを指し、常時 load させたい rules は @import で、特定作業時のみの rules は paths: で分けられている（rubric 22, 28b）",
+      "source": "memory",
+      "section": "Import additional files",
+      "statement": "CLAUDE.md は @path/to/import で別ファイルを取り込める。相対パスは import を書いたファイル基準で解決され、入れ子は最大 4 hops。取り込んだファイルも起動時に読み込まれる（分割しても context は減らない）。作業ディレクトリ外を指す import は初回に承認ダイアログが出る。",
+      "quote": "Relative paths resolve relative to the file containing the import",
+      "check": "生成 CLAUDE.md の @import 行が実在ファイルを指す。context 削減目的の分割には @import でなく paths: 付き rules / skills を使う（rubric 22, 28b）",
       "verified": true,
       "used_by": [
         "agent-harness-bootstrap",
@@ -201,24 +216,25 @@
       "category": "hooks",
       "source": "best-practices",
       "section": "Give Claude a way to verify its work",
-      "statement": "Stop hook でチェックスクリプトを走らせ、PASS するまでターンの終了を block できる（決定的なゲート）。連続 8 回 block すると Claude Code が hook を上書きして終了する。",
-      "quote": "a Stop hook runs your check as a script and blocks the turn from ending until it passes.",
-      "check": "Stop hook で強制するゲートは自前の上限（本リポジトリは 3 回）を持ち、上限到達時はユーザーに未検証である旨を返す",
+      "statement": "Stop hook でチェックスクリプトを走らせ、PASS するまでターンの終了を block できる（決定的なゲート）。進展の無いまま連続 8 回 block すると Claude Code が hook を上書きして終了する。上限は CLAUDE_CODE_STOP_HOOK_BLOCK_CAP で変えられる。",
+      "quote": "Claude Code overrides the hook and ends the turn after 8 consecutive blocks.",
+      "check": "Stop hook で強制するゲートは自前の上限を持ち、上限到達時は systemMessage でユーザーに未検証である旨を伝える（stderr は debug log にしか出ない）。上限は turn ごとに数え直す",
       "verified": true,
       "used_by": [
         "agent-harness-bootstrap",
         "harness-setup-review",
         "harness-compliance-audit"
-      ]
+      ],
+      "note": "statement のうち『進展の無いまま』と CLAUDE_CODE_STOP_HOOK_BLOCK_CAP は hooks-guide（Stop hook hits the block cap）の記述"
     },
     {
       "id": "hooks.stop-hook-active-loop-guard",
       "category": "hooks",
       "source": "hooks-guide",
       "section": "Stop hook hits the block cap",
-      "statement": "Stop hook は入力 JSON の stop_hook_active を読み、true なら early exit して無限ループを避ける（公式例）。Claude Code は Stop hook が、Claude の tool call を挟まず 8 回連続で block した後に上書きして止める。8 回を超える収束が必要なら環境変数 CLAUDE_CODE_STOP_HOOK_BLOCK_CAP で上限を上げられる。本リポジトリの hook-stop-setup-gate.sh は同フラグで再 block 回数を数え 3 回で許可する（有界化の趣旨は同じ・引き締めは著者判断）。",
+      "statement": "Stop hook は入力 JSON の stop_hook_active（既に Stop hook の block で継続中か）を読んで無限ループを避ける。公式例は true なら early exit。false は新しい turn を意味する。",
       "quote": "stop_hook_active",
-      "check": "Stop hook スクリプトが stop_hook_active を parse し、無限に block しない",
+      "check": "Stop hook スクリプトが stop_hook_active を parse し、無限に block しない。自前のカウンタを持つなら stop_hook_active=false でリセットする（永続的に無効化しない）",
       "verified": true,
       "used_by": [
         "agent-harness-bootstrap",
@@ -228,11 +244,11 @@
     {
       "id": "hooks.stop-json-decision-block",
       "category": "hooks",
-      "source": "hooks-guide",
-      "section": "Hook output",
-      "statement": "Stop と PostToolUse は stdout の JSON でトップレベル {\"decision\": \"block\", \"reason\": \"...\"} を返して block する。exit 2 + stderr で block する方式と exit 0 + JSON の方式は 1 つの hook でどちらか一方を選ぶ。stderr は debug ログにも使える。なお Stop で exit 2 の stderr も Claude に届く。PostToolUse は block 不可で、exit 2 は stderr を Claude に見せるだけ（ツールは実行済み）。",
-      "quote": "{\"decision\": \"block\", \"reason\": \"Not allowed\"}",
-      "check": "Stop hook の block は JSON decision（または exit 2 + stderr のどちらか一方）で返し、1 つの hook で方式を混ぜていない",
+      "source": "hooks",
+      "section": "Stop decision control",
+      "statement": "Stop と PostToolUse は stdout の JSON でトップレベル {\"decision\": \"block\", \"reason\": \"...\"} を返して block する。Stop では exit 2 + stderr で block しても reason と同じ経路で Claude に届く。1 つの hook ではどちらか一方に揃える。",
+      "quote": "A hook that blocks by exiting 2 routes the same way as `reason`",
+      "check": "Stop hook の block は JSON decision か exit 2 のどちらか一方に揃っている（JSON の場合 stdout に他の出力を混ぜない）",
       "verified": true,
       "used_by": [
         "agent-harness-bootstrap",
@@ -244,7 +260,7 @@
       "category": "hooks",
       "source": "hooks-guide",
       "section": "Hook output",
-      "statement": "PreToolUse は exit 2 でツール呼び出しを block し、stderr が Claude へのフィードバックになる。構造化制御は hookSpecificOutput.permissionDecision（allow / deny / ask / defer。defer は -p の非対話モードで使う）を使う。複数 hook の結果は最も制限の強い順（deny, defer, ask, allow）で決まる。",
+      "statement": "PreToolUse は exit 2 でツール呼び出しを block し、stderr が Claude へのフィードバックになる。構造化制御は JSON の permissionDecision（allow / deny）を使う。",
       "quote": "exit 2 = block the action",
       "check": "reject 分岐が実際に exit 2（または deny の JSON）に到達している（ログ出力だけで素通りしていない）",
       "verified": true,
@@ -273,8 +289,8 @@
       "source": "hooks",
       "section": "SessionStart",
       "statement": "SessionStart は exit 0 の plain-text stdout がそのまま Claude の context に入る。matcher は startup / resume / clear / compact / fork。",
-      "quote": "Claude Code adds stdout it treats as plain text to Claude's context.",
-      "check": "SessionStart hook は本文を注入せずポインタと verdict のみを stdout に出す（context 汚染防止は著者判断、stdout が context に入る事実は公式）",
+      "quote": "\"fork\" for a new session forked from an existing one",
+      "check": "SessionStart hook は本文を注入せずポインタと verdict のみを stdout に出す（context 汚染防止は著者判断、stdout が context に入る事実は公式）。matcher に fork を含めるか意図的に外すかを決めている",
       "verified": true,
       "used_by": [
         "agent-harness-bootstrap",
@@ -286,7 +302,7 @@
       "category": "hooks",
       "source": "hooks",
       "section": "Configuration Locations",
-      "statement": "hooks は ~/.claude/settings.json（全プロジェクト・非共有）/ .claude/settings.json（プロジェクト・コミットして共有可）/ .claude/settings.local.json（非共有・gitignore）/ managed policy settings（組織全体）/ plugin の hooks/hooks.json / skill・subagent の frontmatter に置ける。${CLAUDE_PROJECT_DIR} はセッション開始時のプロジェクトルートを指し、worktree に入っても動かない。",
+      "statement": "hooks は ~/.claude/settings.json（全プロジェクト・非共有）/ .claude/settings.json（プロジェクト・コミットして共有）/ .claude/settings.local.json（非共有）/ managed policy / plugin hooks.json / skill・subagent frontmatter に置ける。$CLAUDE_PROJECT_DIR はセッション開始時のプロジェクトルート。",
       "quote": "$CLAUDE_PROJECT_DIR",
       "check": "共有したい hook は .claude/settings.json にあり、スクリプトは $CLAUDE_PROJECT_DIR 基準の相対パスで呼ばれている",
       "verified": true,
@@ -316,7 +332,7 @@
       "category": "skills",
       "source": "skills",
       "section": "Frontmatter reference",
-      "statement": "全フィールド任意。description のみ推奨（省略時は本文の最初の空でない行）。name は / メニューに出るコマンド名で、省略時はディレクトリ名（name と入力名の関係は公式『How a skill gets its command name』節を参照）。when_to_use は description に追記され、description と合わせて 1,536 文字で切り詰められる（上限は設定 skillListingMaxDescChars で変更可）。項目: name / description / when_to_use / argument-hint / arguments / disable-model-invocation / user-invocable / allowed-tools / disallowed-tools / model / effort / context / agent / background / hooks / paths / shell / metadata / license / compatibility。metadata は自由な map（Claude Code は解釈せず、map 以外の値は捨てる。paths 等の予約名を key に使わない）。",
+      "statement": "全フィールド任意。description のみ推奨（省略時は本文の最初の空でない行）。name は表示名のみ（ディレクトリ名がコマンド）。when_to_use は description に追記され合計 1,536 文字の上限に算入。argument-hint / arguments / disable-model-invocation / user-invocable / allowed-tools / disallowed-tools / model / effort / context: fork（+ agent / background）/ hooks / paths / shell / metadata（自由な map）/ license / compatibility。",
       "quote": "1,536-character cap",
       "check": "description + when_to_use が 1,536 文字以内。metadata は map。paths 等の予約 key を metadata 配下に再利用していない（skills-audit 2）",
       "verified": true,
@@ -379,9 +395,9 @@
       "category": "skills",
       "source": "skills",
       "section": "Inject dynamic context",
-      "statement": "本文の !`command` 行は実行結果に置換されてから Claude に渡る。$ARGUMENTS で引数を受け取る。${CLAUDE_SKILL_DIR} / ${CLAUDE_PROJECT_DIR} は本文と allowed-tools の Bash ルールで展開される。",
+      "statement": "本文の !`command` 行は実行結果に置換されてから Claude に渡る。コマンドが失敗するとその placeholder だけでなく skill の起動全体が中断される。$ARGUMENTS / arguments で引数を受け取る。${CLAUDE_SKILL_DIR} / ${CLAUDE_PROJECT_DIR} は本文と allowed-tools の Bash ルールで展開される。",
       "quote": "!`git diff HEAD`",
-      "check": "引数を取る skill は $ARGUMENTS と argument-hint を持ち、同梱スクリプトは ${CLAUDE_SKILL_DIR} で参照している（skills-audit 3, 4）",
+      "check": "引数を取る skill は $ARGUMENTS と argument-hint を持ち、同梱スクリプトは ${CLAUDE_SKILL_DIR} で参照している。!`command` は失敗し得るなら `|| true` 等で起動中断を避ける（skills-audit 3, 4）",
       "verified": true,
       "used_by": [
         "skills-audit",
@@ -409,8 +425,8 @@
       "category": "skills",
       "source": "skills",
       "section": "Where skills live",
-      "statement": "下位ディレクトリの .claude/skills/ は起動時には読まれず、そのディレクトリのファイルを最初に読む・編集した時に読まれる。skill の追加・編集・削除は同セッション内で検知される（検知対象は SKILL.md の本文のみ。セッション開始後に新規作成したトップレベルの skills ディレクトリは /reload-skills が必要）。",
-      "quote": "They load the first time Claude reads or edits a file in that subdirectory and stay available for the rest of the session.",
+      "statement": "起動ディレクトリから repo ルートまでの .claude/skills/ が起動時に読まれ、下位ディレクトリの .claude/skills/ はそのディレクトリのファイルを最初に読んだ時に読まれる。SKILL.md の変更は同セッション内で反映される。",
+      "quote": "nested `.claude/skills/`",
       "check": "対象プロジェクトの skills はルートの .claude/skills/ に置く（monorepo の package 固有 skill のみ nested）",
       "verified": true,
       "used_by": [
@@ -422,13 +438,12 @@
     {
       "id": "skills.body-length-guideline",
       "category": "skills",
-      "source": "skills-guide-pdf",
-      "section": "Structure",
-      "statement": "SKILL.md 本体は概ね 500 行以下に保ち、超える分は references / examples に分ける。命名は kebab-case で、name に claude / anthropic を含めない。",
-      "quote": "500",
+      "source": "skills",
+      "section": "Add supporting files",
+      "statement": "SKILL.md は 500 行未満に保ち、詳細なリファレンスは別ファイルに移す（skills docs / skill-authoring とも明記）。命名は kebab-case で、name に claude / anthropic を含めない。",
+      "quote": "Keep `SKILL.md` under 500 lines.",
       "check": "SKILL.md が 500 行以下、kebab-case、name に claude / anthropic 不含（skills-audit 1）",
-      "verified": false,
-      "note": "PDF ガイド由来。docs 側には行数の数値が無いことを 2026-09-04 に確認。数値は目安として扱う",
+      "verified": true,
       "used_by": [
         "skills-audit",
         "review-skill",
@@ -554,6 +569,784 @@
       "verified": true,
       "used_by": [
         "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "claude-md.move-procedures-out",
+      "category": "claude-md",
+      "source": "memory",
+      "section": "When to add to CLAUDE.md",
+      "statement": "CLAUDE.md には毎セッション必要な事実（ビルドコマンド・規約・構成・常に守るルール）だけを置く。複数手順の手続きや一部のコードにしか関わらない内容は skill か path-scoped rule に移す。",
+      "quote": "If an entry is a multi-step procedure or only matters for one part of the codebase, move it to a skill or a path-scoped rule",
+      "check": "CLAUDE.md に複数手順の手続き本文が無く、あればポインタ化されている",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "claude-md.agents-md-import",
+      "category": "claude-md",
+      "source": "memory",
+      "section": "AGENTS.md",
+      "statement": "AGENTS.md があるリポジトリでは、CLAUDE.md に @AGENTS.md を書いて取り込む（言葉で『AGENTS.md を読め』と書くだけでは Claude が開くとは限らない）。@AGENTS.md の import は二重読み込みにならない。",
+      "quote": "Keeping the import never makes Claude read `AGENTS.md` twice",
+      "check": "移植・生成先に AGENTS.md がある場合、CLAUDE.md に @AGENTS.md がある",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "claude-md.ancestor-concatenation",
+      "category": "claude-md",
+      "source": "memory",
+      "section": "How CLAUDE.md files load",
+      "statement": "作業ディレクトリより上位の CLAUDE.md / CLAUDE.local.md は起動時にすべて読み込まれ、上書きではなく連結される。下位ディレクトリのものは Claude がそこのファイルを読んだ時に読み込まれる。不要な上位ファイルは claudeMdExcludes で除外できる。",
+      "quote": "All discovered files are concatenated into context rather than overriding each other",
+      "check": "入れ子の clone（例: 対象の .setup-automate/ で起動）では上位 CLAUDE.md も読まれることを手順書が注記し、衝突時の除外方法（claudeMdExcludes）を示している",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "claude-md.verify-loaded-with-context",
+      "category": "claude-md",
+      "source": "memory",
+      "section": "Troubleshoot memory issues",
+      "statement": "指示が効かない時は /context で Memory files に CLAUDE.md や rules が載っているかを確認する。InstructionsLoaded hook で、どのファイルがいつ・なぜ読み込まれたかを記録できる。",
+      "quote": "run `/context` in your next session and confirm `CLAUDE.md` appears under **Memory files**",
+      "check": "生成・移植の完了確認手順に /context での読み込み確認が含まれる",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "claude-md.local-md-gitignore",
+      "category": "claude-md",
+      "source": "memory",
+      "section": "Choose where to put CLAUDE.md files",
+      "statement": "個人用のプロジェクト設定は ./CLAUDE.local.md に置き、.gitignore に追加する。",
+      "quote": "Personal project-specific preferences; add to `.gitignore`",
+      "check": ".gitignore に CLAUDE.local.md がある",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "claude-md.compaction-root-survives",
+      "category": "claude-md",
+      "source": "memory",
+      "section": "Instructions seem lost after /compact",
+      "statement": "/compact 後に再読込・再注入されるのはプロジェクトルートの CLAUDE.md。入れ子の CLAUDE.md と paths: 付き rules は、該当ファイルを Claude が読むまで戻らない。会話でだけ伝えた指示は compaction で失われる。",
+      "quote": "Project-root CLAUDE.md survives compaction",
+      "check": "compaction 後も必要な常設ルールはルート CLAUDE.md（または paths 無し rules）にあり、会話だけに依存していない",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "claude-md.html-comments-stripped",
+      "category": "claude-md",
+      "source": "memory",
+      "section": "How CLAUDE.md files load",
+      "statement": "CLAUDE.md のブロックレベル HTML コメントは context に注入される前に取り除かれる。人間向けの保守メモを token を使わずに残せる（コードブロック内のコメントは残る）。",
+      "quote": "Block-level HTML comments (`<!-- maintainer notes -->`) in CLAUDE.md files are stripped",
+      "check": "保守メモを本文に書かず HTML コメントにしている（任意）。逆に Claude に読ませたい指示を HTML コメントに入れていない",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "rules.paths-only-frontmatter",
+      "category": "rules",
+      "source": "memory",
+      "section": "Path-specific rules",
+      "statement": "rules の frontmatter で Claude Code が読むのは paths だけ。他のフィールド（name / description 等）はエラー無しで無視される。",
+      "quote": "`paths` is the only field Claude Code reads from a rule; any other field is ignored without an error",
+      "check": "rules の frontmatter に paths 以外のキーが無い（harness_check R01）",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "rules.no-paths-loaded-at-launch",
+      "category": "rules",
+      "source": "memory",
+      "section": "Organize rules with .claude/rules/",
+      "statement": "paths の無い rules は起動時に無条件で読み込まれ、全ファイルに適用される。常時読ませるために CLAUDE.md から @import する必要は無い。",
+      "quote": "Rules without a `paths` field are loaded unconditionally and apply to all files",
+      "check": "常時 load の rules を @import で二重に指定していない。常時 load の担保は『frontmatter に paths が無いこと』で行う（provenance no_frontmatter_paths）",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "rules.path-scoped-trigger-on-read",
+      "category": "rules",
+      "source": "memory",
+      "section": "Path-specific rules",
+      "statement": "paths 付き rules は、Claude がパターンに一致するファイルを読んだ時に発火する（ツール使用のたびではない）。これは仕様であり不具合ではない。paths 付き rule を @import すると常時読み込みになり path-scope の意味が消える。",
+      "quote": "Path-scoped rules trigger when Claude reads files matching the pattern, not on every tool use",
+      "check": "path-scope の発火条件を『既知の不具合』として扱っていない。paths 付き rule を @import していない",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "memory.auto-memory-limits",
+      "category": "memory",
+      "source": "memory",
+      "section": "Auto memory",
+      "statement": "auto memory は既定で有効。MEMORY.md は先頭 200 行または 25KB のどちらか先に達するまでが毎セッション読み込まれる。autoMemoryEnabled で無効化できる。",
+      "quote": "The first 200 lines of `MEMORY.md`, or the first 25KB, whichever comes first",
+      "check": "リポジトリ内の備忘・引継ぎの仕組みと auto memory の役割分担が整理されている（重複して同じ事実を二重管理していない）",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "hooks.security-best-practices",
+      "category": "hooks",
+      "source": "hooks",
+      "section": "Security best practices",
+      "statement": "hook を書く時は、入力を検証・無害化する / shell 変数を必ず引用する / パスの .. を拒否する / スクリプトは絶対パスで指定する（exec form は ${CLAUDE_PROJECT_DIR}、shell form は二重引用符で囲む）/ .env・.git/・鍵などの機密ファイルを扱わない。",
+      "quote": "Validate and sanitize inputs",
+      "check": "生成・同梱する hook が 5 項目を満たし、hook テンプレートがこの 5 項目を明記している",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "hooks.workspace-trust",
+      "category": "hooks",
+      "source": "hooks",
+      "section": "Workspace trust",
+      "statement": "対話セッションでは workspace trust ダイアログを承認するまで settings の hook は実行されない。-p / SDK セッションはダイアログを出さずフォルダを信頼済みとして扱うため、リポジトリにコミットされた .claude/settings.json の hook がそのまま走る。",
+      "quote": "hooks committed in a repository's `.claude/settings.json` run in a folder you've never trusted",
+      "check": "clone して使う前提のリポジトリは、同梱 hook が何をするかを README / 手順書で明示し、-p 実行時の注意を書いている",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "hooks.exec-form-for-path-placeholders",
+      "category": "hooks",
+      "source": "hooks",
+      "section": "Exec form and shell form",
+      "statement": "command hook は args があれば exec form（shell を介さない）、無ければ shell form（macOS/Linux は sh -c、Windows は Git Bash、無ければ PowerShell）。path placeholder を使う hook は args を指定する exec form が推奨。Windows の exec form は実行ファイル（.exe）を要する。",
+      "quote": "Set `args` whenever the hook references a path placeholder",
+      "check": "hook のスクリプトパスが絶対参照（${CLAUDE_PROJECT_DIR} / \"$CLAUDE_PROJECT_DIR\"）で、shell form を使う場合は引用されている。shell form の実行 shell をログイン shell と誤記していない",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "hooks.timeout-defaults",
+      "category": "hooks",
+      "source": "hooks",
+      "section": "Common fields",
+      "statement": "hook の timeout は既定で command / http / mcp_tool が 600 秒（UserPromptSubmit は 30 秒）。ハングし得る hook は timeout を明示する。",
+      "quote": "Defaults: 600 for `command`, `http`, and `mcp_tool`",
+      "check": "外部プロセス（python 等）を起動する hook に timeout がある（harness_check H04）",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "hooks.exit0-stderr-debug-only",
+      "category": "hooks",
+      "source": "hooks",
+      "section": "Exit code 0",
+      "statement": "exit 0 の hook が stderr に出した内容は debug log にしか行かず、transcript にも Claude にも届かない。ユーザーに知らせたい時は JSON の systemMessage を返す。",
+      "quote": "Stderr from a hook that exits 0 goes to the debug log only",
+      "check": "ユーザーへの警告・通知（上限到達・依存欠落など）を stderr でなく systemMessage で出している",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "hooks.stop-additionalcontext",
+      "category": "hooks",
+      "source": "hooks",
+      "section": "Stop decision control",
+      "statement": "Stop / SubagentStop は hookSpecificOutput.additionalContext でエラー扱いにならないフィードバックを返せる。会話は継続し、decision: block と同じループ防止（stop_hook_active と連続 8 回上限）が掛かる。",
+      "quote": "Non-error feedback for Claude. The conversation continues",
+      "check": "Stop hook の『通知だけ』のつもりの出力が会話を継続させていない（通知は systemMessage、継続させたい時だけ additionalContext / block）",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "hooks.shell-profile-echo",
+      "category": "hooks",
+      "source": "hooks-guide",
+      "section": "Hook JSON has no effect",
+      "statement": "shell form の hook では shell profile の無条件 echo が stdout の先頭に混ざり、JSON として解釈されなくなることがある（Git Bash も profile を読む）。",
+      "quote": "something else writes to stdout first, usually an unconditional `echo` in your shell profile",
+      "check": "JSON を返す hook テンプレートが profile 出力の混入に触れている、または exec form を使っている",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "permissions.enforced-not-instructed",
+      "category": "permissions",
+      "source": "permissions",
+      "section": "Manage permissions",
+      "statement": "権限ルールはモデルではなく Claude Code が強制する。プロンプトや CLAUDE.md の指示は Claude の意図を方向付けるだけで、許可される操作は変わらない。",
+      "quote": "Permission rules are enforced by Claude Code, not by the model",
+      "check": "『〜してはならない』を守らせたい操作は CLAUDE.md の文言だけでなく deny ルールや hook で強制している",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "permissions.rule-order-deny-ask-allow",
+      "category": "permissions",
+      "source": "permissions",
+      "section": "Manage permissions",
+      "statement": "ルールは deny → ask → allow の順に評価され、最初に一致したものが結果を決める。ルールの具体度は順序を変えない。",
+      "quote": "Rules are evaluated in order: deny, then ask, then allow",
+      "check": "allow を広く取る場合でも、止めたい操作は deny に書いている",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "permissions.deny-sensitive-reads",
+      "category": "permissions",
+      "source": "permissions",
+      "section": "Read and Edit",
+      "statement": "Claude のファイルツールに読ませたくないファイルは Read の deny ルールで塞ぐ（例: Read(./.env)、Read(./secrets/**)）。",
+      "quote": "add a `Read` deny rule for its path, such as `Read(./.env)` or `Read(./secrets/**)`",
+      "check": "settings.json の permissions.deny に機密ファイルの Read deny がある（移植時は推奨として提案する）",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "permissions.bash-arg-patterns-fragile",
+      "category": "permissions",
+      "source": "permissions",
+      "section": "Bash",
+      "statement": "Bash の引数を絞る permission パターンは壊れやすい（表記揺れで一致しない）。コマンド文字列に依らない制限は sandbox、独自判定は PreToolUse hook を使う。",
+      "quote": "Bash permission patterns that try to constrain command arguments are fragile",
+      "check": "Bash の引数パターンだけに安全性を依存していない",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "permissions.preapprove-and-sandbox",
+      "category": "permissions",
+      "source": "best-practices",
+      "section": "Configure permissions",
+      "statement": "確認の手間を減らすには、信頼できるツールを /permissions で事前承認し、/sandbox で sandbox 内のコマンドを確認無しで実行させる。",
+      "quote": "pre-approve the tools you trust with `/permissions`",
+      "check": "頻出の読み取り系コマンドは allow に入れ、確認プロンプトの多発を避けている（任意）",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "settings.schema-line",
+      "category": "settings",
+      "source": "settings",
+      "section": "Edit a settings file",
+      "statement": "settings.json の先頭に \"$schema\": \"https://json.schemastore.org/claude-code-settings.json\" を置くと、エディタで補完と検証が効く。",
+      "quote": "\"$schema\": \"https://json.schemastore.org/claude-code-settings.json\"",
+      "check": "settings.json に $schema がある（harness_check H03）",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "settings.local-settings-gitignore",
+      "category": "settings",
+      "source": "settings",
+      "section": "Settings files and who they affect",
+      "statement": ".claude/settings.local.json は Claude Code が作った時は git から除外されるが、手で作った場合は自分で .gitignore に追加する。",
+      "quote": "if you create it by hand, add it to `.gitignore`",
+      "check": ".gitignore に .claude/settings.local.json がある",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "skills.allowed-tools-is-preapproval",
+      "category": "skills",
+      "source": "skills",
+      "section": "Pre-approve tools for a skill",
+      "statement": "skill の allowed-tools は、その skill を呼んだ turn の間だけ列挙ツールを確認無しで使える事前承認であり、使えるツールを制限するものではない。制限したい場合は subagent の tools / disallowedTools か permissions の deny を使う。",
+      "quote": "grants permission for the listed tools during the turn that invokes the skill",
+      "check": "allowed-tools を『ツール制限』として説明・利用していない",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "skills.context-fork-runs-in-background",
+      "category": "skills",
+      "source": "skills",
+      "section": "Run skills in a subagent",
+      "statement": "context: fork の skill は既定で background の subagent として走り、結果は完了時に会話へ届く。呼んだ turn で結果を待つには background: false を指定する。background の fork の編集は checkpoint の外で行われ /rewind で戻せない。",
+      "quote": "The forked subagent runs in the background",
+      "check": "context: fork を使う skill は、結果を待つ必要があれば background: false を指定している",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "skills.content-persists-standing-instructions",
+      "category": "skills",
+      "source": "skills",
+      "section": "Skill content lifecycle",
+      "statement": "呼ばれた skill の本文は 1 つのメッセージとして会話に残り、以後の turn で再読込されない。そのため一度きりの手順ではなく常設の指示として書く。auto-compaction 後は各 skill の最新呼び出しが先頭 5,000 token まで、合計 25,000 token の範囲で再添付される。",
+      "quote": "write guidance that should apply throughout a task as standing instructions rather than one-time steps",
+      "check": "SKILL.md の指示が『最初の 1 回だけ』を前提にしていない。長い skill の重要指示は先頭に置く",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "skills.reserved-names",
+      "category": "skills",
+      "source": "skills",
+      "section": "Names reserved for synced skills",
+      "statement": "plugin 外で、名前が anthropic-skills の skill フォルダ・command、または anthropic-skills: で始まる名前のものは読み込まれない（synced skill 用の予約名）。",
+      "quote": "Reserved name `anthropic-skills`",
+      "check": "skill のディレクトリ名に予約名を使っていない",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "subagents.define-custom-for-repeated-workers",
+      "category": "subagents",
+      "source": "sub-agents",
+      "section": "Overview",
+      "statement": "同じ指示で同じ種類の worker を繰り返し起動するなら、custom subagent として定義する。",
+      "quote": "Define a custom subagent when you keep spawning the same kind of worker with the same instructions",
+      "check": "複数の skill が同型のレビュアー／調査役を起動しているなら .claude/agents/ に定義があり、skill はそれを subagent_type で指す",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "subagents.limit-tools-to-enforce",
+      "category": "subagents",
+      "source": "sub-agents",
+      "section": "Available tools",
+      "statement": "subagent に使えるツールを tools（allowlist）か disallowedTools（denylist）で絞って制約を強制する。tools を省略すると利用可能な全ツールを継承する。例: tools: Read, Grep, Glob, Bash なら編集・書き込み・MCP ツールは使えない。",
+      "quote": "To restrict tools, use the `tools` field as an allowlist or the `disallowedTools` field as a denylist",
+      "check": "書き込みを禁じたい subagent（レビュアー等）が tools / disallowedTools で制限されている（harness_check A03）",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "subagents.check-into-vcs",
+      "category": "subagents",
+      "source": "sub-agents",
+      "section": "Choose the subagent scope",
+      "statement": "プロジェクト固有の subagent は .claude/agents/ に置いて version control に入れ、チームで共有・改善する。",
+      "quote": "Check them into version control so your team can use and improve them collaboratively",
+      "check": "skill が依存する subagent 定義が個人設定（~/.claude/agents）ではなくリポジトリの .claude/agents/ にある",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "subagents.frontmatter-fields-and-name-rules",
+      "category": "subagents",
+      "source": "sub-agents",
+      "section": "Write subagent files",
+      "statement": "subagent の frontmatter は name（必須。: を含められない）と description（必須。いつ委譲するか）ほか tools / disallowedTools / model / permissionMode / hooks / skills 等。複数語は camelCase で、未知のフィールドはエラー無しで無視される。新しい agents ディレクトリの作成は再起動まで反映されない。",
+      "quote": "Names can't contain `:`",
+      "check": "agents の name に : が無く、フィールド名の綴りが公式表と一致している（harness_check A01/A02）",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.concise",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Concise is key",
+      "statement": "context window は共有資源。Claude が既に知っていることは書かず、各段落がその token に見合うかを問う。",
+      "quote": "Concise is key",
+      "check": "SKILL.md に一般論・Claude が既知の説明が無い",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.degrees-of-freedom",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Set appropriate degrees of freedom",
+      "statement": "指示の具体度を作業の壊れやすさとばらつきに合わせる。壊れやすい操作は正確な手順・スクリプトで縛り、判断が要る作業は方針だけ示す。",
+      "quote": "Match the level of specificity to the task's fragility and variability",
+      "check": "壊れやすい手順（移行・削除・形式厳守）はスクリプトか厳密な手順で、判断作業は方針で書き分けている",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.third-person-description",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Writing effective descriptions",
+      "statement": "description は常に三人称で書く（system prompt に注入されるため、視点の揺れが発見を妨げる）。",
+      "quote": "Always write in third person",
+      "check": "description が『私は〜』『あなたは〜』で書かれていない（日本語は主語省略の常体・体言止めで可）",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.references-one-level-deep",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Avoid deeply nested references",
+      "statement": "参照ファイルは SKILL.md から 1 段で直接リンクする（参照先からさらに参照を辿らせない）。",
+      "quote": "Keep references one level deep from SKILL.md",
+      "check": "SKILL.md → 参照 → 参照 の多段リンクが無い",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.toc-for-long-references",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Structure longer reference files with table of contents",
+      "statement": "100 行を超える参照ファイルは先頭に目次を置き、部分読みでも全体の範囲が分かるようにする。",
+      "quote": "For reference files longer than 100 lines, include a table of contents at the top",
+      "check": "skill 配下の 100 行超の参照ファイル（README を除く）に目次がある（harness_check S12）",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.feedback-loops",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Implement feedback loops",
+      "statement": "複雑な作業はチェックリスト付きの手順にし、検証 → 修正 → 再検証のループを組み込む。",
+      "quote": "Implement feedback loops",
+      "check": "品質が重要な skill に検証ステップと、失敗時の戻り先がある",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.avoid-time-sensitive",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Avoid time-sensitive information",
+      "statement": "時間とともに古くなる条件分岐（『〇年〇月以前は旧方式』等）を本文に書かない。必要なら『Old patterns』節に隔離する。",
+      "quote": "Don't include information that will become outdated",
+      "check": "本文に日付で分岐する手順が無い（変更履歴の日付注記はこれに当たらない）",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.consistent-terminology",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Use consistent terminology",
+      "statement": "1 つの概念には 1 つの用語を使い、skill 全体で揃える。",
+      "quote": "Use consistent terminology",
+      "check": "同じ対象を複数の呼び名で書いていない",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.avoid-too-many-options",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Avoid offering too many options",
+      "statement": "選択肢を並べすぎず、既定の 1 つを示して例外時の代替だけを添える。",
+      "quote": "Avoid offering too many options",
+      "check": "手段の列挙だけで既定が無い箇所が無い",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.solve-dont-defer",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Solve, don't defer",
+      "statement": "同梱スクリプトはエラーを自分で処理し、Claude に丸投げしない。設定値には根拠を書き、理由の無い定数（voodoo constants）を置かない。",
+      "quote": "No \"voodoo constants\" (all values justified)",
+      "check": "同梱スクリプトの閾値・待ち時間等の定数に根拠コメントがある",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.mcp-fully-qualified-names",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "MCP tool references",
+      "statement": "MCP ツールはサーバー名込みの完全修飾名で書き、tool not found を避ける（Claude Code 上の名前は mcp__<server>__<tool>）。",
+      "quote": "always use fully qualified tool names",
+      "check": "MCP ツールをサーバー名無しで参照していない",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.forward-slashes",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Avoid Windows-style paths",
+      "statement": "ファイルパスは Windows でも常に forward slash で書く。",
+      "quote": "Always use forward slashes in file paths, even on Windows",
+      "check": "SKILL.md のパス表記にバックスラッシュ区切りが無い",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.evaluations-first",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Build evaluations first",
+      "statement": "長い文書を書く前に評価を作る。skill 無しで Claude が失敗する点から最低 3 シナリオを作り、skill の有無で比較する（Claude Code では skill-creator の evals や plugin eval で自動化できる）。",
+      "quote": "Create evaluations BEFORE writing extensive documentation",
+      "check": "skill ごとに最低 3 件の評価シナリオと、skill 無し baseline との比較記録がある",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "authoring.test-with-all-target-models",
+      "category": "authoring",
+      "source": "skill-authoring",
+      "section": "Test with all models you plan to use",
+      "statement": "skill の効き方はモデルで変わるので、使う予定のモデル（Haiku / Sonnet / Opus 等）すべてで試す。",
+      "quote": "Tested with Haiku, Sonnet, and Opus",
+      "check": "skill の評価記録に、使う予定のモデルごとの結果がある",
+      "verified": true,
+      "used_by": [
+        "skills-audit",
+        "skill-authoring-guide",
+        "review-skill",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "verification.gate-strength",
+      "category": "verification",
+      "source": "best-practices",
+      "section": "Give Claude a way to verify its work",
+      "statement": "検証の仕組みを作ったら、終了をどこまで強くゲートするかを選ぶ: プロンプトで頼む → /goal 条件（別の評価者が毎 turn 再確認）→ Stop hook（決定的）。無人で正しく終えるには後の 2 つが要る。",
+      "quote": "decide how hard it gates the stop",
+      "check": "無人実行を想定するゲートは /goal か Stop hook で強制され、プロンプトの依頼だけに頼っていない",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "workflow.self-contained-spec",
+      "category": "workflow",
+      "source": "best-practices",
+      "section": "Let Claude interview you",
+      "statement": "有用な仕様書は自己完結している: 関係するファイルとインターフェースを挙げ、範囲外を明記し、機能が動くことを示す end-to-end の検証手順で締める。",
+      "quote": "they name the files and interfaces involved, state what is out of scope, and end with an end-to-end verification step",
+      "check": "計画・仕様テンプレートに対象ファイル・範囲外・E2E 検証の 3 項目がある",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "workflow.fan-out-scope-allowed-tools",
+      "category": "workflow",
+      "source": "best-practices",
+      "section": "Fan out across files",
+      "statement": "claude -p でタスクをループ実行する時は --allowedTools で一括処理の権限を絞る。",
+      "quote": "Use `--allowedTools` to scope permissions for batch operations",
+      "check": "非対話の一括実行手順が --allowedTools で権限を限定している",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
+        "harness-compliance-audit"
+      ]
+    },
+    {
+      "id": "context.btw-and-checkpoints",
+      "category": "context",
+      "source": "best-practices",
+      "section": "Manage context aggressively",
+      "statement": "context に残さなくてよい質問は /btw で聞く（履歴に入らない）。checkpoint で編集を巻き戻せるが、checkpoint は Claude のファイル編集のみを追跡し、Bash 経由の変更や外部の副作用は戻らない。",
+      "quote": "use [`/btw`]",
+      "check": "巻き戻し前提の実験でも、Bash による破壊的変更は git 等で別途戻せるようにしている",
+      "verified": true,
+      "used_by": [
+        "agent-harness-bootstrap",
+        "harness-setup-review",
         "harness-compliance-audit"
       ]
     }

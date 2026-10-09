@@ -1,0 +1,506 @@
+{
+  "schema": "review-criteria/v1",
+  "stage": "chatbot-operation-design",
+  "stage_name": "顧客対応チャットボットの運用設計",
+  "when": "顧客対応チャットボットの運用設計書（chatbot-operation-design の出力、または同等の文書）を確定する前",
+  "fetched": "2026-09-25",
+  "provenance_levels": {
+    "official": "Anthropic 公式資料に明記。source と原文の quote を持つ",
+    "official-derived": "公式の原則・指標を運用手順に具体化したもの。derived_from は本 JSON の check id か derived_anchors のキーを指し、quote に元の原文を持つ（具体的な発動条件などは公式に書かれていない）",
+    "practice": "公式根拠の無い一般的な運用慣行。source / quote は null"
+  },
+  "sources": {
+    "cs-guide": {
+      "url": "https://platform.claude.com/docs/en/about-claude/use-case-guides/customer-support-chat",
+      "fetched": "2026-09-25"
+    },
+    "reduce-hallucinations": {
+      "url": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-hallucinations",
+      "fetched": "2026-09-25"
+    },
+    "mitigate-jailbreaks": {
+      "url": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/mitigate-jailbreaks",
+      "fetched": "2026-09-25"
+    },
+    "reduce-prompt-leak": {
+      "url": "https://platform.claude.com/docs/en/test-and-evaluate/strengthen-guardrails/reduce-prompt-leak",
+      "fetched": "2026-09-25"
+    },
+    "develop-tests": {
+      "url": "https://platform.claude.com/docs/en/test-and-evaluate/develop-tests",
+      "fetched": "2026-09-25"
+    }
+  },
+  "derived_anchors": {
+    "cs-guide:escalation-efficiency": {
+      "source": "cs-guide",
+      "section": "Establish success criteria",
+      "title": "Escalation efficiency"
+    },
+    "cs-guide:sentiment-maintenance": {
+      "source": "cs-guide",
+      "section": "Establish success criteria",
+      "title": "Sentiment maintenance"
+    },
+    "cs-guide:context-retention": {
+      "source": "cs-guide",
+      "section": "Integrate Claude into your support workflow",
+      "title": "Context retention"
+    },
+    "cs-guide:competitor-filter": {
+      "source": "cs-guide",
+      "section": "Strengthen input and output guardrails",
+      "title": "Avoid mentioning competitors"
+    }
+  },
+  "out_of_scope": [
+    "チャットボットの実装コード・特定プラットフォームの設定",
+    "法規制の具体的な条文（地域ごとに異なるため確認する観点に留める）",
+    "ストリーミング中の拒否応答の処理（handle-streaming-refusals。実装側の関心事）"
+  ],
+  "pass_rule": {
+    "must_pass_all": true,
+    "min_score": 80
+  },
+  "criteria": [
+    {
+      "id": "scope_and_tasks",
+      "name": "対応範囲とタスク分解",
+      "weight": 10,
+      "must_pass": false,
+      "checks": [
+        {
+          "id": "scope.fit",
+          "text": "自動化に向く条件（同種の問い合わせが多い・知識の統合が要る・24 時間対応・繁忙期の増減・口調の統一）に照らして、ボットに任せる範囲を決めている",
+          "provenance": "official",
+          "source": "cs-guide",
+          "quote": "High volume of repetitive queries",
+          "derived_from": null
+        },
+        {
+          "id": "scope.ideal-interaction",
+          "text": "理想の対話の流れ（どこでお客様が何を聞き、ボットがどう応じるか）を実際の文言レベルで書いている",
+          "provenance": "official",
+          "source": "cs-guide",
+          "quote": "Outline an ideal customer interaction",
+          "derived_from": null
+        },
+        {
+          "id": "scope.task-breakdown",
+          "text": "対話をタスク（挨拶・情報提供・会話の管理・手続き等）に分解し、タスクごとにプロンプトと評価を用意している",
+          "provenance": "official",
+          "source": "cs-guide",
+          "quote": "break down your ideal customer interaction into every task you want Claude to be able to perform",
+          "derived_from": null
+        },
+        {
+          "id": "scope.off-topic",
+          "text": "範囲外の話題は扱わないと伝え、本来の話題に戻す方針がある",
+          "provenance": "official",
+          "source": "cs-guide",
+          "quote": "Redirect off-topic questions back to relevant subjects",
+          "derived_from": null
+        },
+        {
+          "id": "scope.languages",
+          "text": "対応する言語の範囲と、範囲外の言語で問い合わせが来た時の扱いを決めている",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        }
+      ]
+    },
+    {
+      "id": "grounding",
+      "name": "回答の正確さと根拠",
+      "weight": 15,
+      "must_pass": true,
+      "checks": [
+        {
+          "id": "grounding.allow-idk",
+          "text": "分からない時は「分からない」と言ってよいと明示している（推測で答えさせない）",
+          "provenance": "official",
+          "source": "reduce-hallucinations",
+          "quote": "Allow Claude to say \"I don't know\":",
+          "derived_from": null
+        },
+        {
+          "id": "grounding.provided-only",
+          "text": "回答は提供した情報（ナレッジ・ツールの結果）だけに基づかせ、一般知識で補わせない",
+          "provenance": "official",
+          "source": "reduce-hallucinations",
+          "quote": "Explicitly instruct Claude to only use information from provided documents and not its general knowledge.",
+          "derived_from": null
+        },
+        {
+          "id": "grounding.citations",
+          "text": "出典（参照リンク・引用）を示して回答を検証可能にしている",
+          "provenance": "official",
+          "source": "reduce-hallucinations",
+          "quote": "Make Claude's response auditable by having it cite quotes and sources for each of its claims.",
+          "derived_from": null
+        },
+        {
+          "id": "grounding.policy-crosscheck",
+          "text": "回答が自社の方針・既知の事実と矛盾しないかを照合する仕組みがある",
+          "provenance": "official",
+          "source": "cs-guide",
+          "quote": "Verify that the agent's responses align with your company's policies and known facts.",
+          "derived_from": null
+        },
+        {
+          "id": "grounding.knowledge-freshness",
+          "text": "ナレッジ（前提知識・検索元データ）の更新手順と責任者を決め、方針や価格が変わった時に古い回答を出し続けないようにしている",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        }
+      ]
+    },
+    {
+      "id": "escalation",
+      "name": "有人への引き継ぎ（エスカレーション）",
+      "weight": 20,
+      "must_pass": true,
+      "checks": [
+        {
+          "id": "escalation.criteria-documented",
+          "text": "人に引き継ぐ条件を文書化し、引き継ぎの正否（引き継ぐべきだったのに引き継がなかった会話）を数えられる形にしている",
+          "provenance": "official-derived",
+          "source": "cs-guide",
+          "quote": "This measures Claude's ability to recognize when a query needs human intervention and escalate appropriately.",
+          "derived_from": "cs-guide:escalation-efficiency"
+        },
+        {
+          "id": "escalation.frustration",
+          "text": "お客様のフラストレーション・感情の悪化の兆候（否定的な感情が続く・悪化する、同じ質問の繰り返し、強い言葉）を条件に人へ引き継ぐ。兆候の判定方法（感情分析・キーワード・ターン数等）を決めている",
+          "provenance": "official-derived",
+          "source": "cs-guide",
+          "quote": "This assesses Claude's ability to maintain or improve customer sentiment throughout the conversation.",
+          "derived_from": "cs-guide:sentiment-maintenance",
+          "note": "公式の感情分析は会話の開始時と終了時を比べる事後の指標（Sentiment maintenance）。会話中に兆候を検知して引き継ぐ条件にするのは、その具体化（公式に発動条件の記述は無い）"
+        },
+        {
+          "id": "escalation.explicit-request",
+          "text": "「人と話したい」と言われたら、引き留めずにすぐ引き継ぐ",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        },
+        {
+          "id": "escalation.repeated-failure",
+          "text": "解決できないやり取りが一定回数（回数を明記）続いたら人へ引き継ぐ",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        },
+        {
+          "id": "escalation.low-confidence",
+          "text": "回答に自信が無い・範囲外の時は、推測せずに人へ引き継ぐか確認する",
+          "provenance": "official-derived",
+          "source": "reduce-hallucinations",
+          "quote": "Explicitly give Claude permission to admit uncertainty.",
+          "derived_from": "grounding.allow-idk"
+        },
+        {
+          "id": "escalation.beyond-authority",
+          "text": "権限外の約束や手続き（返金・契約変更・例外対応など）を求められたら人へ引き継ぐ",
+          "provenance": "official-derived",
+          "source": "cs-guide",
+          "quote": "Ensure the agent doesn't make promises or enter into agreements it's not authorized to make.",
+          "derived_from": "guardrails.no-commitments"
+        },
+        {
+          "id": "escalation.high-risk-topics",
+          "text": "苦情・法的な問題・安全に関わる内容・解約など、高リスクの話題をボットで扱うか人に回すかを決めている",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        }
+      ]
+    },
+    {
+      "id": "handoff_protocol",
+      "name": "引き継ぎの手順",
+      "weight": 15,
+      "must_pass": true,
+      "checks": [
+        {
+          "id": "handoff.summary",
+          "text": "引き継ぐ時に、会話の要約・確認済みの情報・試した対応を担当者へ渡す",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        },
+        {
+          "id": "handoff.no-repeat",
+          "text": "お客様に同じ説明を繰り返させない（担当者は渡された要約から始める）",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        },
+        {
+          "id": "handoff.expectations",
+          "text": "引き継ぎを伝える時に、待ち時間の目安と次に何が起きるかをお客様に伝える",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        },
+        {
+          "id": "handoff.after-hours",
+          "text": "営業時間外や担当者不在の時の代替（問い合わせ票の作成・折り返し連絡等）を決めている",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        },
+        {
+          "id": "handoff.context-retention",
+          "text": "引き継ぎの前後で会話の文脈を失わない（お客様が画面を離れて戻っても続きから対応できる）",
+          "provenance": "official-derived",
+          "source": "cs-guide",
+          "quote": "Maintaining context when a user navigates away and returns is important for continuity in conversations.",
+          "derived_from": "cs-guide:context-retention"
+        }
+      ]
+    },
+    {
+      "id": "guardrails",
+      "name": "ガードレール",
+      "weight": 10,
+      "must_pass": true,
+      "checks": [
+        {
+          "id": "guardrails.no-commitments",
+          "text": "権限の無い約束・合意をしない",
+          "provenance": "official",
+          "source": "cs-guide",
+          "quote": "Ensure the agent doesn't make promises or enter into agreements it's not authorized to make.",
+          "derived_from": null
+        },
+        {
+          "id": "guardrails.pii",
+          "text": "明示的に必要で許可された場合を除き、回答に個人情報を含めない",
+          "provenance": "official",
+          "source": "cs-guide",
+          "quote": "Unless explicitly required and authorized, strip out any PII from responses.",
+          "derived_from": null
+        },
+        {
+          "id": "guardrails.jailbreak-screen",
+          "text": "ジェイルブレイク・直接のプロンプトインジェクション対策（軽量モデルによる入力の事前スクリーニング・入力検証・拒否の仕方の明記）がある",
+          "provenance": "official",
+          "source": "mitigate-jailbreaks",
+          "quote": "Use a lightweight model like Claude Haiku 4.5 to pre-screen user input before it reaches your main conversation.",
+          "derived_from": null
+        },
+        {
+          "id": "guardrails.indirect-injection",
+          "text": "ツールの結果・文書など第三者のコンテンツは信頼しないデータとして扱い、システムプロンプトやお客様の依頼を上書きさせない",
+          "provenance": "official",
+          "source": "mitigate-jailbreaks",
+          "quote": "Tell Claude explicitly that content returned from tools, documents, or searches is untrusted data and must never override the system prompt or the user's original request.",
+          "derived_from": null
+        },
+        {
+          "id": "guardrails.prompt-leak",
+          "text": "プロンプト漏洩はまず出力の監視・後処理で捕捉し、漏洩に強いプロンプトの工夫は本当に必要な時だけ行う。不要な社内情報はプロンプトに入れない",
+          "provenance": "official",
+          "source": "reduce-prompt-leak",
+          "quote": "Try monitoring techniques first, like output screening and post-processing, to try to catch instances of prompt leak.",
+          "derived_from": null
+        },
+        {
+          "id": "guardrails.consistency",
+          "text": "長く複雑なやり取りでも口調や役割がぶれない",
+          "provenance": "official",
+          "source": "cs-guide",
+          "quote": "Prevent Claude from changing style or going out of character, even during long, complex interactions.",
+          "derived_from": null
+        },
+        {
+          "id": "guardrails.competitors",
+          "text": "競合他社への言及の方針を決めている（公式は言及しないフィルタを挙げるが、採否は事業判断）",
+          "provenance": "official-derived",
+          "source": "cs-guide",
+          "quote": "Implement a competitor mention filter to maintain brand focus and not mention any competitor's products or services.",
+          "derived_from": "cs-guide:competitor-filter"
+        }
+      ]
+    },
+    {
+      "id": "tools_and_actions",
+      "name": "ツール連携と操作",
+      "weight": 5,
+      "must_pass": false,
+      "checks": [
+        {
+          "id": "tools.realtime-data",
+          "text": "残高・注文状況などリアルタイムの情報はツールで取得する（検索用データの埋め込みだけに頼らない）",
+          "provenance": "official",
+          "source": "cs-guide",
+          "quote": "When dealing with queries that require real-time information, such as account balances or policy details, embedding-based RAG approaches are not sufficient.",
+          "derived_from": null
+        },
+        {
+          "id": "tools.least-privilege",
+          "text": "ボットに与えるデータ・操作の権限は必要最小限にする",
+          "provenance": "official",
+          "source": "mitigate-jailbreaks",
+          "quote": "Apply the principle of least privilege so that a successful injection can do minimal damage",
+          "derived_from": null
+        },
+        {
+          "id": "tools.confirm-impactful",
+          "text": "取り消し・返金・契約変更など影響の大きい操作は、実行前にお客様へ内容を確認する",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        }
+      ]
+    },
+    {
+      "id": "transparency",
+      "name": "透明性",
+      "weight": 5,
+      "must_pass": false,
+      "checks": [
+        {
+          "id": "transparency.ai-disclosure",
+          "text": "お客様に AI が応対していることを伝える",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        },
+        {
+          "id": "transparency.privacy-notice",
+          "text": "会話データの扱い（保存・利用目的）を告知し、地域の法規制への適合を確認している",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        }
+      ]
+    },
+    {
+      "id": "metrics_and_evaluation",
+      "name": "成功基準と評価",
+      "weight": 10,
+      "must_pass": false,
+      "checks": [
+        {
+          "id": "metrics.defined",
+          "text": "理解の正確さ・回答の関連性・正確さ・出典提示・話題の維持・エスカレーション精度などの品質指標を、目標値つきで定義している",
+          "provenance": "official",
+          "source": "cs-guide",
+          "quote": "with measurable benchmarks and goals.",
+          "derived_from": null
+        },
+        {
+          "id": "metrics.business",
+          "text": "感情の維持・自己解決率（有人に回らずに解決した割合）・顧客満足度・平均処理時間などの事業指標を定義している",
+          "provenance": "official",
+          "source": "cs-guide",
+          "quote": "The percentage of customer inquiries successfully handled by the chatbot without human intervention.",
+          "derived_from": null
+        },
+        {
+          "id": "metrics.task-evals",
+          "text": "実際の問い合わせの分布に沿った評価ケースを作り、不適切・無関係な入力などのエッジケースを含めている",
+          "provenance": "official",
+          "source": "develop-tests",
+          "quote": "Design evals that mirror your real-world task distribution. Don't forget to factor in edge cases!",
+          "derived_from": null
+        },
+        {
+          "id": "metrics.escalation-cases",
+          "text": "評価ケースに「引き継ぐべき会話」と「引き継ぐべきでない会話」の両方を含め、引き継ぎ漏れと過剰な引き継ぎの両方を測る",
+          "provenance": "official-derived",
+          "source": "cs-guide",
+          "quote": "Track the percentage of correctly escalated conversations versus those that should have been escalated but weren't.",
+          "derived_from": "cs-guide:escalation-efficiency"
+        }
+      ]
+    },
+    {
+      "id": "monitoring",
+      "name": "運用監視と改善",
+      "weight": 5,
+      "must_pass": false,
+      "checks": [
+        {
+          "id": "monitoring.output-analysis",
+          "text": "出力を定期的に分析し（インジェクション成功の兆候など）、結果をプロンプト・入力検証・フィルタの改善に使う",
+          "provenance": "official",
+          "source": "mitigate-jailbreaks",
+          "quote": "Regularly analyze outputs for signs of successful injection.",
+          "derived_from": null
+        },
+        {
+          "id": "monitoring.repeat-offenders",
+          "text": "規約を繰り返し回避しようとするユーザーへの対応（応答の調整・利用制限）を決めている",
+          "provenance": "official",
+          "source": "mitigate-jailbreaks",
+          "quote": "consider throttling or banning users who repeatedly attempt to circumvent your application's guardrails",
+          "derived_from": null
+        },
+        {
+          "id": "monitoring.prompt-audit",
+          "text": "プロンプトと出力を定期的に監査する",
+          "provenance": "official",
+          "source": "reduce-prompt-leak",
+          "quote": "Periodically review your prompts and Claude's outputs for potential leaks.",
+          "derived_from": null
+        },
+        {
+          "id": "monitoring.escalation-review",
+          "text": "引き継いだ会話と引き継ぎ漏れの会話を定期的に見直し、引き継ぎ条件とナレッジを更新する",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        }
+      ]
+    },
+    {
+      "id": "resilience",
+      "name": "障害時の縮退運用",
+      "weight": 5,
+      "must_pass": false,
+      "checks": [
+        {
+          "id": "resilience.fallback",
+          "text": "ボットや API の障害時に、有人窓口や定型の案内へ切り替える手順がある",
+          "provenance": "practice",
+          "source": null,
+          "quote": null,
+          "derived_from": null,
+          "note": "公式根拠なし（一般的な運用慣行）"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1164 @@
+{
+  "schema": "compliance-status/v1",
+  "updated": "2026-09-25",
+  "description": "Job-Automate 自身の、公式原則（anthropic-best-practices.json の principle id）ごとの採用状況・findings（CR-xx）・監査ログ。観点の SoT は anthropic-best-practices.json、本ファイルはその採用状況だけを持つ（repo-specific・移植不可）。整合は scripts/check_compliance_status.py が検査する（全単射・evidence 実在・enum・backlog/partial の cr 必須）。",
+  "enums": {
+    "principle_status": [
+      "adopted",
+      "partial",
+      "not-applicable",
+      "backlog"
+    ],
+    "finding_severity": [
+      "High",
+      "Medium",
+      "Low"
+    ],
+    "finding_status": [
+      "open",
+      "backlog",
+      "done",
+      "false-positive"
+    ]
+  },
+  "principles": {
+    "authoring.avoid-time-sensitive": {
+      "status": "partial",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": "CR-29",
+      "note": "ガイドに指針を追加。日付で分岐する手順の有無の全件確認は backlog"
+    },
+    "authoring.avoid-too-many-options": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "authoring.concise": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "authoring.consistent-terminology": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "authoring.degrees-of-freedom": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "authoring.evaluations-first": {
+      "status": "backlog",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": "CR-27",
+      "note": "ガイドとチェックリストには反映済み。skill ごとの評価は未作成"
+    },
+    "authoring.feedback-loops": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/review-gate/SKILL.md",
+        ".claude/skills/single-session-tdd/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "authoring.forward-slashes": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "authoring.mcp-fully-qualified-names": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/server-windows-standard/SKILL.md",
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "authoring.references-one-level-deep": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "authoring.solve-dont-defer": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "authoring.test-with-all-target-models": {
+      "status": "backlog",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": "CR-28",
+      "note": "ガイドとチェックリストには反映済み。モデル別の試験記録は未作成"
+    },
+    "authoring.third-person-description": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "authoring.toc-for-long-references": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh",
+        ".claude/skills/agent-harness-bootstrap/operational-knowhow.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.agents-md-import": {
+      "status": "not-applicable",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/SKILL.md"
+      ],
+      "cr": null,
+      "note": "本リポジトリの agents.md は他ツール向けの AGENTS.md ではなく、エージェント分離の起動手順書（CLAUDE.md からリンクで参照）。CLAUDE.md があるため既定設定では読み込まれない。大文字小文字を区別しない FS で Project instructions を claude-md-and-agents-md に変えると agents.md が常時読み込まれる点に注意。移植先向けの対応は bootstrap Step 1 に実装済み"
+    },
+    "claude-md.ancestor-concatenation": {
+      "status": "adopted",
+      "evidence": [
+        "docs/setup-guide.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.compaction-instructions": {
+      "status": "adopted",
+      "evidence": [
+        "CLAUDE.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.compaction-root-survives": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/operational-knowhow.md",
+        ".claude/skills/agent-harness-bootstrap/rubric.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.emphasis-single-line": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh",
+        ".claude/skills/agent-harness-bootstrap/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.html-comments-stripped": {
+      "status": "not-applicable",
+      "evidence": [],
+      "cr": null,
+      "note": "任意の tip。本リポジトリの CLAUDE.md は人間向け保守メモを持たない。生成テンプレートの <!-- id --> マーカーは生成時に削除する運用で、context から除去される性質には依存していない"
+    },
+    "claude-md.imports": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh",
+        ".claude/skills/agent-harness-bootstrap/template.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.include-exclude": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/SKILL.md",
+        ".claude/skills/agent-harness-bootstrap/template.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.line-necessity": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/SKILL.md",
+        ".claude/skills/agent-harness-bootstrap/rubric.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.local-md-gitignore": {
+      "status": "adopted",
+      "evidence": [
+        ".gitignore"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.move-procedures-out": {
+      "status": "adopted",
+      "evidence": [
+        "CLAUDE.md",
+        ".claude/skills/agent-harness-bootstrap/selection-flow.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.on-demand-goes-to-skills": {
+      "status": "adopted",
+      "evidence": [
+        "CLAUDE.md",
+        ".claude/skills/agent-harness-bootstrap/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.overspecified-prune-or-hook": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/SKILL.md",
+        ".claude/skills/agent-harness-bootstrap/operational-knowhow.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.size-target-200": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh",
+        ".claude/skills/agent-harness-bootstrap/template.md",
+        "CLAUDE.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.treat-like-code": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/harness-compliance-audit/SKILL.md",
+        ".claude/skills/_shared/compliance-roadmap.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "claude-md.verify-loaded-with-context": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/SKILL.md",
+        "docs/setup-guide.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "context.btw-and-checkpoints": {
+      "status": "not-applicable",
+      "evidence": [],
+      "cr": null,
+      "note": "対話操作の tip。リポジトリの成果物で担保する性質のものではない"
+    },
+    "context.clear-between-tasks": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "context.subagents-for-investigation": {
+      "status": "adopted",
+      "evidence": [
+        "agents.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.config-locations": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/settings.json",
+        ".claude/skills/agent-harness-bootstrap/hooks-reference.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.deterministic-zero-exceptions": {
+      "status": "partial",
+      "evidence": [
+        ".claude/settings.json",
+        ".claude/skills/agent-harness-bootstrap/scripts/hook-stop-setup-gate.sh"
+      ],
+      "cr": "CR-12",
+      "note": "Stop ゲートで setup 検証を強制済み。工程順序（設計→テスト設計→Red→実装）の機械的強制は未実装（CR-12）"
+    },
+    "hooks.exec-form-for-path-placeholders": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/hooks-reference.md",
+        ".claude/settings.json"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.exit0-stderr-debug-only": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/scripts/hook-stop-setup-gate.sh",
+        ".claude/skills/agent-harness-bootstrap/hooks-reference.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.pretooluse-block-exit2": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/hooks-reference.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.security-best-practices": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/hooks-reference.md",
+        ".claude/settings.json"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.sessionstart-stdout-is-context": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/scripts/hook-session-start-setup.sh",
+        ".claude/settings.json"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.shell-profile-echo": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/hooks-reference.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.stop-additionalcontext": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/hooks-reference.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.stop-gate-and-block-cap": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/scripts/hook-stop-setup-gate.sh",
+        ".claude/skills/agent-harness-bootstrap/scripts/hook-stop-setup-gate.test.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.stop-hook-active-loop-guard": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/scripts/hook-stop-setup-gate.sh",
+        ".claude/skills/agent-harness-bootstrap/scripts/hook-stop-setup-gate.test.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.stop-json-decision-block": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/scripts/hook-stop-setup-gate.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.timeout-defaults": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/settings.json",
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.userpromptsubmit-additionalcontext": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/hooks-reference.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "hooks.workspace-trust": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/hooks-reference.md",
+        "docs/setup-guide.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "interview.askuserquestion-spec": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/selection-flow.md",
+        ".claude/skills/single-session-tdd/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "memory.auto-memory-limits": {
+      "status": "not-applicable",
+      "evidence": [],
+      "cr": null,
+      "note": "auto memory はユーザーごと・マシンローカルの機能で、リポジトリには置かれない。本リポジトリの discovery-log / handoff はリポジトリ単位で共有する作業記録で役割が違う（同じ事実を二重管理しない）"
+    },
+    "permissions.bash-arg-patterns-fragile": {
+      "status": "not-applicable",
+      "evidence": [],
+      "cr": null,
+      "note": "本リポジトリは Bash の引数パターンによる allow / deny を使っていない。使う時に参照する観点として保持"
+    },
+    "permissions.deny-sensitive-reads": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/settings.json",
+        ".claude/skills/agent-harness-bootstrap/provenance.json"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "permissions.enforced-not-instructed": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/settings.json",
+        ".claude/skills/agent-harness-bootstrap/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "permissions.preapprove-and-sandbox": {
+      "status": "not-applicable",
+      "evidence": [],
+      "cr": null,
+      "note": "事前承認と sandbox は利用者ごとの設定（~/.claude や settings.local.json）で行う。公開リポジトリの共有 settings.json には個人の許可を入れない"
+    },
+    "permissions.rule-order-deny-ask-allow": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/settings.json"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "review.adversarial-subagent": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/agents/readonly-reviewer.md",
+        ".claude/skills/review-gate/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "review.over-report-caution": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/agents/readonly-reviewer.md",
+        ".claude/skills/agent-harness-bootstrap/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "review.writer-reviewer-separate-sessions": {
+      "status": "adopted",
+      "evidence": [
+        "agents.md",
+        ".claude/skills/review-changes/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "rules.no-paths-loaded-at-launch": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/template.md",
+        ".claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "rules.path-scoped-trigger-on-read": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/agent-harness-bootstrap/operational-knowhow.md",
+        ".claude/skills/agent-harness-bootstrap/rubric.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "rules.paths-only-frontmatter": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh",
+        ".claude/skills/agent-harness-bootstrap/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "settings.local-settings-gitignore": {
+      "status": "adopted",
+      "evidence": [
+        ".gitignore"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "settings.schema-line": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/settings.json",
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.allowed-tools-is-preapproval": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md",
+        "agents.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.body-length-guideline": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.content-persists-standing-instructions": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.context-fork-runs-in-background": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.description-key-use-case-first": {
+      "status": "partial",
+      "evidence": [
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh"
+      ],
+      "cr": "CR-02",
+      "note": "機械検査 S06 で『いつ使うか』を検査。description の長さの整理は backlog（CR-02）"
+    },
+    "skills.dynamic-context-and-arguments": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md",
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.file-location-and-precedence": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.frontmatter-fields": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh",
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.nested-and-live-reload": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.progressive-disclosure": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md",
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.reserved-names": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/skill-authoring-guide/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.side-effect-workflows-manual": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "skills.spec-fields-outside-claude-code": {
+      "status": "partial",
+      "evidence": [
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh"
+      ],
+      "cr": "CR-11",
+      "note": "S10 で検出して WARN。claude.ai 等への配布を計画する時にまとめて対応（CR-11）"
+    },
+    "subagents.check-into-vcs": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/agents/readonly-reviewer.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "subagents.define-custom-for-repeated-workers": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/agents/readonly-reviewer.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "subagents.frontmatter-fields-and-name-rules": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/agents/readonly-reviewer.md",
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "subagents.limit-tools-to-enforce": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/agents/readonly-reviewer.md",
+        ".claude/skills/harness-compliance-audit/scripts/harness_check.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "verification.gate-strength": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/settings.json",
+        ".claude/skills/agent-harness-bootstrap/scripts/hook-stop-setup-gate.sh"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "verification.give-a-check-and-show-evidence": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/single-session-tdd/SKILL.md",
+        ".claude/skills/review-gate/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "workflow.explore-plan-code": {
+      "status": "adopted",
+      "evidence": [
+        "CLAUDE.md"
+      ],
+      "cr": null,
+      "note": ""
+    },
+    "workflow.fan-out-scope-allowed-tools": {
+      "status": "not-applicable",
+      "evidence": [],
+      "cr": null,
+      "note": "本リポジトリに claude -p で一括実行する手順は無い。導入する時に --allowedTools で権限を絞る"
+    },
+    "workflow.self-contained-spec": {
+      "status": "adopted",
+      "evidence": [
+        ".claude/skills/single-session-tdd/SKILL.md"
+      ],
+      "cr": null,
+      "note": ""
+    }
+  },
+  "findings": [
+    {
+      "id": "CR-01",
+      "date": "2026-09-11",
+      "finding": "`.claude/commands/*.md`（3件、旧形式・frontmatter無し）が公式ガイダンス「commands は skills に統合済み」に反する",
+      "principles": [
+        "skills.file-location-and-precedence"
+      ],
+      "severity": "High",
+      "status": "done",
+      "note": "移設前の表記: 優先度「High」/ 状態「**done**（2026-09-11）」/ 原則列「`skills.file-location-and-precedence`」。`.claude/skills/{review-changes,review-implementation,review-skill}/SKILL.md` へ移行。`provenance.json` の `review-commands`/`command-review-implementation` を `kind:\"command\"→\"skill\"` に更新。移行後の別エージェントレビュー（review-skill 自身）で B(78)/A(86)/A(81) を確認、指摘（後述 CR-06〜08）は反映済み"
+    },
+    {
+      "id": "CR-02",
+      "date": "2026-09-11",
+      "finding": "34/53 skills の `description` が 250 文字超（本リポジトリ独自の `skill-authoring-guide` 目安。公式の上限は description+when_to_use 合計 1,536 文字で、いずれも遠く及ばない）",
+      "principles": [
+        "skills.description-key-use-case-first"
+      ],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "移設前の表記: 優先度「Low」/ 状態「open / backlog」/ 原則列「`skills.description-key-use-case-first`（style 目安であり違反ではない）」。他の理由でそのスキルを触る時に機会があれば整える。一括修正はしない"
+    },
+    {
+      "id": "CR-03",
+      "date": "2026-09-11",
+      "finding": "3 skills（`skill-authoring-guide`/`three-agent-tdd-workflow`/`ui-design-guidelines`）が副作用語検出で `disable-model-invocation` 欠如を機械的に疑われたが、実地確認の結果いずれも「pre-publish checklist」等のチェックリスト名称・内部シミュレーション上の hand-off であり実際の副作用ではない",
+      "principles": [
+        "skills.side-effect-workflows-manual"
+      ],
+      "severity": "Low",
+      "status": "false-positive",
+      "note": "移設前の表記: 優先度「Low」/ 状態「**done**（false positive 確認済み・編集不要）」/ 原則列「`skills.side-effect-workflows-manual`」。再監査時に再度浮上したら同じ結論を確認するだけでよい"
+    },
+    {
+      "id": "CR-04",
+      "date": "2026-09-11",
+      "finding": "`CLAUDE.md` の「レビュースキル一覧」節が全体の約46%（常時 load）",
+      "principles": [
+        "claude-md.on-demand-goes-to-skills"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "note": "移設前の表記: 優先度「Medium」/ 状態「**done**（2026-09-11）」/ 原則列「`claude-md.on-demand-goes-to-skills`」。README.md へ集約しポインタ化。174行→99行（公式目標 <200 行に対し余裕あり）"
+    },
+    {
+      "id": "CR-05",
+      "date": "2026-09-11",
+      "finding": "`.claude/skills/agent-harness-bootstrap/provenance.json` が1,447行で skill ツリー中最大。移植レビュー等で全文がエージェントに渡る場面がある",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "移設前の表記: 優先度「Low / long-term」/ 状態「open / backlog」/ 原則列「（SKILL.md 500行ルールは非該当。structured lookup data）」。`provenance-check.test.sh`（52 tests）がこのファイルの厳密な構造に依存するため、再構成は「意味を変えずに分割する」計画と再テストが前提。今は着手しない"
+    },
+    {
+      "id": "CR-06",
+      "date": "2026-09-11",
+      "finding": "`workflows/software-development/review-changes.md`・`review-implementation.md` に `dev/`・`docs/` 配下への死んだパス参照が多数残存（2026-07-31 の `workflows/` 構造への再編で取り残された既存債務）。これらのファイルはレビューエージェントへのプロンプトに丸ごと埋め込まれるため、修正前は実際に誤ったパスをエージェントに渡していた",
+      "principles": [],
+      "severity": "High",
+      "status": "done",
+      "note": "移設前の表記: 優先度「High」/ 状態「**done**（2026-09-11、CR-01 移行時の別エージェントレビューで発見・即修正）」/ 原則列「（公式原則の直接該当なし。品質・正確性の一般論）」。全 `dev/design/*`・`dev/three-agent/*`・`dev/rules/*`・`docs/review-*.md` を `workflows/` 配下の実在パスへ修正済み。修正後の残存チェック済み（grep 0件）"
+    },
+    {
+      "id": "CR-07",
+      "date": "2026-09-11",
+      "finding": "`review-skill/SKILL.md` の収集項目「README.md のドキュメント反映状況」が README.md に存在しない節を指す実行不能な指示だった",
+      "principles": [
+        "skills.progressive-disclosure"
+      ],
+      "severity": "High",
+      "status": "done",
+      "note": "移設前の表記: 優先度「High」/ 状態「**done**（2026-09-11）」/ 原則列「`skills.progressive-disclosure` の実用性側面」。「対象スキルが一覧テーブルに実際に記載されているか」という具体的な確認項目に書き換え"
+    },
+    {
+      "id": "CR-08",
+      "date": "2026-09-11",
+      "finding": "`review-changes/SKILL.md` に出力テンプレートが無く、他2件（review-implementation/review-skill）と非対称だった。3件とも `## Examples` 節が0件だった",
+      "principles": [
+        "skills.progressive-disclosure"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "note": "移設前の表記: 優先度「Medium」/ 状態「**done**（2026-09-11）」/ 原則列「`skills.progressive-disclosure`（構造の一貫性）」。review-changes に採点表+出力フォーマットを追加。3件とも Examples 節・相互の対象範囲の違いを追記"
+    },
+    {
+      "id": "CR-09",
+      "date": "2026-09-15",
+      "finding": "`harness_check.sh` の `fm_get()`（shell の単一行 grep ベース）が YAML block scalar（`description: \\|`）を正しく読めず、`S05`/`S06` を誤判定する（実測: 文字数が実際は数百文字のところ「1 文字」と出る）",
+      "principles": [
+        "skills.frontmatter-fields"
+      ],
+      "severity": "Low",
+      "status": "done",
+      "note": "移設前の表記: 優先度「Low」/ 状態「**done**（2026-09-15）」/ 原則列「（ツール自体の限界。原則 `skills.frontmatter-fields` の検査手段の不備）」。`fm_get()` を YAML block scalar 対応（`\\|` `\\|-` `\\|+` `>` `>-` `>+` の6種、次の桁0キーまで収集）の awk 実装に置換し、`when_to_use` 専用の別抽出awk（`next`で1行値を欠落させる潜在バグ持ち）も `fm_get()` 呼び出しに一本化。単体テスト `test_fm_get.sh`（23ケース）で Red→Green を確認。全56 SKILL.md への before/after diff: FAIL増加なし、WARN 47→46（`server-init` の S06 が WARN→PASS）、他は S05 の文字数表記が実測値に修正されるのみ（判定結果は不変）"
+    },
+    {
+      "id": "CR-10",
+      "date": "2026-09-15",
+      "finding": "`.claude/skills/specification/SKILL.md` が commit/push/deploy 系の語を含むが `disable-model-invocation` が無い（closing sweep で新規検出）",
+      "principles": [
+        "skills.side-effect-workflows-manual"
+      ],
+      "severity": "Low",
+      "status": "false-positive",
+      "note": "移設前の表記: 優先度「Low」/ 状態「**done**（false positive 確認済み・編集不要、2026-09-15）」/ 原則列「`skills.side-effect-workflows-manual`」。実地確認: 該当語は `deploy` 1件のみで、生成対象の技術仕様書テンプレート内コード例のフィールド名（`deployment: \"[アプリストア/Web/その他]\"`）であり、Claude が実際にデプロイ操作を実行する指示ではない。CR-03 と同型の誤検知"
+    },
+    {
+      "id": "CR-11",
+      "date": "2026-09-11",
+      "finding": "11 skills の frontmatter に山括弧プレースホルダ（`<...>` 等）があり、XML 風タグを拒否する一部配布経路（claude.ai アップロード等）で問題になり得る",
+      "principles": [
+        "skills.spec-fields-outside-claude-code"
+      ],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "移設前の表記: 優先度「Low」/ 状態「open / backlog」/ 原則列「`skills.spec-fields-outside-claude-code`」。Claude Code 専用利用なら実害なし。claude.ai 等への配布を計画する時にまとめて対応"
+    },
+    {
+      "id": "CR-12",
+      "date": "2026-09-11",
+      "finding": "工程順序（設計 → テスト設計 → テスト実装(Red) → 実装）の強制がレビュアー判定のみで、機械的な検査がない。ゲートを飛ばしても検出されない",
+      "principles": [
+        "hooks.deterministic-zero-exceptions"
+      ],
+      "severity": "Medium",
+      "status": "backlog",
+      "note": "移設前の表記: 優先度「Medium」/ 状態「open / backlog」/ 原則列「`hooks.deterministic-zero-exceptions`」。候補: `review-gate/SKILL.md` が定めるコミットメッセージ規約 `review-gate:<stage> PASS <score>` を commit 直前の hook で検査する（該当工程の行が無ければ block）。誤検出（docs のみの変更・規約導入前のコミット）の除外条件を先に決める必要がある。次のフル判定スイープ（四半期）で再検討。それまでは `review-gate/SKILL.md` の「強制の限界」の表記で運用する。**関連 (2026-09-14 追加)**: レビュー結果自体（観点別合否・出典URL・要約）の永続化は `review-record/v1`（`.claude/skills/_shared/review-record.schema.json` + `.claude/review-history/`）で対応済み（`research-deliverable-review`/`source-verification-scan`/`staged-investigation-workflow` に導入）。本CR-12が指す「工程順序の通過そのものの機械的検査」は別課題として残る。`review-gate` が同機構を採用する場合は同じスキーマ・スクリプトをそのまま流用できる"
+    },
+    {
+      "id": "CR-13",
+      "date": "2026-09-16",
+      "finding": "CR-09 の修正（`fm_get()`）が `sed -E '1{s/^\"(.*)\"$/\\1/}'` という GNU sed 前提の block 構文を使っており、BSD sed（macOS 標準）では `bad flag in substitute command: '}'` で無条件に失敗していた。この1点の失敗が `name`/`description` 抽出を丸ごと壊し、macOS で全リポジトリスイープを実行すると **56 skills 全件が S02/S03/S05 で FAIL**（FAIL=168）になる一方、`test_fm_get.sh`（23ケース）も同一環境で **22/23 FAIL** していた。CR-09 の「Red→Green 確認」「FAIL増加なし」は GNU sed/awk 環境（Linux）でのみ成立しており、macOS では未検証のまま \"done\" と記録されていた",
+      "principles": [],
+      "severity": "High",
+      "status": "done",
+      "note": "移設前の表記: 優先度「High」/ 状態「**done**（2026-09-16、macOS/BSD sed で再現・修正）」/ 原則列「（公式原則の直接該当なし。クロスプラットフォーム正確性の一般論。本リポジトリは Windows 標準化手順等も抱えるためクロスプラットフォーム動作が前提）」。`1{s/.../}\"` の block 構文を `1 s/.../` （アドレス直接指定、`{}` 無し）に変更するだけで GNU/BSD 両対応になることを確認。`test_fm_get.sh` 23/23 PASS、全リポジトリスイープ FAIL=168→0（WARN も 48 に復帰、内訳は CR-09 の記録どおり）で確認済み。**教訓**: shell スクリプトの CR close 時、`bash`/`sed`/`awk` の GNU 実装依存を疑い、可能なら BSD 環境（macOS）でも実行して確認する一文を再監査手順に追加検討"
+    },
+    {
+      "id": "CR-14",
+      "date": "2026-09-25",
+      "finding": "Stop ゲート（hook-stop-setup-gate.sh）の block 回数 stop_blocks が新しい turn でリセットされず、ある turn で上限に達すると以後その setup の間ずっとゲートが効かなくなっていた。上限到達の通知も exit 0 の stderr で、ユーザーにも Claude にも見えなかった",
+      "principles": [
+        "hooks.stop-hook-active-loop-guard",
+        "hooks.stop-gate-and-block-cap",
+        "hooks.exit0-stderr-debug-only"
+      ],
+      "severity": "High",
+      "status": "done",
+      "note": "stop_hook_active=false でカウンタを 0 に戻し、1 turn 3 回で上限。上限到達と python 不在は systemMessage で通知。hook-stop-setup-gate.test.sh（20 ケース）で Red→Green を確認"
+    },
+    {
+      "id": "CR-15",
+      "date": "2026-09-25",
+      "finding": "CLAUDE.md の行数について、キャッシュと生成テンプレートが『公式は数値閾値を持たない』としていたが、公式 memory docs は『1 ファイル 200 行未満を目標』と明記している。検査スクリプト（C01）は 200 行で判定しておりリポジトリ内でも矛盾していた",
+      "principles": [
+        "claude-md.size-target-200"
+      ],
+      "severity": "High",
+      "status": "done",
+      "note": "cache の claude-md.concise-no-numeric-threshold を claude-md.size-target-200 に置換。template.md / SKILL.md / operational-knowhow.md / maintainer-checklist.md / provenance.json(no-line-count-gate) を修正"
+    },
+    {
+      "id": "CR-16",
+      "date": "2026-09-25",
+      "finding": "公式 memory docs を一度も取得しておらず、agent-harness-bootstrap の事前取得リストにも memory / sub-agents / permissions / settings が無かった（CR-15・CR-20 の原因）",
+      "principles": [
+        "claude-md.imports",
+        "rules.paths-only-frontmatter"
+      ],
+      "severity": "High",
+      "status": "done",
+      "note": "sources に memory / sub-agents / settings / permissions / skill-authoring を追加し 2026-09-25 に取得。bootstrap SKILL.md の取得対象表に追加"
+    },
+    {
+      "id": "CR-17",
+      "date": "2026-09-25",
+      "finding": "AGENTS.md への対応が無かった。CLAUDE.md があると既定では AGENTS.md が読まれないため、移植先に AGENTS.md があると CLAUDE.md の生成で AGENTS.md が読まれなくなる",
+      "principles": [
+        "claude-md.agents-md-import"
+      ],
+      "severity": "High",
+      "status": "done",
+      "note": "bootstrap Step 1 に AGENTS.md の検出と @AGENTS.md の import を追加。provenance に official-agents-md-import を追加（条件付きのため突合レビューで判定）"
+    },
+    {
+      "id": "CR-18",
+      "date": "2026-09-25",
+      "finding": "subagent の原則がキャッシュに 1 つも無く、レビュアーは general-purpose（全ツール可）で起動し、読み取り専用を依頼文でしか担保していなかった",
+      "principles": [
+        "subagents.define-custom-for-repeated-workers",
+        "subagents.limit-tools-to-enforce",
+        "subagents.check-into-vcs",
+        "subagents.frontmatter-fields-and-name-rules"
+      ],
+      "severity": "High",
+      "status": "done",
+      "note": ".claude/agents/readonly-reviewer.md（tools / disallowedTools で書き込み系を禁止）を追加し、19 箇所のレビュアー・論者起動を置換。未定義環境の縮退形（general-purpose + 書き込み禁止の明記）を各 skill に併記。harness_check に A02/A03 を追加"
+    },
+    {
+      "id": "CR-19",
+      "date": "2026-09-25",
+      "finding": "subagent のツール制限を skill の allowed-tools と取り違えていた（allowed-tools は事前承認であってツールを制限しない。subagent の制限は tools / disallowedTools）",
+      "principles": [
+        "skills.allowed-tools-is-preapproval",
+        "subagents.limit-tools-to-enforce"
+      ],
+      "severity": "High",
+      "status": "done",
+      "note": "agents.md / operational-knowhow.md / bootstrap SKILL.md / skill-authoring-guide / provenance(agent-design-tool-scope-limit) を修正"
+    },
+    {
+      "id": "CR-20",
+      "date": "2026-09-25",
+      "finding": "rules の読み込み仕様の誤解: frontmatter に description を書かせていた（読まれるのは paths のみ）、paths の無い rules を @import で二重指定していた（起動時に自動で読まれる）、path-scope の Read 時発火を『既知の bug（#23478）』として扱っていた（公式仕様）",
+      "principles": [
+        "rules.paths-only-frontmatter",
+        "rules.no-paths-loaded-at-launch",
+        "rules.path-scoped-trigger-on-read",
+        "claude-md.compaction-root-survives"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "note": "template.md / SKILL.md / operational-knowhow.md / rubric.md(22, 28b) / maintainer-checklist.md / porting-reconciliation.json を修正。provenance の import 契約を新 check type no_frontmatter_paths に置換（provenance-check.test.sh T56〜T59）。harness_check R01 を paths 以外のキー検出に変更"
+    },
+    {
+      "id": "CR-21",
+      "date": "2026-09-25",
+      "finding": ".setup-automate/ 内で起動すると上位（移植先・ホーム）の CLAUDE.md も連結して読み込まれることが手順書に無く、衝突時の除外方法（claudeMdExcludes）も示していなかった",
+      "principles": [
+        "claude-md.ancestor-concatenation"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "note": "docs/setup-guide.md に注記と claudeMdExcludes の置き場所（.claude/settings.local.json）を追記"
+    },
+    {
+      "id": "CR-22",
+      "date": "2026-09-25",
+      "finding": "permissions / settings の原則がキャッシュに無く、本リポジトリの settings.json にも $schema・機密ファイルの Read deny が無かった。.gitignore に settings.local.json / CLAUDE.local.md が無かった",
+      "principles": [
+        "permissions.enforced-not-instructed",
+        "permissions.rule-order-deny-ask-allow",
+        "permissions.deny-sensitive-reads",
+        "permissions.bash-arg-patterns-fragile",
+        "permissions.preapprove-and-sandbox",
+        "settings.schema-line",
+        "settings.local-settings-gitignore",
+        "claude-md.local-md-gitignore"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "note": "settings.json に $schema と permissions.deny、.gitignore に 2 行を追加。provenance に permissions-deny-sensitive を追加。harness_check に H03 を追加"
+    },
+    {
+      "id": "CR-23",
+      "date": "2026-09-25",
+      "finding": "hooks のセキュリティ 5 原則・workspace trust・timeout・出力の使い分け（systemMessage / additionalContext / block）が生成テンプレートに無く、テンプレートは相対パス呼び出し・『ログイン shell』の誤記・legacy の MultiEdit・fork 無しの matcher だった",
+      "principles": [
+        "hooks.security-best-practices",
+        "hooks.workspace-trust",
+        "hooks.exec-form-for-path-placeholders",
+        "hooks.timeout-defaults",
+        "hooks.exit0-stderr-debug-only",
+        "hooks.stop-additionalcontext",
+        "hooks.shell-profile-echo",
+        "hooks.sessionstart-stdout-is-context"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "note": "hooks-reference.md を改訂（目次・セキュリティと信頼・出力の使い分け・絶対パス・timeout・fork）。本リポジトリの settings.json に timeout と fork を追加。harness_check に H04 を追加"
+    },
+    {
+      "id": "CR-24",
+      "date": "2026-09-25",
+      "finding": "公式 skill authoring best practices（platform.claude.com）がキャッシュの出典に無く、skill-authoring-guide に context: fork の background 既定・skill 本文のライフサイクル・評価先行・全モデルでの試験・目次・自由度・voodoo constants・MCP 完全修飾名・三人称などが無かった",
+      "principles": [
+        "skills.context-fork-runs-in-background",
+        "skills.content-persists-standing-instructions",
+        "skills.reserved-names",
+        "authoring.concise",
+        "authoring.degrees-of-freedom",
+        "authoring.third-person-description",
+        "authoring.references-one-level-deep",
+        "authoring.feedback-loops",
+        "authoring.consistent-terminology",
+        "authoring.avoid-too-many-options",
+        "authoring.solve-dont-defer",
+        "authoring.forward-slashes"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "note": "cache に authoring.* 14 件と skills.* 4 件を追加。skill-authoring-guide に節とチェックリスト項目を追加し、根拠は principle id で参照"
+    },
+    {
+      "id": "CR-25",
+      "date": "2026-09-25",
+      "finding": "生成・移植後に CLAUDE.md と rules が実際に読み込まれたかを確かめる手順（/context の Memory files、InstructionsLoaded hook）が無かった",
+      "principles": [
+        "claude-md.verify-loaded-with-context"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "note": "bootstrap Step 9 と docs/setup-guide.md 手順 5 に /context での確認を追加"
+    },
+    {
+      "id": "CR-26",
+      "date": "2026-09-25",
+      "finding": "キャッシュの記述が現行 docs と食い違っていた: Stop の exit 2 は Claude に届く（届く保証が無いとしていた）、SKILL.md 500 行は docs に明記（未確認扱いだった）、frontmatter の arguments / effort / background 欠落、!`command` 失敗で起動全体が中断される点の欠落、Stop 上限の 'without progress' と CLAUDE_CODE_STOP_HOOK_BLOCK_CAP の欠落、SessionStart matcher の fork",
+      "principles": [
+        "hooks.stop-json-decision-block",
+        "skills.body-length-guideline",
+        "skills.frontmatter-fields",
+        "skills.dynamic-context-and-arguments",
+        "hooks.stop-gate-and-block-cap",
+        "hooks.sessionstart-stdout-is-context"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "note": "該当 principle の statement / quote / check / source を 2026-09-25 取得の原文に合わせて更新"
+    },
+    {
+      "id": "CR-27",
+      "date": "2026-09-25",
+      "finding": "skill ごとの評価（最低 3 シナリオ + skill 無し baseline との比較記録）が 1 件も無い",
+      "principles": [
+        "authoring.evaluations-first"
+      ],
+      "severity": "Medium",
+      "status": "backlog",
+      "note": "57 skill 分を 1 回の作業で作る量ではないため backlog。ガイドとチェックリストには反映済み。新規作成・大きな改訂の時に当該 skill から作る。skill-creator の evals / claude plugin eval の採用可否も合わせて検討する"
+    },
+    {
+      "id": "CR-28",
+      "date": "2026-09-25",
+      "finding": "使う予定のモデル（Haiku / Sonnet / Opus 等）ごとの試験記録が無い",
+      "principles": [
+        "authoring.test-with-all-target-models"
+      ],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "CR-27 の評価を作る時に、モデル別の結果欄を設ける"
+    },
+    {
+      "id": "CR-29",
+      "date": "2026-09-25",
+      "finding": "多くの SKILL.md 本文に『(2026-09-01 追加)』のような日付注記がある",
+      "principles": [
+        "authoring.avoid-time-sensitive"
+      ],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "公式の time-sensitive は『〇年〇月以前は旧方式』のような日付で分岐する手順を指し、変更履歴の日付注記はこれに当たらないと判断した。日付で分岐する手順が無いかは次の四半期フル判定で確認する。ガイドには指針を追加済み"
+    },
+    {
+      "id": "CR-30",
+      "date": "2026-09-25",
+      "finding": "100 行を超える参照ファイル 4 件（stop-ai-slop-jp の examples.md / tech-writing.md、bootstrap の operational-knowhow.md / hooks-reference.md）に目次が無かった",
+      "principles": [
+        "authoring.toc-for-long-references"
+      ],
+      "severity": "Low",
+      "status": "done",
+      "note": "目次を追加（stop-ai-slop-jp はローカル翻案として CHANGELOG に記録）。harness_check に S12 を追加"
+    },
+    {
+      "id": "CR-31",
+      "date": "2026-09-25",
+      "finding": "server-windows-standard が MCP ツールをサーバー名無しで記載していた",
+      "principles": [
+        "authoring.mcp-fully-qualified-names"
+      ],
+      "severity": "Low",
+      "status": "done",
+      "note": "Claude Code 上の完全修飾名（mcp__<server>__<tool>）と、登録名を /mcp で確認してから呼ぶ手順を追記。登録名は環境依存のため推測で書かない"
+    },
+    {
+      "id": "CR-32",
+      "date": "2026-09-25",
+      "finding": "リポジトリ CLAUDE.md の『他プロジェクトのセットアップ依頼への対応』節が、selection-flow.md と重複する複数手順の手続き本文を常時読み込みしていた",
+      "principles": [
+        "claude-md.move-procedures-out",
+        "claude-md.on-demand-goes-to-skills"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "note": "発火条件・ユーザーが決める原則・必須ゲートを残し、手順本文を selection-flow.md / harness-setup-review へのポインタにした"
+    },
+    {
+      "id": "CR-33",
+      "date": "2026-09-25",
+      "finding": "skill-authoring-guide §9 が CR-01 の移行後も .claude/commands/*.md を別形式として説明していた（discovery-log 経由）",
+      "principles": [
+        "skills.file-location-and-precedence"
+      ],
+      "severity": "Low",
+      "status": "done",
+      "note": "§9 を『commands は skills に統合済み』に改訂"
+    }
+  ],
+  "audit_log": [
+    {
+      "date": "2026-09-11",
+      "kind": "軽量スイープ（`harness_check.sh` 移行対象ファイルのみ）",
+      "result": "FAIL=0 WARN=7（CR-09 起因の S06 ×3、BP02 ×1、既知の残存WARN）"
+    },
+    {
+      "date": "2026-09-11",
+      "kind": "フル判定（`/review-skill` を CR-01 移行対象3件に実行）",
+      "result": "B(78)/A(86)/A(81) → 指摘反映後 再検証は軽量スイープで完了（CR-06〜08 参照）"
+    },
+    {
+      "date": "2026-09-11",
+      "kind": "軽量スイープ（`harness_check.sh` 全リポジトリ・98 targets、本ロードマップ運用の初回ベースライン）",
+      "result": "FAIL=0 WARN=49（S06 ×35 = CR-09、S10 ×11 = CR-11、S08 ×1 = CR-10、H01 ×1 python 未検出・BP02 ×1）"
+    },
+    {
+      "date": "2026-09-16",
+      "kind": "軽量スイープ（macOS/BSD sed 環境・102 targets、pull 直後の再監査）",
+      "result": "**実行直後は FAIL=168**（56 skills 全件 S02/S03/S05、CR-13 の BSD sed 非互換が原因）→ CR-13 修正後 FAIL=0 WARN=48 に復帰。`test_fm_get.sh` も同時点で 22/23 FAIL → 修正後 23/23 PASS"
+    },
+    {
+      "date": "2026-09-25",
+      "kind": "公式 docs 再突合（best-practices / memory / skills / sub-agents / hooks / hooks-guide / settings / permissions / skill authoring の現行版を取得）+ 軽量スイープ（harness_check.sh 全 103 targets）",
+      "result": "スイープ FAIL=0 WARN=48（前回と同値）。公式突合で CR-14〜CR-33 を起票し、CR-27〜29 以外を同日に是正。cache は 34 → 85 principle"
+    }
+  ]
+}

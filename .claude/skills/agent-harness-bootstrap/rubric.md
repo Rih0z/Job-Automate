@@ -34,14 +34,14 @@ id 列と台帳の整合（双方向）は `scripts/provenance-check.sh` で機�
 | 19 | emphasis（IMPORTANT / YOU MUST）出現が 5 件以下に絞られている（公式 emphasis ガイダンスに沿う） | emphasis-cap-5 |  |
 | 20 | 進行中タスク・TODO・バージョン番号など陳腐化情報がない | official-claude-md-core |  |
 | 21 | 確実に毎回実行したい advisory ルールが hooks 化候補として識別され、settings.json の hooks に登録されている（または該当なしと宣言されている） | hooks-promotion-judgement |  |
-| 22 | `meta.md` 末尾「既知の制約」に [claude-code Issue #23478](https://github.com/anthropics/claude-code/issues/23478) が URL 付きで明記され、`@import` 一次防御 + 手動 Read 二次防御の二重防壁の理由が説明されている | rules-split-progressive-disclosure |  |
+| 22 | `meta.md` に rules の load 戦略が明記されている: `paths:` の無い rules は起動時に常時 load（`@import` 不要）/ `paths:` 付きは一致ファイルを Read した時に load（公式仕様。Write 前に適用したい条文は常時 load 側に置く）/ `/compact` 後にディスクから再注入されるのはルート CLAUDE.md で、path-scope rules は該当ファイルを再び読むまで戻らない | rules-split-progressive-disclosure |  |
 | 23 | `governance.md` が肥大化防止の複数観点（サイズ閾値 / 新項目ルーティング / 公式準拠 / 定期レビュー / 自動検証 / 常時 load ファイル cap 等・増減可）を項目立てて記述している | governance-multi-aspect |  |
 | 24 | `meta.md` / `@import` で常時 load される rules ファイル個別に **5KB soft cap** が宣言されている | always-load-5kb-cap |  |
 | 25 | 関連 docs 読込宣言が**最初と最後の両方**に「完全パス + 1 文要約 + タスク関連性 1 文」を出力する形になっている | docs-read-declaration |  |
 | 26 | 条文宣言が **lazy load 運用**（タスク該当条のみ宣言・全条一括宣言は不要）になっている | lazy-rule-declaration |  |
 | 27 | `docs/` 配下に概ね 5 section 以上ある場合は **`docs-management.md`**（docs 配置 mapping / 新 docs 配置 flow / 全 section README 必須化 + 同期更新義務 / 過時マーカー）が生成されている。該当しない小規模プロジェクトでは `selected: false, decided_by: "scale"` で記録されている | docs-management |  |
 | 28 | 複数の実行主体・モデル格を使い分けるプロジェクトでは **`execution-routing.md`**（司令塔 3 責務 + 振り分け表 + 高コスト主体抑制 + escalation）が生成されている。該当しない場合は `selected: false, decided_by: "scale"` で記録されている | execution-routing |  |
-| 28b | 28 で `execution-routing.md` を生成した場合、生成 CLAUDE.md 本体の `@import` ブロックに **`@.claude/rules/execution-routing.md` の行が実在する**（テーブルに「常時 load」と書くだけで `@import` 行が抜けている＝名ばかり常時 load になっていないか、生成物を Read して確認する） | execution-routing |  |
+| 28b | 28 で `execution-routing.md` を生成した場合、その frontmatter に **`paths:` が無い**（= 起動時に常時 load）。テーブルに「常時 load」と書きながら `paths:` を付けて path-scope になっている＝名ばかり常時 load になっていないか、生成物を Read して確認する | execution-routing |  |
 | 29 | 並走 agent 痕跡 4 軸 recheck（git log / handoff・plan / worktree / git status の 2 境界実行 + 検出時 action a〜d）が `issue-workflow.md` に明記され、SessionStart hook に **verdict のみ注入**の形で組込まれている（並走なし小規模では `selected: false, decided_by: "scale"` の記録で opt-out 可） | concurrent-agent-4-axis-recheck |  |
 | 30 | 成果物の生成主体明示（LLM 生成物 vs script/lib 生成物の厳格区別・メタデータ突合）が `test-verify.md` に明記されている | artifact-generator-attribution |  |
 | 31 | close 前検証 4 段（再現→pass / negative test / regression smoke / 証拠アーカイブ）が `test-verify.md` または issue lifecycle に明記されている | close-verification-4-steps |  |

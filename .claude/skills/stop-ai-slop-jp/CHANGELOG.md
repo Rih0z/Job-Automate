@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1-local] - 2026-09-25 (ローカル翻案・upstream 未反映)
+
+公式 skill authoring の「100 行を超える参照ファイルには先頭に目次」に合わせた。本文の変更は無い。
+
+### 追加
+
+- `references/examples.md` / `references/tech-writing.md`: 先頭に目次（`## 目次`）を追加。`phrases.md` / `structures.md` は既に番号付きのリンク目次があるため変更なし。
+
 ## [0.2.0-local] - 2026-07-16 (ローカル翻案・upstream 未反映)
 
 技術文書モードを追加。

@@ -1,0 +1,259 @@
+{
+  "schema": "harness-checks/v1",
+  "description": "harness_check.sh の check id と、公式原則キャッシュ（.claude/skills/_shared/anthropic-best-practices.json）の principle id の対応。check の追加・変更時はこのファイルを先に更新する（test_new_checks.sh の B15 が harness_check.sh との id 一致を検査する）。",
+  "checks": [
+    {
+      "id": "BP01",
+      "target": "repo",
+      "check": "公式原則の構造化キャッシュ（anthropic-best-practices.yaml|json）の存在（無ければ FAIL）",
+      "principles": [],
+      "note": "判定基準を日付付きの構造化データで持つという本 skill の前提。公式原則ではなく運用上の前提"
+    },
+    {
+      "id": "BP02",
+      "target": "SoT",
+      "check": "fetched が max_age_days 以内か（超過は WARN）",
+      "principles": [],
+      "note": "キャッシュの refetch_when 手順。公式原則ではなく運用上の前提"
+    },
+    {
+      "id": "C01",
+      "target": "CLAUDE.md",
+      "check": "200 行未満（超過は WARN）",
+      "principles": [
+        "claude-md.size-target-200"
+      ]
+    },
+    {
+      "id": "C02",
+      "target": "CLAUDE.md",
+      "check": "@import 先の実在（欠落は FAIL）",
+      "principles": [
+        "claude-md.imports"
+      ]
+    },
+    {
+      "id": "C03",
+      "target": "CLAUDE.md",
+      "check": "強調語（IMPORTANT / YOU MUST）が 3 箇所超なら WARN",
+      "principles": [
+        "claude-md.emphasis-single-line"
+      ]
+    },
+    {
+      "id": "C04",
+      "target": "CLAUDE.md",
+      "check": "Markdown 見出しで構造化されているか（無ければ WARN）",
+      "principles": [
+        "claude-md.size-target-200"
+      ],
+      "note": "memory docs の Write effective instructions（Structure）"
+    },
+    {
+      "id": "R01",
+      "target": "rules",
+      "check": "frontmatter のキーが paths のみか（paths 以外があれば WARN）",
+      "principles": [
+        "rules.paths-only-frontmatter"
+      ]
+    },
+    {
+      "id": "R02",
+      "target": "rules",
+      "check": "paths: の有無（path-scope か常時 load か）を表示",
+      "principles": [
+        "rules.no-paths-loaded-at-launch",
+        "rules.path-scoped-trigger-on-read"
+      ]
+    },
+    {
+      "id": "R03",
+      "target": "rules",
+      "check": "200 行超は WARN（1 ファイル 1 トピック）",
+      "principles": [
+        "claude-md.size-target-200"
+      ]
+    },
+    {
+      "id": "S01",
+      "target": "SKILL.md",
+      "check": "YAML frontmatter の存在（無ければ FAIL）",
+      "principles": [
+        "skills.frontmatter-fields"
+      ]
+    },
+    {
+      "id": "S02",
+      "target": "SKILL.md",
+      "check": "name がディレクトリ名と一致",
+      "principles": [
+        "skills.frontmatter-fields",
+        "skills.file-location-and-precedence"
+      ]
+    },
+    {
+      "id": "S03",
+      "target": "SKILL.md",
+      "check": "name が kebab-case",
+      "principles": [
+        "skills.body-length-guideline"
+      ]
+    },
+    {
+      "id": "S04",
+      "target": "SKILL.md",
+      "check": "name に claude / anthropic を含まない",
+      "principles": [
+        "skills.body-length-guideline"
+      ]
+    },
+    {
+      "id": "S05",
+      "target": "SKILL.md",
+      "check": "description 必須・description+when_to_use ≤ 1,536 文字",
+      "principles": [
+        "skills.frontmatter-fields"
+      ]
+    },
+    {
+      "id": "S06",
+      "target": "SKILL.md",
+      "check": "description に『いつ使うか』がある（無ければ WARN）",
+      "principles": [
+        "skills.description-key-use-case-first"
+      ]
+    },
+    {
+      "id": "S07",
+      "target": "SKILL.md",
+      "check": "500 行未満（超過は FAIL）",
+      "principles": [
+        "skills.body-length-guideline",
+        "skills.progressive-disclosure"
+      ]
+    },
+    {
+      "id": "S08",
+      "target": "SKILL.md",
+      "check": "副作用語（commit/push/deploy 等）があるのに disable-model-invocation が無ければ WARN",
+      "principles": [
+        "skills.side-effect-workflows-manual"
+      ]
+    },
+    {
+      "id": "S09",
+      "target": "SKILL.md",
+      "check": "$ARGUMENTS を使うのに argument-hint が無ければ WARN",
+      "principles": [
+        "skills.dynamic-context-and-arguments"
+      ]
+    },
+    {
+      "id": "S10",
+      "target": "SKILL.md",
+      "check": "frontmatter の山括弧プレースホルダは WARN",
+      "principles": [
+        "skills.spec-fields-outside-claude-code"
+      ],
+      "note": "XML 風タグを拒否する配布経路への配慮"
+    },
+    {
+      "id": "S11",
+      "target": "SKILL.md",
+      "check": "本文リンク先（references/ scripts/ assets/）の実在（欠落は FAIL）",
+      "principles": [
+        "skills.progressive-disclosure",
+        "authoring.references-one-level-deep"
+      ]
+    },
+    {
+      "id": "S12",
+      "target": "skill 配下の参照 .md（SKILL.md・README を除く）",
+      "check": "100 行超で先頭 30 行に目次（目次 / Contents / Table of Contents の見出し、または 3 行以上のアンカーリンク列挙）が無ければ WARN",
+      "principles": [
+        "authoring.toc-for-long-references"
+      ]
+    },
+    {
+      "id": "K01",
+      "target": "commands",
+      "check": "description の有無",
+      "principles": [
+        "skills.file-location-and-precedence",
+        "skills.frontmatter-fields"
+      ]
+    },
+    {
+      "id": "K02",
+      "target": "commands",
+      "check": "frontmatter の山括弧プレースホルダ",
+      "principles": [
+        "skills.spec-fields-outside-claude-code"
+      ]
+    },
+    {
+      "id": "A01",
+      "target": "agents",
+      "check": "frontmatter と name / description の存在（無ければ FAIL）",
+      "principles": [
+        "subagents.frontmatter-fields-and-name-rules"
+      ]
+    },
+    {
+      "id": "A02",
+      "target": "agents",
+      "check": "name に ':' が無い（あれば FAIL。読み込まれない）",
+      "principles": [
+        "subagents.frontmatter-fields-and-name-rules"
+      ]
+    },
+    {
+      "id": "A03",
+      "target": "agents",
+      "check": "tools か disallowedTools でツールを限定している（どちらも無ければ WARN）",
+      "principles": [
+        "subagents.limit-tools-to-enforce"
+      ]
+    },
+    {
+      "id": "H01",
+      "target": "settings.json / settings.local.json",
+      "check": "JSON として妥当（parse エラーは FAIL）",
+      "principles": [
+        "hooks.config-locations"
+      ]
+    },
+    {
+      "id": "H02",
+      "target": "settings.json / settings.local.json",
+      "check": "hook が呼ぶ .claude/ 配下のスクリプトの実在（欠落は FAIL）",
+      "principles": [
+        "hooks.deterministic-zero-exceptions",
+        "hooks.exec-form-for-path-placeholders"
+      ]
+    },
+    {
+      "id": "H03",
+      "target": "settings.json",
+      "check": "$schema がある（無ければ WARN）",
+      "principles": [
+        "settings.schema-line"
+      ]
+    },
+    {
+      "id": "H04",
+      "target": "settings.json / settings.local.json",
+      "check": "すべての hook に timeout がある（無いものがあれば WARN）",
+      "principles": [
+        "hooks.timeout-defaults"
+      ]
+    },
+    {
+      "id": "X00",
+      "target": "その他",
+      "check": "検査対象外の種別（エージェント判定のみ）",
+      "principles": [],
+      "note": "機械検査の対象外であることを示す行"
+    }
+  ]
+}

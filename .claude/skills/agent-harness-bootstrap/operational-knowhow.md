@@ -4,6 +4,21 @@ SKILL.md 本体「本スキル独自の運用ノウハウ」の索引から参�
 
 各項目冒頭の `> provenance:` 行は、その項目が **公式原則の具体化（official-derived）** か **著者の運用嗜好（author-preference）** かと、`provenance.json` の要素 id を示す。author-preference の項目は、別プロジェクトへ適用する時 Step 0（`selection-flow.md`）でユーザーが明示的に選んだ場合のみ生成する（デフォルト非採用）。由来の SoT は `provenance.json`、本ファイルの行は参照用の写しで、整合は `scripts/provenance-check.sh`（C10）が機械検査する。
 
+## 目次
+
+- [規模に応じたスケール調整](#独自運用-規模に応じたスケール調整過剰生成を避ける)
+- [サイズの目安](#独自運用-サイズの目安参考値硬性基準ではない)
+- [標準セット（rules の load 戦略を含む）](#独自構造-標準セットフル装備規模に応じて間引く)
+- [実行主体・モデル格の振り分け規約](#独自運用-実行主体モデル格の振り分け規約execution-routingmd)
+- [関連 docs 読込宣言](#独自運用-関連-docs-読込宣言) / [条文宣言の lazy load 運用](#独自運用-条文宣言の-lazy-load-運用)
+- [governance.md の項目群](#独自運用-governancemd-の項目群) / [ハーネス実質再監査ロードマップ](#独自運用-ハーネス実質再監査ロードマップ該当時のみ)
+- [handoff 受領](#独自運用-handoff-受領user-明示指示駆動本文は自動-read-しない) / [並走 agent 痕跡 4 軸 recheck](#独自運用-並走-agent-痕跡-4-軸-recheck並走衝突防止)
+- [issue ライフサイクル管理](#独自運用-issue-ライフサイクル管理open--processing--closed)
+- [PC 再起動・session 復元の自動化](#独自運用-pc-再起動session-復元の自動化) / [handoff 管理](#独自運用-handoff-管理命名保持issue-連携)
+- [規約の hooks 化判断](#独自運用-規約の-hooks-化判断advisory--deterministic-昇格) / [自作 skill / MCP ツールの品質基準の継承](#独自運用-自作-skill--mcp-ツールの品質基準の継承該当時のみ)
+- [別エージェントレビューサイクル](#独自運用-別エージェントレビューサイクル) / [収束型自律前進](#独自運用-収束型自律前進採用時のみオプション)
+- [成果物の生成主体明示](#独自運用-成果物の生成主体明示誤認防止) / [マルチエージェント / subagent 設計原則](#独自運用-マルチエージェント--subagent-設計原則該当時のみ) / [変更履歴運用](#独自運用-変更履歴運用該当時のみ)
+
 ### 独自運用: 規模に応じたスケール調整（過剰生成を避ける）
 
 > provenance: official-derived · id: scale-adjustment
@@ -22,9 +37,10 @@ SKILL.md 本体「本スキル独自の運用ノウハウ」の索引から参�
 
 | レベル | 対象 | 目安 | 対応 |
 |------|------|------|------|
+| 公式目標 | CLAUDE.md 本体 | 1 ファイル 200 行未満（memory docs の Size 記述。取得時に現行値を確認） | 超えたら rules / skills への分割を検討（出力拒否の閾値ではない） |
 | 剪定検討 | CLAUDE.md 本体 | 概ね 100 行 / 10KB を超え始めたら | 「削除したら Claude が間違えるか」の基準で再評価。挙動が変わらないルールが埋もれていないか観察 |
 | 分割推奨 | CLAUDE.md 本体 | Claude が指示を無視し始める兆候が出たら | rules / skills / docs へ分割 |
-| 常時 load rules 個別 cap | `meta.md` / `@import` で常時 load される rules 個別 | **5KB soft cap**（独自強化） | cap 超過時は条文を path-scope rules に逃がすか、長文条文を docs/ に分離してリンク化 |
+| 常時 load rules 個別 cap | `paths:` の無い（常時 load される）rules 個別 | **5KB soft cap**（独自強化） | cap 超過時は条文を path-scope rules に逃がすか、長文条文を docs/ に分離してリンク化 |
 
 判定は数値より「公式 *"rules getting lost in the noise"* 兆候の有無」を主基準にする。閾値を設定する場合は「早期気付き warning + 構造見直し fail の二段構え」が汎用的に有効（数値は硬性化しない）。
 
@@ -45,20 +61,20 @@ CLAUDE.md は単体ではなく次のセットで構成しうる（あり得る�
 
 | ファイル | 役割 | 要素 id（選択依存 = author-preference のみで構成） | load 戦略 |
 |---|---|---|---|
-| `meta.md` | 条番号インデックス・既知の制約（下記 Issue #23478 等） | rules-split-progressive-disclosure（5KB cap は always-load-5kb-cap） | 常時 load |
-| `code-quality.md` | コード変更時の規約 | rules-split-progressive-disclosure / generic-discipline-menu | `@import` で常時 load |
-| `test-verify.md` | テスト・自検証規約 | rules-split-progressive-disclosure / close-verification-4-steps / artifact-generator-attribution / numeric-target-single-sot | `@import` で常時 load |
+| `meta.md` | 条番号インデックス・load 戦略（下記） | rules-split-progressive-disclosure（5KB cap は always-load-5kb-cap） | 常時 load |
+| `code-quality.md` | コード変更時の規約 | rules-split-progressive-disclosure / generic-discipline-menu | `paths:` 無しで常時 load |
+| `test-verify.md` | テスト・自検証規約 | rules-split-progressive-disclosure / close-verification-4-steps / artifact-generator-attribution / numeric-target-single-sot | `paths:` 無しで常時 load |
 | `issue-workflow.md`（**選択依存**） | Issue 起票・handoff・`/clear` | issue-lifecycle / handoff-management / concurrent-agent-4-axis-recheck | `paths:` で path-scope |
 | `review.md` | 別エージェントレビュー規約 | separate-agent-review-cycle / official-adversarial-review / official-skills-core / review-cycle-parameters | `paths:` で path-scope |
 | `governance.md`（**選択依存**） | 肥大化防止・新項目追加規約 | governance-multi-aspect | `paths:` で path-scope |
-| `execution-routing.md`（**選択依存**） | タスクをどの実行主体・モデル格に振るかの規約 | execution-routing | `@import` で常時 load |
+| `execution-routing.md`（**選択依存**） | タスクをどの実行主体・モデル格に振るかの規約 | execution-routing | `paths:` 無しで常時 load |
 | `docs-management.md`（**選択依存**） | docs 配置 mapping / 新 docs 配置 flow / 全 section README 必須化 + 同期更新義務 / 過時マーカー強制 | docs-management | `paths:` で path-scope |
 
 **`execution-routing.md` 採用判定**: 複数の実行主体（人手 / 複数 AI エージェント / 異なるモデル格）に振り分ける運用があるプロジェクトで採用する。単一実行主体の小規模プロジェクトは不要。
 
 **`docs-management.md` 採用判定**: `docs/` 配下に **複数 section（概ね 5 以上）**があり、複数箇所で同じ section リストを SoT として保持するプロジェクトでのみ採用する。単一 `docs/README.md` で完結する小規模は不要。
 
-`paths:` frontmatter を `@import` と併用する理由: path-scope rules auto-load が **Read 時のみ発火、Write/Create 時には発火しない**既知 bug（[claude-code Issue #23478](https://github.com/anthropics/claude-code/issues/23478)）への補償。`@import` を一次防御、タスク開始時の手動 Read を二次防御とする二重防壁にする。生成 rules の `meta.md` 末尾「既知の制約」にも Issue URL を明記する。
+rules の load 戦略（公式 memory docs の仕様）: frontmatter に `paths:` の無い rules は起動時に常時 load される（`@import` で二重に指定しない）。`paths:` 付き rules は、一致するファイルを Claude が **Read した時**に load される（ツール使用のたびではない。新規ファイルの Write 前には効かない）。これは不具合ではなく仕様なので、Write 前から効かせたい条文は `paths:` 無しの常時 load 側に置き、path-scope 側はタスク開始時に該当ファイルを Read する運用で補う。frontmatter で読まれるのは `paths` だけ（`name` / `description` は無視される）。`/compact` 後にディスクから再注入されるのはルート CLAUDE.md で、path-scope rules は該当ファイルを再び読むまで戻らない。生成 rules の `meta.md` にこの load 戦略を明記する。
 
 ### 独自運用: 実行主体・モデル格の振り分け規約（`execution-routing.md`）
 
@@ -99,11 +115,11 @@ Claude はタスク開始時に関連 docs を最低 1 つ読み、**宣言の�
 | 公式準拠 | 新 `.claude/` subdir は公式定義（rules/skills/commands/agents）のいずれかに限定 | `docs/`, `tmp/` 等を `.claude/` 直下に作らない |
 | 定期レビュー | 公式 docs ドリフト検出のための定期点検。`harness-compliance-roadmap-seed` 採用時は、同要素が生成する `harness-compliance-roadmap.md` の四半期フル判定（`skills-audit` / `harness-compliance-audit`）も同じ定期点検の一部として明記する（非採用時は公式 Best Practices ドリフト検出のみ） | 定期的に公式 Best Practices を WebFetch + ドリフト改修計画（+ 採用時は上記フル判定） |
 | 自動検証 | サイズ閾値・命名規約の hook / CI 検証。`harness-compliance-roadmap-seed` 採用時は、`harness-compliance-roadmap.md` の軽量 `harness_check.sh` スイープも自動検証の一部として明記する（非採用時は hook のみ） | `PreToolUse(Write)` で命名検証、`PostToolUse(Edit)` でサイズ警告（+ 採用時は上記スイープ） |
-| 常時 load ファイルの cap | `meta.md` + `@import` で常時 load される rules 個別の cap | 各 5KB soft cap、超えたら path-scope rules に逃がす |
+| 常時 load ファイルの cap | `paths:` の無い（常時 load される）rules 個別の cap | 各 5KB soft cap、超えたら path-scope rules に逃がす |
 | 新条文追加手順 | 新しい規約を rules に足す前に踏む 5 段（既存条の重複・言い換えでないか確認 → 配置先を項目性質で判定 → 公式ドキュメントと矛盾しないか確認 → 影響する自動検証（hook/CI）があれば同時更新 → 独立レビュー 2 本以上を収束させてから確定）。重複ならまず既存条の拡張を優先し新設しない | 追加提案のたびにこの 5 段をチェックリストとして踏ませる |
 | advisory → hook 昇格判断 | 公式は明記する: 「hooks are deterministic and guarantee the action happens... Use hooks for actions that must happen every time with zero exceptions」。rules 条文に「必ず」「例外なく」等の zero-exception 語気を使う時は、(a) 毎回・例外なく実行されるべきか (b) pass/fail が機械的に判定可能か の両方を満たす規律だけ hook 化を検討する（両方満たさない文脈依存の判断は advisory のまま rules に残してよい） | 既存規約の一斉 hook 化はしない。新条文追加時と定期レビュー時に候補判定するのみ |
 
-サイズ閾値だけでは `@import` 常時 load rules 経由の context 汚染を防げない。「常時 load ファイルの cap」観点が context 汚染を構造的に塞ぐ最も効く一手になる。「新条文追加手順」観点は、規約が場当たり的に増殖し公式からドリフトする経路を構造的に塞ぐ。「advisory → hook 昇格判断」観点は、公式の zero-exception ガイダンスへの non-compliance (advisory 文言だけで済ませてしまう) を構造的に防ぐ。
+サイズ閾値だけでは常時 load rules 経由の context 汚染を防げない。「常時 load ファイルの cap」観点が context 汚染を構造的に塞ぐ最も効く一手になる。「新条文追加手順」観点は、規約が場当たり的に増殖し公式からドリフトする経路を構造的に塞ぐ。「advisory → hook 昇格判断」観点は、公式の zero-exception ガイダンスへの non-compliance (advisory 文言だけで済ませてしまう) を構造的に防ぐ。
 
 ### 独自運用: ハーネス実質再監査ロードマップ（該当時のみ）
 
@@ -312,7 +328,7 @@ CLAUDE.md に書いた規約は advisory なので Claude が長文中で見落�
 
 **コーディネーター中継のメタデータ保持**: 複数の調査・取得系 subagent の結果を、コーディネーターが別の統合（synthesis）エージェントへ引き渡す構成では、各結果の出典（URL・ファイルパス・文書名等）を本文内容と分離した構造化データとして保持したまま渡す（`{content, source_url, source_path}` 等）。「要点だけ」を平文で抜き出して渡すと、統合エージェントに出典を引用する材料が失われ、根拠のない主張を含む成果物が生成される。取得系 subagent 自体が正しく出典を返していても、この中継部分で構造が失われれば無意味になる。
 
-**ツールスコープの限定**: 1 エージェントの `allowed-tools` は 4〜5 個・単一ロールを目安にする。全く異なる専門領域（コード分析・セキュリティスキャン・デプロイ検証等）を 1 エージェントに詰め込むと選択精度が落ちるため、対象単位（ファイル1件・工程1件等）ごとにロール別のエージェントを分けて起動する。
+**ツールスコープの限定**: 1 エージェントのツール（subagent 定義の `tools` / `disallowedTools`。skill の `allowed-tools` は事前承認であって制限ではない）は 4〜5 個・単一ロールを目安にする。全く異なる専門領域（コード分析・セキュリティスキャン・デプロイ検証等）を 1 エージェントに詰め込むと選択精度が落ちるため、対象単位（ファイル1件・工程1件等）ごとにロール別のエージェントを分けて起動する。
 
 ### 独自運用: 変更履歴運用（該当時のみ）
 

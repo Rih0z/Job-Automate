@@ -73,8 +73,8 @@ expect(results).toEqual([{ start: "09:00", end: "10:00" }])
 
 ## 独立レビューの回し方
 
-- 各工程の完了時に `review-gate` skill の手順で `Agent` ツール(`general-purpose`)を起動し、観点JSON(criteria/*.json)に基づくレビューを受ける。
+- 各工程の完了時に `review-gate` skill の手順で `Agent` ツール(`readonly-reviewer`。未定義なら `general-purpose` + 書き込み禁止の明記)を起動し、観点JSON(criteria/*.json)に基づくレビューを受ける。
 - レビュアーには対象ファイルのパスだけを渡し、自分の実装意図・言い訳を渡さない。
 - FAILなら修正して再レビュー。PASSするまで次工程に進まない。
 - レビュアーが観点定義の抜け漏れを指摘したら、criteria JSONを更新してコミットする(スキルは育てるもの)。
-- この順序の強制はレビュアーの判定に依るので確率的で、機械的に保証されるものではない。決定的な検査にする案は `.claude/skills/_shared/compliance-roadmap.md` の backlog にある。
+- この順序の強制はレビュアーの判定に依るので確率的で、機械的に保証されるものではない。決定的な検査にする案は Job-Automate の `.claude/skills/_shared/compliance-status.json` の findings（CR-12・backlog）にある。

@@ -41,12 +41,17 @@ cd .setup-automate   # ← ここで Claude Code を起動する
 
 この clone の `.claude/settings.json` には SessionStart / Stop の hook が登録されている。setup の進行中（選択 → 生成 → 検証）だけ動き、検証（`harness-setup-review`）を PASS する前に Claude が終了しようとすると block する。setup をしていない時は何もしない。
 
+hook は Python（`python3` / `python` / `py`）で state を読む。Python が見つからない時はゲートを評価できない旨を画面に表示して終了を許す（無音で通過しない）。対話セッションでは、フォルダの workspace trust を承認するまで hook は動かない。`claude -p` や SDK から起動した場合は trust の確認が出ず、この hook がそのまま動く。
+
+**上位の CLAUDE.md も一緒に読み込まれる**: Claude Code は起動ディレクトリより上にある `CLAUDE.md` / `CLAUDE.local.md` をすべて連結して読み込む（上書きではない）。`.setup-automate/` 内で起動すると、このリポジトリの CLAUDE.md に加えて、対象プロジェクト（`..`）やホームディレクトリの CLAUDE.md も context に入る。指示が衝突して setup の手順が乱れる場合は、`.setup-automate/.claude/settings.local.json` に `claudeMdExcludes`（除外するファイルのパスまたは glob）を書いて上位の CLAUDE.md を外す。読み込まれているファイルは `/context` の Memory files で確認できる。
+
 ## 手順
 
 1. 上記のとおり `.setup-automate/` に clone し、**その中で** Claude Code を起動する（対象ルートで起動するとこのリポジトリの CLAUDE.md が読み込まれず、下記の指示が効かない）。clone するだけでは何も自動実行されない（Claude Code は明示的な指示なしにファイルを実行しない設計のため、次の一言だけは必要）。
 2. 「親ディレクトリ（`..`）をセットアップして」と伝える（表現は厳密でなくてよい。「ここの仕組みを `..` にも入れて」「`<対象の絶対パス>` をセットアップして」等でも同じ手順が走る — 詳細な発火条件は [CLAUDE.md](../CLAUDE.md)「他プロジェクトのセットアップ依頼への対応」参照）。
 3. 以降は Claude Code が `CLAUDE.md` の**完全列挙 + 由来別選択ルール**を実行する: 全要素を載せた選択記録（= 移植チェックリスト）の作成 → **由来別（Anthropic 公式由来 / 公式原則の具体化 / 著者の運用嗜好 / 第三者 / 業務プロンプト）に提示し、何を取り込むかをあなたが選ぶ**（著者嗜好はデフォルト非採用） → 選択を対象の `.claude/harness-selection.json` に記録 → `.claude/skills/agent-harness-bootstrap` で対象 CLAUDE.md を生成 → 選択した skills をコピー → `harness-setup-review` で「選択済みの抜けゼロ・非選択の混入ゼロ」を機械検査 + 別エージェント突合レビュー（両方 PASS するまで Stop hook が終了を block）→ 既存 skills があれば `skills-audit` で公式準拠を監査。由来の台帳は [provenance.json](../.claude/skills/agent-harness-bootstrap/provenance.json)、選択手順は [selection-flow.md](../.claude/skills/agent-harness-bootstrap/selection-flow.md)。
 4. 完了後、対象側で `CLAUDE.md`・`.claude/`・（採用時）`workflows/software-development/` をコミットする。`.setup-automate/` と `.tmp/` はコミットしない。
+5. 対象ルートで Claude Code を新しく起動して `/context` を実行し、Memory files に生成した `CLAUDE.md` と常時 load の rules（frontmatter に `paths:` の無いもの）が載っていることを確かめる。
 
 ## 検証と再同期
 

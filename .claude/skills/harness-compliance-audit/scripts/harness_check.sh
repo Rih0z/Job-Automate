@@ -6,7 +6,7 @@
 #   bash harness_check.sh path/a path/b   # 指定ファイルのみ
 # 出力: CHECK <id> <PASS|WARN|FAIL> <file> <detail>  （1 行 1 検査）
 # 終了コード: FAIL が 1 件以上なら 1、それ以外 0。
-# check id と公式原則の対応は reference/checks.md。数値の閾値は公式 docs 由来のもののみ（skills 500 行・description 1536 文字・CLAUDE.md 200 行）。
+# check id と公式原則（anthropic-best-practices.json の principle id）の対応は reference/checks.json（SoT）。数値の閾値は公式 docs 由来のもののみ（skills 500 行・description 1536 文字・CLAUDE.md 200 行）。
 set -u
 ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 cd "$ROOT" || exit 2
@@ -68,6 +68,13 @@ fm_get() {
   ' | sed -E '1 s/^"(.*)"$/\1/'
 }
 count_lines() { wc -l < "$1" | tr -d ' '; }
+# python の解決（WindowsApps の実行エイリアス stub は起動がハングし得るので除外）
+PY=""
+for c in python3 python py; do
+  cp_=$(command -v "$c" 2>/dev/null) || continue
+  case "$cp_" in */WindowsApps/*) continue;; esac
+  "$c" -c 'print(1)' >/dev/null 2>&1 && { PY="$c"; break; }
+done
 charlen() { printf '%s' "$1" | wc -m | tr -d ' '; }
 
 for f in "${TARGETS[@]}"; do
@@ -84,10 +91,12 @@ for f in "${TARGETS[@]}"; do
       ;;
     .claude/rules/*.md)
       if [ "$(head -1 "$f")" = "---" ]; then
-        d=$(fm_get "$f" description); [ -n "$d" ] && emit R01 PASS "$f" "description あり" || emit R01 WARN "$f" "frontmatter に description が無い"
+        extra=$(frontmatter "$f" | grep -oE '^[A-Za-z_][A-Za-z0-9_-]*:' | tr -d ':' | grep -vx 'paths' | sort -u | tr '
+' ' ')
+        [ -z "$extra" ] && emit R01 PASS "$f" "frontmatter は paths のみ" || emit R01 WARN "$f" "frontmatter に paths 以外のキー（${extra% }）: Claude Code は paths 以外を無視する"
         if frontmatter "$f" | grep -qE '^paths:'; then emit R02 PASS "$f" "paths あり（path-scope）"; else emit R02 PASS "$f" "paths なし（常時 load）"; fi
       else
-        emit R01 PASS "$f" "frontmatter なし（常時 load・description 省略）"
+        emit R01 PASS "$f" "frontmatter なし（常時 load）"
       fi
       n=$(count_lines "$f"); [ "$n" -gt 200 ] && emit R03 WARN "$f" "$n 行（1 ファイル 1 トピックか確認）" || emit R03 PASS "$f" "$n 行"
       ;;
@@ -116,6 +125,16 @@ for f in "${TARGETS[@]}"; do
         [ -e "$(dirname "$f")/$ref" ] && emit S11 PASS "$f" "$ref 実在" || emit S11 FAIL "$f" "リンク先 $ref が無い"
       done
       ;;
+    .claude/skills/*.md)
+      case "$(basename "$f")" in README*|readme*) emit X00 PASS "$f" "README は参照ファイルの目次検査の対象外"; continue;; esac
+      n=$(count_lines "$f")
+      if [ "$n" -le 100 ]; then emit S12 PASS "$f" "$n 行"
+      else
+        head30=$(head -30 "$f")
+        if echo "$head30" | grep -qE '^#{1,4} *(目次|Contents|Table of Contents) *$' || [ "$(echo "$head30" | grep -cE '^[[:space:]]*([-*]|[0-9]+\.)[[:space:]]*\[[^]]+\]\(#')" -ge 3 ]; then emit S12 PASS "$f" "$n 行・目次あり"
+        else emit S12 WARN "$f" "$n 行で先頭 30 行に目次が無い（100 行超の参照ファイルは目次を置く）"; fi
+      fi
+      ;;
     .claude/commands/*.md)
       if [ "$(head -1 "$f")" = "---" ]; then
         d=$(fm_get "$f" description); [ -n "$d" ] && emit K01 PASS "$f" "description あり" || emit K01 WARN "$f" "description が無い"
@@ -124,15 +143,37 @@ for f in "${TARGETS[@]}"; do
       ;;
     .claude/agents/*.md)
       [ "$(head -1 "$f")" = "---" ] || { emit A01 FAIL "$f" "frontmatter が無い"; continue; }
-      [ -n "$(fm_get "$f" name)" ] && [ -n "$(fm_get "$f" description)" ] && emit A01 PASS "$f" "name/description あり" || emit A01 FAIL "$f" "name または description が無い"
+      an=$(fm_get "$f" name)
+      [ -n "$an" ] && [ -n "$(fm_get "$f" description)" ] && emit A01 PASS "$f" "name/description あり" || emit A01 FAIL "$f" "name または description が無い"
+      case "$an" in *:*) emit A02 FAIL "$f" "name '$an' に ':' がある（plugin 用に予約。読み込まれない）";; *) emit A02 PASS "$f" "name に ':' なし";; esac
+      frontmatter "$f" | grep -qE '^(tools|disallowedTools):' && emit A03 PASS "$f" "tools / disallowedTools でツールを限定" || emit A03 WARN "$f" "tools も disallowedTools も無い（利用可能な全ツールを継承する）"
       ;;
     .claude/settings.json|.claude/settings.local.json)
-      if command -v python >/dev/null 2>&1; then python -c "import json,sys; json.load(open(sys.argv[1], encoding='utf-8'))" "$f" >/dev/null 2>&1 && emit H01 PASS "$f" "JSON として妥当" || emit H01 FAIL "$f" "JSON parse エラー"; else emit H01 WARN "$f" "python 不在で JSON 検証をスキップ"; fi
+      if [ -n "$PY" ]; then "$PY" -c "import json,sys; json.load(open(sys.argv[1], encoding='utf-8'))" "$f" >/dev/null 2>&1 && emit H01 PASS "$f" "JSON として妥当" || emit H01 FAIL "$f" "JSON parse エラー"; else emit H01 WARN "$f" "python 不在で JSON 検証をスキップ"; fi
       while IFS= read -r cmd; do
         p=$(echo "$cmd" | grep -oE '(\$CLAUDE_PROJECT_DIR"?/|\./)?\.claude/[^" ]+' | head -1 | sed -E 's#^\$CLAUDE_PROJECT_DIR"?/##; s#^\./##')
         [ -z "$p" ] && continue
         [ -f "$p" ] && emit H02 PASS "$f" "hook script $p 実在" || emit H02 FAIL "$f" "hook script $p が無い"
       done < <(grep -oE '"command": *"[^"]+"' "$f")
+      if [ "$(basename "$f")" = settings.json ]; then
+        grep -q '"\$schema"' "$f" && emit H03 PASS "$f" "\$schema あり" || emit H03 WARN "$f" "\$schema が無い（エディタでの補完・検証が効かない）"
+      fi
+      if [ -n "$PY" ]; then
+        miss=$("$PY" -c 'import json,sys
+try: d=json.load(open(sys.argv[1],encoding="utf-8"))
+except Exception: print("ERR"); sys.exit()
+n=m=0
+for ev,groups in (d.get("hooks") or {}).items():
+    for g in groups or []:
+        for h in g.get("hooks") or []:
+            n+=1; m+=0 if "timeout" in h else 1
+print(f"{m} {n}")' "$f" 2>/dev/null)
+        case "$miss" in
+          ERR|"") ;;
+          "0 "*) emit H04 PASS "$f" "全 hook（${miss#0 } 件）に timeout あり";;
+          *) emit H04 WARN "$f" "timeout の無い hook が ${miss% *} 件（全 ${miss#* } 件。既定 600 秒）";;
+        esac
+      else emit H04 WARN "$f" "python 不在で timeout 検査をスキップ"; fi
       ;;
     *) emit X00 PASS "$f" "検査対象外の種別（エージェント判定のみ）";;
   esac

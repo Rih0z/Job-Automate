@@ -33,7 +33,7 @@ bash .claude/skills/harness-compliance-audit/scripts/harness_check.sh $ARGUMENTS
 
 ### 2. 独立エージェント判定（変更ファイルごと）
 
-手順 1 が列挙した変更ファイル 1 件につき `Agent` を 1 本起動する（複数は同一メッセージで並列可）。`subagent_type` は `general-purpose`（リポジトリにモデル振り分け規約があればそれに従う）。渡すのは次の 4 点だけ:
+手順 1 が列挙した変更ファイル 1 件につき `Agent` を 1 本起動する（複数は同一メッセージで並列可）。`subagent_type` は `readonly-reviewer`（`.claude/agents/readonly-reviewer.md`。定義が無い環境・未読込のセッションでは `general-purpose` で起動し、prompt 冒頭に「ファイルを作成・変更・削除しない」と明記する）（リポジトリにモデル振り分け規約があればそれに従う）。渡すのは次の 4 点だけ:
 
 ```
 対象ファイルの絶対パス:
