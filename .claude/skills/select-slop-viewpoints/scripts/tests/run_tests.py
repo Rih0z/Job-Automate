@@ -71,7 +71,7 @@ def main():
     missing = [r["id"] for r in rules if r["source_title"] not in skill_md]
     check("viewpoints: 全ての source_title が stop-ai-slop-jp/SKILL.md に含まれる", not missing, missing)
     ids = {b["id"] for b in vp["blockers"]}
-    check("viewpoints: blocker 4 種（帰属誤り・過小断定・指示文のメモ書き化・意味の一意性）がある", {"misattribution", "audience_underassertion", "instruction_echo", "single_meaning"} <= ids)
+    check("viewpoints: blocker 5 種（帰属誤り・過小断定・指示文のメモ書き化・意味の一意性・意味の伝達）がある", {"misattribution", "audience_underassertion", "instruction_echo", "single_meaning", "conveyance"} <= ids)
     sb = {b["id"] for b in (scoring.get("blocker_checks") or {}).get("items", [])}
     check("viewpoints: scoring.json の blocker は目録の部分集合", sb <= ids, sb - ids)
 
@@ -186,7 +186,7 @@ def main():
     for t in BASE_TYPES:
         _, out, _ = run(["--doc-type", t])
         sel = json.loads(out)
-        check("select %s: blocker 4 種（instruction_echo・single_meaning を含む）" % t, {b["id"] for b in sel["blockers"]} == {"misattribution", "audience_underassertion", "instruction_echo", "single_meaning"})
+        check("select %s: blocker 5 種（instruction_echo・single_meaning・conveyance を含む）" % t, {b["id"] for b in sel["blockers"]} == {"misattribution", "audience_underassertion", "instruction_echo", "single_meaning", "conveyance"})
         check("select %s: 手順（独立 3 回の中央値）と採点範囲（文体のみ・範囲外メモ）が入る" % t,
               sel["procedure"]["verdict_rule"]["runs"] == 3 and sel["procedure"]["verdict_rule"]["method"] == "median" and sel["procedure"]["scoring_scope"], sel.get("procedure"))
     _, out, _ = run(["--doc-type", "tech-doc"])
@@ -228,7 +228,7 @@ def main():
         local = {"doc_types": [{"id": "local-x", "name": "局所", "description": "d", "recognize": "r",
                                 "rules": {r["id"]: {"treatment": "apply"} for r in vp["rules"]},
                                 "axes": ["stance", "rhythm", "agency", "concreteness", "reduction"],
-                                "blockers": ["misattribution", "audience_underassertion", "instruction_echo", "single_meaning"]}]}
+                                "blockers": ["misattribution", "audience_underassertion", "instruction_echo", "single_meaning", "conveyance"]}]}
         (cd / "doc-types.local.json").write_text(json.dumps(local, ensure_ascii=False), encoding="utf-8")
         code, out, err = run(["--list", "--criteria-dir", str(cd), "--stop-slop-dir", str(STOP_SLOP)])
         check("--local: 局所の種類が一覧に合流する", code == 0 and "local-x" in out, out + err)

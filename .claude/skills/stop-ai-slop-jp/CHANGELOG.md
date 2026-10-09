@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.3-local] - 2026-10-08 (ローカル翻案・upstream 未反映)
+
+### 追加
+
+- `blocker_checks` に `conveyance`(意味の伝達)を追加した。その文だけを読んだ非専門の読み手が、誰が何をどうしたかを言い直せない文を、スコアに関わらず最優先で是正する。型は `predicate_missing`(名詞止めや実演・説明の名詞止めで何がどうなったかを言わない)・`term_unexplained`(説明の手段が無い語)・`calque_wording`(英語の字面訳。語の対応は新規の `criteria/calque-terms.json`)・`subject_predicate_fit`(主語と述語が組み合わない)。
+- `single_meaning` との線引き: 読み方 A・B を具体的に 2 つ挙げられる文は `single_meaning`、1 通りも読めない文と語が元の意味でない文は `conveyance`。同じ文に両方を付けない。
+- `SKILL.md` の説明の段落、クイックチェック、修正の優先順位の 0 番、`select-slop-viewpoints` の blocker 一覧と全ての種類の blocker にも追加した。
+- スコア・`pass_rule`・5 軸は変えていない。
+- 理由: 「〜の予約状況。」で終わる要約、「手元の名簿」のような字面訳、「部品が加わった」型の文が、`single_meaning`(読み方を 2 つ挙げられる文だけが対象)にも文体の採点にも掛からず、読んでも何も伝わらないまま残った。
+
 ## [0.2.2-local] - 2026-10-08 (ローカル翻案・upstream 未反映)
 
 ### 追加

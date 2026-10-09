@@ -63,7 +63,8 @@
         "misattribution",
         "audience_underassertion",
         "instruction_echo",
-        "single_meaning"
+        "single_meaning",
+        "conveyance"
       ],
       "notes": [
         "全ての規則と 5 軸を、stop-ai-slop-jp の定義どおりに使う。"
@@ -137,7 +138,8 @@
         "misattribution",
         "audience_underassertion",
         "instruction_echo",
-        "single_meaning"
+        "single_meaning",
+        "conveyance"
       ],
       "notes": [
         "報告された内容の節は attribution 軸、所感・示唆の節は R02 の条件付き適用で見る。stance 軸は使わない。",
@@ -234,7 +236,8 @@
         "misattribution",
         "audience_underassertion",
         "instruction_echo",
-        "single_meaning"
+        "single_meaning",
+        "conveyance"
       ],
       "notes": [
         "上記 2 点以外（構造・語彙・記号レベル）は通常のコアルールをそのまま適用する。"
@@ -306,7 +309,8 @@
         "misattribution",
         "audience_underassertion",
         "instruction_echo",
-        "single_meaning"
+        "single_meaning",
+        "conveyance"
       ],
       "notes": [
         "整形（一文一改行、脚注、太字と「」の使い分け）は stop-ai-slop-jp/references/tech-writing.md に従う。",

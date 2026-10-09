@@ -96,7 +96,7 @@ Windows（PowerShell）の例:
     "PreToolUse": [{ "matcher": "Write",
       "hooks": [{ "type": "command", "shell": "powershell", "timeout": 30,
         "command": "pwsh -NoProfile -File \"$env:CLAUDE_PROJECT_DIR/.claude/scripts/hook-pre-tool-use-handoff.ps1\"" }] }],
-    "PostToolUse": [{ "matcher": "Edit|Write",
+    "PostToolUse": [{ "matcher": "Edit|Write|MultiEdit",
       "hooks": [{ "type": "command", "shell": "powershell", "timeout": 30,
         "command": "pwsh -NoProfile -File \"$env:CLAUDE_PROJECT_DIR/.claude/scripts/hook-post-tool-use.ps1\"" }] }],
     "Stop": [{ "hooks": [{ "type": "command", "shell": "powershell", "timeout": 30,
