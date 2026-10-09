@@ -1,0 +1,337 @@
+{
+  "schema": "slop-doc-types/v1",
+  "updated": "2026-10-07",
+  "description": "資料の種類ごとに、stop-ai-slop-jp のどの観点をどう使うかを決める。規則は R01〜R14 の全てに扱い（apply / skip / modify / conditional）を付ける。skip には受け持ち先（covered_by）、modify と conditional には条件（condition）を付ける。軸は 5 つ、blocker は misattribution と audience_underassertion を必ず含める。軸の調整（axis_overrides）には根拠（ground）・緩めない点（keeps）・減点が残る反例（counter_examples、2 件以上）を付ける。扱いは提案値で、使って食い違えば、根拠を付けてこのファイルを直す。",
+  "doc_types": [
+    {
+      "id": "blog",
+      "name": "ブログ・体験記",
+      "description": "書き手が自分の体験と考えを、自分の言葉で読み手に向けて書く記事（個人ブログ、組織のブログ、note 等）。stop-ai-slop-jp の既定の対象。",
+      "recognize": "依頼者が「ブログ」「体験記」「記事」と宣言した文書。迷う時は依頼者に聞く。",
+      "rules": {
+        "R01": {
+          "treatment": "apply"
+        },
+        "R02": {
+          "treatment": "apply"
+        },
+        "R03": {
+          "treatment": "apply"
+        },
+        "R04": {
+          "treatment": "apply"
+        },
+        "R05": {
+          "treatment": "apply"
+        },
+        "R06": {
+          "treatment": "apply"
+        },
+        "R07": {
+          "treatment": "apply"
+        },
+        "R08": {
+          "treatment": "apply"
+        },
+        "R09": {
+          "treatment": "apply"
+        },
+        "R10": {
+          "treatment": "apply"
+        },
+        "R11": {
+          "treatment": "apply"
+        },
+        "R12": {
+          "treatment": "apply"
+        },
+        "R13": {
+          "treatment": "apply"
+        },
+        "R14": {
+          "treatment": "apply"
+        }
+      },
+      "axes": [
+        "stance",
+        "rhythm",
+        "agency",
+        "concreteness",
+        "reduction"
+      ],
+      "blockers": [
+        "misattribution",
+        "audience_underassertion",
+        "instruction_echo",
+        "single_meaning"
+      ],
+      "notes": [
+        "全ての規則と 5 軸を、stop-ai-slop-jp の定義どおりに使う。"
+      ]
+    },
+    {
+      "id": "event-report",
+      "name": "イベント参加報告資料",
+      "description": "イベント（カンファレンス、フォーラム、勉強会）で発表・報告された内容と、参加者の所感・示唆を、組織内などの読み手に伝える報告資料。報告された内容の節と、所感・示唆の節からなる。",
+      "recognize": "依頼者が「イベント参加報告」「参加レポート」「出張報告」と宣言した文書。報告された内容を主に写す文書は帰属と限定を主軸にする。",
+      "rules": {
+        "R01": {
+          "treatment": "apply"
+        },
+        "R02": {
+          "treatment": "conditional",
+          "condition": "「所感・示唆」の節だけに適用する。報告された内容の節は、立場ではなく帰属と限定（attribution 軸）で見る。"
+        },
+        "R03": {
+          "treatment": "modify",
+          "condition": "口語の評価語（微妙、よく分からん）は使わない。強すぎる語（最高、ヤバい）を避け、程度は条件付きの限定で表す。"
+        },
+        "R04": {
+          "treatment": "modify",
+          "condition": "雑談調の伝聞（らしい、そうです）は使わず、出所（誰が、どの資料で、いつ）と確度を書く。調べた事実を断定型で押し付けない趣旨は、出所の明示で満たす。"
+        },
+        "R05": {
+          "treatment": "modify",
+          "condition": "読み手は役割名（読者、関係者）で呼ぶ。「自分は」「私は」は所感・示唆の節で使ってよい。「人々は」「多くの人が」の一般論は避ける。"
+        },
+        "R06": {
+          "treatment": "conditional",
+          "condition": "所感・示唆の節では、両論併記で判断を放棄しない。報告された内容の節で、発表が示した複数の案を並べるのは両論併記ではない。"
+        },
+        "R07": {
+          "treatment": "modify",
+          "condition": "見出しは主題の名詞句を推奨する。報告の要点を先に示す見出し（結論先出し）は、読み手が要点を拾うために許す。"
+        },
+        "R08": {
+          "treatment": "apply"
+        },
+        "R09": {
+          "treatment": "modify",
+          "condition": "見出し・箇条書き・表の形のそろいは、構造として正しいので減点しない。散文の段落には適用する。"
+        },
+        "R10": {
+          "treatment": "skip",
+          "covered_by": "項目の数は、発表された件数・論点の数という事実で決まる。数合わせの並列は reduction 軸（無くても論旨が変わらない一文）で見る。"
+        },
+        "R11": {
+          "treatment": "apply"
+        },
+        "R12": {
+          "treatment": "apply"
+        },
+        "R13": {
+          "treatment": "apply"
+        },
+        "R14": {
+          "treatment": "apply"
+        }
+      },
+      "axes": [
+        "attribution",
+        "rhythm",
+        "agency",
+        "concreteness",
+        "reduction"
+      ],
+      "blockers": [
+        "misattribution",
+        "audience_underassertion",
+        "instruction_echo",
+        "single_meaning"
+      ],
+      "notes": [
+        "報告された内容の節は attribution 軸、所感・示唆の節は R02 の条件付き適用で見る。stance 軸は使わない。",
+        "報告資料の一部だけが報告で、残りがブログ調の所感である文書は、節ごとに種類を分けて採点してよい（依頼者が宣言する）。"
+      ],
+      "axis_replacements": {
+        "attribution": {
+          "replaces": "stance",
+          "ground": "報告資料は、他者の発言や資料の内容を写す部分が主で、書き手が反証可能な主張を立てる文書ではない。立場の問い（反証の相手は読み手）を当てると、報告された内容を誤って減点するか、写した内容に書き手の主張を足す修正を招く。反証の相手を原文に移し、限定の強さを問う帰属と限定の軸に置き換える。",
+          "keeps": [
+            "所感・示唆の節では R02（反証可能な主張）を条件付きで適用し、両論併記での判断放棄は R06 で見る",
+            "出所を追えない評価語・推測は帰属を 5 点以下にする",
+            "合格点と blocker は変えない"
+          ],
+          "counter_examples": [
+            "報告された内容の節に、書き手の所感を所感と分かる形にせず混ぜた文は、帰属で減点する",
+            "発表の「検討している」を「提供する」と書く（2 段以上の強め）は、帰属を 5 点以下にする"
+          ]
+        }
+      },
+      "layout": {
+        "sections": [
+          {
+            "name": "報告された内容の節",
+            "viewpoints": "attribution 軸（限定の強さと出所）と R01・R04・R08・R11〜R14。stance 相当の問いは当てない。"
+          },
+          {
+            "name": "所感・示唆の節",
+            "viewpoints": "R02（反証可能な主張）と R06（判断の放棄）を適用。書き手の一人称は使ってよい（R05 の条件）。"
+          }
+        ],
+        "rule": "節の境界は資料の見出しで決める。見出しで分けられない文書は、依頼者が節ごとに種類を宣言する。"
+      }
+    },
+    {
+      "id": "analysis-report",
+      "name": "調査・分析レポート",
+      "description": "根拠の確度が案件ごとに異なる、調査・分析の報告書。stop-ai-slop-jp の「分析レポート・調査報告モード」を、規則ごとの扱いにしたもの。",
+      "recognize": "依頼者が「調査報告」「分析レポート」と宣言した文書。",
+      "rules": {
+        "R01": {
+          "treatment": "apply"
+        },
+        "R02": {
+          "treatment": "apply"
+        },
+        "R03": {
+          "treatment": "apply"
+        },
+        "R04": {
+          "treatment": "modify",
+          "condition": "確度・信頼度を示すヘッジ（「〜と推測される」「確証度: 中」「別解釈の可能性あり」）は、slop として指摘しない。根拠なく主張を弱める伝聞口調だけを指摘する。"
+        },
+        "R05": {
+          "treatment": "apply"
+        },
+        "R06": {
+          "treatment": "modify",
+          "condition": "確度を添えた代替仮説の併記（「Aの可能性が高いが、Bも棄却できない」）は、両論併記による判断放棄と区別する。確度の無い全方位肯定は指摘する。"
+        },
+        "R07": {
+          "treatment": "apply"
+        },
+        "R08": {
+          "treatment": "apply"
+        },
+        "R09": {
+          "treatment": "apply"
+        },
+        "R10": {
+          "treatment": "apply"
+        },
+        "R11": {
+          "treatment": "apply"
+        },
+        "R12": {
+          "treatment": "apply"
+        },
+        "R13": {
+          "treatment": "apply"
+        },
+        "R14": {
+          "treatment": "apply"
+        }
+      },
+      "axes": [
+        "stance",
+        "rhythm",
+        "agency",
+        "concreteness",
+        "reduction"
+      ],
+      "blockers": [
+        "misattribution",
+        "audience_underassertion",
+        "instruction_echo",
+        "single_meaning"
+      ],
+      "notes": [
+        "上記 2 点以外（構造・語彙・記号レベル）は通常のコアルールをそのまま適用する。"
+      ]
+    },
+    {
+      "id": "tech-doc",
+      "name": "技術文書",
+      "description": "書籍の章、技術記事、解説文。stop-ai-slop-jp の「技術文書モード」の例外表を、規則ごとの扱いにしたもの。整形の規範は stop-ai-slop-jp/references/tech-writing.md を併用する。",
+      "recognize": "依頼者が「技術文書」「解説記事」「書籍の章」と宣言した文書。",
+      "rules": {
+        "R01": {
+          "treatment": "apply"
+        },
+        "R02": {
+          "treatment": "apply"
+        },
+        "R03": {
+          "treatment": "skip",
+          "covered_by": "口語の評価語は使わず、程度は条件付き限定（「〜が成り立つときに限り」）で表す。強度の揺れは concreteness 軸と、R11（偏愛語・副詞）で見る。"
+        },
+        "R04": {
+          "treatment": "modify",
+          "condition": "雑談調の伝聞は使わない。不確実性は根拠ベースで管理し、推量・可能性を機械的に断定へ変えない。"
+        },
+        "R05": {
+          "treatment": "modify",
+          "condition": "読者は役割名（開発者、読者）で呼ぶ。「あなた」は場面導入・結びなど要所のみ。"
+        },
+        "R06": {
+          "treatment": "skip",
+          "covered_by": "毒・自虐・皮肉は使わない。判断の放棄は R02（反証可能な主張）と stance 軸で見る。"
+        },
+        "R07": {
+          "treatment": "apply"
+        },
+        "R08": {
+          "treatment": "apply"
+        },
+        "R09": {
+          "treatment": "skip",
+          "covered_by": "段落は論証の一歩として揃える(パラグラフライティング)。揃え方の評価は rhythm 軸の調整(axis_overrides)が受け持つ。"
+        },
+        "R10": {
+          "treatment": "apply"
+        },
+        "R11": {
+          "treatment": "apply"
+        },
+        "R12": {
+          "treatment": "apply"
+        },
+        "R13": {
+          "treatment": "modify",
+          "condition": "導入済み用語の再言及・引用・否定する命題の書き出しには「」を使ってよい。形容詞や心情に使わない点は同じ。"
+        },
+        "R14": {
+          "treatment": "apply"
+        }
+      },
+      "axes": [
+        "stance",
+        "rhythm",
+        "agency",
+        "concreteness",
+        "reduction"
+      ],
+      "blockers": [
+        "misattribution",
+        "audience_underassertion",
+        "instruction_echo",
+        "single_meaning"
+      ],
+      "notes": [
+        "整形（一文一改行、脚注、太字と「」の使い分け）は stop-ai-slop-jp/references/tech-writing.md に従う。",
+        "アカデミック自称（phrases.md）の例外: 「本書」「本章」は可。ただし「本章では〜を探求する」型の空虚な予告は不可。",
+        "劇的な断片化（structures.md）の例外: 段落内の短い体言止めは、場面の山場に限り使ってよい（山場限定の条件付き許容）。"
+      ],
+      "axis_overrides": {
+        "rhythm": {
+          "question": "技術文書は段落を論証の一歩として揃えるので、段落の長さ・文末・結論のムラは求めない。段落ごとに論証の一歩が完結しているか、同じ文型の機械的な反復で情報が薄くなっていないか?",
+          "anchors": {
+            "1": "段落が論証の一歩になっておらず、同じ文型を機械的に繰り返して情報が薄い",
+            "5": "大半の段落は論証の一歩だが、同じ文型の反復が一部に残る",
+            "10": "全段落が論証の一歩として揃い、文型の反復で情報を薄めていない"
+          },
+          "ground": "stop-ai-slop-jp/SKILL.md の技術文書モードの表は、コアルール 9（ムラを入れる）を「崩さない。段落は論証の一歩として揃える」に上書きする。rhythm 軸の既定の問い（緩急があるか）をそのまま当てると、この表が求める揃え方を減点する。",
+          "keeps": [
+            "全段落が同じ長さ・同じ文末で情報が薄い文章は、引き続き減点する(anchor 1)",
+            "合格点と blocker は変えない"
+          ],
+          "counter_examples": [
+            "全段落が同じ 3 文構成・同じ文末で、各段落が前の段落の言い換えになっている",
+            "論証の一歩になっていない、列挙だけの段落が続く"
+          ]
+        }
+      }
+    }
+  ]
+}

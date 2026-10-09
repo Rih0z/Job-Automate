@@ -228,7 +228,9 @@ PC 再起動 / session 切断後に進行中タスクを自動検出し、User �
 > provenance: author-preference · id: handoff-management
 
 - ファイル名: `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`（issue 紐付けあり）／ `[YYYY-MM-DD]-[識別単語].md`（紐付けなし）。識別単語は 2〜4 語 kebab-case、作業内容が一目で分かるもの
-- 保持: 次の handoff を新規作成するまで前 handoff は削除しない。次 handoff 作成時に削除またはアーカイブする
+- 保持と削除: handoff は引継ぎが**完了するまで**保持し、完了したら削除する（履歴は Git に残る）。issue 側は削除せず `issues/close/` へ `git mv` で移動するだけにする
+- 同期: `.tmp/handoffs/` は `.gitignore` で除外せず追跡対象にし、作成したら当日中に commit して push する（未 commit の handoff は GitHub に上がらず、別 PC・別 session から見えない）。Stop hook で未 commit の handoff を検出して終了を block すると忘れない
+- 作業中マーカー: frontmatter に `created_at`（作成日時）を作成者が書く。受領側は着手時に `work_status: in_progress` と `work_started_at: <ISO 8601 +offset>`（作業開始日時）を追記し、完了時に handoff ごと削除する。マーカーが残ったまま閾値（既定 4 時間）を超えた handoff は「作業が中断された疑い」として SessionStart hook が**ファイル名のみ**通知する（本文は注入しない）。再開時は `work_started_at` を更新する
 - issue 連携: `issues/open|processing/[ID].md` 本文冒頭に「進行中 handoff: [完全パス]」を記載。handoff 更新時は issue 側も同期更新する
 - 受領: handoff は user 明示指示でのみ受領し、本文は再開対象に選ばれた 1 件のみ Read する
 - 構成: ゴール / 完了したこと / 残課題 / 関連ファイル（path:line）/ 落とし穴
