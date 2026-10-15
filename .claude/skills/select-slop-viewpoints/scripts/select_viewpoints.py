@@ -226,6 +226,7 @@ class Catalog:
             "axes": out_axes,
             "blockers": [self.blockers[b] for b in t["blockers"]],
             "pass_rule": self.pass_rule,
+            "confirm_rule": self.scoring.get("confirm_rule"),
             "procedure": self.vp.get("procedure"),
             "notes": t.get("notes", []),
             "instructions_for_scorers": [
@@ -233,6 +234,7 @@ class Catalog:
                 "軸は axes の question と anchor で採点する。override がある軸は、override の question と anchor を使い、keeps の点は緩めない。inherited_profile がある時は、その guards・finding_labels・scope・rebuttal_rule も守る（この JSON を唯一の入力にする）。",
                 "blockers は点に関わらず最優先で是正を求める。",
                 "合否は pass_rule.min_total との比較で、procedure.verdict_rule（独立 3 回の中央値）に従う。採点の範囲は procedure.scoring_scope に従う。",
+                "confirm_rule があれば、合格した資料を確定する時の条件として従う。指摘は、確定条件に影響する指摘と軽微な指摘（1 点未満の好みの差）に分けて返す。",
             ],
         }
         for k in ("layout", "parameters"):

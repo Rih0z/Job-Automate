@@ -2,6 +2,16 @@
   "stage": "ja-writing-quality",
   "stage_name": "日本語文章のAI臭スコアリング",
   "pass_rule": { "min_total": 35, "max_total": 50 },
+  "confirm_rule": {
+    "purpose": "合格した資料を、確定して外に出してよいかを決める追加の条件。合格点（pass_rule）は変えず、満点を求めない。1 点未満の好みの差で確定が止まり続ける修正ループを避け、確定を止める誤りだけを条件にする。",
+    "conditions": [
+      { "id": "agency_concreteness_full", "check": "agency と concreteness が各 10 点である（false agency と、具体の欠落の指摘が 0 件）" },
+      { "id": "other_axes_good", "check": "stance・rhythm・reduction が各 7 点以上である（各軸の anchor の「良」の帯）" },
+      { "id": "meaning_blockers_zero", "check": "blocker_checks の single_meaning と conveyance の指摘が 0 件である。全文が 1 通りにだけ読め、非専門の読み手が誰が何をどうしたかを言い直せる状態を、文書の種類を問わず確定の条件にする" }
+    ],
+    "reporting": "採点者は指摘を 2 つに分けて返す。確定条件に影響する指摘（上の 3 条件を満たせない原因）と、軽微な指摘（1 点未満の好みの差。確定を妨げない）。軽微な指摘は逐語引用付きで別記し、直すかは呼び出し元が決める。確定条件に影響しない指摘のために、再採点を重ねない。",
+    "relation_to_pass_rule": "pass_rule の合否（独立 3 回の中央値）は従来どおり。confirm_rule は、合格した資料を確定する時の追加の条件で、pass_rule の合格点は緩めない。他の blocker（misattribution・audience_underassertion・instruction_echo）は、従来どおり点に関わらず是正する。"
+  },
   "scope_note": "採点範囲は文体のみ。事実主張の実測・突合はしない。範囲の定義は SKILL.md「採点範囲」節を参照",
   "conflict_policy": {
     "purpose": "採点基準と、採点対象のディレクトリ・生成物の条件が矛盾することがある。矛盾したまま採点を続けると、直しても合格しない修正ループや、対象の規約に反する書き方を求める指摘が生じる。",

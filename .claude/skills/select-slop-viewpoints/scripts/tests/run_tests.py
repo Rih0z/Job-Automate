@@ -95,6 +95,7 @@ def main():
         check("select %s: 14 規則・5 軸・点の合計が max_total" % t,
               len(d["rules"]) == 14 and len(axes) == 5 and sum(a["weight"] for a in axes) == scoring["pass_rule"]["max_total"], (len(d["rules"]), len(axes)))
         check("select %s: 合格点が scoring.json と同値" % t, d["pass_rule"]["min_total"] == scoring["pass_rule"]["min_total"])
+        check("select %s: confirm_rule が scoring.json と同値" % t, d.get("confirm_rule") == scoring.get("confirm_rule"))
         check("select %s: blocker が残る" % t, {"misattribution", "audience_underassertion"} <= {b["id"] for b in d["blockers"]})
         check("select %s: 全ての軸に質問文と anchor がある" % t, all(a.get("question") and a.get("anchors") for a in axes))
         check("select %s: 全ての規則に扱い（apply/skip/modify/conditional）がある" % t,

@@ -33,8 +33,9 @@ metadata:
    - `axes`: 使う 5 軸の質問文・1/5/10 点の anchor・配点。種類ごとの調整（`override`）があれば、根拠・緩めない点・減点が残る反例を含む。
    - `blockers`: 点に関わらず最優先で是正する項目。
    - `pass_rule`: 合格点（`stop-ai-slop-jp/criteria/scoring.json` と同値）。
+   - `confirm_rule`: 合格した資料を確定する時の追加の条件（`scoring.json` と同値。無ければ `null`）。
 3. **採点者に渡す。** レビューを行う別エージェント（作成者とは別）に、資料と手順 2 の JSON だけを渡す。実装の経緯や会話履歴は渡さない。採点者は JSON の `instructions_for_scorers` に従い、`skip` の規則は指摘せず、`modify`・`conditional` は条件の範囲だけで適用する。
-4. **点と合否。** 出力 JSON の `procedure`（独立 3 回の中央値で合否を決める `verdict_rule`、文体だけを採点する `scoring_scope`、反論の扱い）に従う。blocker は点に関わらず是正する。
+4. **点と合否。** 出力 JSON の `procedure`（独立 3 回の中央値で合否を決める `verdict_rule`、文体だけを採点する `scoring_scope`、反論の扱い）に従う。blocker は点に関わらず是正する。確定する時は `confirm_rule` の条件（主体性と具体性が各 10 点、他の軸が良の帯、意味の一意性と意味の伝達の指摘が 0 件）も満たし、指摘は確定条件に影響するものと軽微なものに分けて返す。
 
 ## 資料の種類（汎用）
 
@@ -56,7 +57,7 @@ metadata:
 
 ## 緩めない保証
 
-- 合格点は `scoring.json` の `pass_rule.min_total` と同値で、種類ごとに変えない。
+- 合格点は `scoring.json` の `pass_rule.min_total` と同値で、種類ごとに変えない。確定の条件（`confirm_rule`）も種類ごとに変えない。
 - `agency`・`concreteness` は読み替えない規定（`stop-ai-slop-jp` の G3）がある repo では、その軸を調整する種類を `scoring.json` の G3 の `exceptions` に根拠付きで残す。残っていなければ検査が落とす。
 - 種類が `inherit_profile` を持つ時は、その profile の `guards`・`finding_labels`・`scope`・`rebuttal_rule` が出力 JSON の `inherited_profile` に入り、採点者に渡す JSON だけで足りる。
 - blocker は全ての種類で残る。帰属誤り・属性の過小断定は `stop-ai-slop-jp` の定義で、指示文のメモ書き化（`instruction_echo`。依頼文の言い回しや作業用の語の漏れ）はこの skill が追加した blocker。意味の一意性（`single_meaning`。文の読み方が 2 通りに割れて、読み手が別の事実に取る誤り）と意味の伝達（`conveyance`。その文だけを読んだ非専門の読み手が、誰が何をどうしたかを言い直せない誤り）は `stop-ai-slop-jp` の `blocker_checks` と同じ定義。
