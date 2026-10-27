@@ -1,6 +1,6 @@
 {
   "schema": "compliance-status/v1",
-  "updated": "2026-09-25",
+  "updated": "2026-10-27",
   "description": "Job-Automate 自身の、公式原則（anthropic-best-practices.json の principle id）ごとの採用状況・findings（CR-xx）・監査ログ。観点の SoT は anthropic-best-practices.json、本ファイルはその採用状況だけを持つ（repo-specific・移植不可）。整合は scripts/check_compliance_status.py が検査する（全単射・evidence 実在・enum・backlog/partial の cr 必須）。",
   "enums": {
     "principle_status": [
@@ -1132,6 +1132,15 @@
       "severity": "Low",
       "status": "done",
       "note": "§9 を『commands は skills に統合済み』に改訂"
+    },
+    {
+      "id": "CR-34",
+      "date": "2026-10-27",
+      "finding": "公式 docs の新設原則を cache に取り込んでいない（2026-10-27 の再突合で判明）",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "候補: hooks の onFailure: \"block\"（hook 自体の失敗時にも block）・PostToolBatch など新イベント・skills の disallowed-tools / skillOverrides / allowManagedPermissionRulesOnly・/doctor prompt-audit・auto mode が既定になった点。あわせて、現行 docs に同等根拠が見つからず verified:false にした 6 件（claude-md.emphasis-single-line は現行 docs が強調の追加を勧めない方向に変わった / claude-md.treat-like-code / claude-md.compaction-instructions / permissions.preapprove-and-sandbox / workflow.explore-plan-code / workflow.self-contained-spec）の採否は main が決める。path-scoped rules が Write / Edit でも読み込まれる仕様に変わったため、本 repo の rules 運用への影響も確認する"
     }
   ],
   "audit_log": [
@@ -1159,6 +1168,11 @@
       "date": "2026-09-25",
       "kind": "公式 docs 再突合（best-practices / memory / skills / sub-agents / hooks / hooks-guide / settings / permissions / skill authoring の現行版を取得）+ 軽量スイープ（harness_check.sh 全 103 targets）",
       "result": "スイープ FAIL=0 WARN=48（前回と同値）。公式突合で CR-14〜CR-33 を起票し、CR-27〜29 以外を同日に是正。cache は 34 → 85 principle"
+    },
+    {
+      "date": "2026-10-27",
+      "kind": "公式 docs 再突合（best-practices / skills / hooks / hooks-guide / memory / sub-agents / settings / permissions / skill authoring を取得し cache の quote 全件を逐語照合）+ harness_check.sh（cache と status の 2 ファイル）",
+      "result": "quote 不一致 25 件のうち 19 件を現行文へ貼り替え、6 件は同等根拠が無く verified:false。新設原則の取り込みは CR-34（backlog）。check_compliance_status.py violations=0（principles=85 findings=34）、harness_check.sh FAIL=0 WARN=0 targets=2"
     }
   ]
 }
