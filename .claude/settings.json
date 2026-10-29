@@ -16,6 +16,11 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/skills/agent-harness-bootstrap/scripts/hook-session-start-setup.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/skills/review-skill/scripts/hook-skill-review-gate.sh",
+            "timeout": 30
           }
         ]
       }
@@ -26,6 +31,11 @@
           {
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/skills/agent-harness-bootstrap/scripts/hook-stop-setup-gate.sh",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/skills/review-skill/scripts/hook-skill-review-gate.sh",
             "timeout": 30
           }
         ]

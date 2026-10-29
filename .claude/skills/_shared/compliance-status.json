@@ -1,6 +1,6 @@
 {
   "schema": "compliance-status/v1",
-  "updated": "2026-10-27",
+  "updated": "2026-10-28",
   "description": "Job-Automate 自身の、公式原則（anthropic-best-practices.json の principle id）ごとの採用状況・findings（CR-xx）・監査ログ。観点の SoT は anthropic-best-practices.json、本ファイルはその採用状況だけを持つ（repo-specific・移植不可）。整合は scripts/check_compliance_status.py が検査する（全単射・evidence 実在・enum・backlog/partial の cr 必須）。",
   "enums": {
     "principle_status": [
@@ -1141,6 +1141,60 @@
       "severity": "Low",
       "status": "backlog",
       "note": "候補: hooks の onFailure: \"block\"（hook 自体の失敗時にも block）・PostToolBatch など新イベント・skills の disallowed-tools / skillOverrides / allowManagedPermissionRulesOnly・/doctor prompt-audit・auto mode が既定になった点。あわせて、現行 docs に同等根拠が見つからず verified:false にした 6 件（claude-md.emphasis-single-line は現行 docs が強調の追加を勧めない方向に変わった / claude-md.treat-like-code / claude-md.compaction-instructions / permissions.preapprove-and-sandbox / workflow.explore-plan-code / workflow.self-contained-spec）の採否は main が決める。path-scoped rules が Write / Edit でも読み込まれる仕様に変わったため、本 repo の rules 運用への影響も確認する"
+    },
+    {
+      "id": "CR-35",
+      "date": "2026-10-28",
+      "finding": "skill を作成・変更したときに別エージェントのレビューが行われた証跡が無く、行われたことを強制する仕組みも無かった",
+      "principles": [
+        "review.writer-reviewer-separate-sessions",
+        "hooks.stop-gate-and-block-cap"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "note": "review-skill の観点を criteria JSON 化し、記録（skill-review-record/v1、内容 hash と criteria の sha256 付き）の保存 script、gate、Stop・SessionStart hook、負債台帳、整合検査を追加した。検査は turn の終了時だけで、commit・push 時点では働かない。中核 6 skill のみ実地レビュー済みで、残り 54 skill は負債台帳で免除している（CR-38）"
+    },
+    {
+      "id": "CR-36",
+      "date": "2026-10-28",
+      "finding": "公式原則 SoT（anthropic-best-practices.json）が max_age_days を過ぎて期限切れになっていた",
+      "principles": [],
+      "severity": "Low",
+      "status": "done",
+      "note": "公式 docs の現行版で再取得し、取得日を進めた。gate は SoT の期限切れを WARN として表示する（判定は変えない）"
+    },
+    {
+      "id": "CR-37",
+      "date": "2026-10-28",
+      "finding": "skill 以外の harness ファイル（CLAUDE.md・agents・hooks 設定）には、別エージェントのレビュー記録と検査が無い",
+      "principles": [
+        "review.writer-reviewer-separate-sessions"
+      ],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "今回の gate の対象は .claude/skills 直下の skill だけ。同じ形の記録と検査を広げるかは未定"
+    },
+    {
+      "id": "CR-38",
+      "date": "2026-10-28",
+      "finding": "負債台帳にある 54 skill は別エージェントのレビューが未実施",
+      "principles": [
+        "review.writer-reviewer-separate-sessions"
+      ],
+      "severity": "Medium",
+      "status": "backlog",
+      "note": "台帳の免除は、内容が登録時と同じ間だけ有効。全件レビューの費用は約 430〜540 万トークン（再レビューを含めるとさらに 5 割程度）。実施するかは利用者の判断"
+    },
+    {
+      "id": "CR-39",
+      "date": "2026-10-28",
+      "finding": "レビュー結果の保存はメイン session が転記して行う。reviewer 応答を PostToolUse hook で自動保存する案は未着手",
+      "principles": [
+        "hooks.deterministic-zero-exceptions"
+      ],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "hook の入力に Agent の識別子と応答が含まれるかを、実機で確かめる必要がある。レビュー開始時の hash（--expected-hash）と両立させる設計も要る"
     }
   ],
   "audit_log": [
