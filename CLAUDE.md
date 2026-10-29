@@ -68,7 +68,7 @@ Claude Code 環境で使えるレビュー系コマンド／Skills の全一覧�
 
 ## 新しいワークフロー・スキルを追加するルール
 
-**追加前チェック（共通）**: 既存の `workflows/` 一覧・`.claude/skills/` 一覧を検索し、目的が重複する既存プロンプト/スキルがないか確認する（重複なら新設せず既存を拡張する）。作成後は別エージェント（`/review-skill` 等）によるレビューを最低 1 回受け、指摘が収束してからマージする。
+**追加前チェック（共通）**: 既存の `workflows/` 一覧・`.claude/skills/` 一覧を検索し、目的が重複する既存プロンプト/スキルがないか確認する（重複なら新設せず既存を拡張する）。skill を作成・変更したら `/review-skill` を別エージェントで実行し、記録を `.claude/review-history/skill-review/` に残す。
 
 **採点基準と採点対象の矛盾**: レビュー・採点系の skill を新設・改修する時は、採点対象のディレクトリや生成物の条件（規約、生成 script の固定文、文書の構造）と採点基準が矛盾しないか確かめる。矛盾することがあり、その場合は矛盾しない設計に見直す。矛盾の型と見つけた時の手順は [stop-ai-slop-jp](.claude/skills/stop-ai-slop-jp/SKILL.md) の `criteria/scoring.json`（`conflict_policy`）にある。
 

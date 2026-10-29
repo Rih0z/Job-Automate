@@ -538,6 +538,32 @@
       }
     },
     {
+      "id": "skill-review-gate-hook",
+      "kind": "hooks",
+      "provenance": "author-preference",
+      "summary": "skill の変更後に別エージェントのレビュー記録があるかを turn の終了時に検査する仕組み。Stop hook が未レビューの skill 名を挙げて最大 3 回 block し、SessionStart hook が件数と整合検査の結果を表示する。内容 hash と criteria の sha256 で記録を照合する。",
+      "applies_to": [
+        "review-skill/SKILL.md gate と hook"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "separate-agent-review-cycle",
+        "hooks-promotion-judgement",
+        "review-commands"
+      ],
+      "files": [
+        ".claude/skills/review-skill/scripts/hook-skill-review-gate.sh",
+        ".claude/skills/review-skill/scripts/skill_review_gate.py",
+        ".claude/skills/review-skill/scripts/skill_review_lib.py",
+        ".claude/skills/review-skill/scripts/append_skill_review_record.py",
+        ".claude/skills/review-skill/scripts/check_skill_review_consistency.py",
+        ".claude/skills/review-skill/scripts/render_review_skill_md.py",
+        ".claude/skills/review-skill/criteria/skill-quality.json",
+        ".claude/skills/_shared/skill-review-record.schema.json"
+      ],
+      "note": "移植候補だが既定は取り込まない（author-preference の既定 ask）。理由: 検査は turn の終了時だけで commit・push 時点では働かず、hook を settings.json に登録する対象 repo でしか効かない。負債台帳（.claude/review-history/skill-review/baseline-unreviewed.json）は対象 repo の skill 一覧から新規に作る必要があり、コピーできない。review-skill の skills[] は review-commands が所有しているので、この要素は files[] だけを持つ。"
+    },
+    {
       "id": "size-guideline-100-lines",
       "kind": "principle",
       "provenance": "author-preference",

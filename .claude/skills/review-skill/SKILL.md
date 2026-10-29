@@ -1,219 +1,64 @@
 ---
 name: review-skill
 description: |
-  作成済みの Claude Code Skills / スラッシュコマンドを、別エージェントに構造・トリガー設計・
-  命令品質・出力設計・実用性の5軸・100点満点で Anthropic ベストプラクティス準拠を客観評価
-  させる（自己レビューしない）。
+  作成・変更した skill を、別エージェント（readonly-reviewer）に 5 軸・100 点で採点させ、
+  合否の記録を .claude/review-history/skill-review/ に保存する。作成者本人はレビューしない。
+  skill を作った・直したあとに使う。全 skill の一括仕分けは skills-audit、直近の変更の公式準拠監査は harness-compliance-audit。
   Trigger phrases: 'Skillをレビューして', 'skill品質チェック', 'review-skill',
   'ベストプラクティス準拠確認', '公式準拠レビュー'.
 disable-model-invocation: true
-allowed-tools: Read, Glob, Grep, Agent
-argument-hint: "[ファイルパス...（省略時はリポジトリ内の全 skill）]"
+allowed-tools: Read, Glob, Grep, Agent, Bash(python .claude/skills/review-skill/scripts/skill_review_gate.py:*), Bash(python .claude/skills/review-skill/scripts/append_skill_review_record.py:*)
+argument-hint: "[skill 名...（省略時は gate が未レビューと判定した skill）]"
 metadata:
   provenance: official-derived
 ---
 
-# /review-skill — Skills 品質レビュー（エージェント分離実行）
+# /review-skill — skill の別エージェントレビューと記録
 
-> **このコマンドは別エージェントを起動してレビューを行う。現在のセッションでは直接レビューしない。**
-> 実装コンテキスト（作成時の思考過程・設計判断・会話履歴）をレビューエージェントに渡さないことで客観性を確保する。
-> 作成済みの Claude Code スラッシュコマンド / Claude.ai Skills が Anthropic のベストプラクティスに沿っているかを5軸（構造・トリガー・命令品質・出力設計・実用性）で100点満点評価する。
-> 詳細な評価基準は `workflows/software-development/review-skill.md` を参照。
-> 評価の根拠となるマニュアルは `workflows/software-development/skills-building-guide.md`。
-> 公式原則の構造化データ: `.claude/skills/_shared/anthropic-best-practices.json`（`category: skills` の principle 群。`fetched` と `refetch_when` を確認し、該当時は `source_url` を WebFetch して現行版と突合する）を判定基準の SoT として参照する。
+採点の観点・配点・合格条件・レビュアーへの固定依頼文は `criteria/skill-quality.json` が正本。この SKILL.md に観点を重ねて書かない。
+散文版は `workflows/software-development/review-skill.md` の生成区間（`render_review_skill_md.py` が JSON から作る。手で直さない）。
+判定の根拠となる公式原則は `.claude/skills/_shared/anthropic-best-practices.json`。
 
----
+作成者がこの session でレビューしない。必ず Agent ツールで別エージェントを起動する。
 
-## 実行手順
+## 手順
 
-### ステップ1: 情報収集（この実装セッションで行う）
+skill 1 つにつき、次を順に行う。
 
-以下の事実情報のみを収集する。スキル作成の意図・目的・設計判断の説明は**含めない**。
+1. 現在の内容 hash を取る: `python .claude/skills/review-skill/scripts/skill_review_gate.py --hash SKILL名`。この値を手順 4 まで保持する。
+2. Agent ツールで `subagent_type: readonly-reviewer` を起動する（定義が無い環境では general-purpose で起動し、依頼文の冒頭に「ファイルを作成・変更・削除しない」と書く）。
+   - prompt は `criteria/skill-quality.json` の `reviewer_requirements.fixed_prompt` に、対象 skill ディレクトリの絶対パスと criteria の絶対パスの 2 つだけを添える。
+   - 作成意図・設計判断・会話履歴・自己評価は渡さない（`forbid_to_reviewer`）。skill の内容の埋め込みもしない。
+3. レビュアーが返した JSON（`output_schema` の形）を `.tmp/` 配下のファイルに UTF-8 で保存する。Agent の結果から agent_id を転記する。取れなければ `unavailable`。
+4. 記録を保存する:
+   `python .claude/skills/review-skill/scripts/append_skill_review_record.py --skill SKILL名 --expected-hash HASH --result-file .tmp/result.json --agent-id ID --subagent-type readonly-reviewer --model MODEL`
+   - 保存前に、結果の JSON に他プロジェクト由来の会社名・顧客名・個人名が混ざっていないか grep で確かめる（公開 repo）。
+   - レビュー中に skill が編集されていたら hash が合わず拒否される。再度手順 1 から行う。
+   - 保存時刻と content_hash は script が付ける。拒否されたら理由を読んで直す。同じ結果の再保存は「記録済み」で成功する。
+5. verdict が FAIL なら、指摘を直して手順 1 からやり直す。skill を 1 バイトでも直すと hash が変わり、前の記録は失効する。回数で止めず PASS まで続ける。
 
-```
-収集対象:
-1. スキル作成マニュアル: workflows/software-development/skills-building-guide.md の内容（評価基準の根拠）
-2. 詳細評価基準: workflows/software-development/review-skill.md の内容
-3. 対象スキルファイル: 引数で指定されたファイル、または .claude/skills/*/SKILL.md の全ファイルの内容
-4. 関連ドキュメント: 対象スキルが参照している workflows/*/review-*.md 等のファイルの内容
-5. README.md の「Claude Code スラッシュコマンド／Skills」節のスキル一覧テーブル
-6. 対象スキルが上記5のテーブル（および該当ワークフローの README.md）に実際に記載されているかどうか
-```
+結果はレビュアーの出力をそのまま報告する。要約や解釈を足さない。
 
-### 引数によるスコープ制御
+## gate と hook
 
-- 引数なし → `.claude/skills/` 内の全スキルをレビュー
-- ファイルパス指定 → そのファイルのみレビュー
-- 複数ファイル指定 → 指定ファイル群をレビュー
+- `python .claude/skills/review-skill/scripts/skill_review_gate.py --all` で全 skill の状態を見る（PASS・FAIL・INVALID・BASELINE_DEBT・STALE・UNREVIEWED）。`--strict` は PASS と BASELINE_DEBT 以外があれば exit 1。
+- Stop hook（`scripts/hook-skill-review-gate.sh`）は、未レビューの skill があると turn の終了を最大 3 回 block する。1 turn に 1 skill ずつ依頼する。上限に達すると未レビュー名を通知して通す。SessionStart では件数と整合検査の結果を表示する。
+- gate の exit 0 は、全 skill が別エージェントのレビュー済みという意味ではない。負債台帳（`.claude/review-history/skill-review/baseline-unreviewed.json`）にある skill は、内容が登録時と同じ間だけ免除される。
+- hook が想定外に block し続けるときは、`.claude/settings.json` の Stop と SessionStart にある本 hook の登録 2 行を外す。外したら整合検査（`check_skill_review_consistency.py`）の hook_registration が NG になるので、直したあとに戻す。
+- 整合検査は `python .claude/skills/review-skill/scripts/check_skill_review_consistency.py`（criteria と生成 md のずれ、principle id、台帳、hook 登録、スキーマ）。
 
-### ステップ2: レビューエージェント起動
+## 負債台帳の修正
 
-**Agent ツール**を使い、以下の設定で別エージェントを起動する:
+台帳の `--verify-ledger` は、台帳を最後に追加した commit の内容を基準にし、基準に無いエントリや書き換えを改ざんとみなす。台帳にある skill を編集した場合は、免除が失効して UNREVIEWED になるので、そのままレビューすれば PASS になる（台帳の修正は不要）。
+初回の誤りの訂正など、台帳そのものを直すときは利用者の承認を得て、旧台帳を削除する commit と新台帳を追加する commit に分ける。新台帳の追加 commit が新しい基準になる。
 
-```
-Agent ツールの設定:
-- subagent_type: "readonly-reviewer"（`.claude/agents/readonly-reviewer.md`。書き込み系ツールを持たない。定義が無い環境・新設直後で未読込のセッションでは "general-purpose" で起動し、prompt 冒頭に「ファイルを作成・変更・削除しない」と明記する）
-- description: "Review skill quality objectively"
-- prompt: 以下のテンプレートに収集した情報を埋め込む
-```
+## 制約
 
-**プロンプトテンプレート（レビューエージェントに渡す内容）:**
-
-````
-あなたは Claude Skills のエキスパートレビュアーです。
-Anthropic 公式ガイド「The Complete Guide to Building Skills for Claude」に基づき、
-以下のスキルファイルの品質を客観的にレビューし、100点満点で評価してください。
-
-## 行動原則
-- 証拠主義: スキルファイルの記述事実のみに基づいて評価する。推測でスコアを付けない
-- 各スコアにはファイルパスと該当箇所の引用を含めること
-- 非破壊: レビューのみ行い、スキルファイルの編集は行わない
-- 証拠不十分時は各レンジの下限で採点する
-
-## スキル作成マニュアル（評価基準の根拠）
-[ここに workflows/software-development/skills-building-guide.md の内容を埋め込む]
-
-## 詳細評価基準
-[ここに workflows/software-development/review-skill.md の内容を埋め込む]
-
-## 対象スキルファイル
-[ここに対象スキルファイルの内容を埋め込む（複数ある場合は全て）]
-
-## 関連ドキュメント
-[ここに対象スキルが参照している workflows/*/review-*.md 等の内容を埋め込む]
-
-## README.md スキル一覧テーブル
-[ここに該当部分を埋め込む]
-
-## README.md への反映確認
-[対象スキルが上記テーブルに実際に記載されているか（OK/NG）を埋め込む。記載が無ければ NG として
-「Anthropic ベストプラクティスとの差分」表の該当行に反映すること]
-
-## 評価軸（5項目・各20点 = 100点満点）
-
-### 1. 構造・命名・フォーマット（20点）
-- ファイル・フォルダ命名規則の準拠
-- YAML フロントマター / ヘッダーの品質
-- Progressive Disclosure の実装（詳細基準の分離）
-- Markdown フォーマットの品質
-
-### 2. Description / トリガー設計（20点）
-- 「何をするか」の明確さ
-- 「いつ使うか」のトリガーフレーズ
-- オーバー/アンダートリガーのリスク
-- 他スキルとの責任境界
-
-### 3. 命令の品質・明確性（20点）
-- 具体性・アクション可能性
-- ステップ構造と依存関係
-- 例・ユースケースの充実度
-- エラーハンドリング
-
-### 4. 出力設計・一貫性（20点）
-- 出力テンプレート・フォーマット定義
-- 採点基準・判定表の明確さ
-- 行動原則・制約の明記
-- 再現性の高さ
-
-### 5. 実用性・保守性（20点）
-- ユースケースの実用性
-- 保守性・ドキュメント反映
-- ポータビリティ
-- Composability（他スキルとの共存）
-
----
-
-## 詳細な評価基準
-
-`workflows/software-development/review-skill.md` の内容を読み込んで詳細なチェックリストとして使用すること。
-評価の根拠となるベストプラクティスは `workflows/software-development/skills-building-guide.md` に記載。
-
----
-
-## 採点・判定
-
-| 評価 | 点数 | 判定 |
-|------|------|------|
-| S | 90〜100 | 高品質。そのまま配布・共有可能 |
-| A | 80〜89  | 軽微な改善後に配布可能 |
-| B | 70〜79  | 重点項目の改善が必要。再レビュー |
-| C | 60〜69  | 大幅な改善が必要 |
-| D | 59以下  | 根本的な再設計が必要 |
-
----
-
-## 出力フォーマット
-
-```markdown
-# Skills 品質レビュー結果
-
-## 基本情報
-- スキル名:
-- レビュー日:
-- スキル形式:（Claude Code コマンド / SKILL.md）
-- ユースケースカテゴリ:
-- 参照マニュアル: workflows/software-development/skills-building-guide.md
-
-## 総合評価
-- **総合点: XX / 100点**
-- **判定: X (S/A/B/C/D)**
-
-## 観点別採点
-
-| # | 観点 | 配点 | 得点 | 主なコメント |
-|---|------|------|------|-------------|
-| 1 | 構造・命名・フォーマット | 20 | | |
-| 2 | Description / トリガー設計 | 20 | | |
-| 3 | 命令の品質・明確性 | 20 | | |
-| 4 | 出力設計・一貫性 | 20 | | |
-| 5 | 実用性・保守性 | 20 | | |
-
-## 良かった点（Keep）
-
-## 改善提案（Problem / Try）
-
-## Anthropic ベストプラクティスとの差分
-
-| チェック項目 | 状態 | コメント |
-|------------|------|----------|
-| kebab-case 命名 | OK / NG / N/A | |
-| description に「何を・いつ」 | OK / NG / N/A | |
-| Progressive Disclosure | OK / NG / N/A | |
-| エラーハンドリング記載 | OK / NG / N/A | |
-| 出力テンプレート定義 | OK / NG / N/A | |
-| 行動原則の明記 | OK / NG / N/A | |
-| 例・ユースケースの提供 | OK / NG / N/A | |
-| CLAUDE.md / README への反映 | OK / NG / N/A | |
-
-## 具体的な改善箇所
-
-| 観点 | ファイル/箇所 | 現状 | 問題点 | 改善案 |
-|------|-------------|------|--------|--------|
-| | | | | |
-
-## 次のアクション
-
-1. 【必須】
-2. 【推奨】
-3. 【任意】
-```
-````
-
-### ステップ3: 結果の報告
-
-レビューエージェントから返却された結果を、そのままユーザーに表示する。
-要約や解釈を加えない（レビューの客観性を維持するため）。
-
----
+- gate・記録・hook はこの repo 固有の構成に依存する。`~/.claude/skills/` へコピーしても動くのは reviewer 起動の手順だけで、gate は働かない。
+- gate の対象は `.claude/skills/` 直下の skill のみ。CLAUDE.md・agents・hooks 設定のレビュー記録は対象外。
+- レビュアーの独立性は固定依頼文で標準化するだけで、機械では強制できない。記録の偽造や gate 自体の書き換えは検出できない。
 
 ## Examples
 
-- ユーザー: 「新しく作ったスキルをレビューして」→ `/review-skill .claude/skills/my-new-skill/SKILL.md` → skills-building-guide.md の基準に照らして別エージェントが5軸採点。
-- 引数なし → `.claude/skills/` 内の全スキルを対象にレビュー（`skills-audit` の一括監査と役割が近いが、本スキルは1〜数ファイルへの深掘り採点、`skills-audit` はリポジトリ全体を GOOD/MIGRATE/IMPROVE/SPLIT で高速に一次仕分けする用途で使い分ける）。
-
-## 注意事項
-
-- **絶対に実装セッション内で直接レビューしない**。必ず Agent ツールで別エージェントを起動すること
-- レビューエージェントに渡す情報は事実（スキルファイルの記述内容・評価基準ドキュメント）のみ。スキル作成の意図・設計判断・会話履歴は渡さない
-- 対象スキルの規模が小さい場合でも分離実行する。規模で判断しない
-- 詳細なアーキテクチャは `agents.md` を参照
+- 「新しく作った skill をレビューして」: `--hash` で hash を取る、readonly-reviewer を起動する、返ってきた JSON を `--expected-hash` つきで保存する、`--all` で PASS を確かめる。
+- Stop hook が未レビューの skill 名を挙げて block した: 挙げられた skill のうち 1 つを上の手順で処理して終了する。残りは次の block で依頼される。

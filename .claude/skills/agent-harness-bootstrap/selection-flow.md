@@ -28,6 +28,7 @@ SKILL.md 本体の生成手順 Step 0 から参照する supporting file。対�
 - **対話が不可能な時**（メインセッションで `AskUserQuestion` が利用不可 / エラーを返す・headless 実行・ユーザー応答が得られない）: `default_selection` のみ採用する（A = 採用、B = 採用、C = 非採用、D = 除外）。**この場合は最終報告の冒頭に「著者嗜好要素はデフォルト非採用で生成した。`harness-selection.json` を編集して再実行できる」と明記する**。推測でユーザーの好みを補わない。
 - **依存関係の検証**: 選んだ要素の `depends_on` に非選択の要素があれば、その組合せは成立しないことを示して**選び直させる**（例: `session-restore-hook` を選ぶには `handoff-management` と `issue-lifecycle` と `hooks-reference-set` が要る）。`soft_depends_on` は**警告のみ**で成立させ、台帳の `note` に従う縮退形で採用する。
 - **「全部入れて」への対応**: ユーザーがそう言った場合も群 D は入れない。群 C を全採用する時は、要素数と生成される rules / hooks の量を 1 行で示した上で確定する（過剰生成に気付く機会を残す。スケール調整の原則と同じ）。
+- **skill レビュー gate（`skill-review-gate-hook`）**: 群 C の hooks に入る。既定は取り込まない。取り込む場合も、`settings.json` への hook 登録（Stop・SessionStart）と負債台帳の作成は対象 repo 側で利用者が行う。台帳は対象の skill 一覧から新規に作り、元の repo の台帳はコピーしない。
 
 ## 0-4. 決定を対象に記録する
 

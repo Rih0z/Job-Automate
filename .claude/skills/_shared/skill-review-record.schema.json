@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skill-review-record/v1",
+  "title": "Skill Review Record v1",
+  "description": "skill のレビュー（別 agent が review-skill の criteria で判定した結果）の記録。保存は append_skill_review_record.py 経由のみ（reviewed_at・content_hash は script が保存時に計算する）。保存先は .claude/review-history/skill-review/<skill>/<UTC 日時>-<同一性キー先頭 8 桁>.json。既存の review-record/v1 とは別スキーマ（必須キーが違うため拡張しない）。required は append_skill_review_record.py・skill_review_gate.py の検査（skill_review_lib.REQUIRED_TOP）と一致させ、check_skill_review_consistency.py の schema 項目が確かめる。",
+  "type": "object",
+  "required": ["schema", "skill", "reviewed_at", "target", "criteria", "best_practices_snapshot", "reviewer", "result"],
+  "properties": {
+    "schema": { "const": "skill-review-record/v1" },
+    "skill": { "type": "string", "description": "レビュー対象の skill 名（.claude/skills 直下のディレクトリ名）" },
+    "reviewed_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$", "description": "保存時に script が付ける UTC の日時" },
+    "target": {
+      "type": "object",
+      "required": ["files", "content_hash"],
+      "properties": {
+        "files": {
+          "type": "array",
+          "description": "hash の対象になった skill ディレクトリ内のファイル（相対パス・正規化後の sha256）",
+          "items": {
+            "type": "object",
+            "required": ["path", "sha256"],
+            "properties": { "path": { "type": "string" }, "sha256": { "type": "string" } }
+          }
+        },
+        "content_hash": { "type": "string", "description": "skill ディレクトリの内容 hash。保存時に script が実ファイルから計算する（定義は計画書 D2）" }
+      }
+    },
+    "criteria": {
+      "type": "object",
+      "required": ["file", "sha256"],
+      "properties": {
+        "file": { "type": "string", "description": "判定に使った criteria の repo 相対パス" },
+        "sha256": { "type": "string", "description": "criteria ファイル内容（CRLF を LF に正規化後）の sha256。変わると全記録が失効する" }
+      }
+    },
+    "best_practices_snapshot": {
+      "type": "object",
+      "required": ["fetched", "max_age_days"],
+      "properties": { "fetched": { "type": "string" }, "max_age_days": { "type": "integer" } }
+    },
+    "reviewer": {
+      "type": "object",
+      "required": ["kind", "subagent_type", "agent_id", "model"],
+      "properties": {
+        "kind": { "const": "subagent" },
+        "subagent_type": { "type": "string" },
+        "agent_id": { "type": "string", "description": "Agent ツールの結果から転記する。取得できなければ unavailable（gate --all が WARN を出す）" },
+        "model": { "type": "string" }
+      }
+    },
+    "result": {
+      "type": "object",
+      "description": "criteria の reviewer_requirements.output_schema の JSON。保存時に整合を検査する",
+      "required": ["axes", "score", "verdict", "must_pass_failures", "findings"],
+      "properties": {
+        "axes": {
+          "type": "array",
+          "items": { "type": "object", "required": ["id", "score"], "properties": { "id": { "type": "string" }, "score": { "type": "integer" } } }
+        },
+        "score": { "type": "integer" },
+        "verdict": { "enum": ["PASS", "FAIL"] },
+        "must_pass_failures": { "type": "array", "items": { "type": "string" } },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["criterion_id", "severity", "location", "comment"],
+            "properties": {
+              "criterion_id": { "type": "string" },
+              "severity": { "enum": ["high", "medium", "low"] },
+              "location": { "type": "string" },
+              "comment": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

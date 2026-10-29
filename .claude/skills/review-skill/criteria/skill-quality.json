@@ -1,0 +1,287 @@
+{
+  "schema": "skill-quality/v1",
+  "description": "skill / スラッシュコマンドの品質を 5 軸・100 点で判定する観点。散文の workflows/software-development/review-skill.md の評価軸と採点目安の節は、この JSON から render_review_skill_md.py が生成する（直接編集しない）。変更すると criteria の sha256 が変わり、全レビュー記録が失効する。",
+  "axes": [
+    {
+      "id": "structure",
+      "name": "構造・命名・フォーマット",
+      "weight": 20,
+      "criteria": [
+        {
+          "id": "S1",
+          "name": "ファイル・フォルダ構造",
+          "weight": 8,
+          "must_pass": false,
+          "checks": [
+            "ファイル名が正しい（SKILL.md 形式の場合は正確な綴り、コマンド形式の場合は kebab-case.md）",
+            "フォルダ名が kebab-case（SKILL.md 形式の場合）",
+            "スキルフォルダ内に不要な README.md がない（SKILL.md 形式の場合）",
+            "詳細な評価基準が別ファイル（docs/review-*.md 等）に分離されているか（Progressive Disclosure）"
+          ],
+          "principles": ["skills.file-location-and-precedence", "skills.progressive-disclosure"]
+        },
+        {
+          "id": "S2",
+          "name": "YAML フロントマター / ヘッダー",
+          "weight": 6,
+          "must_pass": true,
+          "checks": [
+            "Claude Code コマンドの場合: 冒頭に明確なタイトルと説明がある",
+            "SKILL.md 形式の場合: --- デリミタで囲まれた YAML フロントマターがある",
+            "name フィールドが kebab-case（SKILL.md 形式の場合）",
+            "XML タグ（山括弧で囲んだタグ）がフロントマターに含まれていない",
+            "スキル名に claude / anthropic が含まれていない"
+          ],
+          "principles": ["skills.frontmatter-fields", "skills.reserved-names"]
+        },
+        {
+          "id": "S3",
+          "name": "Markdown 品質",
+          "weight": 6,
+          "must_pass": false,
+          "checks": [
+            "見出し階層が論理的か（# → ## → ###）",
+            "コードブロック・テーブル・リストが正しくフォーマットされているか",
+            "全体が 5,000 語以内に収まっているか（超える場合は references/ に分離すべき）"
+          ],
+          "principles": ["skills.body-length-guideline", "authoring.references-one-level-deep", "authoring.toc-for-long-references"]
+        }
+      ],
+      "scoring_guide": [
+        { "range": "18〜20", "criterion": "全技術要件を満たし、Progressive Disclosure が適切に実装されている" },
+        { "range": "14〜17", "criterion": "おおむね準拠だが、分離やフォーマットに軽微な問題あり" },
+        { "range": "10〜13", "criterion": "基本構造はあるが命名規則違反や構造上の問題がある" },
+        { "range": "0〜9", "criterion": "技術要件を大幅に満たしていない" }
+      ]
+    },
+    {
+      "id": "description",
+      "name": "Description / トリガー設計",
+      "weight": 20,
+      "criteria": [
+        {
+          "id": "D1",
+          "name": "「何をするか」の記述",
+          "weight": 7,
+          "must_pass": true,
+          "checks": [
+            "スキルの目的が 1-2 文で明確に説明されているか",
+            "具体的な成果物・アウトプットが分かるか",
+            "対象カテゴリ（Document Creation / Workflow Automation / MCP Enhancement）が推測できるか"
+          ],
+          "principles": ["skills.description-key-use-case-first", "authoring.third-person-description"]
+        },
+        {
+          "id": "D2",
+          "name": "「いつ使うか」の記述",
+          "weight": 6,
+          "must_pass": false,
+          "checks": [
+            "ユーザーが実際に言いそうなトリガーフレーズが含まれているか",
+            "言い換え・パラフレーズでもトリガーされるよう複数のフレーズがあるか",
+            "関連するファイルタイプが記載されているか（該当する場合）"
+          ],
+          "principles": ["skills.description-key-use-case-first"]
+        },
+        {
+          "id": "D3",
+          "name": "トリガー品質",
+          "weight": 7,
+          "must_pass": false,
+          "checks": [
+            "description が曖昧すぎないか（「Helps with projects」のような表現がないか）",
+            "description が広すぎないか（無関係なクエリでも発火しそうにないか）",
+            "ネガティブトリガー（使うべきでない場面）が明記されているか（必要な場合）",
+            "他のスキルとの責任境界が明確か"
+          ],
+          "principles": ["skills.description-key-use-case-first", "skills.side-effect-workflows-manual"]
+        }
+      ],
+      "scoring_guide": [
+        { "range": "18〜20", "criterion": "「何を・いつ」が明確、トリガーフレーズが豊富、境界が明確" },
+        { "range": "14〜17", "criterion": "概ね良いが、トリガーフレーズが不足、またはやや曖昧" },
+        { "range": "10〜13", "criterion": "目的は分かるがトリガー設計が弱い" },
+        { "range": "0〜9", "criterion": "何をするスキルか分からない、またはトリガー条件がない" }
+      ]
+    },
+    {
+      "id": "instructions",
+      "name": "命令の品質・明確性",
+      "weight": 20,
+      "criteria": [
+        {
+          "id": "I1",
+          "name": "具体性・アクション可能性",
+          "weight": 6,
+          "must_pass": true,
+          "checks": [
+            "各ステップが具体的で実行可能か（「適切に処理する」のような曖昧表現がないか）",
+            "必要なパラメータ・入力値が明記されているか",
+            "成功・失敗の判定基準が示されているか",
+            "コマンド・スクリプトの呼び出しが正確か"
+          ],
+          "principles": ["authoring.degrees-of-freedom", "authoring.solve-dont-defer"]
+        },
+        {
+          "id": "I2",
+          "name": "ステップ構造",
+          "weight": 5,
+          "must_pass": false,
+          "checks": [
+            "ステップが論理的な順序で並んでいるか",
+            "ステップ間の依存関係が明確か",
+            "バリデーションゲート（次に進む前の確認）があるか",
+            "重要な命令が冒頭に配置されているか（Important / Critical 等の節）"
+          ],
+          "principles": ["authoring.feedback-loops", "verification.give-a-check-and-show-evidence"]
+        },
+        {
+          "id": "I3",
+          "name": "例・ユースケース",
+          "weight": 4,
+          "must_pass": false,
+          "checks": [
+            "典型的なユースケースの例が含まれているか",
+            "ユーザーの発言 → アクション → 結果の流れが示されているか",
+            "エッジケースへの対応が示されているか"
+          ],
+          "principles": ["authoring.consistent-terminology", "authoring.avoid-too-many-options"]
+        },
+        {
+          "id": "I4",
+          "name": "エラーハンドリング",
+          "weight": 5,
+          "must_pass": false,
+          "checks": [
+            "一般的なエラーとその対処法が記載されているか",
+            "MCP 接続エラー等の外部依存エラーへの対処があるか（該当する場合）",
+            "ロールバック・フォールバック手順があるか（該当する場合）"
+          ],
+          "principles": ["authoring.solve-dont-defer", "authoring.mcp-fully-qualified-names"]
+        }
+      ],
+      "scoring_guide": [
+        { "range": "18〜20", "criterion": "具体的でアクション可能、例が豊富、エラーハンドリング完備" },
+        { "range": "14〜17", "criterion": "おおむね良いが、一部の命令が曖昧、または例・エラー対処が不足" },
+        { "range": "10〜13", "criterion": "基本的な手順はあるが、曖昧な表現が多い、または例がない" },
+        { "range": "0〜9", "criterion": "命令が抽象的すぎて Claude が一貫した結果を出せない" }
+      ]
+    },
+    {
+      "id": "output",
+      "name": "出力設計・一貫性",
+      "weight": 20,
+      "criteria": [
+        {
+          "id": "O1",
+          "name": "出力フォーマット",
+          "weight": 8,
+          "must_pass": false,
+          "checks": [
+            "出力テンプレート・フォーマットが定義されているか",
+            "採点基準がある場合、採点表・判定表が含まれているか",
+            "出力に含めるべきセクション・フィールドが明確か",
+            "不要な情報を含めない制約が示されているか"
+          ],
+          "principles": ["authoring.concise", "authoring.degrees-of-freedom"]
+        },
+        {
+          "id": "O2",
+          "name": "一貫性の担保",
+          "weight": 6,
+          "must_pass": false,
+          "checks": [
+            "同じ入力に対して毎回同じ構造の出力が得られるか",
+            "評価軸がある場合、各軸の配点・採点目安が明確か",
+            "ユーザーが追加の指示をしなくてもワークフローが完遂するか"
+          ],
+          "principles": ["verification.gate-strength", "authoring.feedback-loops"]
+        },
+        {
+          "id": "O3",
+          "name": "行動原則・制約",
+          "weight": 6,
+          "must_pass": false,
+          "checks": [
+            "スキルの行動原則（証拠主義・非破壊等）が明記されているか",
+            "やってはいけないこと（コード編集・実行禁止等）が明記されているか",
+            "判断基準の根拠（ファイルパス・行番号の引用等）が求められているか"
+          ],
+          "principles": ["verification.give-a-check-and-show-evidence", "review.over-report-caution"]
+        }
+      ],
+      "scoring_guide": [
+        { "range": "18〜20", "criterion": "出力テンプレートが明確、行動原則が確立、高い再現性" },
+        { "range": "14〜17", "criterion": "テンプレートはあるが一部不明確、または制約が不十分" },
+        { "range": "10〜13", "criterion": "出力形式の指定が弱い、結果にばらつきが出やすい" },
+        { "range": "0〜9", "criterion": "出力設計がなく、毎回異なる形式の結果になる" }
+      ]
+    },
+    {
+      "id": "practicality",
+      "name": "実用性・保守性",
+      "weight": 20,
+      "criteria": [
+        {
+          "id": "P1",
+          "name": "実用性",
+          "weight": 7,
+          "must_pass": false,
+          "checks": [
+            "想定ユーザーが実際に使うシナリオが明確か",
+            "前提条件（必要なファイル・設定・MCP 接続等）が明記されているか",
+            "スキルなしの場合と比べて明確な改善があるか（やりとり回数削減・品質向上等）",
+            "他のスキルとの組み合わせが考慮されているか（Composability）"
+          ],
+          "principles": ["skills.side-effect-workflows-manual", "skills.allowed-tools-is-preapproval"]
+        },
+        {
+          "id": "P2",
+          "name": "保守性",
+          "weight": 7,
+          "must_pass": false,
+          "checks": [
+            "別の開発者がスキルを読んで理解・修正できるか",
+            "バージョン情報・更新履歴が管理されているか（metadata 等）",
+            "CLAUDE.md や README 等のドキュメントに反映されているか",
+            "詳細基準が別ファイルに分離され、独立して更新可能か"
+          ],
+          "principles": ["authoring.avoid-time-sensitive", "authoring.evaluations-first"]
+        },
+        {
+          "id": "P3",
+          "name": "ポータビリティ",
+          "weight": 6,
+          "must_pass": false,
+          "checks": [
+            "プロジェクト固有のパスがハードコードされていないか",
+            "他のプロジェクトにコピーしても動作するか",
+            "環境依存（OS・ツール・MCP）が明記されているか"
+          ],
+          "principles": ["workflow.self-contained-spec", "authoring.forward-slashes"]
+        }
+      ],
+      "scoring_guide": [
+        { "range": "18〜20", "criterion": "明確なユースケース、高い保守性、ポータブル、ドキュメント完備" },
+        { "range": "14〜17", "criterion": "実用的だが、保守性やドキュメントに軽微な不足" },
+        { "range": "10〜13", "criterion": "動くが、保守や他プロジェクト展開に課題あり" },
+        { "range": "0〜9", "criterion": "実用性が低い、または保守が困難" }
+      ]
+    }
+  ],
+  "pass_rule": { "min_score": 90, "must_pass_all": true },
+  "reviewer_requirements": {
+    "separate_agent": true,
+    "subagent_type": "readonly-reviewer",
+    "pass_to_reviewer": ["対象 skill ディレクトリの絶対パス", "この criteria ファイルの絶対パス"],
+    "forbid_to_reviewer": ["skill の作成意図・設計判断の説明", "会話履歴", "作成者による自己評価"],
+    "fixed_prompt": "あなたは独立したレビュアーです。渡された 2 つの絶対パスだけを根拠に判定してください。1 つ目は対象 skill のディレクトリ、2 つ目は評価基準（criteria の JSON）です。ファイルは自分で読み、ファイルの作成・変更・削除はしないでください。各 axis の各 criterion について checks を 1 つずつ照らし、axis ごとに 0 から配点までの整数で採点してください。得点には対象ファイルの該当箇所（ファイルと行）の引用を根拠として添えてください。証拠が足りないときは低い側で採点してください。correctness（誤った記述・動かない手順）と、criteria に明記された要件に関わる指摘だけを severity high または medium にし、好みや改善提案は severity low（任意）にしてください。must_pass が true の criterion を満たさないものは must_pass_failures に criterion の id を列挙してください。verdict は、合計点が pass_rule の min_score 以上で、must_pass_failures が空で、severity high の finding が無いときだけ PASS、それ以外は FAIL としてください。応答の最後に、output_schema に従う JSON を 1 つだけ、コードブロックで返してください。JSON の score は axes の得点の合計と一致させてください。",
+    "output_schema": {
+      "axes": "[{id: axis の id, score: 0 から配点までの整数}]（criteria の全 axis を 1 つずつ）",
+      "score": "整数（axes の得点の合計）",
+      "verdict": "PASS または FAIL",
+      "must_pass_failures": "[満たさなかった must_pass の criterion id]",
+      "findings": "[{criterion_id, severity: high / medium / low, location: ファイル:行, comment}]"
+    }
+  }
+}
