@@ -1,0 +1,87 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "chatbot-operation-design",
+  "reviewed_at": "2026-10-29T22:07:58Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "25bba1af3f4df3b1ee2c9046cb3a44e4056aa70157eacea188d201985e174d6b"
+      }
+    ],
+    "content_hash": "16a8f0cc1f9ffa23a34aaeee2dc2db6418cabacfdb53a69497f631bfc2b2d953"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "a9b377307e595ec20",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 17
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 20
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": "SKILL.md:30",
+        "comment": "引き継ぎ条件の表の列定義や章ごとの出力テンプレートが無く、章立ての列挙にとどまる。表の最小例が 1 つあると再現性が上がる。"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": "SKILL.md:22",
+        "comment": "criteria JSON が読めない場合の扱いが無い。"
+      },
+      {
+        "criterion_id": "D3",
+        "severity": "low",
+        "location": "SKILL.md:3-4",
+        "comment": "使うべきでない場面(社内向けボットや既存設計書のレビューのみ等)の明記が無い。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:51",
+        "comment": "repo 固有パス workflows/customer-support/... を参照しており、skill 単体で持ち出すと切れる。任意の注記なので影響は軽微。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:46-49",
+        "comment": "例は 2 件のみで、ユーザー発言→アクション→結果の流れとして短い。"
+      }
+    ]
+  }
+}

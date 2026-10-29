@@ -1,0 +1,87 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "research-deliverable-review",
+  "reviewed_at": "2026-10-29T22:18:22Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "79e86e9679332fb428ecb530e6e7db2bcc5f4234a5608ba0b15577aa01adfa6d"
+      }
+    ],
+    "content_hash": "0a4b1ac773f7eda3d8b10f1ad9335b1d821f9100b6dace84c8562820acb41d36"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "adadb0ea2b6fa0441",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 17
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 19
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": "SKILL.md:76-196",
+        "comment": "5 観点の詳細基準とテンプレートが SKILL.md に同居している。references/ に分離すると Progressive Disclosure に沿う。任意の改善。"
+      },
+      {
+        "criterion_id": "S3",
+        "severity": "low",
+        "location": "SKILL.md:198",
+        "comment": "プロンプトテンプレートを開くコードフェンス(62行)の閉じが 198 行にあり、間の ## 見出しと ``` の対応が読み取りにくい。ネストしたフェンスは外側を 4 連バッククォートにするとよい。"
+      },
+      {
+        "criterion_id": "D3",
+        "severity": "low",
+        "location": "SKILL.md:3-8",
+        "comment": "description に「使わない場面」(例: 一般文書のレビューは対象外)と他の review 系 skill との境界がない。任意の改善。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:9-10",
+        "comment": "metadata に version や更新履歴がない。任意の改善。"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": "SKILL.md:154-155",
+        "comment": "「根拠の引用を求める」原則が共有ルーブリックへの参照のみ。レビューエージェントのプロンプトに 1 行加えると確実になる。任意の改善。"
+      }
+    ]
+  }
+}
