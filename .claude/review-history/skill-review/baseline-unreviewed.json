@@ -1,0 +1,275 @@
+{
+  "schema": "skill-review-baseline/v1",
+  "skills": {
+    "agent-harness-bootstrap": {
+      "content_hash": "9fcade68d6394ca9d6cbadd18941b22b8b91ec2510e2dea0513c78f5f1abf271",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "ai-automation": {
+      "content_hash": "234df29443a3bd394e73e1866b7bbe17cd4e0e6be1173a72b93e1ae55f51090e",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "avoid-ai-generated-design-look": {
+      "content_hash": "063e5583ba809220cba14a68436dcf6c969d25d8ac1a51fa204311d172e80e60",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "blind-eval-harness": {
+      "content_hash": "702f85738fdcb65f5432da5fc6a69a1c6d739bb0fa19f1f73bc32e9df659f0b8",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "blog-seo-growth-planner": {
+      "content_hash": "fce65b3eee6bc944980e2828a8ec69509c46513b4a7eb90b26d66d41b8b88e73",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "business-idea": {
+      "content_hash": "a578725c688ec213121d14c88638aaa25e6ed5dc50090bf959efafdd1aaaabaf",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "business-proposal": {
+      "content_hash": "f67043b412059e62160a9b0078e7bb2b7419a060801a69439d13c9dbc626df42",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "chatbot-operation-design": {
+      "content_hash": "16a8f0cc1f9ffa23a34aaeee2dc2db6418cabacfdb53a69497f631bfc2b2d953",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "craft-beer-news-research": {
+      "content_hash": "1d81008572c1f6e6b8487aab61f6c9159b970297d9a7783449d3e6c0a4a1fafb",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "creative-text-art": {
+      "content_hash": "5bdec32fb922249048b37dcb40d7fee83b874a61872ab88d51c474c9518bdbbe",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "customer-persona-design": {
+      "content_hash": "3280844ca7699a1f540691ff231f6487ce48b3b7808312ac5a55995d1fe0b159",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "general-news-research": {
+      "content_hash": "5ff5cb132396e2fd558b4fcf774e1c58f62c117d17b8ff788a6e53f213d5c48e",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "generic-proposal": {
+      "content_hash": "1f236ca493cd49d2c03496eec28d47fdbcb05de5ee4a1f7fee5621a82567ffee",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "ibm-carbon-design-system": {
+      "content_hash": "3cce9fcba9eeb6b014a06f7182ab06b12e72fd7caf6ceda8d32195e1764d567f",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "investment-portfolio-analysis": {
+      "content_hash": "d89c331f7650cc0d4d97a9cf49240faf2292b36b22a041778721dbc848825ea8",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "issue-lifecycle-tracking": {
+      "content_hash": "3e411cf5c39d1662b738e62629153b7f9e8dc1efbe7bc3c98111a39e3148450c",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "it-proposal": {
+      "content_hash": "1f547b2f7715a5872353c0da89ab32dcd59ddc8331927f74a1eeea152037cb02",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "it-tech-news-research": {
+      "content_hash": "5af014e5838e5c43a338e449fc542ab8b872e9fd29404386c14c4c18e42642cf",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "mcp-server-setup": {
+      "content_hash": "873cfa8eeb94068eb71448b288d36df44fd7509dcdc683e0ee5df899b4aad7ca",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "model-cost-optimization-routing": {
+      "content_hash": "c0cff4eb1d36fd67c38fa3ab087467f832a58301f58e8ef7a3636957eb429a9b",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "multi-tenant-template-injector": {
+      "content_hash": "e94eade93da62797d633a979c907a02c17270e2750a5ff5f7aceba1b11388b24",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "playwright-mcp-e2e-testing": {
+      "content_hash": "fe30bcd401fb801ae62d350ee2059e2fd50d5a86abb32559e48c49a03699a49b",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "repo-hygiene-patrol": {
+      "content_hash": "737b409bce2d3d6cbd0e07654c2a0c3e04caca7c5bba4bdb83a6b4beeaeb87bc",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "research-deliverable-review": {
+      "content_hash": "0a4b1ac773f7eda3d8b10f1ad9335b1d821f9100b6dace84c8562820acb41d36",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-ai-automation": {
+      "content_hash": "adf725e7fa26e30894ad25f37179418b32e3979abfda941b0e4b60b774c2a400",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-blog": {
+      "content_hash": "adb4ef87eafc0be93a5bc559d298bc63d0bafba6c014b2f54cae1bc94c88290d",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-business-idea": {
+      "content_hash": "65d4c53aa90365a525340d6d4849c7cd28202ddad60c3d5fbe32ed34c7a189c5",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-changes": {
+      "content_hash": "a363f75ea8474f8d5017ac583fbe39fd4c2b442bf6391dc554b074d3143d2828",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-chatbot-operation-design": {
+      "content_hash": "aea4040df11356476bd15e93ff818f61767c1d53f32d9d01ec4d80fff9ae77a3",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-gate": {
+      "content_hash": "94b23ed064a214fc69024a64ea725a188b6813bf42a5c8c9577090247681b239",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-implementation": {
+      "content_hash": "27289f6ced8c8942fefe646d91f51110f1bd80bb6787700aa4d580a6f79e1e6b",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-ops": {
+      "content_hash": "57017fb4ec2fc509b0044cad233c978eb769ef9906732b513b7753646142a004",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-oss-contribution": {
+      "content_hash": "339abc6d5b5a6946db340424d2ba922eb4b610f1f3e6732d851d414a8d5fa9cf",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-persona-analysis": {
+      "content_hash": "96cff453beb0f25e14e9c5d2f2f5ddda0297d6dc772efcbc4eec621f5b59fe28",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-proposal": {
+      "content_hash": "75f6edeb32d68fa6d0a2e3c8925e66ed62c1290df5e1345b556912a7c31b191d",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-slides": {
+      "content_hash": "461971056f27bc637da9700deb08490ca6e912e1b0151b6c19466dd0ab2b4944",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-specification": {
+      "content_hash": "13492edaa592db5c9757bcad22c2eba61c5ae6b4b3f9787c3f7bc4060f18eb52",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "review-thumbnail": {
+      "content_hash": "ac4a7731e193f7672232e7e69787d6c2591795fa6aed6320055a1db800357688",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "seo-keyword-article-planner": {
+      "content_hash": "0a88d5bc13157447b66c6143168f347858c5479f286952c2a6554a5a3dbe701d",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "server-automation": {
+      "content_hash": "65089bd70aad5be3967d8f82b53a61437a4b0ed394e786e290b6a2f820c50166",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "server-init": {
+      "content_hash": "10d1b197492cfb6c7497d63a34806c952d2a3bf9b3bf8508ff9e12c1b1fcc6d0",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "server-windows-standard": {
+      "content_hash": "cb7d374b4b4cb44f80980a0c37a511db35914141d96989ba4d915a9daafc0310",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "single-session-tdd": {
+      "content_hash": "e5fc608735eb86682dad48a17405a47d00d5dad3c6e9b04e7e5ca6bdcfc2e66b",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "skill-authoring-guide": {
+      "content_hash": "b199537a64a8c7d63ad69d433b7360c43d679dc55b4414c3127a926af905e4d6",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "slides-pro": {
+      "content_hash": "a14e233b8a87deacb6cbeada8a76862e6e2539ce65bcce7c58169796e990f7f2",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "source-verification-scan": {
+      "content_hash": "d30d1dca3a33763415055ec42279ecc6ac12a7e1f924989710a1b30fd21171cf",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "specification": {
+      "content_hash": "36dfba1c3b762b3efca1b34cc7931e3931764bf582ce87d323324dbe01cfa78e",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "staged-investigation-workflow": {
+      "content_hash": "7c08e9bf3b42fdf8b3d7adc94bd3b8d945300ff8e1dd98a5b52e985e93690fc6",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "stop-ai-slop-jp": {
+      "content_hash": "a1074289bd59420cca9c772828edcb2abdd48d4e3898cd0a10228a37565fa2e4",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "three-agent-tdd-workflow": {
+      "content_hash": "2a7586b7c1d07af81f1e5b531e5d224a1fa229f7fb10901bd31e9b1ce31a09ce",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "thumbnail-generation": {
+      "content_hash": "a674e644264f589645e8cc97ac63c7707f55d4e4153a5f5c5951c5adf5e59da4",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "ui-design-guidelines": {
+      "content_hash": "8290182c9ca6b7ef5ab4df8760195b2043b59ec00d651636e71d727d5e716ddb",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "workflow-coverage-and-structure": {
+      "content_hash": "c39f52a360dbf047eb63cd47014e718bcba3e3b7a458479b2eee296595dc6c35",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    },
+    "year-end-adjustment-csv": {
+      "content_hash": "6d9fc8608f4eca6efb0e4c7211ba98c1a7ea18972d46b098f6d1066aee2da660",
+      "registered": "2026-10-28",
+      "reason": "skill レビュー gate の導入時点で未レビュー（負債）。内容が変わると免除は失効する"
+    }
+  }
+}
