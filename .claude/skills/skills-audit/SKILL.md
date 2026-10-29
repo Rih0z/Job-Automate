@@ -1,11 +1,13 @@
 ---
 name: skills-audit
-description: Audit all custom skills in a repo for quality, structure, and Anthropic best practices. Checks frontmatter, descriptions, content organization, and argument handling. Complements single-skill scoring reviews by scanning every skill at once and tiering them (GOOD/MIGRATE/IMPROVE/SPLIT).
+description: Audit all custom skills in a repo against Anthropic best practices via subagents and tier each GOOD/MIGRATE/IMPROVE/SPLIT. Manual-only (/skills-audit [name]); e.g. skill を一括点検, 品質監査. Single skill: review-skill.
 disable-model-invocation: true
 allowed-tools: Glob Grep Read Agent
 argument-hint: "[skill-name or blank for all]"
 metadata:
   provenance: official-derived
+  version: 1.2.0
+  history: "1.2.0 基準とテンプレートを references/ に分離、出力例・JSON 形式・基準古化時の手順を追加"
 ---
 
 # Skill Quality Audit
@@ -15,34 +17,23 @@ metadata:
 
 対象: $ARGUMENTS (省略時は全スキルを監査)
 
-## Anthropic公式ベストプラクティス基準
+## 前提
 
-> 基準の SoT は `.claude/skills/_shared/anthropic-best-practices.json`（`category: skills` の principle 群。取得日 `fetched` と再取得条件 `refetch_when` 付き）。監査開始時に `fetched` を確認し、`refetch_when` に該当すれば `source_url` を WebFetch して現行版と突合してから採点する。下記チェックリストは同ファイルの要約であり、食い違う場合は構造化データ側を正とする。
+- `.claude/skills/_shared/anthropic-best-practices.json`（基準の構造化データ）が存在すること
+- `.claude/agents/readonly-reviewer.md`（書き込みツールを持たない監査用 agent）があると望ましい（無くても下記 fallback で動く）
+- Agent ツールが使える環境であること
+- 他リポジトリへコピーする場合は上記 2 ファイルも併せて用意する
 
-### 1. ファイル形式チェック
-- [ ] 新形式 `.claude/skills/<name>/SKILL.md` を使用しているか（旧形式 `.claude/commands/*.md` は非推奨）
-- [ ] YAMLフロントマター (`---` で囲まれた設定) が存在するか
-- [ ] SKILL.md が500行以下か（超過時は reference.md / examples.md に分割）
-- [ ] `name` に `claude` / `anthropic` が含まれていないか
+## 参照ファイル
 
-### 2. フロントマター品質
-- [ ] `description` が存在し、明確か（先頭にユースケース、250文字以内）
-- [ ] 副作用のあるワークフローに `disable-model-invocation: true` が設定されているか
-- [ ] バックグラウンド知識には `user-invocable: false` が設定されているか
-- [ ] 必要なツールが `allowed-tools` で事前承認されているか
-- [ ] 引数を受け取る場合 `argument-hint` が設定されているか
+- [references/criteria.md](references/criteria.md): 基準チェックリスト（1〜4）と判定区分の閾値・優先順位。本スキル内の唯一の正本
+- [references/audit-prompt.md](references/audit-prompt.md): 監査エージェントへ渡すプロンプトのテンプレートと出力形式
 
-### 3. コンテンツ品質
-- [ ] 単一責任（1スキル = 1ワークフロー）
-- [ ] 指示が明確でアクション可能か
-- [ ] `$ARGUMENTS` / `$N` による動的入力が適切に使われているか
-- [ ] 曖昧な記述や汎用すぎる説明がないか
-- [ ] 特定の企業名・製品名・非公開プロジェクト名がハードコードされていないか（公開リポジトリの場合は必須確認）
+## 使用例
 
-### 4. コンテキスト効率
-- [ ] 動的コンテキスト注入 (`!`<command>```) を活用しているか
-- [ ] 不要な定型文が含まれていないか
-- [ ] description がClaude自動起動の判断に十分な情報を含むか
+- `/skills-audit` → 全 skill と command を検出し、1 件ずつ別エージェントで監査して判定表を返す
+- `/skills-audit review-skill` → 名前が一致する 1 件だけを監査し、判定表を返す（記入例は「出力形式」参照）
+- 対象が 0 件（該当名なし・skill 未作成）→ 監査エージェントを起動せず「対象 0 件」と報告して終了する。指定名の綴りを確認するよう促す
 
 ## 監査手順（エージェント分離実行）
 
@@ -53,6 +44,8 @@ metadata:
 1. `.claude/skills/*/SKILL.md` と `.claude/commands/*.md` を Glob で全検出し、絶対パスの一覧を作る
 2. `$ARGUMENTS` が指定されている場合はその skill 名に一致するファイルのみに絞る
 3. 各ファイルの中身は読み込まない（読み込みは監査エージェント側の役割）
+4. 一覧が 0 件なら終了する（使用例参照）。`_shared/anthropic-best-practices.json` が無ければ監査を始めず、不在を報告して止める（基準なしで採点しない）
+5. 同 JSON の `fetched` と `refetch_when` を確認する。再取得条件に該当（基準が古い）なら `source_url` を WebFetch して現行版と突合してから進める。WebFetch できない場合は JSON を正として続行し、出力表の末尾に「基準が古い可能性あり（取得日 fetched の値）」と注記する
 
 ### ステップ2: 監査エージェントの起動
 
@@ -60,74 +53,35 @@ metadata:
 
 ```
 Agent ツールの設定:
-- subagent_type: "readonly-reviewer"（`.claude/agents/readonly-reviewer.md`。書き込み系ツールを持たない。定義が無い環境・新設直後で未読込のセッションでは "general-purpose" で起動し、prompt 冒頭に「ファイルを作成・変更・削除しない」と明記する）
-- description: "Audit skill file <対象ファイル名>"
-- prompt: 以下のテンプレートに対象ファイルの絶対パスを埋め込む
+- subagent_type: "readonly-reviewer"（書き込み系ツールを持たない。定義が無い環境・新設直後で未読込のセッションでは "general-purpose" で起動し、prompt 冒頭に「ファイルを作成・変更・削除しない」と明記する）
+- description: "Audit skill file (対象ファイル名)"
+- prompt: references/audit-prompt.md のテンプレートに、対象ファイルの絶対パスと references/criteria.md の本文を埋め込んだもの
 ```
 
-**プロンプトテンプレート（監査エージェントに渡す内容）:**
+**エラー時の手順:**
 
-```
-あなたは Anthropic 公式ベストプラクティスに基づき Claude Code の skill/command ファイルを
-独立監査する客観的なレビュアーです。
-
-## 行動原則
-- proof-by-presence: 対象ファイルを Read ツールで実際に読み込み、そこに書かれている記述のみを根拠に判定する
-- 会話履歴・呼び出し元セッションの実装意図・設計判断は一切与えられていない。それらを根拠にした推測をしない
-- 判定根拠には該当箇所の引用（行番号または該当テキスト）を必ず含める
-- 非破壊: 監査のみ行い、対象ファイルの編集は行わない
-
-## 監査対象
-[ここに対象ファイルの絶対パスを埋め込む]
-
-## Anthropic公式ベストプラクティス基準
-
-> 基準の SoT は `.claude/skills/_shared/anthropic-best-practices.json`（`category: skills` の principle 群。取得日 `fetched` と再取得条件 `refetch_when` 付き）。監査開始時に `fetched` を確認し、`refetch_when` に該当すれば `source_url` を WebFetch して現行版と突合してから採点する。下記チェックリストは同ファイルの要約であり、食い違う場合は構造化データ側を正とする。
-
-### 1. ファイル形式チェック
-- [ ] 新形式 `.claude/skills/<name>/SKILL.md` を使用しているか（旧形式 `.claude/commands/*.md` は非推奨）
-- [ ] YAMLフロントマター (`---` で囲まれた設定) が存在するか
-- [ ] SKILL.md が500行以下か（超過時は reference.md / examples.md に分割）
-- [ ] `name` に `claude` / `anthropic` が含まれていないか
-
-### 2. フロントマター品質
-- [ ] `description` が存在し、明確か（先頭にユースケース、250文字以内）
-- [ ] 副作用のあるワークフローに `disable-model-invocation: true` が設定されているか
-- [ ] バックグラウンド知識には `user-invocable: false` が設定されているか
-- [ ] 必要なツールが `allowed-tools` で事前承認されているか
-- [ ] 引数を受け取る場合 `argument-hint` が設定されているか
-
-### 3. コンテンツ品質
-- [ ] 単一責任（1スキル = 1ワークフロー）
-- [ ] 指示が明確でアクション可能か
-- [ ] `$ARGUMENTS` / `$N` による動的入力が適切に使われているか
-- [ ] 曖昧な記述や汎用すぎる説明がないか
-- [ ] 特定の企業名・製品名・非公開プロジェクト名がハードコードされていないか（公開リポジトリの場合は必須確認）
-
-### 4. コンテキスト効率
-- [ ] 動的コンテキスト注入 (`!`<command>```) を活用しているか
-- [ ] 不要な定型文が含まれていないか
-- [ ] description がClaude自動起動の判断に十分な情報を含むか
-
-## 判定区分（4段階、いずれか1つを選ぶ）
-- GOOD: ベストプラクティス準拠
-- MIGRATE: 旧形式→新形式への移行が必要
-- IMPROVE: 品質改善が必要（description不明確、フロントマター不足、固有名詞混入等）
-- SPLIT: 責務過多で分割が必要
-
-## 出力
-以下を含む構造化レポートを返すこと:
-- スキル名 / 形式 / 行数
-- 4段階判定とその根拠（引用付き）
-- 基準1〜4それぞれのチェック結果
-- 具体的な修正提案
-```
+- Agent の起動に失敗した: 同じ対象を 1 回だけ再起動する。再失敗したらその対象は「監査未実施（起動失敗）」と表に記載し、他の対象の監査は続ける。このセッションで代わりに採点しない
+- 判定が返らない（出力が空・4 段階のどれでもない）: 同じ prompt で 1 回だけ再依頼し、なお不明なら「判定不能」と記載する
+- readonly-reviewer が無い: 上記の general-purpose fallback を使う
 
 ### ステップ3: 結果の統合（このセッションで行う）
 
-各監査エージェントから返却された判定を、そのまま統合して以下の出力形式にまとめる。**このセッションが判定をやり直す・上書きすることはしない**（自己レビュー禁止）。判定に迷いや矛盾がある場合も、独自に再採点せず、判定不能である旨をそのまま記載する。
+各監査エージェントから返却された判定を、そのまま統合して下記の表にまとめる。**このセッションが判定をやり直す・上書きすることはしない**（自己レビュー禁止）。判定に迷いや矛盾がある場合も、独自に再採点せず、判定不能である旨をそのまま記載する。
 
 ## 出力形式
 
+列の記入規則:
+
+- 形式: `SKILL.md` または `command`
+- description: 基準 2 の description 項目の結果。`OK`、または `未達（字数・理由）`
+- frontmatter: 基準 2 のその他項目の結果。`OK`、または未達の項目名
+- 行数: 整数
+- 判定: GOOD / MIGRATE / IMPROVE / SPLIT のいずれか 1 つ
+- 改善点: 監査エージェントの suggestions を優先度順に最大 3 件、1 件 1 文。GOOD なら `なし`
+
+記入例（架空のスキル名）:
+
 | スキル名 | 形式 | description | frontmatter | 行数 | 判定 | 改善点 |
 |---------|------|------------|-------------|------|------|-------|
+| example-report | SKILL.md | 未達（280 字） | OK | 120 | IMPROVE | description を 250 字以内にする |
+| example-old | command | OK | 未達（allowed-tools なし） | 60 | MIGRATE | .claude/skills/example-old/SKILL.md へ移行する |

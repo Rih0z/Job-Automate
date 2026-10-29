@@ -1,0 +1,97 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "select-slop-viewpoints",
+  "reviewed_at": "2026-10-29T00:15:35Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "1d8fdb64a54f8cbca934382a7532dd6093857151b79134a94456ad0d4f4c82e7"
+      },
+      {
+        "path": "criteria/axes.json",
+        "sha256": "d915ad7405e096544ed40daaeec685557a8e173955ad2aa01d49492441f76de1"
+      },
+      {
+        "path": "criteria/doc-types.json",
+        "sha256": "b8bc8fbe3b5c36a0747edbfedd8d11f9ba458994a0269df0897cc5bf291628d3"
+      },
+      {
+        "path": "criteria/viewpoints.json",
+        "sha256": "1165270d98140f1ccde17dbfe7de21a6001ce496d828d1bb6e5afc02f1ac68ad"
+      },
+      {
+        "path": "scripts/select_viewpoints.py",
+        "sha256": "9b5a277c8139fe0f977f3cceb03d5a80a50494a491de7770d50808b8541cf627"
+      }
+    ],
+    "content_hash": "e1e9af4f0547ae033e68dbc00216f6a23bbec13bef4f43a1e346423089dafbc4"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "aa0a6870c66bdb258",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 20
+      }
+    ],
+    "score": 92,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P1",
+        "severity": "low",
+        "location": "SKILL.md:69",
+        "comment": "同階層に stop-ai-slop-jp が必要という前提条件を明記するとよい（任意）。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": "SKILL.md:31",
+        "comment": "出力 JSON の抜粋例があると再現性の確認が容易（任意）。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:40",
+        "comment": "ユーザー発言から結果までの通し例がない（任意）。"
+      },
+      {
+        "criterion_id": "D3",
+        "severity": "low",
+        "location": "SKILL.md:3",
+        "comment": "description にネガティブトリガー（総合レビューには使わない等）を足すとよい（任意）。"
+      }
+    ]
+  }
+}

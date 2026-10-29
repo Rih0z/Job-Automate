@@ -1,6 +1,6 @@
 ---
 name: harness-compliance-audit
-description: "CLAUDE.md・.claude/rules・.claude/skills・.claude/commands・.claude/agents・hooks 設定を新規作成または編集した直後に、その変更分が Anthropic 公式ベストプラクティス（リポジトリ内の構造化キャッシュ anthropic-best-practices.yaml|json）に従っているかを監査する。機械検査 script と、変更ファイルごとの独立エージェント判定（principle id 付き）の 2 段で PASS/FAIL を出す。skill を新しく作ったとき、CLAUDE.md や rules を編集したときに使う。全 skill の一括監査（skills-audit または audit-skill-system）と単一 skill の 5 軸採点（/review-skill）は別 skill で、本 skill は直近の変更分に限定する。"
+description: "CLAUDE.md・rules・skills・commands・agents・hooks 設定を新規作成または編集した直後のとき、その変更分が Anthropic 公式ベストプラクティスに従っているかを、機械検査 script と変更ファイルごとの独立エージェント判定の 2 段で監査し PASS/FAIL を出す。全 skill の一括監査（skills-audit または audit-skill-system）と単一 skill の 5 軸採点（/review-skill）には使わない。"
 when_to_use: >
   skill を新しく作った直後、CLAUDE.md・rules・commands・agents・hooks 設定を編集した直後、
   「ベストプラクティスに沿っているか確認して」「公式準拠監査」「harness-compliance-audit」と言われたとき、
@@ -9,10 +9,13 @@ argument-hint: "[git ref（省略時は未 commit 変更 + 直近 1 commit）| �
 allowed-tools: Read, Write, Glob, Grep, Bash, Agent
 metadata:
   provenance: official-derived
+  version: "1.1.0"
+  history: "1.1.0 使用例・エラー処理・前提を追加し、description の重複を削減"
 ---
 
 # harness-compliance-audit — 変更分の公式ベストプラクティス監査
 
+**前提**: 本 skill は次の repo 固有の配置を前提にする。判定の SoT `.claude/skills/_shared/`、reviewer 定義 `.claude/agents/readonly-reviewer.md`（無ければ手順 2 の代替）、報告の保存先 `.tmp/`（無ければ応答本文のみ）。他 repo へ移す場合はこの 3 点を差し替える。
 **何をするか**: 直近に変更した「ハーネス」ファイル（CLAUDE.md・`.claude/rules/**`・`.claude/skills/**`・`.claude/commands/**`・`.claude/agents/**`・`.claude/settings*.json`）だけを対象に、公式原則との適合を判定する。全体監査ではない（それはリポジトリの一括監査 skill＝`skills-audit` または `audit-skill-system`）。
 **判定の SoT**: `.claude/skills/_shared/anthropic-best-practices.yaml` または `.json`（取得日 `fetched`・再取得条件 `refetch_when` 付き）。本文に基準を再掲しない。SoT と本 skill の記述が食い違えば SoT を正とする。
 **実行主体**: 手順 2 の判定は、変更を行ったセッションではなく `Agent` tool で起動した別エージェントが行う（自己レビュー禁止）。呼び出し元は対象パスと SoT のパスだけを渡し、会話履歴・変更意図を渡さない。
@@ -30,6 +33,7 @@ bash .claude/skills/harness-compliance-audit/scripts/harness_check.sh $ARGUMENTS
 - FAIL が 1 件でもあれば終了コード 1。FAIL は手順 2 に進む前に修正するか、修正しない理由を報告に書く。
 - 対象 0 件と表示されたときは `git log -1 --format='%h %ci'` と `git status --short` を報告に併記する（別 session の commit で差分が先に取り込まれたケースと「本当に変更なし」を見分けるため）。
 - SoT の `fetched` が `max_age_days` を超えていれば WARN が出る。その場合は先に SoT の `refetch_when` 手順（各 `source` の URL を WebFetch し差分を principle 単位で反映して `fetched` を進める）を実行する。
+- SoT が無い場合は `CHECK BP01 FAIL` が出る。手順 2 に進まず、SoT の作成または取得（`refetch_when` 手順）を呼び出し元へ依頼して、監査 FAIL として終える。
 
 ### 2. 独立エージェント判定（変更ファイルごと）
 
@@ -60,13 +64,21 @@ reviewer の出力（JSON のみ）:
 ```
 
 - `verdict` は blocker が 0 件で PASS。score は 100 から blocker 20・major 10・minor 3 を減じた値（info は減点しない）。
+- reviewer が JSON 以外を返した、または `review-result/v1` の必須キーを欠く場合は、その file を「判定不能」として表に載せ、同じ file だけ 1 回起動し直す。再度不正なら判定不能のまま報告し、総合は FAIL にする。
+- `Agent` の起動自体に失敗した場合は、該当 file を「判定不能（起動失敗）」とし、機械検査の結果だけを報告して総合は FAIL にする。自分で代わりに判定しない。
 - 種別ごとの必須観点（reviewer が最低限見る項目）は [reference/checks.md](reference/checks.md) の「エージェント判定の観点」。
 
 ### 3. 統合（このセッションで実行）
 
 - 手順 1 の FAIL/WARN と手順 2 の JSON をそのまま並べる。判定をやり直さない・上書きしない（矛盾があれば「判定不能」と書く）。
 - 全ファイルが PASS（機械検査 FAIL 0・blocker 0）なら監査 PASS。1 件でも FAIL なら監査 FAIL とし、呼び出し元が対象を修正してから手順 1 から再実行する（本 skill 自身は対象を編集しない。監査だけを依頼された run では修正せず FAIL を報告して終える）。3 回連続 FAIL で中断し、残る指摘を issue/課題として起票する（起票先はリポジトリの規約に従う）。
-- 報告は `.tmp/harness-audit/<YYYY-MM-DD>-<short-sha>.md` に保存する（`.tmp/` が無いリポジトリでは応答本文のみ）。
+- 報告は `.tmp/harness-audit/<YYYY-MM-DD>-<short-sha>.md` に保存する（`.tmp/` が無いリポジトリでは応答本文のみ）。Write は、この報告ファイルの保存にだけ使う。
+
+## 使用例とエッジケース
+
+- 例: ユーザーが「skill を 1 本書いたので公式準拠を確認して」と言う。→ 手順 1 が未 commit の変更 1 件を列挙し、機械検査は FAIL 0・WARN 1。→ 手順 2 で別エージェントが blocker 0・major 1 を返す。→ 総合は PASS とし、major の principle id と file:line を表に載せて報告する。
+- 例外: 対象が 0 件のときは手順 1 の記述どおり `git log` と `git status` を併記する。変更が `.claude/` 外だけなら「対象外」と報告して終える。
+- 例外: 機械検査が FAIL のまま reviewer が blocker 0 を返した場合は、判定を上書きせず総合 FAIL とする。
 
 ## 出力形式
 

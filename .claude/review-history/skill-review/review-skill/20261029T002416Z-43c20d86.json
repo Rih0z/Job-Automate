@@ -1,0 +1,115 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "review-skill",
+  "reviewed_at": "2026-10-29T00:24:16Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "8eea3ff8653a78ad3bb9e46eee022ca819aab5de4f0ce9f04ab1e20ea44af854"
+      },
+      {
+        "path": "criteria/skill-quality.json",
+        "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+      },
+      {
+        "path": "scripts/append_skill_review_record.py",
+        "sha256": "fb4312c0c240861a28ab8f556e7afc8efd2a3d857d9a9057a96875a851bf394b"
+      },
+      {
+        "path": "scripts/check_skill_review_consistency.py",
+        "sha256": "54a0946c82d0b812d22f16378d3da73085164e75cf139d6ab04edf05902a824a"
+      },
+      {
+        "path": "scripts/hook-skill-review-gate.sh",
+        "sha256": "d9171cc3cea8e0330287766e084c3a10d2246709ee944f9a8ef7c40049b70980"
+      },
+      {
+        "path": "scripts/render_review_skill_md.py",
+        "sha256": "5e90fe5bf2f838631933a8c52d941314827248000b47a085573ce008751a7f8d"
+      },
+      {
+        "path": "scripts/skill_review_gate.py",
+        "sha256": "f19ed6dcb88959e4d5c0def6c542f04d0b2d84eab60b59e9a13d75234c084771"
+      },
+      {
+        "path": "scripts/skill_review_lib.py",
+        "sha256": "b557e44322422b0018bc28f15b82a1224daf75ac83dc9617ba18e9ff3d3b5008"
+      }
+    ],
+    "content_hash": "7915acf839dc45c838517f405d5bfc040865ad09134d57988370cd7ab7850a24"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "a01dd0fb5ef027625",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 19
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 19
+      }
+    ],
+    "score": 93,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": "SKILL.md:7-8",
+        "comment": "トリガーフレーズは 5 つあるが、関連ファイルタイプ（skill 名・SKILL.md 等）の記載がない。"
+      },
+      {
+        "criterion_id": "D1",
+        "severity": "low",
+        "location": "SKILL.md:4",
+        "comment": "description の書き出しが命令調で、第三者視点の「何をするか」から始まっていない。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:12-13",
+        "comment": "metadata は provenance のみで、バージョン・更新履歴の管理がない。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:47",
+        "comment": "settings.json の Stop / SessionStart に hook 登録行がある前提の記述だが、登録の実在は整合検査（hook_registration）で確認すべき。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:61-64",
+        "comment": "Examples は 2 件のみで、エッジケース（hash 不一致の拒否、FAIL 後の再レビュー）の例がない。"
+      }
+    ]
+  }
+}

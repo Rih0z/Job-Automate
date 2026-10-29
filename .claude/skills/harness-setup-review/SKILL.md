@@ -2,14 +2,16 @@
 name: harness-setup-review
 description: "別プロジェクトへの harness セットアップ（agent-harness-bootstrap Step 0〜8）の完了後に、ユーザーが選択した全観点が対象の CLAUDE.md / rules / skills に反映されているか（抜けゼロ）と、非選択の著者嗜好が混入していないか（混入ゼロ）を検査する。機械検査（provenance-check.sh --target）と別エージェントの突合レビュー（criteria/porting-reconciliation.json）の両方が PASS するまで setup を完了扱いにしない（Stop hook が検証前の終了を block する）。対象に既存の skills があれば skills-audit で Anthropic 公式ベストプラクティス準拠も監査する。Use when the user asks to 'セットアップ結果をレビューして', 'harness-setup-review', '移植の抜けと混入を確認して', or immediately after agent-harness-bootstrap finishes generating for a target other than this repository."
 allowed-tools: Read Bash Agent Glob Grep
-argument-hint: "<対象プロジェクトの絶対パス>（省略時は進行中 setup の state から取得）"
+argument-hint: "[対象プロジェクトの絶対パス]（省略時は進行中 setup の state から取得）"
 metadata:
   provenance: official-derived
+  version: "1.1.0"
+  changelog: "1.1.0 使用例・エラー対処・出力形式を追加し、山括弧表記を除去"
 ---
 
 # harness-setup-review — setup 後の抜け・混入レビュー
 
-移植元（このリポジトリの clone）で実行する。対象プロジェクトへはコピーしない。公式ベストプラクティスの参照は `.claude/skills/_shared/anthropic-best-practices.json`（日付付きの構造化データ）を使い、判定前に `refetch_when` に該当していれば各 `source_url` の現行版で裏取りする。
+移植元（このリポジトリの clone）で実行する。前提として、clone 内の `.claude/skills/agent-harness-bootstrap/scripts/` 配下のスクリプトと bash・python が実在することを意図的に前提とする（対象プロジェクトへはスクリプトを持ち込まない設計）。対象プロジェクトへはコピーしない。公式ベストプラクティスの参照は `.claude/skills/_shared/anthropic-best-practices.json`（日付付きの構造化データ）を使い、判定前に `refetch_when` に該当していれば各 `source_url` の現行版で裏取りする。
 
 ## 入力
 
@@ -21,10 +23,10 @@ metadata:
 1. **機械検査（決定的）**: 対象ルートで次を実行し、出力をそのまま記録する。
 
    ```bash
-   bash <本 clone>/.claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh --target <対象の絶対パス>
+   bash [本 clone のパス]/.claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh --target [対象の絶対パス]
    ```
 
-   C11（選択記録: 全要素網羅・official は必ず selected・依存充足・skill-group の skills[]）と C12（生成物: 選択要素の契約語句・ファイル・`@import`・`paths:` の存在、非選択要素の語句・ファイル・ディレクトリ・skill の不在、`<!-- id: -->` マーカー残存禁止、`.setup-automate/` の gitignore）を評価する。FAIL 行があればそれが修正対象。
+   C11（選択記録: 全要素網羅・official は必ず selected・依存充足・skill-group の skills[]）と C12（生成物: 選択要素の契約語句・ファイル・`@import`・`paths:` の存在、非選択要素の語句・ファイル・ディレクトリ・skill の不在、id コメントマーカー残存禁止、`.setup-automate/` の gitignore）を評価する。FAIL 行があればそれが修正対象。
 2. **突合レビュー（別エージェント）**: `Agent`（`readonly-reviewer`（`.claude/agents/readonly-reviewer.md`。定義が無い環境・未読込のセッションでは `general-purpose` で起動し、prompt 冒頭に「ファイルを作成・変更・削除しない」と明記する））を起動し、次の 4 点の完全パス**のみ**を渡す（会話履歴・実装意図・本 skill の本文は渡さない）:
    - 移植元 `.claude/skills/agent-harness-bootstrap/provenance.json`
    - 対象 `.claude/harness-selection.json`
@@ -36,13 +38,36 @@ metadata:
 4. **判定と state 更新**:
 
    ```bash
-   bash <本 clone>/.claude/skills/agent-harness-bootstrap/scripts/harness-setup-state.sh verify --machine <PASS|FAIL> --review <PASS|FAIL>
+   bash [本 clone のパス]/.claude/skills/agent-harness-bootstrap/scripts/harness-setup-state.sh verify --machine [PASS または FAIL] --review [PASS または FAIL]
    ```
 
    - 両方 PASS → `phase=verified`。続けて `harness-setup-state.sh done` を実行し、完了報告へ進む。
    - いずれか FAIL → findings（file:line）を修正し、手順 1 から再実行する。`verify` は FAIL のたびに `fail_count` を進め、**3 回 FAIL で中断してユーザーに報告する**（対象で `issue-lifecycle` が選択済みなら `issues/open/` に起票、非選択なら報告のみ）。
 5. **読み込みの確認（ユーザーに依頼）**: 対象ルートで Claude Code を新しく起動して `/context` を実行し、Memory files に生成した `CLAUDE.md` と常時 load の rules（frontmatter に `paths:` の無いもの）が載っていることを確かめてもらう（対話操作のため本 skill からは実行できない。依頼した事実と、結果を受け取った場合はその内容を完了報告に含める）。対象に `AGENTS.md` がある場合は、CLAUDE.md の `@AGENTS.md` で取り込まれていることも併せて確認してもらう。
 6. **完了報告**: 機械検査の出力（PASS 行または FAIL 行）、突合レビューの score / verdict / findings、手順 3 の tier 一覧、手順 5 の確認依頼、`harness-selection.json` の完全パス、修正した箇所の完全パスを含める。
+
+## 出力の型
+
+突合レビューの返却 JSON（レビュアに指定する形式）:
+
+```json
+{"score": 0, "verdict": "PASS または FAIL", "must_pass_failures": ["観点 id と理由"], "findings": [{"file": "対象内の相対パス", "line": 1, "criterion": "観点 id", "issue": "内容", "fix": "直し方"}], "missing_perspectives": ["観点定義に無いが見るべき点"]}
+```
+
+完了報告の型（この順・この見出しで書く。余分な考察は足さない）:
+
+1. 機械検査: PASS 行または FAIL 行の原文
+2. 突合レビュー: score / verdict / findings の要約
+3. 既存 skills の公式準拠状況: tier 一覧（対象外なら「対象外」）
+4. 読み込み確認の依頼内容と、受け取った結果
+5. `harness-selection.json` と修正箇所の完全パス
+
+## 使用例とエッジケース
+
+- 使用例: ユーザー「セットアップ結果をレビューして」→ 対象を state から取得し、機械検査と別エージェントの突合レビューを実行 → 両方 PASS なら `verify` と `done` を実行して完了報告を返す。
+- 突合レビューだけ FAIL: findings の file:line を直し、手順 1 から再実行する（`fail_count` が進む）。
+- `harness-selection.json` が無い: 検査せず中断し、Step 0 からの実施を報告する。
+- スクリプトが無い・python が無い: 機械検査を PASS 扱いにしない。該当スクリプトの不在またはインストール不足を報告して中断し、`verify` は実行しない。
 
 ## 禁止事項
 

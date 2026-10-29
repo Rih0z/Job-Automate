@@ -1,0 +1,95 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "harness-compliance-audit",
+  "reviewed_at": "2026-10-29T00:24:23Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "4eb75b182c9efc96995427e8e1a83581b87ea8469798e52cbf26f61e39eb7500"
+      },
+      {
+        "path": "reference/checks.json",
+        "sha256": "ae0d2767281424242fc434aa49a3b89b204bb4fcfa2abe084da1e509816ee5f3"
+      },
+      {
+        "path": "reference/checks.md",
+        "sha256": "3112796f5da3cd9b28e81b27959bb44a6e63de57e10d572f4ff3f2eee889bf84"
+      },
+      {
+        "path": "scripts/harness_check.sh",
+        "sha256": "a9ed67a824000e7a6b8db8850e2950fdf23c551b0464baa56168dac2fc6bca4b"
+      },
+      {
+        "path": "scripts/test_fm_get.sh",
+        "sha256": "253de45c391bbf8b03f7a859f061048cc35f5c70fffb4115a65c9f0b25ae579f"
+      },
+      {
+        "path": "scripts/test_new_checks.sh",
+        "sha256": "7b74b6f594c120b8798a32718788ae0f8ecf5edc628d8bae9a8d3c68814bac31"
+      }
+    ],
+    "content_hash": "c5e6499c4b0768072eb53f024390470c604281ddf2b473e8d425078e60eaf525"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "abd9eb07d69889672",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 20
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 93,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:18",
+        "comment": "Repo-specific paths (.claude/skills/_shared, readonly-reviewer.md, .tmp) are hard-coded. The skill declares this and says to swap them, so it is only a portability note."
+      },
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": "SKILL.md:6",
+        "comment": "The trigger phrases are few and no file types are listed. Optional: add more paraphrases and the targets."
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:79",
+        "comment": "Only one worked example is given. Optional: add a FAIL example or an example with a git ref argument."
+      }
+    ]
+  }
+}

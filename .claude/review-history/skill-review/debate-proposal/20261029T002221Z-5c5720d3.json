@@ -1,0 +1,95 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "debate-proposal",
+  "reviewed_at": "2026-10-29T00:22:21Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "47c4c36a2cee9436bc8aecead8a2623a0faa39d1e47372f9d3829f2f5e2bd6c0"
+      },
+      {
+        "path": "references/debater-prompts.md",
+        "sha256": "9def4f38ae1bc47ca368a1e8323c142714d0c2e0e4baa86200fe410bcc086e31"
+      },
+      {
+        "path": "references/error-handling.md",
+        "sha256": "773c0d1ca3dd11f7e24e0a68a83e807408f75bcac09a1ef55aa3241c9224815f"
+      }
+    ],
+    "content_hash": "bcd829c1af1f012d2c70984c8153d812f566052b56bef039de752f26e52e9fac"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "a581a7658f3e34753",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "D3",
+        "severity": "low",
+        "location": "SKILL.md:3-4",
+        "comment": "使わない場面（typo・軽微修正・PASS 済み設計・成果物レビュー）は本文の「適用しない」(33-34) にのみあり、description 側にネガティブトリガーが無い。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:46, 172-178",
+        "comment": "作業用ディレクトリ .tmp/review/ と、特定 repo の実例に依存した「由来」節が残る。依存表に代替があるため軽微。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md 全体",
+        "comment": "CLAUDE.md や README への登録・反映はこのディレクトリ内からは確認できない。"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": "SKILL.md:109-110",
+        "comment": "第 2 ラウンドは「事実認識の差か判断の差か」で分岐するが、ラウンド数の上限や終了基準は書かれていない。"
+      },
+      {
+        "criterion_id": "S3",
+        "severity": "low",
+        "location": "SKILL.md:54, 75",
+        "comment": "本文に山括弧のプレースホルダ表記がある。フロントマター外なので criteria 違反ではない。"
+      }
+    ]
+  }
+}
