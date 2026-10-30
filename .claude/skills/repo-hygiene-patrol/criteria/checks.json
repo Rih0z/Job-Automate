@@ -14,7 +14,7 @@
       "name": "OS由来のゴミファイル",
       "command": "find . -iname \"nul\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\"; ls -d C:* 2>/dev/null; find . -name \".DS_Store\" -not -path \"*/node_modules/*\" -not -path \"*/.git/*\"",
       "severity": "HIGH",
-      "rationale": ".DS_Store は .gitignore への追記も併せて提案する"
+      "rationale": ".DS_Store は .gitignore への追記も併せて提案する。`ls -d C:*` は Windows パスが誤ってディレクトリ名になった残骸の検出用で、該当が無ければ何も出力しない"
     },
     {
       "id": "root_build_residue",
@@ -47,7 +47,7 @@
     {
       "id": "numeric_target_drift",
       "name": "数値目標の整合性ドリフト",
-      "command": "grep -rn \"[0-9]+%|[0-9]+点以上|閾値\" CLAUDE.md .claude/ docs/ 2>/dev/null",
+      "command": "grep -rnE \"[0-9]+%|[0-9]+点以上|閾値\" CLAUDE.md .claude/ docs/ 2>/dev/null",
       "severity_rules": {
         "HIGH": "prose の宣言と実際の強制値(CI閾値変数・validator定数等)が食い違っている、または全く強制されていない",
         "MEDIUM": "数値目標が prose 側に手書きで複数箇所重複記載されている(1箇所更新で他が stale 化する構造)",

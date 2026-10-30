@@ -1,0 +1,75 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "review-thumbnail",
+  "reviewed_at": "2026-10-30T16:07:21Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "9e9748a236d8392ba6ce6cbfec8d50126914049f44d9bf407a708f05dc57f672"
+      }
+    ],
+    "content_hash": "f07b2fa82a56210a056c3bf31b8e18a604b6396fb1bbc71a728c5636c8a6e3ed"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": "review-thumbnail/SKILL.md:37,56",
+        "comment": "C は「Read のみで実施」「スクリプトは実行しない」と書くが、出力形式の見出しは「機械チェック」。用語が食い違う。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "review-thumbnail/SKILL.md:76,80",
+        "comment": "「Round 1」「コンテンツフック追加ラウンド」は thumbnail-generation の手順書が前提で、本文だけでは意味が分からない。"
+      },
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": "review-thumbnail/SKILL.md",
+        "comment": "単一ファイル（84 行）で分離は無い。長さからは許容範囲。"
+      }
+    ]
+  }
+}

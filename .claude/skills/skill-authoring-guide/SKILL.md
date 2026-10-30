@@ -1,15 +1,62 @@
 ---
 name: skill-authoring-guide
-description: "Reference manual (based on Anthropic's official 'The Complete Guide to Building Skills for Claude') for designing, structuring, and testing SKILL.md files and Claude Code slash commands: folder structure, YAML frontmatter rules, progressive disclosure, instruction-quality patterns, and a pre-publish checklist. Use when the user asks to 'Skillを作りたい', 'SKILL.mdの書き方を教えて', 'スキル作成のベストプラクティスを確認して', or is the evaluation basis for /review-skill."
+description: "Reference manual (based on Anthropic's official 'The Complete Guide to Building Skills for Claude') for designing, structuring, and testing SKILL.md files and Claude Code slash commands: folder structure, YAML frontmatter rules, progressive disclosure, instruction-quality patterns, and a pre-publish checklist. Use when the user asks to 'Skillを作りたい', 'SKILL.mdの書き方を教えて', 'スキル作成のベストプラクティスを確認して', 'descriptionの書き方', 'frontmatterに何を書く？', 'スキルを新規設計したい', or is the evaluation basis for /review-skill. Not for: auditing a just-edited skill against official practices (use harness-compliance-audit), scoring a skill or command after an update (use /review-skill), or whole skill-system audits (use skills-audit); this guide is a reference to consult while writing, not an executor."
 metadata:
   provenance: official-derived
+  version: "1.0"
 ---
 
 # Claude Skills 作成マニュアル
 
 > **出典**: Anthropic "The Complete Guide to Building Skills for Claude" (PDF)
 > **構造化データ**: 公式原則の要約は `.claude/skills/_shared/anthropic-best-practices.json`（`category: skills`）が SoT。本文と食い違う場合は構造化データ側を正とし、`refetch_when` に該当すれば公式 docs を WebFetch して更新する。
+> **目次**: 1 基本構造 / 2 Progressive Disclosure / 3 YAML フロントマター / 4 命令の書き方 / 5 詳細リファレンス（references/） / 6 Claude Code での扱い / 困ったとき / 出典・関連
 > **用途**: Skills の設計・作成・テスト・配布のリファレンス。`/review-skill` の評価基準として参照する。
+
+> **この guide の使い方と出力**: 質問への回答の形式は「回答テンプレートと完了条件」の 4 見出し固定が唯一の指定。新規 skill の設計相談だけは、4 見出しの代わりに `## 4` の推奨構造に沿った SKILL.md の骨子を示す。
+> **行動原則**: 公式原則の出典 (本文または構造化データ) に無いことを「公式の決まり」として断定しない。分からない点は `refetch_when` に従って公式 docs を確認する。他の skill や設定ファイルは、依頼されない限り編集しない。
+> **前提・他プロジェクトで使う場合**: 本リポジトリ固有の参照は下の「前提と代替」にまとめた。コピー先に無ければ代替で読み替え、存在しないパスは案内しない。
+
+## 前提と代替（本リポジトリ固有の参照）
+
+| 本文に出る参照 | 役割 | 無い環境での代替 |
+|---|---|---|
+| `.claude/skills/_shared/anthropic-best-practices.json` | 公式原則の要約（SoT）。`skills.*` の principle id と `refetch_when` を持つ | Anthropic 公式の Skills docs と Best practices を直接確認し、principle id は節番号に読み替える |
+| `workflows/software-development/skills-building-guide.md` | 本 guide の原文 | 不要（本文だけで完結する） |
+| `.claude/agents/readonly-reviewer.md` | 書き込み禁止のレビュー用 subagent の定義例 | 自分の環境で `tools` に読み取り系だけを許可した subagent を作る |
+| `skills-audit`、`/review-skill`、`harness-compliance-audit` | 監査・採点を担当する別 skill | 無ければ「公開前チェックリスト」（references/testing-and-checklist.md）で自己点検する |
+
+---
+
+## 回答テンプレートと完了条件
+
+この guide は参照マニュアルなので、同じ質問には同じ構造で答える。質問への回答は次の 4 見出し固定で書く。
+
+```
+### 結論
+（どう書くか。1〜3 文）
+### 根拠
+（本 guide の節番号、または `skills.*` principle の id。両方あれば両方）
+### 良い例 / 悪い例
+（各 1 組。コードブロックで示す）
+### 次に確認すること
+（公開前チェックリストのうち該当する 1〜3 項目。無ければ「なし」）
+```
+
+- 新規 skill の設計相談では、上の 4 見出しの代わりに `## 4` の推奨構造に沿った SKILL.md の骨子を示し、その後に「根拠」だけ添える。
+- 含めない情報: 質問と無関係な節の要約、本 guide に出典のない「公式の決まり」、依頼されていない他 skill の編集案。
+- 完了条件(次の 4 つがすべて真なら回答完了。1 つでも偽なら書き直す):
+  1. 回答に節番号または principle id が 1 つ以上ある
+  2. 良い例と悪い例が各 1 件ある
+  3. 出典の無い内容を「公式」と断定していない
+  4. 回答中のファイル名・パスが、`## 1` の命名規則と矛盾していない
+- 採点目安(自分の回答を見直すときの 5 段階。3 以下は書き直す): 5 = 4 見出しすべて・完了条件 4 つ全真 / 4 = 1 見出しが薄い / 3 = 根拠か例が欠ける / 2 = 結論のみ / 1 = 質問に答えていない。
+
+## 使用例
+
+- 正常系: 「description の書き方を教えて」→ `## 3` の「description の書き方」を根拠に、上のテンプレートで結論(何をするか + いつ使うか + 主な機能の順)・良い例 1 件・悪い例 1 件を返す。
+- 設計相談: 「議事録整形の skill を新しく作りたい」→ `## 4` の推奨構造に沿って name / description / Step 1〜 / Examples / Troubleshooting の骨子を示す。description は 1024 文字以下、山括弧を含めない。
+- 失敗系: 「この skill を採点して」→ 採点は /review-skill、直近変更の監査は harness-compliance-audit の担当と伝え、この guide では採点しない。「公式ではこう決まっている」と本 guide に無い内容を聞かれたら、断定せず `refetch_when` に従って公式 docs の確認を勧める。
 
 ---
 
@@ -181,178 +228,35 @@ CRITICAL: Before calling create_project, verify:
 - Start date is not in the past
 ```
 
-### 決定的な強制 vs 確率的な依頼
+## 5. 詳細リファレンス（references/、必要になった時だけ読む）
 
-「絶対に守ってほしい」規律ほど、**モデルへの指示文だけ（確率的な依頼）に頼らず、スクリプト・バリデーション・スキーマ等の構造で強制（決定的な強制）できないか**を先に検討する。指示文は従わない実行が起こりうるが、プログラム的な検証・ゲート・スキーマは物理的に迂回できない。
-
-| 迂回されうる（確率的） | 迂回されない（決定的） |
+| 知りたいこと | 読むファイル |
 |---|---|
-| 「JSON形式で出力してください」という指示文のみ | 出力スキーマ検証 + 不一致時は reject して再生成させる |
-| few-shot 例で望ましい形式を示すだけ | 後続処理側で構造チェック（フィールド欠落・型不一致を機械的に検出） |
-| コメントで「このフィールドは変更しないで」と書く | 該当フィールドを書き込み不能にする / 変更検出スクリプトを別途走らせる |
+| 決定的な強制 vs 確率的な依頼、Few-shot 例の個数と欠損値、出力スキーマの `required` 設計 | [references/instruction-design.md](references/instruction-design.md) |
+| ユースケースカテゴリ 3 種、パターン 1〜6（ルーター型 skill を含む） | [references/use-case-patterns.md](references/use-case-patterns.md) |
+| トリガー・機能・性能テスト、評価シナリオを先に作る手順、反復の表、公開前チェックリスト | [references/testing-and-checklist.md](references/testing-and-checklist.md) |
 
-「より丁寧・より慎重に見える指示文」を追加するだけでは、結局モデル任せの依頼に留まる場合がある。本当に保証したい規律は、`## 7. テストと反復` の検証ゲートやスクリプト実行ステップに落とし込む。
-
-### Few-shot 例（Examples セクション）の設計
-
-- **個数は 2〜4 個を目安にする**。それ以上増やしても効果は逓減しやすく、個数より**シナリオの多様性**（似た例の量産でなく異なるケースの網羅）の方が重要
-- **全ての例で共通フィールドが常に値で埋まっている状態を避ける**。欠損・null・不明値を一度も見せないと、モデルは「常に全項目埋まっているべき」という誤ったパターンを学習し、実際に値が無い場面でそれらしい値を捏造しやすくなる（ハルシネーション誘発）。少なくとも1例は欠損値を含むケースを用意する
-- 複数言語・複数フォーマットにまたがる skill では、例を1つのパターンに集中させず**種別ごとに最低1例ずつ配分**し、かつ全例で同じ出力構造を示す（フォーマットの一貫性と網羅性を両立させる）
-
-### 構造化出力スキーマの設計（tool_use の入力スキーマ・MCPツールの出力等、該当時のみ）
-
-- **カテゴリによって適用有無が変わるフィールドは `required` にしない**。例: 分類タスクで `category` が「スパム」の時は `target_demographic`（対象層）が本来存在しないのに、そのフィールドが `required` だと、モデルは値の生成を強制され「一般大衆」のようなそれらしい値を捏造しやすくなる（ハルシネーション誘発）。該当しない場合に正当に「無い」と表明できるよう nullable / optional にする（上記の few-shot 例でも同じ理由で欠損値を含むケースを示す）
-- 判断の目安: そのフィールドが「常にどのケースでも意味を持つか」を自問し、否なら `required` から外す
+本当に守らせたい規律は、指示文の追加だけでなくスクリプト・スキーマ検証で強制する（詳細は instruction-design.md）。
 
 ---
 
-## 5. ユースケースカテゴリ
+## 6. Claude Code での扱い（commands は skills に統合済み）
 
-### Category 1: Document & Asset Creation
-ドキュメント・プレゼン・デザイン・コード等の一貫した高品質出力の作成。
-
-**テクニック**: スタイルガイド埋め込み、テンプレート構造、品質チェックリスト
-
-### Category 2: Workflow Automation
-一貫した方法論で行うマルチステッププロセス。
-
-**テクニック**: 検証ゲート付きステップ、テンプレート、レビュー・改善提案、反復ループ
-
-### Category 3: MCP Enhancement
-MCP サーバーが提供するツールアクセスを強化するワークフローガイダンス。
-
-**テクニック**: MCP 呼び出しの順序制御、ドメイン知識埋め込み、エラーハンドリング
-
----
-
-## 6. パターン集
-
-### Pattern 1: Sequential Workflow Orchestration
-マルチステッププロセスを特定の順序で実行。
-- 明示的なステップ順序
-- ステップ間の依存関係
-- 各段階でのバリデーション
-- 失敗時のロールバック
-
-### Pattern 2: Multi-MCP Coordination
-複数サービスにまたがるワークフロー。
-- 明確なフェーズ分離
-- MCP 間のデータ受け渡し
-- 次フェーズ前のバリデーション
-
-### Pattern 3: Iterative Refinement
-反復で出力品質を向上。
-- 明示的な品質基準
-- バリデーションスクリプト
-- 停止条件の明確化
-
-### Pattern 4: Context-aware Tool Selection
-コンテキストに応じて異なるツールを選択。
-- 明確な判断基準
-- フォールバック
-- 選択理由の透明化
-
-### Pattern 5: Domain-specific Intelligence
-ツールアクセス以上の専門知識を付加。
-- ロジックにドメイン知識を埋め込み
-- アクション前のコンプライアンスチェック
-- 監査証跡
-
-### Pattern 6: Router + Content-free Skills(2026-09-01 追加)
-ナレッジベースが大きい場合、1つの巨大なSKILL.mdに全知識を詰めない。ルーター役のskillは「どのトピックがどの参照ファイル/セクションにあるか」の索引のみを持ち、本文コンテンツは持たない。個別トピックのskill(または`references/`配下のファイル)は本文コンテンツのみを持ち、ルーティングロジックを持たない。効果: ①関連トピックだけがcontextに載る(token節約) ②本文更新時にルーターを触らずに済む(疎結合)。副作用: ルーター経由の間接呼び出しはprompt injectionの経路になりうるため、ルーターが外部入力(取得したWebコンテンツ等)をそのまま次のskill呼び出し先の判断に使わないよう明示的にガードする。
-
----
-
-## 7. テストと反復
-
-### テストの3領域
-
-#### 1. トリガーテスト
-```
-Should trigger:
-- "Help me set up a new ProjectHub workspace"
-- "I need to create a project in ProjectHub"
-
-Should NOT trigger:
-- "What's the weather?"
-- "Help me write Python code"
-```
-
-#### 2. 機能テスト
-- 正しい出力が生成されるか
-- API 呼び出しが成功するか
-- エラーハンドリングが機能するか
-- エッジケースがカバーされているか
-
-#### 3. パフォーマンス比較
-スキルありとなしで比較:
-- やりとり回数
-- 失敗した API 呼び出し数
-- 消費トークン数
-
-#### 評価を先に作る（公式 authoring の推奨）
-- 長い本文を書く前に、skill 無しで Claude が失敗する点から**最低 3 件の評価シナリオ**を作り、skill 無しの baseline を記録する。前の会話の文脈が評価を甘くするので、比較は新しいセッションで行う
-- Claude Code では skill-creator plugin の evals や `claude plugin eval` で比較を自動化できる
-- 使う予定の**すべてのモデル**（Haiku / Sonnet / Opus 等）で試す。効き方はモデルで変わる
-
-### フィードバックに基づく反復
-
-| シグナル | 原因 | 対処 |
-|---------|------|------|
-| アンダートリガー（発火しない） | description が曖昧 | キーワード・トリガーフレーズを追加 |
-| オーバートリガー（関係ない時に発火） | description が広すぎる | ネガティブトリガー追加、スコープ明確化 |
-| 命令が守られない | 命令が冗長/埋もれ/曖昧 | 簡潔に、重要事項を先頭に、具体的に |
-
----
-
-## 8. クイックチェックリスト
-
-### 開発前
-- [ ] 2-3個の具体的ユースケースを特定
-- [ ] 必要なツール（組み込み or MCP）を特定
-- [ ] フォルダ構造を計画
-
-### 開発中
-（各項目の根拠は `anthropic-best-practices.json` の `skills.*` / `authoring.*` principle。文言を変える時はそちらを先に更新する）
-- [ ] フォルダ名が kebab-case
-- [ ] SKILL.md が正確な綴り
-- [ ] YAML フロントマターに `---` デリミタ
-- [ ] name: kebab-case、スペース・大文字なし
-- [ ] description に「何を」と「いつ」の両方を含む
-- [ ] XML タグ（`<` `>`）なし
-- [ ] 命令が明確でアクション可能
-- [ ] エラーハンドリング含む
-- [ ] 例を提供
-- [ ] 参照ファイルを明示し、SKILL.md から 1 段で直接リンクしている（参照先からさらに辿らせない）
-- [ ] 100 行を超える参照ファイルの先頭に目次がある
-- [ ] Claude が既に知っている一般論を書いていない（簡潔さ）
-- [ ] 指示の具体度を作業の壊れやすさに合わせている（壊れやすい操作は厳密な手順・スクリプト、判断作業は方針）
-- [ ] description は三人称（日本語は主語を省いた常体・体言止め）で、「私は」「あなたは」を使っていない
-- [ ] 1 つの概念に 1 つの用語を使っている
-- [ ] 選択肢を並べすぎず、既定の 1 つを示している
-- [ ] 日付で分岐する手順（「〇月以前は旧方式」等）を本文に書いていない（必要なら「Old patterns」節に隔離）
-- [ ] 同梱スクリプトはエラーを自分で処理し、定数には根拠を書いている（理由の無い定数を置かない）
-- [ ] MCP ツールはサーバー名込みの完全修飾名で書いている（Claude Code では `mcp__<server>__<tool>`）
-- [ ] パスは forward slash で書いている
-
-### テスト
-- [ ] 最低 3 件の評価シナリオと skill 無し baseline の比較記録がある
-- [ ] 使う予定のすべてのモデルで試した
-- [ ] 明示的なタスクでトリガーされる
-- [ ] 言い換えでもトリガーされる
-- [ ] 無関係なトピックではトリガーされない
-- [ ] 機能テストがパス
-
-### 保守(2026-09-01 追加)
-- [ ] `metadata.version` 等のバージョン表記を持つskillは、内容(振る舞い)を変えない編集(typo修正・言い回し調整)でバージョンを自動的に繰り上げない。繰り上げは振る舞いが変わる変更時のみ、変更前後の差分をchangelogに残す。
-
----
-
-## 9. Claude Code での扱い（commands は skills に統合済み）
-
-Claude Code では custom commands は skills に統合されている。`.claude/commands/x.md` と `.claude/skills/x/SKILL.md` はどちらも `/x` を作るが、本リポジトリでは新規作成・移行ともに `.claude/skills/<name>/SKILL.md` に統一する（旧 `.claude/commands/*.md` は 2026-09-11 に移行済み）。本ガイドの原則はそのまま適用される。Claude Code 固有の frontmatter（`argument-hint` / `arguments` / `disable-model-invocation` / `user-invocable` / `allowed-tools` / `model` / `effort` / `context: fork` + `agent` / `background` / `paths` / `hooks` 等）は skills docs の Frontmatter reference を参照する。
+Claude Code では custom commands は skills に統合されている。`.claude/commands/x.md` と `.claude/skills/x/SKILL.md` はどちらも `/x` を作るが、本リポジトリでは新規作成・移行ともに `.claude/skills/<name>/SKILL.md` に統一する（旧 `.claude/commands/*.md` は移行済み）。本ガイドの原則はそのまま適用される。Claude Code 固有の frontmatter（`argument-hint` / `arguments` / `disable-model-invocation` / `user-invocable` / `allowed-tools` / `model` / `effort` / `context: fork` + `agent` / `background` / `paths` / `hooks` 等）は skills docs の Frontmatter reference を参照する。
 
 繰り返し起動するレビュアーや調査役は skill 本文に指示を毎回書くより、`.claude/agents/<name>.md` に subagent として定義し、`tools` / `disallowedTools` で書き込み等を禁止する（本リポジトリでは `.claude/agents/readonly-reviewer.md`）。
+
+---
+
+## 困ったとき (Troubleshooting)
+
+| 症状 | 原因 | 対処 |
+|------|------|------|
+| skill がアップロード/読込できない | フォルダ・ファイル名が `SKILL.md` でない、フロントマターの `---` 欠落、name にスペース・大文字 | `## 1` の命名規則と `## 3` のフィールド仕様を再確認する |
+| フロントマターのエラーになる | description に `<` `>` や YAML 的に危険な記号 (コロン等) を含む | 山括弧を外し、複数行は block scalar か引用符で囲む |
+| 発火しない / 発火しすぎる | description のトリガー不足または広すぎる | references/testing-and-checklist.md の反復の表に従い、フレーズ追加またはネガティブトリガー追加 |
+| 構造化データと本文が食い違う | 本文が古い | 構造化データ (`anthropic-best-practices.json`) を正とし、本文を直す |
+| 参照パス (`_shared/...` 等) が無い | 他プロジェクトにコピーした | 上記「他プロジェクトで使う場合」のとおり公式 docs で読み替える |
 
 ---
 
@@ -367,3 +271,10 @@ Claude Code では custom commands は skills に統合されている。`.claud
 ## 出典・関連
 
 原文: `workflows/software-development/skills-building-guide.md`。`.claude/skills/review-skill/SKILL.md`（`/review-skill`）の評価基準本体としても参照される。本リポジトリの `.claude/skills/skills-audit/SKILL.md` と役割が近接するため、重複が疑われる場合はメンテナンスIssueで整理すること。
+
+---
+
+## 更新履歴
+
+- 1.0（現行）: SKILL.md 本文（1 基本構造〜6 Claude Code での扱い、困ったとき）と references/ 3 ファイル（instruction-design.md / use-case-patterns.md / testing-and-checklist.md）で構成。回答は 4 見出し固定のテンプレートで返す。
+- 2026-10-30: 回答テンプレート・完了条件・採点目安・使用例・前提と代替の表を追加（version は据え置き）

@@ -1,0 +1,117 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "stop-ai-slop-jp",
+  "reviewed_at": "2026-10-30T16:09:26Z",
+  "target": {
+    "files": [
+      {
+        "path": ".gitignore",
+        "sha256": "cf237c7aff44efbe6e502e645c3e06da03a69d7bdeb43392108ef3348143417e"
+      },
+      {
+        "path": "CHANGELOG.md",
+        "sha256": "5e9563e758908c036c3a69e4c477115d4e0d5ae58997fb6c43058bb98be010d9"
+      },
+      {
+        "path": "LICENSE",
+        "sha256": "f9145903368bf0483fec06d7f2ed12d2e20667190783a7ffea161e92ff39f301"
+      },
+      {
+        "path": "SKILL.md",
+        "sha256": "d3f0ec755fee29d969522bacd50b307f0d0dd8c515577ab062ed40d69a70cd28"
+      },
+      {
+        "path": "criteria/calque-terms.json",
+        "sha256": "f344dd3e6a19c30444b7dc265fe60763f1c946b86004af4f534442bf9001101d"
+      },
+      {
+        "path": "criteria/scoring.json",
+        "sha256": "663c10c822b54cb14ed36ea172de45ba18c7499715968dd7ab3e465bf72642b9"
+      },
+      {
+        "path": "references/examples.md",
+        "sha256": "de05877b1dc136adaf3280d536c74e030442507ab90fd0c7c3ce9ca91496331c"
+      },
+      {
+        "path": "references/fact-integrity.md",
+        "sha256": "34a4674dab56787422034f5862b39a87067abf1524d063601f68ebbef9cbc504"
+      },
+      {
+        "path": "references/phrases.md",
+        "sha256": "0e23388b43146d7f560cdc04a1f8ebe3518b57889404e39fa258b025ab4d2003"
+      },
+      {
+        "path": "references/structures.md",
+        "sha256": "af7447458633e522394a153295ac2a5ef8c14c6e82befae212a0650058e52969"
+      },
+      {
+        "path": "references/tech-writing.md",
+        "sha256": "b22ed9d23e18bd841c92c256d0facc34c201dd49eebfe0d213f12c28ca2032b9"
+      },
+      {
+        "path": "references/upstream-readme.en.md",
+        "sha256": "34da14afae2054207dc14c3330587ac9fb2ca49c4ac54562ac9c45063f4c2500"
+      },
+      {
+        "path": "references/upstream-readme.ja.md",
+        "sha256": "aa62e01dc0cbf7e4db4a1c7e9bf5ac94d219679c4cd95a48c9767609d0ca8083"
+      }
+    ],
+    "content_hash": "62219ed366e7e8f4724958a59faa6694b1040aa78ce01af2e9da908014e06378"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:196",
+        "comment": "select-slop-viewpoints スキルへの参照あり。単体動作可と明記"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:166-170",
+        "comment": "SKILL.md 内の使用例は簡潔。詳細は references/examples.md"
+      }
+    ]
+  }
+}

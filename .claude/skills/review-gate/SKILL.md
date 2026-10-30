@@ -1,8 +1,9 @@
 ---
 name: review-gate
-description: "工程別レビューゲート。仕様・設計・テスト・実装・リリースの各工程が1つ進むごとに、成果物を別エージェントにJSON定義の観点でレビューさせ、PASSするまで次工程に進ませない品質ゲート。レビュアーが観点定義自体の抜け漏れも指摘し、criteria JSONを育てていく。Use when the user asks to '工程レビューして', 'レビューゲートを通して', '仕様/設計/テスト/実装をレビューして', or when a development stage (spec/design/test/implementation/release) has just been completed and needs independent review before proceeding."
+description: "工程別レビューゲート。仕様・設計・テスト・実装・リリースの各工程が1つ進むごとに、成果物を別エージェントにJSON定義の観点でレビューさせ、PASSするまで次工程に進ませない品質ゲート。レビュアーが観点定義自体の抜け漏れも指摘し、criteria JSONを育てていく。Use when the user asks to '工程レビューして', 'レビューゲートを通して', '仕様/設計/テスト/実装をレビューして', or when a development stage (spec/design/test/implementation/release) has just been completed and needs independent review before proceeding. Do not use for: a design-only stage without a test strategy section (the design gate would always fail), a one-off diff review (use review-changes), or running the development flow itself (use single-session-tdd or three-agent-tdd-workflow)."
 metadata:
   provenance: official-derived
+  version: "1.1"
 ---
 
 # review-gate — 工程別レビューゲート
@@ -39,7 +40,8 @@ metadata:
    最初に見た項目に評価が引きずられるため、全体像の把握を先に行う)。
    その上で各criterionを checks に沿って検証し、weightに基づき100点満点で採点。
    甘い採点を禁止する。判断に迷ったら減点し findings に書く。
-   プロジェクトまたはこの変更に該当しない criterion は N/A とし、残りの weight で按分して100点換算する。
+   プロジェクトまたはこの変更に該当しない criterion は N/A とし、残りの weight で按分して100点換算する
+   (換算式: score = 各 criterion の得点の合計 ÷ N/A を除いた criterion の weight の合計 × 100。例: weight 合計 100 のうち weight 10 が N/A で、残り 90 のうち 72 点なら 72÷90×100 = 80 点)。
    N/A にした criterion は理由つきで na_criteria に列挙せよ(must_pass も同じ扱い)。
    さらに「この観点定義自体に抜けている観点はないか」を考え、あれば missing_perspectives に提案せよ。
    出力は次のJSONのみ(説明文なし):
@@ -54,6 +56,8 @@ metadata:
    }
    ```
 
+   レビュアーが失敗・空応答・JSON 以外を返した場合は、結果を補完せず、同じプロンプトで 1 回だけ再起動する。再度失敗したらその事実をユーザーに報告して止まる(PASS 扱いにしない)。criteria JSON が読めない場合も同様に止めて報告する。
+
 3. **判定**: must_pass の criterion がすべて合格、かつ score ≥ pass_rule.min_score で PASS。
    - **must_pass を N/A にできる条件**: その criterion が対象とする成果物の種類が、その変更に存在しない場合に限る(例: 設計書を持たないスクリプト1本の修正)。依頼時に「この変更に存在しない成果物」として宣言し、レビュアーが N/A と判定し、**`na_criteria` に理由つきで現れている**ものだけを合格扱いとする。存在するのに書いていない場合は N/A にせず FAIL とする。
    - FAIL → findings を修正して同じ工程を再レビュー。PASSするまで次工程に進まない。
@@ -62,7 +66,15 @@ metadata:
 
    **weightを動かした記録 (2026-09-11)**: テスト設計の審査を入れるため design に `test_strategy`(10)・test に `red_evidence`(10) を新設し、その分 design の simplicity・testability と test の coverage_normal・independence を各 10→5 に下げた(合計100を維持)。
 
-   **観点の自己検証 (2026-08-31 追加)**: criteria JSON の checks を「厳格」と称する前に、意図的に劣化させたサンプル(基準を満たさないよう壊した対象)を実際にレビュアーへ通し、当該 criterion が FAIL することを確認する。FAIL しない check は基準が緩すぎるため、checks の記述を締め直してからコミットする。**孤立チェックの点検 (2026-09-01 追加)**: 上記に加え、criteria JSON 内の各 criterion が実際に score/verdict へ反映されているか（採点ロジックから参照されない孤立した check がないか）も定期的に確認する。checks を追加・変更した際、それが `weight` 計算や `must_pass` 判定のどちらにも紐付いていなければ、レビュアーがそのcriterionを検証しても結果が採点に反映されない不整合となる。
+   **観点の自己検証 (2026-08-31 追加)**: criteria JSON の checks を「厳格」と称する前に、意図的に劣化させたサンプル(基準を満たさないよう壊した対象)を実際にレビュアーへ通し、当該 criterion が FAIL することを確認する。FAIL しない check は基準が緩すぎるため、checks の記述を締め直してからコミットする。
+
+   **孤立チェックの点検 (2026-09-01 追加)**: 上記に加え、criteria JSON 内の各 criterion が実際に score/verdict へ反映されているか（採点ロジックから参照されない孤立した check がないか）も定期的に確認する。checks を追加・変更した際、それが `weight` 計算や `must_pass` 判定のどちらにも紐付いていなければ、レビュアーがそのcriterionを検証しても結果が採点に反映されない不整合となる。
+
+## 使用例
+
+- 「仕様をレビューして」→ `criteria/spec.json` を読み、仕様書のパスだけを渡してレビュアーを起動 → JSON が返る → `verdict: PASS`・score 92 ならコミットメッセージ末尾に `review-gate:spec PASS 92` を入れて設計へ進む。
+- 設計書が無いスクリプト1本の修正 → 依頼時に「この変更に存在しない成果物: 設計書」と宣言 → レビュアーが `na_criteria` に理由つきで挙げた criterion だけ N/A として按分される。
+- design ゲートが `test_strategy` で FAIL → テスト戦略の節を足して同じ工程を再レビューする。テストコードは書き始めない。
 
 ## 運用ノート
 
@@ -73,5 +85,5 @@ metadata:
 - レビュアーには結論だけでなく location を出させ、修正を機械的に適用できるようにする。
 - 同一工程で3回FAILしたら、観点かレビュー粒度に問題がある可能性を疑い、ユーザーに相談する。
 - **手続きとcriteriaの突き合わせ (2026-09-11 追加)**: 規則文書が別ゲートの通過を手続きとして指示する場合、そのゲートの criteria の must_pass と両立するか(指示どおり進めると必ずFAILする順序になっていないか)を突き合わせる。
-- **強制の限界**: このゲートはレビュアーの判定に依るので確率的で、機械的に保証されるものではない。決定的な検査にする案は Job-Automate の `.claude/skills/_shared/compliance-status.json` の findings（CR-12・backlog）にある。
+- **強制の限界**: このゲートはレビュアーの判定に依るので確率的で、機械的に保証されるものではない。決定的な検査にする案は、Job-Automate リポジトリでは `.claude/skills/_shared/compliance-status.json` の findings（CR-12・backlog）にある。他のプロジェクトにコピーした場合、このファイルは無いので読み飛ばしてよい。
 - 単一セッションでの開発フロー全体は `single-session-tdd` skill、3ターミナル分離で回す場合は `three-agent-tdd-workflow` skill を参照。

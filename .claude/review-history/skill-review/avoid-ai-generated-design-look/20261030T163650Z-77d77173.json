@@ -1,0 +1,77 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "avoid-ai-generated-design-look",
+  "reviewed_at": "2026-10-30T16:36:50Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "c22d49fefaf953a501f0b3163d4fa1bcab171ca684c66fffe7d54f311fabdb45"
+      },
+      {
+        "path": "references/design-notes.md",
+        "sha256": "95c87dae7746be6b7a66533cc9d58394396aac623ede7dd9206515385918fe07"
+      },
+      {
+        "path": "references/principles.md",
+        "sha256": "72f258a25b1ae34c893b55d76297a5306a95243aeec09c690c9fb932bbdacd53"
+      }
+    ],
+    "content_hash": "b698f26e636199037add3a8354200f60db522de5b572fa6865f290a5548d19ea"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": "SKILL.md:57",
+        "comment": "『該当が 0 件のまま修正前の診断になった』は意味が取りにくい。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": "SKILL.md:29,54",
+        "comment": "コントラスト基準が手順3は 4.5:1 のみ、エラー表は大きな文字 3:1 併記で不揃い。"
+      }
+    ]
+  }
+}

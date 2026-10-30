@@ -1,0 +1,75 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "server-init",
+  "reviewed_at": "2026-10-30T16:07:28Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "4dac86f6c08e7d2211e633fb52555972b92ba7c2783ec11c4988e2fde5a167e3"
+      }
+    ],
+    "content_hash": "4ad6e4ef64036f7dbdad8aa8d5553b436c1296d9ef8714e47792f9e8210a797d"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 93,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": "SKILL.md:30-31",
+        "comment": "手順1「Claude Web版を利用して…環境を構築する」は実行内容が曖昧"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:86-87,96",
+        "comment": "repo固有パス参照(読み替え注記あり)。Windows標準に rsync は無い点の明記なし"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:89-93",
+        "comment": "使用例が1つで、パターン2の例が無い"
+      }
+    ]
+  }
+}

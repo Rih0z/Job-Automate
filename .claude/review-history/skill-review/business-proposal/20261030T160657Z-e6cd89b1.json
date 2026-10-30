@@ -1,0 +1,81 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "business-proposal",
+  "reviewed_at": "2026-10-30T16:06:57Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "b356ae25601ea06b1e374910e4f269f2a379c722b6d9d9f4dff7ecdf8719ac4b"
+      },
+      {
+        "path": "references/dialogue-example.md",
+        "sha256": "07a445a3fc7331ab9d96e50336b8022eb758450da04e3620d106834c31ea4073"
+      },
+      {
+        "path": "references/engagement-design.md",
+        "sha256": "59bf30be1e8dae59a9fc04a53a08a6592deee0f2bc8ef48ed835e8cf06c7adc3"
+      },
+      {
+        "path": "references/plan-template.md",
+        "sha256": "a75c664b195a0bf417e6feaf2de120db1f934c4c6b979712fbe1c4bdea499209"
+      }
+    ],
+    "content_hash": "4442e127bd6f896c2fb1fcd23992c9f644519b4cb2b698dd07a54242642106e5"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 17
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": "SKILL.md:23-28",
+        "comment": "入力不足・市場データ不足の対処はあるが、他の失敗系は限定的"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:183",
+        "comment": "repo 固有参照あり。単独で完結と明記済み"
+      }
+    ]
+  }
+}

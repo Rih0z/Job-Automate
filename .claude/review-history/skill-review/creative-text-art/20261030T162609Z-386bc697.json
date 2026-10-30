@@ -1,0 +1,73 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "creative-text-art",
+  "reviewed_at": "2026-10-30T16:26:09Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "634a61fbb38dd766d5754cc83a15039d88efb7d1969affea2a61e646eade59be"
+      },
+      {
+        "path": "references/parts-catalog.md",
+        "sha256": "7097d3f6762f646f4922c87f11c04700cc1fbde65747bfb734e12aab14db5104"
+      }
+    ],
+    "content_hash": "835a95e15e63ee35a58279a101f4bad6b64babbe7321c9ac4c09e45e201848b2"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 17
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "creative-text-art/SKILL.md:25,31",
+        "comment": "既定レベル3の規則に対し使用例2が『シンプル』を読み取って1〜2にする推論をしており、規則本文に明記が無い。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "creative-text-art/SKILL.md:45-47",
+        "comment": "更新履歴の順序が 1.1,1.3,1.2 で乱れている。"
+      }
+    ]
+  }
+}

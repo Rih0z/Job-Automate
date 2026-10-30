@@ -1,8 +1,9 @@
 ---
 name: three-agent-tdd-workflow
-description: "Guides a 3-role (Leader/Executor/Reviewer), TDD-first development workflow run across 3 separate AI sessions/terminals for objectivity: Leader plans a test-first iteration, Executor writes a failing test then minimal implementation, Reviewer scores the result out of 100 and either sends it back for revision or hands off to the Leader for the next iteration. Use when the user asks to 'three-agent開発システムで進めて', '3エージェント体制で開発して', 'リーダー/実行/レビューの3ターミナルで開発を回して', or is starting any new coding project ('このシステムはすべての開発の起点')."
+description: "Guides a 3-role (Leader/Executor/Reviewer), TDD-first development workflow run across 3 separate AI sessions/terminals for objectivity: Leader plans a test-first iteration, Executor writes a failing test then minimal implementation, Reviewer scores the result out of 100 and either sends it back for revision or hands off to the Leader for the next iteration. Use when the user asks to 'three-agent開発システムで進めて', '3エージェント体制で開発して', 'リーダー/実行/レビューの3ターミナルで開発を回して', or is starting any new coding project ('このシステムはすべての開発の起点'). Not for single-session work (use review-gate or single-session-tdd), or for one-off small fixes that need no role separation."
 metadata:
   provenance: author-preference
+  version: "1.1"
 ---
 
 # 3エージェント開発システム (TDD強化版) — Skill 概要
@@ -60,14 +61,40 @@ metadata:
 3. **ターミナル3（レビュー）**: 実行の `---OUTPUT DOCUMENT---`〜`---OUTPUT METADATA---` + `workflows/software-development/three-agent/reviewer.md` の全文を貼り付け、100点満点でレビューする
 4. 点数に応じてステップ2または1に戻る。全ゴール達成でリーダーの完了テンプレートを出力
 
-各ロールの完全な出力テンプレート（`---LEADER OUTPUT START---` 等の区切り記法、`.tmp/` 保存構造、品質基準、旧ウォーターフォール版テンプレート）は、Progressive Disclosure として以下の原文ファイルに委ねる。イテレーション実行時は必ず該当ロールの原文を Read してから、そこに定義された出力テンプレートをそのまま使うこと（要約・省略しない）。
+### 出力の区切りと必須項目（要約）
+
+| ロール | 区切り | 必ず含めるもの |
+|---|---|---|
+| リーダー | `---LEADER OUTPUT START---` | ゴール、テスト方針、`---EXECUTION INSTRUCTION---`、`---LONG TERM PLAN---`（ロードマップの完全パス）、`---CREATED FILES---` |
+| 実行 | `---OUTPUT START---` | `---OUTPUT DOCUMENT---`〜`---OUTPUT METADATA---`、`---NEXT AGENT INSTRUCTION---`、`---CREATED FILES---`。本文にはこの skill の工程表どおり Red の失敗ログと全テスト緑の確認を含める |
+| レビュー | `---REVIEW OUTPUT START---` | `---REVIEW REPORT---`（100点満点の点数と改善指示）、`---REVIEW METADATA---`、`---NEXT AGENT INSTRUCTION---`、`---CREATED FILES---` |
+
+各ロールの完全な出力テンプレート（区切り記法の全文、`.tmp/` 保存構造、品質基準、旧ウォーターフォール版テンプレート）は、Progressive Disclosure として以下の原文ファイルに委ねる。イテレーション実行時は該当ロールの原文を Read してから、そこに定義された出力テンプレートをそのまま使うこと（要約・省略しない）。上の表は索引であり、原文と食い違ったら原文が優先。
 
 | ロール | 原文（完全版） |
 |---|---|
-| リーダー | `workflows/software-development/three-agent/leader.md`（555行） |
-| 実行 | `workflows/software-development/three-agent/executor.md`（439行） |
-| レビュー | `workflows/software-development/three-agent/reviewer.md`（597行） |
-| システム全体・FAQ・`.tmp`保存構造の詳細 | `workflows/software-development/three-agent/README.md`（320行） |
+| リーダー | `workflows/software-development/three-agent/leader.md` |
+| 実行 | `workflows/software-development/three-agent/executor.md` |
+| レビュー | `workflows/software-development/three-agent/reviewer.md` |
+| システム全体・FAQ・`.tmp`保存構造の詳細 | `workflows/software-development/three-agent/README.md` |
+
+この skill を他のプロジェクトへコピーする場合は、上記 `workflows/software-development/three-agent/` 一式も一緒にコピーする（無い場合は、上の区切り表と工程順序表だけでも運用できる）。
+
+## 使用例
+
+ユーザー: 「3エージェント体制でログイン機能を作って」
+1. ターミナル1でリーダーが「ログイン成功/失敗/ロック」のテスト設計を含む `---EXECUTION INSTRUCTION---` を出す。
+2. ターミナル2で実行が失敗するテストを書き、失敗ログを残してから最小実装し、全テスト緑にする。
+3. ターミナル3でレビューが採点。92点なら指摘を添えてターミナル2へ戻し、100点ならターミナル1へ渡して次イテレーションを計画する。
+
+## 想定外のときの対処
+
+| 状況 | 対処 |
+|---|---|
+| Red を確認できない（テストが最初から通る） | テストが仕様を検証していない。期待値と導出根拠を見直し、失敗する形に直してから実装に進む。実装コードを先に書いていたら、いったん外して Red を取り直す |
+| 上記の原文ファイルが見つからない | 工程順序表・ループ条件・区切り表だけで進め、不足を報告に書く。原文を推測で再現しない |
+| AI セッションを1つしか使えない | 三役運用はできない。`review-gate` skill（単一セッション）または `single-session-tdd` skill に切り替える |
+| 改善を繰り返しても100点に届かない | 同じ指摘が続くなら、指摘をリーダーへ戻して設計・テスト設計から見直す（実行だけで粘らない） |
 
 ## 細部実装への参照
 

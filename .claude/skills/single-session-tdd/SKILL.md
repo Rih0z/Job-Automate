@@ -3,11 +3,18 @@ name: single-session-tdd
 description: "単一セッションで回すテスト駆動開発(TDD)ワークフロー。仕様確認→(曖昧ならユーザーに質問)→設計→テスト設計→テスト実装(Red)→実装(Green→Refactor)の順を強制し、各ゲートで review-gate skill の別エージェントによる独立レビューを受け、PASSするまで次工程に進まない。ハードコード・テストごまかしの検出例つき。Use when the user asks to 'TDDで進めて', 'テスト駆動で開発して', 'テストファーストで実装して', or when starting implementation work in a project that mandates TDD. 3ターミナル分離で回す場合は three-agent-tdd-workflow を使う。"
 metadata:
   provenance: author-preference
+  version: "1.1"
 ---
 
 # single-session-tdd — 単一セッションTDDワークフロー
 
 3ターミナル分離(`three-agent-tdd-workflow`)を使わず、1つのClaude Codeセッションで開発を回すときのTDDプロトコル。レビューの客観性は `Agent` ツールによる別エージェント委譲(`review-gate` skill)で担保する。
+
+## 前提条件
+- プロジェクトにテスト実行コマンドがある (`package.json` の `scripts.test`、`pytest`、`go test` 等)。無ければ最初のタスクでテスト基盤の導入を設計に含め、ユーザーに確認する。
+- `review-gate` skill が存在する (`.claude/skills/review-gate/`)。レビュアー agent は `readonly-reviewer` (`.claude/agents/readonly-reviewer.md`) が望ましいが、無くても下記のフォールバックで進める。
+- `.claude/skills/review-gate/` と `.claude/agents/readonly-reviewer.md` はこの repo の構成。他の環境では同等のレビュー skill と、書き込み禁止の独立レビュアーを用意して読み替える。
+- 他プロジェクトへコピーした場合、`review-gate` と観点 JSON が無ければ先に用意する (無いままゲートを通過扱いにしない)。
 
 ## 必須の順序(実装タスクごとに繰り返す)
 
@@ -18,7 +25,7 @@ metadata:
 1. **仕様確認**: 仕様書・設計書の該当箇所を読み、期待される振る舞いを特定する。仕様に書かれていない・曖昧な点があれば、**実装で勝手に決めずユーザーに質問して仕様を確定させる**。仕様を書いた/変えたら → review-gate: spec
 2. **設計**: 設計・スキーマ・APIを書く。ここではまだゲートを回さない(テスト設計まで書いてから1回でまとめて審査する)。
 3. **テスト設計**: 設計書に機能ごとの「テスト戦略」節を書く(内容は下記)。テストコードはまだ書かない。→ review-gate: design(設計ゲートはここで**1回だけ**回し、設計とテスト戦略の節をまとめて審査する。`test_strategy` は must_pass なので、テスト設計を書く前に回すと必ずFAILする)
-4. **テスト実装(Red)**: テスト戦略どおりにテストコードを書き、実行して失敗することを確認する。**失敗ログ(コマンドと出力)を証跡として残す**。→ review-gate: test(PASSしてから実装に入る)
+4. **テスト実装(Red)**: テスト戦略どおりにテストコードを書き、実行して失敗することを確認する。**失敗ログ(コマンドと出力)を証跡として残す**。テストはプロジェクトのテストコマンド (例: `npm test` / `pytest -x`) で実行し、実行したコマンド・失敗したテスト名・失敗メッセージを、PR本文または変更計画の「Red確認」欄 (無ければ作業メモ) に貼る。→ review-gate: test(PASSしてから実装に入る)
 5. **実装(Green→Refactor)**: テストを通す最小限の実装をし、テストが通ったままコードを整理する。→ review-gate: implementation(PASSしてからコミット)
 6. **デプロイ前**: → review-gate: release
 
@@ -38,6 +45,14 @@ metadata:
 - 自分の成果物を自分でレビューして通過扱いにすること。
 - 実装をまとめて書いてからテストをまとめて書くこと(機能単位で小さくRed→Green→Refactorを回す)。
 
+## 使用例
+
+ユーザー: 「手数料計算を TDD で追加して」
+1. 仕様確認: 手数料率の端数処理が仕様に無い → 実装で決めず「端数は切り捨てか四捨五入か」とユーザーに質問し、回答を設計に書く。
+2. 設計とテスト戦略 (ゼロ円、境界、負数の異常系を列挙) → review-gate: design が FAIL (期待値の導出が無い) → 導出を追記して再レビュー → PASS。
+3. テスト実装: `npm test` で赤を確認しログを残す → review-gate: test → PASS。
+4. 実装 (最小) → 緑 → 整理 → review-gate: implementation → PASS → コミット。
+
 ## テストカバレッジの最低ライン
 
 - 正常系(ハッピーパス)
@@ -47,34 +62,24 @@ metadata:
 
 ## ハードコード・テストごまかしの検出
 
-実装とテストを書いたあと、必ず次のパターンがないか見直す。
-
-```ts
-// NG: テストケースの値をそのまま返している
-function calculateFee(amount: number) {
-  if (amount === 1000) return 100
-  return 0
-}
-
-// OK: 実際のロジックで計算する
-function calculateFee(amount: number) {
-  if (amount <= 0) return 0
-  return amount * FEE_RATE
-}
-```
-
-```ts
-// NG: アサーションを緩めて無理やり通している
-expect(results.length).toBeGreaterThan(0)
-
-// OK: 期待値を厳密に書く
-expect(results).toEqual([{ start: "09:00", end: "10:00" }])
-```
+実装とテストを書いたあと、必ず見直す。典型は (1) テストケースの値をそのまま返すハードコード、(2) アサーションを緩めて通すこと (例: 件数が 0 より大きいことだけを見る)。NG / OK のコード例は [references/cheat-detection.md](references/cheat-detection.md) を読む。
 
 ## 独立レビューの回し方
 
 - 各工程の完了時に `review-gate` skill の手順で `Agent` ツール(`readonly-reviewer`。未定義なら `general-purpose` + 書き込み禁止の明記)を起動し、観点JSON(criteria/*.json)に基づくレビューを受ける。
 - レビュアーには対象ファイルのパスだけを渡し、自分の実装意図・言い訳を渡さない。
-- FAILなら修正して再レビュー。PASSするまで次工程に進まない。
+- FAILなら修正して再レビュー。PASSするまで次工程に進まない。同じ指摘で3回続けてFAILしたら、修正を繰り返さず、仕様または設計に原因がないかを見直し、状況と未解決の指摘をユーザーに報告して方針を確認する。
+- レビュアー agent が起動できない・応答しない場合: `general-purpose` で再試行し、それも不可ならゲートを通過扱いにせず、その旨をユーザーに伝えて判断を仰ぐ。`review-gate` skill が無い場合も同様 (自己レビューで代替しない)。
+- 各ゲートの報告は次のテンプレートで 1〜3 行にする。
+
+```
+ゲート名: PASS / FAIL
+根拠: レビュアーが引用した箇所 (ファイル:行)
+FAILなら修正内容: 何をどう直して再レビューするか
+```
+
 - レビュアーが観点定義の抜け漏れを指摘したら、criteria JSONを更新してコミットする(スキルは育てるもの)。
-- この順序の強制はレビュアーの判定に依るので確率的で、機械的に保証されるものではない。決定的な検査にする案は Job-Automate の `.claude/skills/_shared/compliance-status.json` の findings（CR-12・backlog）にある。
+- この順序の強制はレビュアーの判定に依るので確率的で、機械的に保証されるものではない。決定的な検査にする案は、Job-Automate リポジトリでは `.claude/skills/_shared/compliance-status.json` の findings（CR-12・backlog）にある。他のプロジェクトで使う場合はこの参照を読み替える。
+
+## 更新履歴
+- 1.1: コード例を references/ に分離、ゲート報告のテンプレートと前提の注記を追加。

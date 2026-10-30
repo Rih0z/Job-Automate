@@ -1,4 +1,4 @@
-[English](README.en.md) | 日本語
+[English](upstream-readme.en.md) | 日本語
 
 # Stop AI Slop(日本語版)
 
@@ -40,7 +40,7 @@ stop-ai-slop-jp/
 │   ├── structures.md     # 避けるべき構造パターン
 │   └── examples.md       # AI版/人間版の対比
 ├── CHANGELOG.md
-├── README.md
+├── references/upstream-readme.ja.md
 └── LICENSE
 ```
 

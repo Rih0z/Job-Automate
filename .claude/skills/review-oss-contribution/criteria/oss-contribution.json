@@ -49,5 +49,5 @@
       ]
     }
   ],
-  "severity_note": "各基準への個別指摘(❌/△の理由)には .claude/skills/_shared/review-rubrics.yaml の severity (HIGH/MEDIUM/LOW) を付す。GO/HOLD/REJECT の総合判定ロジックは変更しない、指摘の重大度表示を追加するのみ(2026-08-31)。"
+  "severity_note": "各基準への個別指摘(❌/△の理由)には .claude/skills/_shared/review-rubrics.yaml の severity (HIGH/MEDIUM/LOW) を付す。GO/HOLD/REJECT の総合判定ロジックは変更しない。指摘の重大度表示を追加するだけである。"
 }

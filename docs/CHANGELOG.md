@@ -8,6 +8,7 @@ Anthropic 公式ベストプラクティスへの逸脱・改善バックログ�
 
 ## 2026-10
 
+- **10-30**: 負債台帳にあった 50 skill を修正し、別エージェントの採点（5 軸 100 点・合格 90 点・must_pass 全通過）で全件 PASS にした。全 60 skill のレビュー記録が揃い、`gate --strict` は PASS=60・要レビュー 0。主な修正は、詳細基準・出力テンプレートの `references/` への分離、出力形式・エラー対処・使用例の追加、repo 固有パス依存の前提節への集約、実害のある誤り（`slides-pro` の `allowed-tools` 欠落、`repo-hygiene-patrol` の grep の `-E` 欠落、`ui-design-guidelines` のコントラスト値、`year-end-adjustment-csv` の矛盾、`server-windows-standard` の確認できない WinDbg コマンド）の訂正。台帳 `baseline-unreviewed.json` は全エントリが失効済みで、免除は働かない。
 - **10-28**: skill のレビューが別エージェントで行われたことを、記録と検査で確かめる仕組みを追加。`review-skill` の採点観点を `criteria/skill-quality.json` に移し（散文 `workflows/software-development/review-skill.md` の評価軸の節はそこから生成）、結果を `.claude/review-history/skill-review/` に content hash 付きで保存し、Stop hook（未レビューの skill があると 1 turn に最大 3 回 block）と SessionStart hook（件数と整合検査の表示）で見張る。既存 54 skill は負債台帳で免除し（内容が登録時と同じ間だけ有効）、gate が exit 0 でも全 skill がレビュー済みという意味ではない。公式 SoT の期限切れ更新と、compliance-status の CR-35〜39 を記録した。
 - **10-07**: `stop-ai-slop-jp` に、採点基準と採点対象（ディレクトリ・生成物）の条件が矛盾することがあり、その場合は矛盾しない設計に見直す、という原則を追加した（`criteria/scoring.json` の `conflict_policy`、SKILL.md の節、CLAUDE.md の追加ルール）。
 - **10-06**: `anthropic-best-practices.json` を公式 docs（best-practices・skills・hooks・hooks-guide・memory）の現行版で再取得し、取得日を 2026-10-06 に進めた。9 principle を更新した（CLAUDE.md の行数の目安 200 行未満、Stop hook の連続 block の上限、PreToolUse の permissionDecision、skills の frontmatter 項目など）。principle の数は 34 のまま

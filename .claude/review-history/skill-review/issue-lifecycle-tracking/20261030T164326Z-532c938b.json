@@ -1,0 +1,79 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "issue-lifecycle-tracking",
+  "reviewed_at": "2026-10-30T16:43:26Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "94c660b4fb6c68f9fa2653c737ea9344b9115b1ee81d263a57526ebe16ea50e3"
+      },
+      {
+        "path": "references/issue-template.md",
+        "sha256": "065a91412afcbd551b80d0452f092ebacbf300aedcbe3be6c90f5d967047d5b3"
+      }
+    ],
+    "content_hash": "13ba46efb18d29557733fb30126950bca4f4b7214abdfeb5e8c6900b63227296"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 19
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 94,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": "issue-lifecycle-tracking/SKILL.md:68 / references/issue-template.md:12",
+        "comment": "必須項目一覧に related が無いがテンプレートにはある。軽微な不一致。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "issue-lifecycle-tracking/SKILL.md:24,78",
+        "comment": "state/close-verify 等の著者例パスが本文に残る(読み替え表あり)。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "issue-lifecycle-tracking/SKILL.md:122",
+        "comment": "1.1.0 の日付が未記録。"
+      }
+    ]
+  }
+}

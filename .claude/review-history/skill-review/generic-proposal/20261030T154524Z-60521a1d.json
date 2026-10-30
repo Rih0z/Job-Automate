@@ -1,0 +1,75 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "generic-proposal",
+  "reviewed_at": "2026-10-30T15:45:24Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "32bf4869aad6e5f1daa3f2c57d84eda39e4d0df21a987e6b9fba28e1968d84b1"
+      }
+    ],
+    "content_hash": "c9ac6ad1fa2f7e5b8cc374999ab249424c3249820553f02be9f50e7dbb4b6a41"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 16
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 19
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "S1",
+        "severity": "medium",
+        "location": "generic-proposal/SKILL.md:42-391",
+        "comment": "約 26KB の出力テンプレートが SKILL.md 本体に同居し、Progressive Disclosure で分離されていない"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:5-6",
+        "comment": "バージョン・更新履歴なし"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:446",
+        "comment": "リポジトリ内パス参照があるがフォールバック注記あり"
+      }
+    ]
+  }
+}

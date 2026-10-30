@@ -1,0 +1,73 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "customer-persona-design",
+  "reviewed_at": "2026-10-30T16:07:05Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "a9876c30be5da78e688a1a3ba0655f076c829fcbf6700c2e9ab9c394822876ed"
+      },
+      {
+        "path": "references/phase-templates.md",
+        "sha256": "7b5f8cd49b7f62f75009d68d2c82956afa5e5bbc772a643899cdd1a817d5d4b1"
+      }
+    ],
+    "content_hash": "d3e7f5bee00a7531978736a905ad1bfea2c545dff21a750fc93aaae17a825b1f"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "customer-persona-design/SKILL.md:95",
+        "comment": "repo 固有パス workflows/software-development/design/persona.md への言及。「参照できない環境では完結」と明記済み。"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": "customer-persona-design/SKILL.md:25",
+        "comment": "情報不足時の仮ペルソナ対処はあるが、承認が得られない場合以外のエラー系は簡素。"
+      }
+    ]
+  }
+}

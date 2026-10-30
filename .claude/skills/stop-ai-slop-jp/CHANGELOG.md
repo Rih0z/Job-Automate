@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.4-local] 追記 - 2026-10-30
+
+- スキルフォルダ直下の `README.md` / `README.en.md` を `references/upstream-readme.ja.md` / `references/upstream-readme.en.md` へ移した(内容は変更なし)。
+- `SKILL.md` のコアルール D と「採点範囲」節の長い段落を `references/fact-integrity.md` へ、技術文書モードの上書き表を `references/tech-writing.md` へ移した(内容は変更なし)。
+- `blocker_checks` の項目数の記述を 5 項目（帰属誤り・属性の過小断定・指示文のメモ書き化・意味の一意性・意味の伝達）に統一した。
+- 以下の履歴で言及する `select-slop-viewpoints` は、同じリポジトリの `.claude/skills/select-slop-viewpoints/` にある兄弟スキルである。
+
 ## [0.2.4-local] - 2026-10-15 (ローカル翻案・upstream 未反映)
 
 ### 追加

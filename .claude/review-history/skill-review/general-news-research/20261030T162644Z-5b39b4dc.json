@@ -1,0 +1,69 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "general-news-research",
+  "reviewed_at": "2026-10-30T16:26:44Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "de7bd295c64c4ee9c87c83841a28436fc158cb2cc8ac83245c0740d648374436"
+      }
+    ],
+    "content_hash": "4b504a4684860502578247fb8b7bb9f605d03dab20fd3bc7d896d4be66209486"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": "general-news-research/SKILL.md:40",
+        "comment": "『主要メディアと専門メディア』の具体的基準が無く判断がぶれ得る。"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": "general-news-research/SKILL.md:57",
+        "comment": "『Generated at UTC時刻』はツール無しでは現在時刻を得る手段が示されていない。"
+      }
+    ]
+  }
+}

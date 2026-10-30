@@ -1,0 +1,79 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "blog-seo-growth-planner",
+  "reviewed_at": "2026-10-30T16:06:50Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "d0f8dbf2ba59217f1f11fda8fd0f29cf8a59e2bda830b2a532b91f12e58ba0a4"
+      },
+      {
+        "path": "references/output-template.md",
+        "sha256": "fdc22cc9f8d5d9f3542f347d8c59a9141a6c4b7ab54ef297c591e23e8c9ba270"
+      }
+    ],
+    "content_hash": "c06ccc1932241637d2db1a34a493f38f7e9b2f815baaa0c244862eeffcdd9d47"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "D1",
+        "severity": "low",
+        "location": "SKILL.md:3-9",
+        "comment": "Document Creation 等のカテゴリは推測可能だが明示なし"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:269-271",
+        "comment": "CLAUDE.md/README への反映は skill 内から確認できない"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": "SKILL.md:72",
+        "comment": "ステップ1の現在日付の取得手段が未指定"
+      }
+    ]
+  }
+}

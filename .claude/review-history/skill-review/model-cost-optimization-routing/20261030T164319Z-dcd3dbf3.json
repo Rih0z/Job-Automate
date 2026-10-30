@@ -1,0 +1,73 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "model-cost-optimization-routing",
+  "reviewed_at": "2026-10-30T16:43:19Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "0b5873952648587fc825e1b6383987522e3badbf21fed294139db502872edf46"
+      },
+      {
+        "path": "references/routing-policy.md",
+        "sha256": "ef6db318b8da8626c3917e28a803721a024f4aa1b0b0f2ebbe4e8aff9e516921"
+      }
+    ],
+    "content_hash": "16a41a411949b6e4f6f38fb4d55912b5c800663a1a8fe8db0962220b23489267"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 92,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": "references/routing-policy.md:19 と SKILL.md:96",
+        "comment": "対象不在時の扱いが、課題起票手順がある場合は起票、SKILL.md 側は構成案提示と了承後に作成、と二系統で読める。条件付きで整合はしているが統一すると良い。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:20",
+        "comment": "役割名に一般化済みだが Sonnet/Opus 相当の括弧書きが references に残る（許容範囲）。"
+      }
+    ]
+  }
+}

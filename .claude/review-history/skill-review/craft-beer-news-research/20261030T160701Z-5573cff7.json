@@ -1,0 +1,69 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "craft-beer-news-research",
+  "reviewed_at": "2026-10-30T16:07:01Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "11f088f2da6172cddc31f8668eccf06d173cc9f16a820191662746b1007a679d"
+      }
+    ],
+    "content_hash": "8e24bd43a6f91813dea40d60d217636379c01bd84373394c405c80f5e35cc1ce"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "O2",
+        "severity": "low",
+        "location": "SKILL.md:54",
+        "comment": "Generated at の UTC 時刻を取得する手段が未指定"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:95-98",
+        "comment": "更新履歴あり。他文書への登録は skill 内から確認不可"
+      }
+    ]
+  }
+}

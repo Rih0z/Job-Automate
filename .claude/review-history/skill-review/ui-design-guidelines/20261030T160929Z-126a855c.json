@@ -1,0 +1,77 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "ui-design-guidelines",
+  "reviewed_at": "2026-10-30T16:09:29Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "34c065ff155ca75bbd0db67213410ef0b562cf0d1845639c919f9a6d36011929"
+      },
+      {
+        "path": "references/brand-identity.md",
+        "sha256": "5f8470c468aaa20f904c68a4f0c19af606416f9003d12fec4d3c7b6f5e177bce"
+      },
+      {
+        "path": "references/neo-brutalism.md",
+        "sha256": "4f8ad2b70e23988c4e42ff8425cfef9f4fd0bfe4e31a7a27116ef353d2c0edb8"
+      }
+    ],
+    "content_hash": "18550e43bfddcc4056a76732cd2cb896bda02efa105ddfff3f823bf3ace66da9"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 17
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:407",
+        "comment": "原文パス・関連 Skill は元リポジトリ依存。他リポジトリでの扱いは本文で説明済み"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": "SKILL.md:369-372",
+        "comment": "エラー対処は判定節に限られる(十分)"
+      }
+    ]
+  }
+}

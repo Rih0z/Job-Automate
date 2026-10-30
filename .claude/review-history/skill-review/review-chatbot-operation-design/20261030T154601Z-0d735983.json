@@ -1,0 +1,73 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "review-chatbot-operation-design",
+  "reviewed_at": "2026-10-30T15:46:01Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "b56ae148524320e73be24333c57c1bba5f4f55e461c9662b4c2a696d3fffb36a"
+      },
+      {
+        "path": "criteria/chatbot-operation.json",
+        "sha256": "443ca8e6ce0f7bc5acd4b669a7819b5e5df1faaaba02948498368fceb1669687"
+      }
+    ],
+    "content_hash": "f2c80ec92248d02f388d20ea4fdfdecdcd8ea73e45472fe81168c2bf77d90d5a"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:6-8",
+        "comment": "version のみで更新履歴が無い"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:92",
+        "comment": "repo 固有パスの参照（他 repo では不要と明記済み）"
+      }
+    ]
+  }
+}

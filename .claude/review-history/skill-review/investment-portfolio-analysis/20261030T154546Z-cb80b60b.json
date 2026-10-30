@@ -1,0 +1,69 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "investment-portfolio-analysis",
+  "reviewed_at": "2026-10-30T15:45:46Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "aaccb7699f57c60212b4113ae5fadd6cf547082d55f3877da78ae5033a198dae"
+      }
+    ],
+    "content_hash": "be91e1dfb6a3c0d82b1edb67eaaaec098345af643f21507eeafb1901434e4dc7"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 19
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 92,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "investment-portfolio-analysis/SKILL.md:11-13",
+        "comment": "バージョン・更新履歴なし"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:22",
+        "comment": "使用例が 1 件のみ"
+      }
+    ]
+  }
+}

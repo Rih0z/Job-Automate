@@ -1,0 +1,77 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "review-specification",
+  "reviewed_at": "2026-10-30T16:27:14Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "d147d8988af6b6a9f7d763e9d6061a65aa30dadf75ec222996b009469339375f"
+      },
+      {
+        "path": "references/review-criteria.md",
+        "sha256": "415389064676b94c3d157f48a2b5fce4396d1cbc8ce55ad7f650522d0eb99ffb"
+      },
+      {
+        "path": "references/reviewer-fallback.md",
+        "sha256": "6fd9d09f2307c8618e20267f1053692d3363c704b2a43f23709fa0ea3cc1db1a"
+      }
+    ],
+    "content_hash": "1c68e26fb1f4a59ef03c0bcfd8cc8d44a29a4ae81b1c1a1d0651e6607300529d"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 17
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "medium",
+        "location": "review-specification/SKILL.md:31-37 と 61-73",
+        "comment": "ステップ1で収集する確認事項5項目の回答を、プロンプトテンプレートへ埋め込む欄が無い(埋め込み欄は仕様書全文だけ)。argument-hint のパスも本文のどこにも使われず、全文取得の手順が不明。"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": "review-specification/SKILL.md:148",
+        "comment": "rubrics.yaml が読めない場合の対処が reviewer-fallback.md を使うと書いていない(前提の節と不整合)。"
+      }
+    ]
+  }
+}

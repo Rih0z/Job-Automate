@@ -1,10 +1,11 @@
 ---
 name: workflow-coverage-and-structure
-description: このリポジトリの「テストカバレッジ」「プロジェクト構成」に相当する質問に即答する。プロンプトライブラリのため実コードのカバレッジ%は測定せず、代わりに workflows/ 配下の各ファイルが category README にドキュメント化されているか（drift 検出）を機械検査する。Use when user asks "テストカバレッジは?", "test coverage", "プロジェクト構成は?", "project structure", "workflows の網羅性", or after adding a new workflow prompt file / category.
+description: このリポジトリの「テストカバレッジ」「プロジェクト構成」に相当する質問に即答する。プロンプトライブラリのため実コードのカバレッジ%は測定せず、代わりに workflows/ 配下の各ファイルが category README にドキュメント化されているか（drift 検出）を機械検査する。Use when user asks "テストカバレッジは?", "test coverage", "プロジェクト構成は?", "project structure", "workflows の網羅性", or after adding a new workflow prompt file / category. Not for measuring real code coverage of an application (this repo has none), reviewing the quality of a skill (use review-skill), or auditing the skill system as a whole (use skills-audit).
 argument-hint: "<action: report|check> (省略時は report)"
 allowed-tools: Read Bash
 metadata:
   provenance: repo-specific
+  version: "1.1"
 ---
 
 # ワークフロー ドキュメント網羅性・構成 Skill
@@ -34,11 +35,40 @@ bash .claude/skills/workflow-coverage-and-structure/scripts/workflow-doc-coverag
 bash .claude/skills/workflow-coverage-and-structure/scripts/workflow-doc-coverage-check.sh
 ```
 
+## 前提条件
+
+- `bash`、`git`、`find`、`grep` が使えること（Windows では Git Bash）。
+- git リポジトリ内で、`workflows/<category>/README.md` と `.claude/skills/` が存在すること。スクリプトはこのリポジトリ構成を前提にしており、他のリポジトリで使う場合はスクリプト内のパス（`workflows/`、`.claude/skills/`）を直す必要がある。
+
 ## 実行方針
 
 - 読み取り専用・非破壊。実行前の確認は不要。
 - `examples/` 配下（worked-example 集）は個別ファイルへのリンクを要求しない（README ではディレクトリ単位でリンクされる設計のため対象外）。
 - 質問への回答は「直近実行結果が古い（または存在しない）なら再実行してから答える」— 常に鮮度を担保する。
+- 根拠の示し方: 報告にはスクリプトの出力（PASS/FAIL と未記載ファイルのパス）をそのまま引用する。スクリプトの出力と、自分が読んだ README から推測した内容は区別して書く。
+- `--report` の「category README 未記載ファイル数」は、未記載ファイルのほかに「README.md 自体が存在しない category」「workflows/README.md に未記載の category」の行も 1 件ずつ数える。件数と実際の未記載ファイル数が食い違って見えたら、無引数の check の出力で内訳を確認する。
+
+## 報告の形式
+
+| 質問 | 報告に含める項目 |
+|---|---|
+| テストカバレッジ / 網羅性 | 「実コードのカバレッジは測定対象外」の一文、`--report` の 4 件数、drift check の PASS/FAIL、FAIL なら未記載ファイルの一覧と対応（README への追記） |
+| プロジェクト構成 | category ごとの 1 行説明（`workflows/README.md` の一覧表に基づく）、ルート `README.md` からの補足。コードは載せない |
+
+## 使用例
+
+- 「テストカバレッジは?」→ `--report` を実行 → 「このリポジトリはプロンプトライブラリなので line/branch カバレッジは対象外です。代わりに workflows の README 記載率を見ています: ファイル N 件、review M 件、skill K 件、未記載 0 件」と出力値を引用して回答。
+- 「新しい workflow を追加した」→ 無引数で check → FAIL で `workflows/<category>/foo.md` が出たら、その category の README.md の表に行を追加して再実行し、PASS を確認する。
+
+## エラー時の対処
+
+| 出力・状況 | 対処 |
+|---|---|
+| `FAIL: not in a git repo` | git リポジトリの外で実行している。リポジトリ内へ移動して再実行する。リポジトリ自体が無いなら、この skill は使えないとユーザーに伝える |
+| `bash` が見つからない / `workflows/` が無い | 環境（Git Bash）またはリポジトリ構成の前提が満たされていない。推測で数値を答えず、前提不足を報告する |
+| `README.md 自体が存在しない` の行 | その category に README.md を作成する必要がある。作成するかはユーザーに確認する |
+| `workflows/README.md に未記載の category` の行 | `workflows/README.md` の一覧表に category を追記する |
+| FAIL で未記載ファイルが出た | 該当 category の README.md の表に追記して再実行。意図的に載せないファイルなら、ディレクトリ単位のリンクで解消するか、その旨をユーザーに確認する |
 
 ## 関連ファイル
 

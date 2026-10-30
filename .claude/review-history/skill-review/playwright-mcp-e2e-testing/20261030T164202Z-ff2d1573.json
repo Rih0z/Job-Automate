@@ -1,0 +1,79 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "playwright-mcp-e2e-testing",
+  "reviewed_at": "2026-10-30T16:42:02Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "2c4b69e3817ffbe56223673878da5ce81006c504ebe83ef5c928cc95a3f72119"
+      },
+      {
+        "path": "references/report-template.md",
+        "sha256": "940f17af955574c49db71992ddd9124c4e0227c3eb6824aec97e329ee4e8eb14"
+      }
+    ],
+    "content_hash": "44628ea921f493000121f6136bece1bdd5ad85b84006c45d659eaadaff75f473"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 92,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:118",
+        "comment": "項目5の手順1の「この入れ子の最後の番号」は参照が分かりにくい（手順5と書くべき）。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:181",
+        "comment": ".tmp/e2e-screenshots/ は例示でありプロジェクト固有でない。問題なし。出典の workflows/ パスは注記済み。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:28",
+        "comment": "@latest 固定の注意は記載あり。バージョン固定の具体例があるとなお良い。"
+      }
+    ]
+  }
+}

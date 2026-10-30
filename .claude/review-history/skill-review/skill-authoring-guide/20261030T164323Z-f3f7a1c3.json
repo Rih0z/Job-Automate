@@ -1,0 +1,93 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "skill-authoring-guide",
+  "reviewed_at": "2026-10-30T16:43:23Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "b720c03cad1ca5cdf1e821f91209df2dd9eac79c9880a8e510634d435a188ffd"
+      },
+      {
+        "path": "references/instruction-design.md",
+        "sha256": "123ab17fb6632d1439fc24f2856c961085f38fbacef48b11b65998f8b0fc7d22"
+      },
+      {
+        "path": "references/testing-and-checklist.md",
+        "sha256": "a94c4d47f4797f8194b8145788083be68a214879b76ea31b4e856bf4b8457f2e"
+      },
+      {
+        "path": "references/use-case-patterns.md",
+        "sha256": "94e1c8bacc44600fc016e7e08955055cbb8938a6c423e115faa6abd3a53a2db3"
+      }
+    ],
+    "content_hash": "0e89936fa638a1292aae01151ed05962c3c8d4b0763c693e13e42aaf3d40e97b"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 17
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "skill-authoring-guide/SKILL.md:20-27",
+        "comment": "repo 固有パス(.claude/skills/_shared/..., workflows/...)が本文に残る。ただし「前提と代替」表で読み替えを明示しており許容範囲。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "skill-authoring-guide/SKILL.md:280",
+        "comment": "内容を追加したのに version 1.0 据え置き。更新履歴の版管理が曖昧。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "skill-authoring-guide/SKILL.md:55-59",
+        "comment": "参照マニュアルのためエッジケース例は少なめ(3 件)。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": "skill-authoring-guide/SKILL.md:136-142",
+        "comment": "フィールド表に context 等が無く、別節の注記で補う構成。Claude Code 固有 frontmatter の一覧が本文に無い(docs 参照に委譲)。"
+      }
+    ]
+  }
+}

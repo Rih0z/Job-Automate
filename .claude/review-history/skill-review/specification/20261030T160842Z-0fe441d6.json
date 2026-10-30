@@ -1,0 +1,75 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "specification",
+  "reviewed_at": "2026-10-30T16:08:42Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "8b84021bb2d620ec9762c7f7875b6971ec2041208e151e3314554ca822f4a0f9"
+      }
+    ],
+    "content_hash": "e92d085fd1df5ee6dab3516cb5aff52581e0a09e98bf57e095127628ac8b35fc"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": "SKILL.md:19-178",
+        "comment": "出力テンプレート約 160 行が SKILL.md に同居。references/ に分離すれば Progressive Disclosure が向上"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:1-224",
+        "comment": "更新履歴の記載が無い(metadata.version のみ)"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:223",
+        "comment": "元プロンプトのリポジトリ固有パスを参照するが単独動作と明記済み"
+      }
+    ]
+  }
+}

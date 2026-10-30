@@ -1,0 +1,157 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "agent-harness-bootstrap",
+  "reviewed_at": "2026-10-30T16:06:00Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "b561cdc22440662b12f2e3b5d7e3d52fb2a823b22eb2ae8eca079bd0dfbd3012"
+      },
+      {
+        "path": "criteria/porting-reconciliation.json",
+        "sha256": "4971685379d9078d5e950a2a14d83d465680bb7d168154ff8c97489476acc1a7"
+      },
+      {
+        "path": "hooks-reference.md",
+        "sha256": "4fd707a971f4e03aada2ecdbe77b679c621069341e1c7a2ec1d0d274ded0ab45"
+      },
+      {
+        "path": "maintainer-checklist.md",
+        "sha256": "af116990f901852df8c99096045250ade1c832a7475643e36cdcf6abaabab58d"
+      },
+      {
+        "path": "official-sources.md",
+        "sha256": "29b46a9bda8fce000fa511cb1dced303bf11e6d77dff5320fcd8758f5d3c83ea"
+      },
+      {
+        "path": "operational-knowhow-index.md",
+        "sha256": "7b485685d74a8edb147cc1f8e06d5492bb4f8987f4a5e14b4c96b92648db66e1"
+      },
+      {
+        "path": "operational-knowhow.md",
+        "sha256": "5cd4f5ab92049c373d5b5de6e6d6d98a47c252b0d4b7f5c7ccf02f093ac936d7"
+      },
+      {
+        "path": "provenance.json",
+        "sha256": "d90fa46849084867e8c95b5ebeac0119ff6f087f10c08a7c57dd72871ba17304"
+      },
+      {
+        "path": "rubric.md",
+        "sha256": "33b66c88767443424545e97cbdb1b2ca9da933c919c1ab735dda53557862e1a7"
+      },
+      {
+        "path": "scripts/contract-selfcheck.sh",
+        "sha256": "27acfd7a3b7de0d77204974f144a9bd6105810af697460a62b2083298f471819"
+      },
+      {
+        "path": "scripts/harness-setup-state.sh",
+        "sha256": "2027b6845a07a89d7a6c547a6fa44adf1b8587e0ae67f8fa817b0dcc36e69ff8"
+      },
+      {
+        "path": "scripts/hook-session-start-setup.sh",
+        "sha256": "7cd66ec7c45339900acc3c9d534579f3ee777706584c40339801a17167ff8c1f"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.sh",
+        "sha256": "fb79fed4e778270c0606707197cee91044bc1a223fe7538b6c62ef530de90783"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.test.sh",
+        "sha256": "fe50edb26d5784d0fa1f3506e0dfcd0d6df6c190907ab191eda7eec83d49ef23"
+      },
+      {
+        "path": "scripts/provenance-check.sh",
+        "sha256": "43362629085f70fb5abb0e23ddbe9d7504e36085bc48b13c58efaea5d16294b9"
+      },
+      {
+        "path": "scripts/provenance-check.test.sh",
+        "sha256": "5166695a490645e598445dbea3e0a35943b08d8df008b792f5744078c58ccba0"
+      },
+      {
+        "path": "selection-flow.md",
+        "sha256": "13b9bb086de7c78447b7b0da6ad7a8094bc176b50f55bf183f6228b444ea4f96"
+      },
+      {
+        "path": "step7-reviewer-procedure.md",
+        "sha256": "29ff05a014db51ba7146eeb437f9333fd071eab18a276d17cb339e1d73503d05"
+      },
+      {
+        "path": "step8-step9-output-and-verify.md",
+        "sha256": "754bd4f29b835accf2ceeb1f730df7197eac637e69ef3884aed29a02ba4f1077"
+      },
+      {
+        "path": "template.md",
+        "sha256": "3bf3d29e53e2241e51590fe1b97d12b7edd05947d138e1ce51e3ad3e2674ed44"
+      }
+    ],
+    "content_hash": "9cca444dfa514a404a7be682834f6c8767a2c41f0b6d3197398313c5b4e62339"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:71-80",
+        "comment": "repo 固有依存（repo ルート CLAUDE.md の節、.setup-automate/、Stop hook）が前提節で明示され代替も示されているが、単体での移植性はやや低い。"
+      },
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": "SKILL.md:3-4",
+        "comment": "トリガーフレーズは when_to_use に集約され長文。description 単体では「いつ使うか」が弱い。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:195-201",
+        "comment": "使用例は 3 行の表のみ。エッジケースの流れ（対話不可時など）の具体例は薄い。"
+      },
+      {
+        "criterion_id": "S3",
+        "severity": "low",
+        "location": "SKILL.md:1-233",
+        "comment": "SKILL.md は 233 行で supporting files へ分離済みだが、Step 0 や運用基準など本体にまだ情報が多い。"
+      }
+    ]
+  }
+}

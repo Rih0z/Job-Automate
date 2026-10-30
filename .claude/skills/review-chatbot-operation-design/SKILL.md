@@ -1,10 +1,11 @@
 ---
 name: review-chatbot-operation-design
-description: "顧客対応チャットボットの運用設計書（chatbot-operation-design の出力、または同等の文書）を、対応範囲・回答の根拠・有人への引き継ぎ（フラストレーション検知を含む）・引き継ぎ手順・ガードレール・ツール操作・透明性・成功基準と評価・運用監視・障害時の縮退の 10 観点・100 点満点で採点する。観点は構造化 JSON（criteria/chatbot-operation.json）で、Anthropic 公式資料に出典のあるものと、公式根拠の無い運用慣行を区別して持つ。設計書を確定する前にレビューしたい時に使う。別エージェントを起動してレビューする（自己レビューしない）。"
+description: "顧客対応チャットボットの運用設計書（chatbot-operation-design の出力、または同等の文書）を、対応範囲・回答の根拠・有人への引き継ぎ（フラストレーション検知を含む）・引き継ぎ手順・ガードレール・ツール操作・透明性・成功基準と評価・運用監視・障害時の縮退の 10 観点・100 点満点で採点する。観点は構造化 JSON（criteria/chatbot-operation.json）で、Anthropic 公式資料に出典のあるものと、公式根拠の無い運用慣行を区別して持つ。設計書を確定する前にレビューしたい時に使う。別エージェントを起動してレビューする（自己レビューしない）。使わない場面: 運用設計書を新規に作る・直す（chatbot-operation-design を使う）、提案書・ブログ・スライド・実装コードのレビュー（それぞれ review-proposal / review-blog / review-slides / review-implementation）。"
 when_to_use: "「チャットボットの運用設計をレビューして」「サポートボットのエスカレーション設計を確認して」「問い合わせ対応 AI の運用ルールを採点して」等、顧客対応チャットボットの運用設計書を確定する前"
 argument-hint: "[運用設計書のパス]"
 metadata:
   provenance: domain-prompt
+  version: "1.1"
 ---
 
 # /review-chatbot-operation-design — 顧客対応チャットボット運用設計レビュー（エージェント分離実行）
@@ -23,6 +24,9 @@ metadata:
 
 1. `$ARGUMENTS` の運用設計書の完全パス（省略時はユーザーに聞く）
 2. 本 skill の `criteria/chatbot-operation.json` の完全パス
+3. 両ファイルが存在し読めることを確認する。設計書が無い・空の場合は、レビューを起動せずユーザーに正しいパスを聞く。criteria JSON が読めない場合は、skill の配置が壊れているので起動せずその旨を報告する
+
+前提: 本 skill は `.claude/agents/readonly-reviewer.md`（任意。無ければ general-purpose で代替）と、同じ skill 内の `criteria/chatbot-operation.json` だけに依存する。
 
 ### ステップ2: レビューエージェント起動
 
@@ -62,6 +66,8 @@ Agent ツールの設定:
 
 レビューエージェントの結果をそのまま表示する（要約・解釈を加えない）。
 
+結果が下の出力形式に沿っていない（判定・得点表が無い）、エージェントが失敗・空応答を返した、といった場合は、結果を補完・推測せず、同じ 2 つのパスでエージェントを 1 回だけ再起動する。再度失敗したら、失敗した事実とエージェントの出力をそのまま報告する。
+
 ## 出力形式
 
 ```
@@ -80,6 +86,7 @@ Agent ツールの設定:
 ## Examples
 
 - 「support-bot-design.md をレビューして」→ ステップ1 で完全パスと criteria JSON のパスを集め、ステップ2 で readonly-reviewer を起動
+- 設計書のパスが存在しない・空 → エージェントを起動せず、ユーザーに正しいパスを聞く
 - 引き継ぎ条件に「フラストレーションの兆候」が無い設計書 → `escalation.frustration` が満たさない → escalation（must_pass）不合格で FAIL
 
-元プロンプト（Claude.ai 等に貼る場合）: `workflows/customer-support/review-chatbot-operation-design.md`
+元プロンプト（Claude.ai 等に貼る場合。この repo 固有の参照で、他の repo にコピーした場合は不要）: `workflows/customer-support/review-chatbot-operation-design.md`

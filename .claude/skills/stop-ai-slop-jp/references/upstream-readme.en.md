@@ -1,4 +1,4 @@
-English | [日本語](README.md)
+English | [日本語](upstream-readme.ja.md)
 
 # Stop AI Slop (Japanese Edition)
 
@@ -43,7 +43,7 @@ stop-ai-slop-jp/
 │   ├── structures.md     # Structural patterns to avoid
 │   └── examples.md       # AI / human transformation pairs
 ├── CHANGELOG.md
-├── README.md
+├── references/upstream-readme.ja.md
 └── LICENSE
 ```
 

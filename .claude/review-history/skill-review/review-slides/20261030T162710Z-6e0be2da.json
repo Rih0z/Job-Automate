@@ -1,0 +1,77 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "review-slides",
+  "reviewed_at": "2026-10-30T16:27:10Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "8962a205e7813bdf20c1a69f37b4c02996cc9e9dfc441a7ee4364a061be404c6"
+      },
+      {
+        "path": "references/review-criteria.md",
+        "sha256": "41b1be77de46de83fc186604a4dcc5a6324bfeaf4c52fbcd051e7e26bc2bdd0b"
+      },
+      {
+        "path": "references/reviewer-fallback.md",
+        "sha256": "4593526aabd5e97c5879512d6f73888580e5f96b6b11d56b64923d9e5e39c809"
+      }
+    ],
+    "content_hash": "d1cb11cd533bf277b9a50f63b3bb012b3822c5b5ba6980330fc50cbec321a62b"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "unavailable",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 19
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 93,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "review-slides/SKILL.md:26-27,57,86,90",
+        "comment": "repo 固有パスが多い。reviewer-fallback.md による代替は明記されている。"
+      },
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": "review-slides/SKILL.md:11,29",
+        "comment": "disable-model-invocation: true のため description のトリガーフレーズは実質的な発火に使われない。理由は本文に記載済み。"
+      }
+    ]
+  }
+}
