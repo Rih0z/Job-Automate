@@ -66,9 +66,16 @@ Claude Code 環境で使えるレビュー系コマンド／Skills の全一覧�
 
 ---
 
+## YOU MUST: skill の作成・変更は review-skill を通す
+
+- **対象**: `.claude/skills/<name>/` 配下（SKILL.md・scripts・criteria・references・サンプル）を作成・変更・削除したとき、毎回。誤字の修正でも、内容（改行を正規化した後のバイト列）が変われば記録は失効して再レビューが要る。`_shared/` を変えて skill の動作が変わるときは、影響を受ける skill も同じ手順で再レビューする（記録の hash は `_shared/` を含まないので、gate は検出しない。自分で洗い出す）。
+- **手順**: [review-skill](.claude/skills/review-skill/SKILL.md) skill で、別エージェント（`readonly-reviewer`）に採点させ、PASS の記録を `.claude/review-history/skill-review/` に保存する（`skill_review_gate.py --hash` で得た content_hash を `--expected-hash` に付ける）。作成者本人は採点しない・採点を代行しない。FAIL なら直して再レビューする（回数で止めない）。
+- **作業を終える前に**: PASS の記録が保存されるまで、完了報告・コミット・push をしない。push の前に `python .claude/skills/review-skill/scripts/skill_review_gate.py --all --strict` が exit 0 であることを確かめる（Stop hook は未レビューの skill があると 1 turn に最大 3 回まで終了を止めるが、上限に達した時と評価できない時〈python が無い・時間切れ〉は通す。commit と push は止めない。だから hook が通したことを「レビュー済み」と読まない）。
+- **完了報告**には、レビューした skill 名・点数・記録のパスを書く。レビューを省いた場合は省いたと明記する（省いたまま完了とは報告しない）。
+
 ## 新しいワークフロー・スキルを追加するルール
 
-**追加前チェック（共通）**: 既存の `workflows/` 一覧・`.claude/skills/` 一覧を検索し、目的が重複する既存プロンプト/スキルがないか確認する（重複なら新設せず既存を拡張する）。skill を作成・変更したら `/review-skill` を別エージェントで実行し、記録を `.claude/review-history/skill-review/` に残す。
+**追加前チェック（共通）**: 既存の `workflows/` 一覧・`.claude/skills/` 一覧を検索し、目的が重複する既存プロンプト/スキルがないか確認する（重複なら新設せず既存を拡張する）。skill を作成・変更したら、上の「YOU MUST: skill の作成・変更は review-skill を通す」に従う。
 
 **採点基準と採点対象の矛盾**: レビュー・採点系の skill を新設・改修する時は、採点対象のディレクトリや生成物の条件（規約、生成 script の固定文、文書の構造）と採点基準が矛盾しないか確かめる。矛盾することがあり、その場合は矛盾しない設計に見直す。矛盾の型と見つけた時の手順は [stop-ai-slop-jp](.claude/skills/stop-ai-slop-jp/SKILL.md) の `criteria/scoring.json`（`conflict_policy`）にある。
 

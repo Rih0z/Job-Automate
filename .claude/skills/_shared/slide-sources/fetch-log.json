@@ -101,6 +101,77 @@
         "Use preattentive attributes (e.g. color, size) to create a visual hierarchy of information",
         "Use color sparingly and strategically."
       ]
+    },
+    {
+      "source_id": "wcag-use-of-color",
+      "url": "https://www.w3.org/WAI/WCAG21/Understanding/use-of-color.html",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "969e2b43a032b50dc79c93ddda9ffebcc65e9b0136ce6a3407c3af467643b7f5",
+      "excerpts": [
+        "Use information in addition to color, such as shape or text, to convey meaning."
+      ]
+    },
+    {
+      "source_id": "wcag-non-text-contrast",
+      "url": "https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "cd94147b314334a6e97e4e094f8178f97d0ae8695b1ab1de989a973f4d833a29",
+      "excerpts": [
+        "contrast ratio of at least 3:1 against adjacent color(s)"
+      ]
+    },
+    {
+      "source_id": "datawrapper-style-guides",
+      "url": "https://www.datawrapper.de/blog/colors-for-data-vis-style-guides",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "008b5a26da9d0464d1f8463a97d56fc84a018f37a18d99a3d907fec9974c6554",
+      "excerpts": [
+        "Gray is the most important color in data visualization"
+      ]
+    },
+    {
+      "source_id": "datawrapper-background",
+      "url": "https://www.datawrapper.de/blog/background-color-of-data-visualizations",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "fa263a74006d80dcf91ea9218f1ba202e870f5a1ea908f6d090e96ab7cfe16ab",
+      "excerpts": [
+        "Your background color should be desaturated, and either very bright or very dark."
+      ]
+    },
+    {
+      "source_id": "okabe-ito-cud",
+      "url": "https://jfly.uni-koeln.de/color/",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "b2f97100088d8e562814c8ccb3ba66f1bca4463cae668fb00ae2992e930306d0",
+      "excerpts": [
+        "There are always colorblind people among the audience and readers."
+      ]
+    },
+    {
+      "source_id": "ms-accessible-pptx",
+      "url": "https://support.microsoft.com/en-us/accessibility/powerpoint/make-your-powerpoint-presentations-accessible-to-people-with-disabilities",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "b6d69ab98429e7939ad5791f803f03c133c6cb517a1c4eac2100c6d812db470c",
+      "excerpts": [
+        "Use a larger font size (18pt or larger), sans serif fonts, and sufficient white space.",
+        "Strong contrast between text and background makes it easier for people with low vision or colorblindness to see and use the content."
+      ]
+    },
+    {
+      "source_id": "kawasaki-102030",
+      "url": "https://guykawasaki.com/the_102030_rule/",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "2c4460ecd756da80bfa53d579f9593750884b3233ea673cfb61c73c1b02c8a8d",
+      "excerpts": [
+        "contain no font smaller than thirty points"
+      ]
     }
   ]
 }

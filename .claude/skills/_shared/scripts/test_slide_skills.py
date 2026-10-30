@@ -153,6 +153,39 @@ def build_pptx(path, kind):
         grp = s1.shapes.add_group_shape()
         gb = grp.shapes.add_textbox(Inches(1), Inches(4), Inches(3), Inches(1))
         gb.text_frame.text = "group text"
+    elif kind in ("contrast_bad", "contrast_good", "colors_many", "edges", "theme_color", "bg_fill"):
+        from pptx.dml.color import RGBColor
+        from pptx.enum.dml import MSO_THEME_COLOR
+        s1 = prs.slides.add_slide(blank)
+
+        def colored(text, left, top, fill=None, color=None, theme=False):
+            box = tb(s1, text, 18, left=left, top=top)
+            if fill:
+                box.fill.solid()
+                box.fill.fore_color.rgb = RGBColor(*fill)
+            run = box.text_frame.paragraphs[0].runs[0]
+            if theme:
+                run.font.color.theme_color = MSO_THEME_COLOR.ACCENT_1
+            elif color:
+                run.font.color.rgb = RGBColor(*color)
+            return box
+
+        if kind == "contrast_bad":      # 暗い地に暗い文字（比 ≈1.0）
+            colored("dark on dark", 1, 1, fill=(31, 41, 55), color=(30, 40, 50))
+        elif kind == "contrast_good":   # 暗い地に白（比 ≈14.7）
+            colored("white on dark", 1, 1, fill=(31, 41, 55), color=(255, 255, 255))
+        elif kind == "colors_many":     # 明示色 6 種（文字色 3 + 塗り 3）
+            for i, c in enumerate([(10, 20, 30), (200, 30, 30), (30, 200, 30)]):
+                colored("c%d" % i, 1, 1 + i, fill=(240 - i * 5, 240, 240), color=c)
+        elif kind == "edges":           # 左端 5 種（1.0 / 1.3 / 2.0 / 2.7 / 3.4 インチ）
+            for i, left in enumerate((1.0, 1.3, 2.0, 2.7, 3.4)):
+                tb(s1, "e%d" % i, 18, left=left, top=1 + i)
+        elif kind == "theme_color":
+            colored("theme colored", 1, 1, theme=True)
+        elif kind == "bg_fill":         # スライド背景を明示（濃色）+ 薄い文字（比が低い）
+            s1.background.fill.solid()
+            s1.background.fill.fore_color.rgb = RGBColor(20, 20, 20)
+            colored("light on bg", 1, 1, color=(30, 30, 30))
     prs.save(path)
 
 
@@ -262,10 +295,10 @@ class ValidatePractices(unittest.TestCase):
         self.assertEqual((code, "invalid method" in out), (1, True), out)
 
     def test_T13_count_warning(self):
-        ps = [practice("fx-%02d" % i) for i in range(30)]
+        ps = [practice("fx-%02d" % i) for i in range(50)]
         code, out = self.v(practices_doc(ps))
         self.assertEqual(code, 0, out)
-        self.assertIn("practice count 30 outside 10-25", out)
+        self.assertIn("practice count 50 outside 10-40", out)
 
     def _fetch_fixture(self, body_html=None, quote="a sufficiently long quote text"):
         body = body_html or ("<html><body><script>x()</script><p>%s</p>" % ("filler text " * 30) +
@@ -535,6 +568,77 @@ class Extract(unittest.TestCase):
         self.assertIsNone(f["slides"][0]["min_font_pt"])
         self.assertIn("font inherited: 1 slides", f["limitations"])
         self.assertIn("font checked: 0/1 slides", f["limitations"])
+
+
+class ExtractDesign(unittest.TestCase):
+    """色・位置の抽出（デザインレビューの入力）。"""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def facts(self, kind):
+        pptx = os.path.join(self.d, kind + ".pptx")
+        build_pptx(pptx, kind)
+        out = os.path.join(self.d, kind + ".json")
+        code, text = run(EXTRACT, pptx, "-o", out)
+        self.assertEqual(code, 0, text)
+        with open(out, encoding="utf-8") as f:
+            return json.load(f)
+
+    def test_T55_contrast_low_and_high(self):
+        low = self.facts("contrast_bad")["slides"][0]["min_contrast"]
+        high = self.facts("contrast_good")["slides"][0]["min_contrast"]
+        self.assertLess(low, 1.5)
+        self.assertGreater(high, 10)
+
+    def test_T56_background_fill_used_when_explicit(self):
+        s = self.facts("bg_fill")["slides"][0]
+        self.assertIsNotNone(s["min_contrast"])
+        self.assertLess(s["min_contrast"], 2)
+
+    def test_T57_unknown_background_is_not_judged(self):
+        f = self.facts("inherited")  # 色も背景も明示なし
+        self.assertIsNone(f["slides"][0]["min_contrast"])
+        self.assertIn("color checked: 0/1 slides", f["limitations"])
+
+    def test_T58_distinct_colors_and_edges(self):
+        self.assertEqual(self.facts("colors_many")["slides"][0]["distinct_colors"], 6)
+        self.assertEqual(self.facts("edges")["slides"][0]["left_edge_count"], 5)
+        self.assertEqual(self.facts("good")["slides"][0]["distinct_colors"], 0)
+
+    def test_T59_theme_colors_reported_not_resolved(self):
+        f = self.facts("theme_color")
+        self.assertIsNone(f["slides"][0]["min_contrast"])
+        self.assertIn("color theme-based: 1 slides", f["limitations"])
+
+    def test_T60_shapes_geometry_for_reviewer(self):
+        shapes = self.facts("edges")["slides"][0]["shapes"]
+        self.assertEqual(len(shapes), 5)
+        self.assertEqual(shapes[0]["left"], 1.0)
+        self.assertEqual({"kind", "left", "top", "width", "height"}, set(shapes[0]) & {"kind", "left", "top", "width", "height"})
+
+    def test_T61_new_metrics_accepted_and_checked(self):
+        ps = [auto("fx-edges", "deck", "left_edge_count", "max", 4),
+              auto("fx-colors", "deck", "distinct_colors", "max", 5),
+              auto("fx-contrast", "deck", "min_contrast", "min", 4.5, severity="must")]
+        pp = write_json(self.d, "p.json", practices_doc(ps))
+        code, out = run(VALIDATE, "practices", pp)
+        self.assertEqual(code, 0, out)
+        pptx = os.path.join(self.d, "bad.pptx")
+        build_pptx(pptx, "contrast_bad")
+        facts = os.path.join(self.d, "bad.facts.json")
+        self.assertEqual(run(EXTRACT, pptx, "-o", facts)[0], 0)
+        res = os.path.join(self.d, "bad.auto.json")
+        code, out = run(CHECK, facts, "--practices", pp, "-o", res)
+        self.assertEqual(code, 1)
+        with open(res, encoding="utf-8") as f:
+            msgs = [v["message"] for v in json.load(f)["violations"]]
+        self.assertTrue(any(m.startswith("slide 1: fx-contrast violated (1") and "< 4.5" in m for m in msgs), msgs)
+        self.assertEqual(len(msgs), 1)
 
 
 class CheckDeck(unittest.TestCase):

@@ -73,6 +73,17 @@ pptx 生成 skill に任せる前に、「誰に・何を・どの順で・ど�
 
 `focus`（視線を集める強調。面積は小さく）/ `surface-1`（ページの淡い地）/ `surface-2`（カードの地）/ `border` / `text-primary` / `text-secondary`（出典・注記のみ）/ `emphasis-mid`（中間の強調）/ `functional`（意味を担う色。最小限）。役割→色の対応は生成側が持つ。`criteria/palette.example.json` は役割の構造を示す汎用サンプル。
 
+### 色と見せ方の原則（構成の段階で決めておく）
+
+根拠の出典と抜粋は `slide-best-practices.json` の各 practice にある。数値の基準もそちらが正。
+
+- **土台はグレーの階調、色は要点にだけ使う**（`neutral-base`、`color-restraint`）。重要でない情報はグレーに落とし、`emphasis_role: focus` は要点のスライドにだけ付ける。
+- **意味を色だけで伝えない**（`color-not-sole`）。比較・良否・凡例には、形・文字・位置などの手がかりを添える。赤と緑のように見分けにくい組み合わせは避ける。
+- **背景は彩度を抑え、とても明るいか暗い色**にする（`calm-background`）。
+- **視線の起点を 1 つに絞る**（`focal-point`）。`focal_element` に、最初に見てほしい要素を決める。
+- **文字は小さくしすぎず、明暗差を確保する**（`min-font`、`contrast-measured`）。`text_size_class` で区分だけ決め、pt は生成側に任せる。
+- 色の対応表（`palette_ref`）がある場合は、`palette` 検査で文字と地の明暗差を確かめてから渡す。
+
 ## コマンド（リポジトリのルートから）
 
 ```

@@ -21,10 +21,15 @@ metadata:
 
 ## 手順（リポジトリのルートから実行）
 
-1. **事実の抽出**: `python .claude/skills/slide-clarity-review/scripts/extract_deck.py <deck.pptx> -o <作業dir>/deck-facts.json`。スライド毎の見出し・本文量・箇条書き数・最小文字サイズ・画像数・段落テキストを得る。継承されたフォントは取れないため、limitations に検査できた割合（`font checked: m/n slides`）が出る。
+1. **事実の抽出**: `python .claude/skills/slide-clarity-review/scripts/extract_deck.py <deck.pptx> -o <作業dir>/deck-facts.json`。スライド毎に次を得る。
+   - 内容: 見出し・本文量・箇条書き数・段落テキスト・画像数。
+   - 文字サイズ: 明示指定された最小値。
+   - 配置: トップレベル図形の位置と大きさ（インチ）、左端の種類数。
+   - 色: 明示された色の種類数、文字色と背景色が両方明示された組の最小コントラスト比。
+   - 取れないもの: 継承されたフォントと色、テーマ色（解決しない）、グループ内の座標、描画結果。limitations に検査できた割合（`font checked` / `color checked` / `color theme-based`）が出る。**描画した画像は作らない**（見た目の最終確認は人が行う）。
 2. **機械検査**: `python .claude/skills/slide-clarity-review/scripts/check_deck.py <作業dir>/deck-facts.json --practices .claude/skills/_shared/slide-best-practices.json -o <作業dir>/auto-results.json`（違反があれば終了コード 1）。
 3. **別エージェントで観点判定**: `readonly-reviewer` を起動し、下記の入力だけを渡す。
-   - `deck-facts.json`、`auto-results.json`（画像があれば追加）
+   - `deck-facts.json`（`shapes` の位置・大きさ・塗りを、整列・余白・視線の起点の判定に使わせる）、`auto-results.json`（画像があれば追加）
    - `clarity.json` の軸（id・title・practice_ids）と、軸が参照する `method: llm` の practice の `id` / `title` / `rule` / `check.how`（severity は渡さない）
    - 返却形式: `{"axes":[{"id","score","citations":["slide 3: …"]}],"llm_results":[{"practice_id","passed"}],"fixes":[{"slide","practice_id","problem","fix"}]}`。各軸 0〜20 点、citations は成果物内の記述の引用を最低 1 つ。判定できない観点は passed を false にし、理由を fixes に書く。
 4. **検査とゲート判定**: reviewer の JSON を保存し、`python .claude/skills/slide-clarity-review/scripts/finalize_review.py --deck <deck.pptx> --auto <作業dir>/auto-results.json --review <作業dir>/reviewer.json --practices .claude/skills/_shared/slide-best-practices.json --clarity .claude/skills/slide-clarity-review/criteria/clarity.json --write`。

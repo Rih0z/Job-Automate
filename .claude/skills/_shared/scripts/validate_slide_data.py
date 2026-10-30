@@ -155,8 +155,8 @@ def check_practices(doc, rep, today):
                 rep.err("%s: threshold not in quote" % pid)
 
     n = len(doc.get("practices", []))
-    if not 10 <= n <= 25:
-        rep.warn("practice count %d outside 10-25" % n)
+    if not 10 <= n <= 40:
+        rep.warn("practice count %d outside 10-40" % n)
 
 
 def check_fetch_log(doc, log, rep, sources_dir):

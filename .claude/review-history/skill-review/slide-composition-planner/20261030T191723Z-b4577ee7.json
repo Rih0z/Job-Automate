@@ -1,0 +1,85 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "slide-composition-planner",
+  "reviewed_at": "2026-10-30T19:17:23Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "a8763ba1eda2b148d759d2e0f8e33650e9de3a59c6c098d0cacda98eedd5eb9c"
+      },
+      {
+        "path": "criteria/palette.example.json",
+        "sha256": "9024597c5baf9c7c42097db6d57207e5418c12ead5c5b4f8ff32c39764fbbc89"
+      }
+    ],
+    "content_hash": "df1d30fe0d801b24ea8d9a3144971fb2b8c2526f01d37eb7549d65e62166215c"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a3462718684f328f0",
+    "model": "unavailable"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 17
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 19
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "README.md",
+        "comment": "README のスキル一覧に slide-composition-planner の記載が見つからない。スキル一覧は docs/skills-index.md にあり、そちらには記載済み。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:51-70",
+        "comment": "例は 2 枚抜粋のみ。検査に落ちた時の違反メッセージから直す流れの例があるとよい。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:87-92",
+        "comment": "コマンドがリポジトリのルート前提の相対パス。_shared への依存と python の前提を一箇所にまとめるとよい。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": "SKILL.md:30",
+        "comment": "ユーザーへ構成を提示する時の形式が未定義。"
+      }
+    ]
+  }
+}

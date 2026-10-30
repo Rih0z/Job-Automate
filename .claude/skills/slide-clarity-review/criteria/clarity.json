@@ -31,8 +31,12 @@
       "practice_ids": [
         "focal-point",
         "color-restraint",
+        "neutral-base",
+        "calm-background",
+        "distinct-colors",
         "declutter-whitespace",
-        "alignment-consistency"
+        "alignment-consistency",
+        "alignment-edges"
       ]
     },
     {
@@ -46,10 +50,13 @@
     },
     {
       "id": "ax-legibility",
-      "title": "可読性（コントラスト・文字サイズ）",
+      "title": "可読性・アクセシビリティ（コントラスト・文字サイズ・色以外の手がかり）",
       "weight": 20,
       "practice_ids": [
         "contrast-minimum",
+        "contrast-measured",
+        "graphic-contrast",
+        "color-not-sole",
         "min-font"
       ]
     }

@@ -6,7 +6,7 @@
 
 公式ベストプラクティスは取得日・再取得条件付きの構造化データ [anthropic-best-practices.json](.claude/skills/_shared/anthropic-best-practices.json) として保持し、著者独自の運用嗜好は由来台帳 [provenance.json](.claude/skills/agent-harness-bootstrap/provenance.json) で公式由来と分けて管理する。別プロジェクトへは、公式由来をデフォルトで入れ、著者の運用嗜好はあなたが選んだものだけを入れる。
 
-skill を作成・変更したときの別エージェントレビューは、記録と hook で確かめる（[.claude/skills/review-skill/SKILL.md](.claude/skills/review-skill/SKILL.md)）。gate が exit 0 でも、全 skill が別エージェントのレビュー済みという意味ではない。既存 54 skill は負債台帳で免除しており、全件レビューは未実施。
+skill を作成・変更したときの別エージェントレビュー（`/review-skill`）は**必須**で、完了報告・コミット・push の前に PASS の記録を残す（規則の本体は [CLAUDE.md](CLAUDE.md) の「YOU MUST: skill の作成・変更は review-skill を通す」）。レビューの有無は、記録と hook で確かめる（[.claude/skills/review-skill/SKILL.md](.claude/skills/review-skill/SKILL.md)）。gate が exit 0 でも、全 skill が別エージェントのレビュー済みという意味ではない。既存 54 skill は負債台帳で免除しており、全件レビューは未実施。
 
 ## ディレクトリ構成
 

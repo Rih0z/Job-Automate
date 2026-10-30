@@ -10,7 +10,8 @@ import json
 import re
 
 SCOPES = ("deck", "deck-spec")
-DECK_METRICS = ("body_chars", "bullet_count", "min_font_pt", "title")
+DECK_METRICS = ("body_chars", "bullet_count", "min_font_pt", "title",
+                "left_edge_count", "distinct_colors", "min_contrast")
 SPEC_METRICS = ("points_count", "action_title_chars", "closing_present", "content_source_present",
                 "focal_element_present", "raw_color_absent")
 OPS = ("max", "min", "required")

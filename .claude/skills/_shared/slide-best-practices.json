@@ -124,6 +124,99 @@
       "max_age_days": 730
     },
     {
+      "id": "wcag-use-of-color",
+      "title": "Understanding Success Criterion 1.4.1: Use of Color",
+      "url": "https://www.w3.org/WAI/WCAG21/Understanding/use-of-color.html",
+      "kind": "standard",
+      "authors": [],
+      "organization": "W3C Web Accessibility Initiative (WAI)",
+      "year": "2018",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 730
+    },
+    {
+      "id": "wcag-non-text-contrast",
+      "title": "Understanding Success Criterion 1.4.11: Non-text Contrast",
+      "url": "https://www.w3.org/WAI/WCAG21/Understanding/non-text-contrast.html",
+      "kind": "standard",
+      "authors": [],
+      "organization": "W3C Web Accessibility Initiative (WAI)",
+      "year": "2018",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 730
+    },
+    {
+      "id": "datawrapper-style-guides",
+      "title": "A detailed guide to colors in data vis style guides",
+      "url": "https://www.datawrapper.de/blog/colors-for-data-vis-style-guides",
+      "kind": "article",
+      "authors": [
+        "Lisa Charlotte Muth"
+      ],
+      "organization": "Datawrapper",
+      "year": "n.d.",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 730
+    },
+    {
+      "id": "datawrapper-background",
+      "title": "What background color should your data vis have?",
+      "url": "https://www.datawrapper.de/blog/background-color-of-data-visualizations",
+      "kind": "article",
+      "authors": [
+        "Lisa Charlotte Muth"
+      ],
+      "organization": "Datawrapper",
+      "year": "2022",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 730
+    },
+    {
+      "id": "okabe-ito-cud",
+      "title": "Color Universal Design (CUD) - How to make figures and presentations that are friendly to Colorblind people",
+      "url": "https://jfly.uni-koeln.de/color/",
+      "kind": "article",
+      "authors": [
+        "Masataka Okabe",
+        "Kei Ito"
+      ],
+      "organization": "Jikei Medical School; University of Tokyo (Institute for Molecular and Cellular Biosciences)",
+      "year": "2002",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 1095
+    },
+    {
+      "id": "ms-accessible-pptx",
+      "title": "Make your PowerPoint presentations accessible to people with disabilities",
+      "url": "https://support.microsoft.com/en-us/accessibility/powerpoint/make-your-powerpoint-presentations-accessible-to-people-with-disabilities",
+      "kind": "article",
+      "authors": [],
+      "organization": "Microsoft Corporation (Microsoft Support)",
+      "year": "n.d.",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 365
+    },
+    {
+      "id": "kawasaki-102030",
+      "title": "The 10/20/30 Rule of PowerPoint",
+      "url": "https://guykawasaki.com/the_102030_rule/",
+      "kind": "article",
+      "authors": [
+        "Guy Kawasaki"
+      ],
+      "organization": "guykawasaki.com",
+      "year": "2005",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 1095
+    },
+    {
       "id": "mayer-aace",
       "title": "A Picture is Worth a Thousand Words: A Summary of Mayer's 12 Principles of Multimedia Learning",
       "url": "https://aace.org/review/designing-online-learning-spaces-3-a-picture-is-worth-a-thousand-words-a-summary-of-mayers-12-principles-of-multimedia-learning/",
@@ -326,16 +419,26 @@
         "metric": "min_font_pt",
         "op": "min",
         "threshold": 18,
-        "threshold_origin": "adaptation"
+        "threshold_origin": "source"
       },
       "evidence": [
+        {
+          "source_id": "ms-accessible-pptx",
+          "locator": "fonts and white space",
+          "quote": "Use a larger font size (18pt or larger), sans serif fonts, and sufficient white space."
+        },
         {
           "source_id": "wcag-contrast",
           "locator": "definition of large scale text",
           "quote": "at least 18 point or 14 point bold"
+        },
+        {
+          "source_id": "kawasaki-102030",
+          "locator": "the rule",
+          "quote": "contain no font smaller than thirty points"
         }
       ],
-      "adaptation": "基準の 18 ポイントは『大きい文字』の定義であり、本文の最小サイズの要求ではない。下限 18 は運用上の目安として採用。"
+      "adaptation": "下限 18 は出典（アクセシビリティ指針）の値。室内で発表する場合は 30 ポイントを下限とする意見もあり（Kawasaki）、発表用途では 18 を最低線として可能な限り大きくする。基準 WCAG の 18 ポイントは『大きい文字』の定義であり、本文の最小サイズの要求ではない。"
     },
     {
       "id": "contrast-minimum",
@@ -353,9 +456,14 @@
           "source_id": "wcag-contrast",
           "locator": "Success Criterion text",
           "quote": "contrast ratio of at least 4.5:1"
+        },
+        {
+          "source_id": "ms-accessible-pptx",
+          "locator": "text and background colors",
+          "quote": "Strong contrast between text and background makes it easier for people with low vision or colorblindness to see and use the content."
         }
       ],
-      "adaptation": "基準は通常の文字で 4.5:1、大きい文字で 3:1。ここでは通常の文字の値を採る。"
+      "adaptation": "基準は通常の文字で 4.5:1、大きい文字で 3:1。ここでは通常の文字の値を採る。機械で測れる組（文字色・背景色が両方明示）は contrast-measured が担い、継承色・テーマ色・画像上の文字はこの観点で判定する。"
     },
     {
       "id": "focal-point",
@@ -446,6 +554,11 @@
           "source_id": "reynolds-design-tips",
           "locator": "slide design section",
           "quote": "Your slides should have plenty of empty space"
+        },
+        {
+          "source_id": "ms-accessible-pptx",
+          "locator": "fonts and white space",
+          "quote": "Use a larger font size (18pt or larger), sans serif fonts, and sufficient white space."
         },
         {
           "source_id": "mayer-aace",
@@ -657,6 +770,181 @@
         }
       ],
       "adaptation": "反復の原則を、色の指定方法に適用した運用ルール。"
+    },
+    {
+      "id": "contrast-measured",
+      "category": "accessibility",
+      "title": "明示された文字色と背景色のコントラスト比を確保する",
+      "rule": "文字色と背景色が明示されている箇所は、コントラスト比を基準以上にする。",
+      "rationale": "コントラストが低い文字は、視力や環境によって読めなくなる。",
+      "severity": "must",
+      "check": {
+        "method": "auto",
+        "how": "文字色と背景色（図形の塗りまたは明示されたスライド背景）が両方 RGB で明示された組の最小コントラスト比が下限以上か。",
+        "scope": "deck",
+        "metric": "min_contrast",
+        "op": "min",
+        "threshold": 4.5,
+        "threshold_origin": "source"
+      },
+      "evidence": [
+        {
+          "source_id": "wcag-contrast",
+          "locator": "Success Criterion text",
+          "quote": "contrast ratio of at least 4.5:1"
+        },
+        {
+          "source_id": "ms-accessible-pptx",
+          "locator": "text and background colors",
+          "quote": "Strong contrast between text and background makes it easier for people with low vision or colorblindness to see and use the content."
+        }
+      ],
+      "adaptation": "測れるのは両方の色が RGB で明示された組だけ。継承色・テーマ色・画像上の文字は測れず、contrast-minimum（reviewer の判定）に回る。"
+    },
+    {
+      "id": "alignment-edges",
+      "category": "visual",
+      "title": "左端の揃いを保つ",
+      "rule": "要素の左端を少数の共通線に揃え、ばらつかせない。",
+      "rationale": "共通の線に揃えると、整理されて追いやすい印象になる。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "トップレベルの text / picture / table 図形の左端の種類数が上限以下か。",
+        "scope": "deck",
+        "metric": "left_edge_count",
+        "op": "max",
+        "threshold": 4,
+        "threshold_origin": "adaptation"
+      },
+      "evidence": [
+        {
+          "source_id": "pz-crap",
+          "locator": "Alignment",
+          "quote": "they sit on an invisible grid which then makes the design feel clean, related, and easy to follow"
+        }
+      ],
+      "adaptation": "出典は『共通の端に揃える』と述べるのみで数値は与えない。複数列の配置を許す運用上の上限として 4 を採る。グループ内の図形は座標系が違うため数えない。"
+    },
+    {
+      "id": "distinct-colors",
+      "category": "visual",
+      "title": "1 枚で使う色数を絞る",
+      "rule": "1 つのスライドで明示的に使う色の種類を絞る。",
+      "rationale": "色を多用すると、どこが重要かが分からなくなる。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "明示された RGB の色（文字・塗り・背景）の種類数が上限以下か。",
+        "scope": "deck",
+        "metric": "distinct_colors",
+        "op": "max",
+        "threshold": 5,
+        "threshold_origin": "adaptation"
+      },
+      "evidence": [
+        {
+          "source_id": "swd-crushing",
+          "locator": "tip 2: Highlight the important stuff",
+          "quote": "Use color sparingly and strategically."
+        },
+        {
+          "source_id": "datawrapper-style-guides",
+          "locator": "Grays for data",
+          "quote": "Gray is the most important color in data visualization"
+        }
+      ],
+      "adaptation": "出典は『控えめに』と述べるのみで数値は与えない。グレーの階調を含めた運用上の上限として 5 を採る。テーマ色は数えない。"
+    },
+    {
+      "id": "color-not-sole",
+      "category": "accessibility",
+      "title": "意味を色だけで伝えない",
+      "rule": "意味の区別を色だけに頼らず、形・文字・位置などの手がかりを添える。赤と緑のように見分けにくい組み合わせを避ける。",
+      "rationale": "色の見え方は人によって違い、色だけの区別は伝わらない人がいる。",
+      "severity": "must",
+      "check": {
+        "method": "llm",
+        "how": "凡例・強調・良否の区別が色だけで表されていないか、形や文字の手がかりが添えられているかを判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "wcag-use-of-color",
+          "locator": "In Brief: What to do",
+          "quote": "Use information in addition to color, such as shape or text, to convey meaning."
+        },
+        {
+          "source_id": "okabe-ito-cud",
+          "locator": "introduction",
+          "quote": "There are always colorblind people among the audience and readers."
+        }
+      ],
+      "adaptation": "出典は色覚の多様性への配慮の指針。『赤と緑を避ける』は同じ出典が示す見分けにくい組み合わせの例に基づく運用。"
+    },
+    {
+      "id": "graphic-contrast",
+      "category": "accessibility",
+      "title": "図・グラフの要素にも十分な明暗差を付ける",
+      "rule": "図形やグラフの要素と、隣り合う色との明暗差を十分に確保する。",
+      "rationale": "要素が背景に溶けると、図の意味が読み取れない。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "図形・グラフの線や塗りが、隣り合う色と区別できる明暗差を持っているかを判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "wcag-non-text-contrast",
+          "locator": "Success Criterion text",
+          "quote": "contrast ratio of at least 3:1 against adjacent color(s)"
+        }
+      ],
+      "adaptation": "基準は画面部品と情報を担うグラフィックスを対象に 3:1 を定める。スライドの図表に当てはめた解釈。"
+    },
+    {
+      "id": "neutral-base",
+      "category": "visual",
+      "title": "グレーを土台に、要点だけに色を使う",
+      "rule": "資料の土台は中立色（グレーの階調）で組み、重要でない情報はグレーに落とし、色は要点にだけ使う。",
+      "rationale": "土台が静かだと、色を付けた要点が際立つ。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "背景・補助情報・重要でない要素がグレー系で、強調色が要点にだけ使われているかを判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "datawrapper-style-guides",
+          "locator": "Grays for data",
+          "quote": "Gray is the most important color in data visualization"
+        },
+        {
+          "source_id": "swd-crushing",
+          "locator": "tip 2: Highlight the important stuff",
+          "quote": "Use color sparingly and strategically."
+        }
+      ],
+      "adaptation": "出典はデータ可視化向けの指針。スライド全体の配色に広げた解釈。"
+    },
+    {
+      "id": "calm-background",
+      "category": "visual",
+      "title": "背景は彩度を抑える",
+      "rule": "背景色は彩度を抑え、とても明るいか、とても暗い色にする。",
+      "rationale": "彩度の高い背景は、前景の情報と競合して読みにくくなる。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "背景色が彩度の高い色になっていないか、前景の文字・図と十分に離れた明るさかを判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "datawrapper-background",
+          "locator": "conclusion",
+          "quote": "Your background color should be desaturated, and either very bright or very dark."
+        }
+      ],
+      "adaptation": "出典はデータ可視化の調査に基づく助言。スライドの背景に広げた解釈。"
     }
   ]
 }

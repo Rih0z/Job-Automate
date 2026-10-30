@@ -1,0 +1,101 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "slide-clarity-review",
+  "reviewed_at": "2026-10-30T19:19:55Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "b8391cb392e394672a73b05b1cb21019d47c2f69333015c0c2061563a34022aa"
+      },
+      {
+        "path": "criteria/clarity.json",
+        "sha256": "030b79813b21d646fb595c2736df653e4b1638b8bf5e9d001ff23bbe6cd5645b"
+      },
+      {
+        "path": "scripts/check_deck.py",
+        "sha256": "3cc5419d44b798f223deb3d9bee7b7b94ee803d7f5d2110fff37fcdbe74654f3"
+      },
+      {
+        "path": "scripts/extract_deck.py",
+        "sha256": "5e05f79e7dde39dea55d432dbca4ee3231051af0d2b54857f8221b3296b2a541"
+      },
+      {
+        "path": "scripts/finalize_review.py",
+        "sha256": "ba650a0a64b1acf08eddc67e3612d265597b23b226d74648513c430ad1b940c7"
+      },
+      {
+        "path": "scripts/gate.py",
+        "sha256": "95f166266d8ee3fdcef5613ff2d6cdd1516d264ee4b971ba0a2cb3d33b6ce85b"
+      }
+    ],
+    "content_hash": "498fd5a76d7045ddafa995faca1a339fd684f3d77e53e12986c65cb1b600f859"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "aaac9db42fb9bce52",
+    "model": "unavailable"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 17
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 19
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": "scripts/__pycache__/gate.cpython-311.pyc",
+        "comment": "生成物の pycache が skill フォルダ内にある。コミット対象に入らないよう .gitignore 確認を推奨。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "medium",
+        "location": "README.md",
+        "comment": "README.md と agents.md に slide-clarity-review の記載が grep で見つからない。CLAUDE.md の skill 追加ルール（README のスキル一覧に追記）に未対応の可能性がある。"
+      },
+      {
+        "criterion_id": "D1",
+        "severity": "low",
+        "location": "SKILL.md:3",
+        "comment": "description の「出して直させる」は誰が直すかが曖昧で、命令調。三人称で書くと安定する。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:83-85",
+        "comment": "使用例が 1 つのみ。画像なしの deck や、reviewer が不正出力を返す場合の例があると良い。"
+      }
+    ]
+  }
+}
