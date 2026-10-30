@@ -1,0 +1,13 @@
+{
+  "_note": "汎用の配色サンプル。役割（role）の構造だけを示す。実際の配色は利用者の環境で別ファイルを作り、deck-spec の design.palette_ref で渡す（コミットしない）。",
+  "roles": {
+    "focus": "#1F3FBF",
+    "surface-1": "#F2F4F8",
+    "surface-2": "#E1E5EC",
+    "border": "#C3CAD6",
+    "text-primary": "#1E2330",
+    "text-secondary": "#4A5060",
+    "emphasis-mid": "#4F5563",
+    "functional": "#0A7F6F"
+  }
+}

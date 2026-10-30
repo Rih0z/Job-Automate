@@ -29,7 +29,7 @@ common_principles:
   non_destructive:
     title: 非破壊
     body: レビューのみ行い、対象ファイルの編集・実行は行わない。レビュワーは元ファイルを絶対に編集してはならない。改善点は「提案」として記載し、修正作業は作成者自身が行う。
-  used_by: [research-deliverable-review, review-ai-automation, review-specification, review-proposal, review-persona-analysis, review-business-idea, review-slides, review-ops]
+  used_by: [research-deliverable-review, review-ai-automation, review-specification, review-proposal, review-persona-analysis, review-business-idea, review-slides, review-ops, slide-clarity-review]
   # review-blog は原本 (workflows/content-creation/review-blog.md) が独自の行動原則を持つため
   # common_principles の used_by には含めない (rank5_100 と同じ理由、下記コメント参照)。
 
@@ -48,7 +48,7 @@ verdict_scales:
       - {label: B, range: 70-79, meaning: 修正推奨。特定の観点で深掘り・再検討が必要}
       - {label: C, range: 60-69, meaning: 大幅な修正・再検討が必要}
       - {label: D, range: 0-59, meaning: 根本的な見直し・書き直しが必要}
-    used_by: [research-deliverable-review, review-ai-automation, review-specification, review-proposal, review-persona-analysis, review-business-idea, review-slides, review-ops]
+    used_by: [research-deliverable-review, review-ai-automation, review-specification, review-proposal, review-persona-analysis, review-business-idea, review-slides, review-ops, slide-clarity-review]
     # review-blog は原本 (workflows/content-creation/review-blog.md, 956行) が独自の 110点満点 +
     # 0/4/9-gate 即D判定を持つため rank5_100 の used_by には含めない (原本 SoT を上書きしない)。
     # review-blog はゲート条項による即D判定のみ本 scale と趣旨を共有する旨を SKILL.md に注記する。

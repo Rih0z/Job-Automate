@@ -1,0 +1,157 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "agent-harness-bootstrap",
+  "reviewed_at": "2026-10-30T18:16:40Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "b561cdc22440662b12f2e3b5d7e3d52fb2a823b22eb2ae8eca079bd0dfbd3012"
+      },
+      {
+        "path": "criteria/porting-reconciliation.json",
+        "sha256": "4971685379d9078d5e950a2a14d83d465680bb7d168154ff8c97489476acc1a7"
+      },
+      {
+        "path": "hooks-reference.md",
+        "sha256": "4fd707a971f4e03aada2ecdbe77b679c621069341e1c7a2ec1d0d274ded0ab45"
+      },
+      {
+        "path": "maintainer-checklist.md",
+        "sha256": "af116990f901852df8c99096045250ade1c832a7475643e36cdcf6abaabab58d"
+      },
+      {
+        "path": "official-sources.md",
+        "sha256": "29b46a9bda8fce000fa511cb1dced303bf11e6d77dff5320fcd8758f5d3c83ea"
+      },
+      {
+        "path": "operational-knowhow-index.md",
+        "sha256": "7b485685d74a8edb147cc1f8e06d5492bb4f8987f4a5e14b4c96b92648db66e1"
+      },
+      {
+        "path": "operational-knowhow.md",
+        "sha256": "5cd4f5ab92049c373d5b5de6e6d6d98a47c252b0d4b7f5c7ccf02f093ac936d7"
+      },
+      {
+        "path": "provenance.json",
+        "sha256": "7879819769f2570334332b7559656761a68141428b1980796b9a9705b856110a"
+      },
+      {
+        "path": "rubric.md",
+        "sha256": "33b66c88767443424545e97cbdb1b2ca9da933c919c1ab735dda53557862e1a7"
+      },
+      {
+        "path": "scripts/contract-selfcheck.sh",
+        "sha256": "27acfd7a3b7de0d77204974f144a9bd6105810af697460a62b2083298f471819"
+      },
+      {
+        "path": "scripts/harness-setup-state.sh",
+        "sha256": "2027b6845a07a89d7a6c547a6fa44adf1b8587e0ae67f8fa817b0dcc36e69ff8"
+      },
+      {
+        "path": "scripts/hook-session-start-setup.sh",
+        "sha256": "7cd66ec7c45339900acc3c9d534579f3ee777706584c40339801a17167ff8c1f"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.sh",
+        "sha256": "fb79fed4e778270c0606707197cee91044bc1a223fe7538b6c62ef530de90783"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.test.sh",
+        "sha256": "fe50edb26d5784d0fa1f3506e0dfcd0d6df6c190907ab191eda7eec83d49ef23"
+      },
+      {
+        "path": "scripts/provenance-check.sh",
+        "sha256": "43362629085f70fb5abb0e23ddbe9d7504e36085bc48b13c58efaea5d16294b9"
+      },
+      {
+        "path": "scripts/provenance-check.test.sh",
+        "sha256": "5166695a490645e598445dbea3e0a35943b08d8df008b792f5744078c58ccba0"
+      },
+      {
+        "path": "selection-flow.md",
+        "sha256": "13b9bb086de7c78447b7b0da6ad7a8094bc176b50f55bf183f6228b444ea4f96"
+      },
+      {
+        "path": "step7-reviewer-procedure.md",
+        "sha256": "29ff05a014db51ba7146eeb437f9333fd071eab18a276d17cb339e1d73503d05"
+      },
+      {
+        "path": "step8-step9-output-and-verify.md",
+        "sha256": "754bd4f29b835accf2ceeb1f730df7197eac637e69ef3884aed29a02ba4f1077"
+      },
+      {
+        "path": "template.md",
+        "sha256": "3bf3d29e53e2241e51590fe1b97d12b7edd05947d138e1ce51e3ad3e2674ed44"
+      }
+    ],
+    "content_hash": "3742cabb9709b387f7ce622328c2e6495d18657b049273c24d760053075ba339"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "aae866661b8bb5beb",
+    "model": "unavailable"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 17
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:4, 216",
+        "comment": "日付（2026-09-01）が when_to_use と更新履歴に残っている。時間依存の記述は更新履歴に寄せるとよい。"
+      },
+      {
+        "criterion_id": "D1",
+        "severity": "low",
+        "location": "SKILL.md:3",
+        "comment": "description が長い。目的を 1-2 文に絞り、補足を本文へ移すとトリガー精度が上がる。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": "SKILL.md:187",
+        "comment": "最終報告の項目は列挙のみ。簡単な出力例を SKILL.md 内に置くと再現性が上がる。"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": "SKILL.md:183, 191",
+        "comment": "Step 7 と Step 9 の詳細が外部ファイルに委譲されている。合格基準の要点だけでも本体に残すとよい。"
+      }
+    ]
+  }
+}

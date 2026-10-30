@@ -1,0 +1,662 @@
+{
+  "schema": "slide-best-practices/v1",
+  "sources": [
+    {
+      "id": "wcag-contrast",
+      "title": "Understanding Success Criterion 1.4.3: Contrast (Minimum)",
+      "url": "https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html",
+      "kind": "standard",
+      "authors": [],
+      "organization": "W3C Web Accessibility Initiative (WAI)",
+      "year": "2018",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 730
+    },
+    {
+      "id": "assertion-evidence",
+      "title": "The Assertion-Evidence Approach",
+      "url": "https://www.assertion-evidence.com/",
+      "kind": "article",
+      "authors": [
+        "Michael Alley"
+      ],
+      "organization": "Leonhard Center, Penn State University",
+      "year": "n.d.",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 730
+    },
+    {
+      "id": "nngroup-scan",
+      "title": "How Users Read on the Web",
+      "url": "https://www.nngroup.com/articles/how-users-read-on-the-web/",
+      "kind": "article",
+      "authors": [
+        "Jakob Nielsen"
+      ],
+      "organization": "Nielsen Norman Group",
+      "year": "1997",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 730
+    },
+    {
+      "id": "cowan-2001",
+      "title": "The magical number 4 in short-term memory: a reconsideration of mental storage capacity",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11515286/",
+      "kind": "paper",
+      "authors": [
+        "Nelson Cowan"
+      ],
+      "organization": "Behavioral and Brain Sciences 24(1)",
+      "year": "2001",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 1095
+    },
+    {
+      "id": "duarte-storytelling",
+      "title": "7 Storytelling Tips for Better Business Presentations",
+      "url": "https://www.duarte.com/blog/tips-for-crafting-a-storytelling-presentation/",
+      "kind": "article",
+      "authors": [
+        "Josh Storie"
+      ],
+      "organization": "Duarte, Inc.",
+      "year": "2026",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 365
+    },
+    {
+      "id": "duarte-glance",
+      "title": "Get the Point Across Fast with The Glance Test",
+      "url": "https://www.duarte.com/resources/guides-tools/the-glance-test/",
+      "kind": "article",
+      "authors": [],
+      "organization": "Duarte, Inc.",
+      "year": "n.d.",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 365
+    },
+    {
+      "id": "reynolds-design-tips",
+      "title": "How to Design a Great Presentation",
+      "url": "https://www.garrreynolds.com/design-tips",
+      "kind": "article",
+      "authors": [
+        "Garr Reynolds"
+      ],
+      "organization": "garrreynolds.com",
+      "year": "n.d.",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 730
+    },
+    {
+      "id": "pz-crap",
+      "title": "Design Fundamentals: Contrast, Repetition, Alignment, Proximity",
+      "url": "https://presentationzen.com/blog/design-fundamentals-contrast-repetition-alignment-proximity",
+      "kind": "article",
+      "authors": [
+        "Garr Reynolds"
+      ],
+      "organization": "Presentation Zen",
+      "year": "n.d.",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 730
+    },
+    {
+      "id": "swd-crushing",
+      "title": "crushing on your data viz",
+      "url": "https://www.storytellingwithdata.com/blog/2011/08/crushing-on-your-data-viz",
+      "kind": "article",
+      "authors": [
+        "Cole Nussbaumer Knaflic"
+      ],
+      "organization": "storytelling with data",
+      "year": "2011",
+      "verification": "fetched",
+      "checked_on": "2026-10-30",
+      "max_age_days": 730
+    },
+    {
+      "id": "mayer-aace",
+      "title": "A Picture is Worth a Thousand Words: A Summary of Mayer's 12 Principles of Multimedia Learning",
+      "url": "https://aace.org/review/designing-online-learning-spaces-3-a-picture-is-worth-a-thousand-words-a-summary-of-mayers-12-principles-of-multimedia-learning/",
+      "kind": "article",
+      "authors": [],
+      "organization": "AACE Review (Mayer の原典の要約記事)",
+      "year": "n.d.",
+      "verification": "secondary",
+      "checked_on": "2026-10-30",
+      "max_age_days": 730
+    }
+  ],
+  "practices": [
+    {
+      "id": "assertion-title",
+      "category": "message",
+      "title": "スライドの見出しは主張の一文にする",
+      "rule": "各スライドの見出しは話題の名詞句ではなく、言いたい結論を述べる文にする。",
+      "rationale": "見出しだけでスライドの要点が伝わると、聴衆は本文を読まずに流れを追える。",
+      "severity": "must",
+      "check": {
+        "method": "llm",
+        "how": "見出しだけを順に読み、それぞれが結論（主張）を述べる文になっているか判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "assertion-evidence",
+          "locator": "web page body",
+          "quote": "you build your presentations on succinct messages (assertions), rather than phrase topics"
+        }
+      ],
+      "adaptation": "日本語では体言止めの話題名（例: 売上の推移）を不合格、主張文（例: 売上は 2 割伸びた）を合格とする。"
+    },
+    {
+      "id": "visual-evidence",
+      "category": "visual",
+      "title": "主張の根拠は箇条書きより図表で示す",
+      "rule": "主張を支える根拠は、可能な限り図・表・画像などの視覚的な証拠で示す。",
+      "rationale": "箇条書きの羅列より、図表の方が主張と根拠の関係が一目で伝わる。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "主張スライドの根拠が箇条書きだけになっていないか、図表で示せる内容が文章になっていないかを判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "assertion-evidence",
+          "locator": "web page body",
+          "quote": "you provide visual evidence rather than bulleted lists"
+        }
+      ],
+      "adaptation": "技術・科学向けの手法を一般の業務資料に広げた解釈。手順や定義の列挙は箇条書きでよい。"
+    },
+    {
+      "id": "conclusion-first",
+      "category": "message",
+      "title": "結論を先に置く",
+      "rule": "資料全体と各スライドで、結論を最初に示し、理由や詳細を後に続ける。",
+      "rationale": "読み手は最初の数語で読むかを決めるため、結論が先にあると要点が確実に届く。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "デッキの冒頭と各スライドの先頭で、結論が最初に述べられているかを判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "nngroup-scan",
+          "locator": "list of writing guidelines",
+          "quote": "the inverted pyramid style, starting with the conclusion"
+        }
+      ],
+      "adaptation": "出典は Web 文章の研究。スライドの構成にも同じ読まれ方が当てはまるとみなした解釈。"
+    },
+    {
+      "id": "concise-text",
+      "category": "text",
+      "title": "本文量を抑える",
+      "rule": "1 スライドの本文は短くし、長い説明は分割するか口頭に回す。",
+      "rationale": "読み手は全文を読まず拾い読みするため、文章量が少ない方が使いやすさが高い。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "本文の文字数（表・グループ内を含む）が上限以下か。",
+        "scope": "deck",
+        "metric": "body_chars",
+        "op": "max",
+        "threshold": 200,
+        "threshold_origin": "adaptation"
+      },
+      "evidence": [
+        {
+          "source_id": "nngroup-scan",
+          "locator": "list of writing guidelines",
+          "quote": "half the word count (or less) than conventional writing"
+        }
+      ],
+      "adaptation": "上限 200 文字は運用上の目安（HTML スライドの規約では 1 段落 150 文字・分割判断 200 文字）。出典は『従来の半分以下』と述べるのみで数値は与えない。"
+    },
+    {
+      "id": "bullets-limit",
+      "category": "text",
+      "title": "箇条書きの項目数を抑える",
+      "rule": "1 スライドに並べる項目は少数にし、多い場合は分割または階層化する。",
+      "rationale": "短期記憶が一度に扱える単位は少数で、並べすぎると保持されない。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "タイトル以外の非空段落数が上限以下か。",
+        "scope": "deck",
+        "metric": "bullet_count",
+        "op": "max",
+        "threshold": 5,
+        "threshold_origin": "adaptation"
+      },
+      "evidence": [
+        {
+          "source_id": "cowan-2001",
+          "locator": "abstract",
+          "quote": "it is only three to five chunks"
+        }
+      ],
+      "adaptation": "出典は 3〜5 単位と述べる。上限 5 はその上端に合わせた運用値（HTML スライド規約の上位項目 5 以内と整合）。"
+    },
+    {
+      "id": "points-limit",
+      "category": "text",
+      "title": "構成段階で 1 枚の要点数を抑える",
+      "rule": "構成仕様の段階で、1 スライドの要点（points）を少数にする。",
+      "rationale": "作る前に絞らないと、生成後に詰め込みが起きる。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "構成仕様の points の件数が上限以下か。",
+        "scope": "deck-spec",
+        "metric": "points_count",
+        "op": "max",
+        "threshold": 5,
+        "threshold_origin": "adaptation"
+      },
+      "evidence": [
+        {
+          "source_id": "cowan-2001",
+          "locator": "abstract",
+          "quote": "it is only three to five chunks"
+        }
+      ],
+      "adaptation": "bullets-limit と同じ根拠・同じ上限。構成仕様側の検査。"
+    },
+    {
+      "id": "one-idea",
+      "category": "message",
+      "title": "1 スライドに 1 つの要点",
+      "rule": "各スライドは 1 つの要点に絞り、複数の主張を混在させない。",
+      "rationale": "要点が複数あると、聴衆はどこを見るべきか分からず主張がぼやける。",
+      "severity": "must",
+      "check": {
+        "method": "llm",
+        "how": "スライドごとに要点を一文で言えるか。複数の主張が混じっていないかを判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "duarte-glance",
+          "locator": "tool description list",
+          "quote": "Sharpen your focus to a single, precise point on each slide to avoid muddling your message"
+        }
+      ],
+      "adaptation": "出典は発行元（Duarte）の指針で、実証研究ではない。"
+    },
+    {
+      "id": "glance-test",
+      "category": "delivery",
+      "title": "数秒で要点が伝わる",
+      "rule": "スライドを数秒見ただけで、聴衆が主な要点を理解できる状態にする。",
+      "rationale": "発表中の聴衆は聞きながら見るため、読み込みを要する資料は伝わらない。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "スライドを数秒だけ見たと仮定して、要点を言えるか判定する。文字量・視線の流れ・要素数を根拠にする。"
+      },
+      "evidence": [
+        {
+          "source_id": "duarte-glance",
+          "locator": "page lead",
+          "quote": "Will your audience understand the main point of your slide in 3 seconds or less?"
+        }
+      ],
+      "adaptation": "3 秒は発行元の目安で、実証研究ではない。"
+    },
+    {
+      "id": "min-font",
+      "category": "accessibility",
+      "title": "文字サイズを下限以上にする",
+      "rule": "本文の文字サイズは、遠くからでも読める下限を下回らない。",
+      "rationale": "小さい文字は読み取れない。基準側も『大きい文字』を一定以上の大きさとして定義している。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "明示指定された文字サイズの最小値が下限以上か（継承値は判定不能として扱う）。",
+        "scope": "deck",
+        "metric": "min_font_pt",
+        "op": "min",
+        "threshold": 18,
+        "threshold_origin": "adaptation"
+      },
+      "evidence": [
+        {
+          "source_id": "wcag-contrast",
+          "locator": "definition of large scale text",
+          "quote": "at least 18 point or 14 point bold"
+        }
+      ],
+      "adaptation": "基準の 18 ポイントは『大きい文字』の定義であり、本文の最小サイズの要求ではない。下限 18 は運用上の目安として採用。"
+    },
+    {
+      "id": "contrast-minimum",
+      "category": "accessibility",
+      "title": "文字と背景のコントラストを確保する",
+      "rule": "文字と背景の明暗差（コントラスト比）を、基準で定められた値以上にする。",
+      "rationale": "コントラストが低い文字は、視力や環境によって読めなくなる。",
+      "severity": "must",
+      "check": {
+        "method": "llm",
+        "how": "文字色と背景色の組み合わせを確認し、基準を下回る箇所を挙げる。色が明示されない箇所は判定不能として記録する。"
+      },
+      "evidence": [
+        {
+          "source_id": "wcag-contrast",
+          "locator": "Success Criterion text",
+          "quote": "contrast ratio of at least 4.5:1"
+        }
+      ],
+      "adaptation": "基準は通常の文字で 4.5:1、大きい文字で 3:1。ここでは通常の文字の値を採る。"
+    },
+    {
+      "id": "focal-point",
+      "category": "visual",
+      "title": "視線が最初に向かう要素を決める",
+      "rule": "色や大きさの差で情報に階層をつけ、最初に見てほしい要素を 1 つに絞る。",
+      "rationale": "視線の行き先が設計されていないと、重要でない要素が先に目に入る。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "スライドから目を離して見直した時に最初に目が行く要素が、伝えたい要点と一致しているかを判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "swd-crushing",
+          "locator": "tip 2: Highlight the important stuff",
+          "quote": "Use preattentive attributes (e.g. color, size) to create a visual hierarchy of information"
+        }
+      ],
+      "adaptation": "出典はデータ可視化向けの助言。スライド全体の視覚設計に広げた解釈。"
+    },
+    {
+      "id": "focal-spec",
+      "category": "visual",
+      "title": "構成段階で視線の起点を決める",
+      "rule": "構成仕様の段階で、本文スライドごとに視線が最初に向かう要素（図・数字・画像・見出し）を決める。",
+      "rationale": "作る前に起点を決めないと、生成後に強調がばらつく。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "本文スライドの focal_element が none でないか。",
+        "scope": "deck-spec",
+        "metric": "focal_element_present",
+        "op": "required"
+      },
+      "evidence": [
+        {
+          "source_id": "swd-crushing",
+          "locator": "tip 2: Highlight the important stuff",
+          "quote": "Use preattentive attributes (e.g. color, size) to create a visual hierarchy of information"
+        }
+      ],
+      "adaptation": "focal-point と同じ根拠。構成仕様側の検査で、役割が content のスライドだけを対象にする。",
+      "applies_when": {
+        "role_in": [
+          "content"
+        ]
+      }
+    },
+    {
+      "id": "color-restraint",
+      "category": "visual",
+      "title": "色の使用を絞る",
+      "rule": "強調色は要点にだけ使い、色数と強調の面積を小さく保つ。",
+      "rationale": "色を多用すると、どこが重要かが分からなくなる。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "強調色の使われ方を確認し、要点以外に強調色が使われていないか、色数が多すぎないかを判定する。強調色の面積は小さい範囲に収まっているか。"
+      },
+      "evidence": [
+        {
+          "source_id": "swd-crushing",
+          "locator": "tip 2: Highlight the important stuff",
+          "quote": "Use color sparingly and strategically."
+        }
+      ],
+      "adaptation": "面積比の目安（強調色は小さく、機能色は最小限）は運用上の値で、出典は定量値を与えない。"
+    },
+    {
+      "id": "declutter-whitespace",
+      "category": "visual",
+      "title": "不要な要素を除き、余白を残す",
+      "rule": "要点に寄与しない装飾・ロゴ・重複した文字を除き、余白を十分に残す。",
+      "rationale": "余分な要素は雑音になり、要点が埋もれる。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "要点に寄与しない要素（装飾・繰り返しのロゴ・重複情報）の有無と、余白が確保されているかを判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "reynolds-design-tips",
+          "locator": "slide design section",
+          "quote": "Nothing in your slide should be superfluous."
+        },
+        {
+          "source_id": "reynolds-design-tips",
+          "locator": "slide design section",
+          "quote": "Your slides should have plenty of empty space"
+        },
+        {
+          "source_id": "mayer-aace",
+          "locator": "Coherence Principle",
+          "quote": "Extraneous words, pictures, or sounds hinder learning."
+        }
+      ],
+      "adaptation": "Mayer の項は二次資料（要約記事）のため補強としてのみ使う。"
+    },
+    {
+      "id": "alignment-consistency",
+      "category": "visual",
+      "title": "整列・近接・反復をそろえる",
+      "rule": "要素を共通の線に揃え、関連するものを近づけ、同じ役割の要素は同じ書式にする。",
+      "rationale": "整列と近接は関係を示し、反復は資料全体の統一感を作る。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "要素の左端・中心の揃い、関連要素のまとまり、同役割の見出し・図の書式の一貫性を判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "pz-crap",
+          "locator": "Alignment",
+          "quote": "they sit on an invisible grid which then makes the design feel clean, related, and easy to follow"
+        },
+        {
+          "source_id": "pz-crap",
+          "locator": "Proximity",
+          "quote": "When things are close to each other, we read them as belonging together"
+        },
+        {
+          "source_id": "pz-crap",
+          "locator": "Repetition",
+          "quote": "they subtly connect slides together and create a sense of unity and familiarity"
+        }
+      ],
+      "adaptation": "出典は非デザイナー向けのデザイン原則の解説。"
+    },
+    {
+      "id": "storyline-contrast",
+      "category": "message",
+      "title": "聴衆を主役に、現状と望ましい姿を対比する",
+      "rule": "話の流れは、聴衆の課題を主役にし、現状と望ましい姿を交互に示して対比をつくる。",
+      "rationale": "対比があると聴衆の関心が続き、提案の意味が伝わる。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "資料が発表者側の話ではなく聴衆の課題を中心にしているか、現状と望ましい姿の対比があるかを判定する。"
+      },
+      "evidence": [
+        {
+          "source_id": "duarte-storytelling",
+          "locator": "tip 4: Add Contrast",
+          "quote": "using the contrast to keep the audience engaged"
+        },
+        {
+          "source_id": "duarte-storytelling",
+          "locator": "tip 3",
+          "quote": "When you make your audience the hero, it frees you as a presenter to focus on the problems you get to solve."
+        }
+      ],
+      "adaptation": "出典は発行元（Duarte）の指針。"
+    },
+    {
+      "id": "closing-slide",
+      "category": "message",
+      "title": "最後に望ましい姿と次の行動を示す",
+      "rule": "最終スライドは礼だけで終えず、望ましい姿と次の行動を示す。",
+      "rationale": "聴衆が持ち帰る内容が最後に決まる。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "構成仕様に role=closing のスライドがあるか。",
+        "scope": "deck-spec",
+        "metric": "closing_present",
+        "op": "required"
+      },
+      "evidence": [
+        {
+          "source_id": "duarte-storytelling",
+          "locator": "tip 7: End with a New Bliss",
+          "quote": "By giving their audience a vision of what could be."
+        }
+      ],
+      "adaptation": "出典は『望ましい姿で締める』という助言。次の行動の明示は運用上の追加。"
+    },
+    {
+      "id": "content-source",
+      "category": "evidence",
+      "title": "本文の主張に根拠を付ける",
+      "rule": "意見・提案を除く本文の主張には、根拠の URL または資料のパスを付ける。",
+      "rationale": "出典が分かると、読み手は内容を信頼しやすい。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "content_source が空でないか（evidence_type が opinion / proposal のスライドは対象外）。",
+        "scope": "deck-spec",
+        "metric": "content_source_present",
+        "op": "required"
+      },
+      "evidence": [
+        {
+          "source_id": "nngroup-scan",
+          "locator": "credibility paragraph",
+          "quote": "We found that credibility is important for Web users"
+        }
+      ],
+      "adaptation": "出典は Web 利用者の信頼性に関する知見。根拠明記は本リポジトリの推奨（advisory）として運用。",
+      "applies_when": {
+        "evidence_type_not_in": [
+          "opinion",
+          "proposal"
+        ]
+      }
+    },
+    {
+      "id": "title-present",
+      "category": "message",
+      "title": "全スライドに見出しを付ける",
+      "rule": "すべてのスライドに見出し（タイトル）を付ける。",
+      "rationale": "見出しが主張を担うため、無いスライドは要点が伝わらない。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "タイトルプレースホルダが空でないか。",
+        "scope": "deck",
+        "metric": "title",
+        "op": "required"
+      },
+      "evidence": [
+        {
+          "source_id": "assertion-evidence",
+          "locator": "web page body",
+          "quote": "you build your presentations on succinct messages (assertions), rather than phrase topics"
+        }
+      ],
+      "adaptation": "assertion-title の前提となる存在検査。"
+    },
+    {
+      "id": "title-nonempty",
+      "category": "message",
+      "title": "構成段階で見出しを空にしない",
+      "rule": "構成仕様の action_title を空にしない。",
+      "rationale": "主張を決めずに作り始めると、生成後に見出しが話題名になる。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "action_title が 1 文字以上か。",
+        "scope": "deck-spec",
+        "metric": "action_title_chars",
+        "op": "min",
+        "threshold": 1,
+        "threshold_origin": "adaptation"
+      },
+      "evidence": [
+        {
+          "source_id": "assertion-evidence",
+          "locator": "web page body",
+          "quote": "you build your presentations on succinct messages (assertions), rather than phrase topics"
+        }
+      ],
+      "adaptation": "存在検査。"
+    },
+    {
+      "id": "title-length",
+      "category": "message",
+      "title": "見出しを一文に収める長さにする",
+      "rule": "見出しは主張を一文で言い切れる長さに収める。",
+      "rationale": "長すぎる見出しは読まれず、要約にもならない。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "action_title の文字数が上限以下か。",
+        "scope": "deck-spec",
+        "metric": "action_title_chars",
+        "op": "max",
+        "threshold": 40,
+        "threshold_origin": "adaptation"
+      },
+      "evidence": [
+        {
+          "source_id": "assertion-evidence",
+          "locator": "web page body",
+          "quote": "you build your presentations on succinct messages (assertions), rather than phrase topics"
+        }
+      ],
+      "adaptation": "出典は『短い主張』と述べるのみ。上限 40 文字は運用上の目安。"
+    },
+    {
+      "id": "raw-color",
+      "category": "visual",
+      "title": "構成仕様では色を役割で指定する",
+      "rule": "構成仕様に色コードを直接書かず、役割名（強調・地・文字など）で指定する。",
+      "rationale": "色を役割で扱うと、資料全体の統一と生成側での再現が保てる。",
+      "severity": "should",
+      "check": {
+        "method": "auto",
+        "how": "構成仕様の文字列に色コードが含まれないか。",
+        "scope": "deck-spec",
+        "metric": "raw_color_absent",
+        "op": "required"
+      },
+      "evidence": [
+        {
+          "source_id": "pz-crap",
+          "locator": "Repetition",
+          "quote": "they subtly connect slides together and create a sense of unity and familiarity"
+        }
+      ],
+      "adaptation": "反復の原則を、色の指定方法に適用した運用ルール。"
+    }
+  ]
+}

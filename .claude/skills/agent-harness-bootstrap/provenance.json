@@ -1513,7 +1513,9 @@
         "ui-design-guidelines",
         "year-end-adjustment-csv",
         "chatbot-operation-design",
-        "review-chatbot-operation-design"
+        "review-chatbot-operation-design",
+        "slide-composition-planner",
+        "slide-clarity-review"
       ],
       "rubric_items": [],
       "depends_on": [],

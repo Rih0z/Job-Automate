@@ -1,0 +1,85 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "slide-composition-planner",
+  "reviewed_at": "2026-10-30T18:13:57Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "eb45fab5b4f73565e68a9d53d10ecf8363b1f074dec759a92fcc99661a0a1fd9"
+      },
+      {
+        "path": "criteria/palette.example.json",
+        "sha256": "9024597c5baf9c7c42097db6d57207e5418c12ead5c5b4f8ff32c39764fbbc89"
+      }
+    ],
+    "content_hash": "b1a5dc7c4e98d99e836278913fb0c24126c0820dd23d16eadb0f0f3cdc131d3c"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a72e468bbe89e9d49",
+    "model": "unavailable"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 19
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:78-81",
+        "comment": "コマンドが repo ルートと _shared に依存。前提として明記するとよい。"
+      },
+      {
+        "criterion_id": "D1",
+        "severity": "low",
+        "location": "SKILL.md:3",
+        "comment": "対象カテゴリ（Document Creation 等）が推測しにくい。"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": "SKILL.md:13",
+        "comment": "禁止事項が本文に散在している。独立した節にまとめるとよい。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:100-102",
+        "comment": "エッジケース（元資料なし、聴衆不明）の入力例があるとよい。"
+      }
+    ]
+  }
+}

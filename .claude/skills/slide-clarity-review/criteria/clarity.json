@@ -1,0 +1,61 @@
+{
+  "schema": "slide-clarity-criteria/v1",
+  "axes": [
+    {
+      "id": "ax-message",
+      "title": "主張と構成",
+      "weight": 20,
+      "practice_ids": [
+        "assertion-title",
+        "conclusion-first",
+        "storyline-contrast",
+        "closing-slide",
+        "one-idea"
+      ]
+    },
+    {
+      "id": "ax-text",
+      "title": "テキスト量と読みやすさ",
+      "weight": 20,
+      "practice_ids": [
+        "concise-text",
+        "bullets-limit",
+        "glance-test",
+        "title-present"
+      ]
+    },
+    {
+      "id": "ax-design",
+      "title": "視覚設計（焦点・色・余白・整列）",
+      "weight": 20,
+      "practice_ids": [
+        "focal-point",
+        "color-restraint",
+        "declutter-whitespace",
+        "alignment-consistency"
+      ]
+    },
+    {
+      "id": "ax-evidence",
+      "title": "根拠と図表",
+      "weight": 20,
+      "practice_ids": [
+        "visual-evidence",
+        "content-source"
+      ]
+    },
+    {
+      "id": "ax-legibility",
+      "title": "可読性（コントラスト・文字サイズ）",
+      "weight": 20,
+      "practice_ids": [
+        "contrast-minimum",
+        "min-font"
+      ]
+    }
+  ],
+  "gate": {
+    "pass_min_score": 80,
+    "rank_scale": "rank5_100"
+  }
+}

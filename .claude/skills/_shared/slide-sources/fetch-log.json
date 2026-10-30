@@ -1,0 +1,106 @@
+{
+  "schema": "slide-fetch-log/v1",
+  "entries": [
+    {
+      "source_id": "wcag-contrast",
+      "url": "https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "ad649a40af1d453dabcbb1e1ce5694358206d929e0e06d18ce88bdd5b5fdb18c",
+      "excerpts": [
+        "at least 18 point or 14 point bold",
+        "contrast ratio of at least 4.5:1"
+      ]
+    },
+    {
+      "source_id": "assertion-evidence",
+      "url": "https://www.assertion-evidence.com/",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "62d6ab302f81c41f0720204b40e39845d3bb9213ebcb36470b047bffc1234c36",
+      "excerpts": [
+        "you build your presentations on succinct messages (assertions), rather than phrase topics",
+        "you provide visual evidence rather than bulleted lists"
+      ]
+    },
+    {
+      "source_id": "nngroup-scan",
+      "url": "https://www.nngroup.com/articles/how-users-read-on-the-web/",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "7eeaf7e46780b18ecd2cb84df9649b7ddc9a546b691c8f8b47f0f088aeb134c8",
+      "excerpts": [
+        "the inverted pyramid style, starting with the conclusion",
+        "half the word count (or less) than conventional writing",
+        "We found that credibility is important for Web users"
+      ]
+    },
+    {
+      "source_id": "cowan-2001",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/11515286/",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "48241b4d3d6b0e76bdab7b89336008ee191b603216a65ea620f0588388f9868b",
+      "excerpts": [
+        "it is only three to five chunks"
+      ]
+    },
+    {
+      "source_id": "duarte-storytelling",
+      "url": "https://www.duarte.com/blog/tips-for-crafting-a-storytelling-presentation/",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "85aa216f752266cb2d0bf13f5aac67ade2c1f2218e4d466ce792b9860063ecc4",
+      "excerpts": [
+        "using the contrast to keep the audience engaged",
+        "When you make your audience the hero, it frees you as a presenter to focus on the problems you get to solve.",
+        "By giving their audience a vision of what could be."
+      ]
+    },
+    {
+      "source_id": "duarte-glance",
+      "url": "https://www.duarte.com/resources/guides-tools/the-glance-test/",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "fcb597d25e3b948beed20211f66c7bd5d650ebc20b5b063a90f45b59a1149caa",
+      "excerpts": [
+        "Sharpen your focus to a single, precise point on each slide to avoid muddling your message",
+        "Will your audience understand the main point of your slide in 3 seconds or less?"
+      ]
+    },
+    {
+      "source_id": "reynolds-design-tips",
+      "url": "https://www.garrreynolds.com/design-tips",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "20472402ab55b33d7248cedab240adeeca74d88b4fdb83aa557507c3833e6a55",
+      "excerpts": [
+        "Nothing in your slide should be superfluous.",
+        "Your slides should have plenty of empty space"
+      ]
+    },
+    {
+      "source_id": "pz-crap",
+      "url": "https://presentationzen.com/blog/design-fundamentals-contrast-repetition-alignment-proximity",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "8b9e585c65f41b79b204d8aa0fceaae08ba43abfdb769e999bdb5cda31cc8c3b",
+      "excerpts": [
+        "they sit on an invisible grid which then makes the design feel clean, related, and easy to follow",
+        "When things are close to each other, we read them as belonging together",
+        "they subtly connect slides together and create a sense of unity and familiarity"
+      ]
+    },
+    {
+      "source_id": "swd-crushing",
+      "url": "https://www.storytellingwithdata.com/blog/2011/08/crushing-on-your-data-viz",
+      "fetched_on": "2026-10-30",
+      "method": "raw-http",
+      "sha256": "d2c7ae1c7c71bec9ace0728481f595ef0309da6f9707515292546711db44db99",
+      "excerpts": [
+        "Use preattentive attributes (e.g. color, size) to create a visual hierarchy of information",
+        "Use color sparingly and strategically."
+      ]
+    }
+  ]
+}
