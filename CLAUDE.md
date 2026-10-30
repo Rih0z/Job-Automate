@@ -70,7 +70,7 @@ Claude Code 環境で使えるレビュー系コマンド／Skills の全一覧�
 
 - **対象**: `.claude/skills/<name>/` 配下（SKILL.md・scripts・criteria・references・サンプル）を作成・変更・削除したとき、毎回。誤字の修正でも、内容（改行を正規化した後のバイト列）が変われば記録は失効して再レビューが要る。`_shared/` を変えて skill の動作が変わるときは、影響を受ける skill も同じ手順で再レビューする（記録の hash は `_shared/` を含まないので、gate は検出しない。自分で洗い出す）。
 - **手順**: [review-skill](.claude/skills/review-skill/SKILL.md) skill で、別エージェント（`readonly-reviewer`）に採点させ、PASS の記録を `.claude/review-history/skill-review/` に保存する（`skill_review_gate.py --hash` で得た content_hash を `--expected-hash` に付ける）。作成者本人は採点しない・採点を代行しない。FAIL なら直して再レビューする（回数で止めない）。
-- **作業を終える前に**: PASS の記録が保存されるまで、完了報告・コミット・push をしない。push の前に `python .claude/skills/review-skill/scripts/skill_review_gate.py --all --strict` が exit 0 であることを確かめる（Stop hook は未レビューの skill があると 1 turn に最大 3 回まで終了を止めるが、上限に達した時と評価できない時〈python が無い・時間切れ〉は通す。commit と push は止めない。だから hook が通したことを「レビュー済み」と読まない）。
+- **作業を終える前に**: PASS の記録が保存されるまで、完了報告・コミット・push をしない。push の前に `python .claude/skills/review-skill/scripts/skill_review_gate.py --all --strict` が exit 0 であることを確かめる（Stop hook は未レビューの skill があると 1 turn に最大 3 回まで終了を止め、上限に達すると通す。`git push` と、`.claude/skills/` の変更を含む `git commit` は、PreToolUse hook〈`.claude/hooks/pre-git-skill-review-gate.sh`〉が gate の失敗時に止める。こちらに回数の上限は無く、gate が通るまで止まる。どちらの hook も、評価できない時〈python が無い・時間切れ〉は通し、git の別名・変数・スクリプト経由の push は見ないので、hook が通したことを「レビュー済み」と読まない。逆に、コマンド文字列の照合なので、引用符の中の `git push` や、別のリポジトリへの push でも、このリポジトリの gate が失敗していれば止まる。この登録を外すのは人の判断であり、エージェントが回避しない）。
 - **完了報告**には、レビューした skill 名・点数・記録のパスを書く。レビューを省いた場合は省いたと明記する（省いたまま完了とは報告しない）。
 
 ## 新しいワークフロー・スキルを追加するルール

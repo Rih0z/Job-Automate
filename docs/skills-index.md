@@ -13,7 +13,7 @@
 | `/review-skill` | [.claude/skills/review-skill/SKILL.md](../.claude/skills/review-skill/SKILL.md) | 作成・変更したSkillを構造化データ基準（`criteria/skill-quality.json`）で5軸（構造・トリガー・命令品質・出力設計・実用性）100点満点評価し、別エージェントの判定を記録として保存する |
 | `/debate-proposal` | [.claude/skills/debate-proposal/SKILL.md](../.claude/skills/debate-proposal/SKILL.md) | 新規実装案・設計提案・方針転換案を採用前に、推進側/反対側/OSS前例調査+中立裁定の3本の独立エージェントに同じ一次資料だけを渡して議論させ、既存実装との重複・前提の事実検証・OSS前例・5観点で採否を裁定。**別エージェントで実行**し実装は行わない |
 
-skill を作成・変更したら `/review-skill` は**必須**（規則の本体は [CLAUDE.md](../CLAUDE.md) の「YOU MUST: skill の作成・変更は review-skill を通す」。PASS の記録が無いまま完了報告・コミット・push をしない）。`/review-skill` の記録は `.claude/review-history/skill-review/` に残り、Stop hook が記録の無い skill を見つけると終了を止める（この repo の `.claude/settings.json` に登録した場合）。gate が exit 0 でも、全 skill が別エージェントのレビュー済みという意味ではない（既存 54 skill は負債台帳で免除）。コピー先では gate は働かない。
+skill を作成・変更したら `/review-skill` は**必須**（規則の本体は [CLAUDE.md](../CLAUDE.md) の「YOU MUST: skill の作成・変更は review-skill を通す」。PASS の記録が無いまま完了報告・コミット・push をしない）。`/review-skill` の記録は `.claude/review-history/skill-review/` に残り、Stop hook が記録の無い skill を見つけると終了を止め、`git push` と skill の変更を含む `git commit` は PreToolUse hook（`.claude/hooks/pre-git-skill-review-gate.sh`）が止める（コマンド文字列の照合なので、git の別名・スクリプト経由の push・別のリポジトリへの push は見ない。引用符の中の `git push` も、gate が失敗している間は止める）（この repo の `.claude/settings.json` に登録した場合）。gate が exit 0 でも、全 skill が別エージェントのレビュー済みという意味ではない（既存 54 skill は負債台帳で免除）。コピー先では gate は働かない。
 
 `/review-changes` は実装セッションとは別のエージェントを自動起動してレビューする（詳細は [agents.md](../agents.md)）。すべて `disable-model-invocation: true` のため自動発動せず、スラッシュコマンドとしてのみ起動する。
 
