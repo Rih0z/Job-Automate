@@ -1,10 +1,11 @@
 """slide-composition-planner / slide-clarity-review 周りの単体テスト（stdlib の unittest）。
 
 対象: slide_checks.py / validate_slide_data.py（_shared/scripts）、
-      extract_deck.py / check_deck.py / gate.py（slide-clarity-review/scripts）。
+      extract_deck.py / check_deck.py / gate.py / finalize_review.py / render_deck.py（slide-clarity-review/scripts）、
+      check_ja_slide.py（slide-japanese-review/scripts）。
 fixture は全てテスト内で生成する（実データの practice id・閾値には依存しない: id は fx- 接頭辞）。
 実行: python -m unittest .claude/skills/_shared/scripts/test_slide_skills.py -v
-依存: python-pptx（extract_deck の fixture 生成と実行に必要）。
+依存: python-pptx（fixture の生成に必要。extract_deck 自体は標準ライブラリのみ）。
 """
 import hashlib
 import json
@@ -840,9 +841,144 @@ class Finalize(unittest.TestCase):
             self.assertEqual(json.load(f)["slides"][0]["paragraphs"], ["short body"])
 
 
+# ================================================================ 点数の導出・text_blocks・日本語の機械検査（2026-11 追加）
+JA_CHECK = os.path.join(SKILLS, "slide-japanese-review", "scripts", "check_ja_slide.py")
+RENDER = os.path.join(REVIEW_SCRIPTS, "render_deck.py")
+
+
+class DerivedScoring(unittest.TestCase):
+    PRACTICES = [{"id": "fx-must", "severity": "must"}, {"id": "fx-should", "severity": "should"},
+                 {"id": "fx-auto", "severity": "should"}]
+    CLARITY = {"axes": [{"id": "ax0", "weight": 20, "practice_ids": ["fx-must", "fx-should"]},
+                        {"id": "ax1", "weight": 20, "practice_ids": ["fx-auto"]},
+                        {"id": "ax2", "weight": 20, "practice_ids": []}]}
+
+    def derive(self, violations, llm):
+        import gate
+        return {a["id"]: a for a in gate.derive_axes(violations, llm, self.PRACTICES, self.CLARITY)}
+
+    def test_T62_penalties_by_severity_and_kind(self):
+        llm = [{"practice_id": "fx-must", "passed": False}, {"practice_id": "fx-should", "passed": False}]
+        few = [{"practice_id": "fx-auto", "slide": s} for s in (1, 2)]
+        r = self.derive(few, llm)
+        self.assertEqual((r["ax0"]["score"], r["ax1"]["score"], r["ax2"]["score"]), (11, 18, 20))
+        self.assertEqual(r["ax0"]["basis"], ["fx-must(-6)", "fx-should(-3)"])
+        self.assertEqual(r["ax1"]["basis"], ["fx-auto(-2)"])
+        many = [{"practice_id": "fx-auto", "slide": s} for s in (1, 2, 3)]
+        self.assertEqual(self.derive(many, [])["ax1"]["score"], 16)
+        # 同じスライドの重複違反は 1 枚として数える
+        dup = [{"practice_id": "fx-auto", "slide": 1}] * 3
+        self.assertEqual(self.derive(dup, [])["ax1"]["score"], 18)
+
+    def test_T63_score_never_below_zero(self):
+        import gate
+        clarity = {"axes": [{"id": "ax0", "weight": 5, "practice_ids": ["fx-must", "fx-should"]}]}
+        llm = [{"practice_id": "fx-must", "passed": False}, {"practice_id": "fx-should", "passed": False}]
+        self.assertEqual(gate.derive_axes([], llm, self.PRACTICES, clarity)[0]["score"], 0)
+
+
+class FinalizeScoreMode(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+        self.practices = write_json(self.d, "p.json", practices_doc(
+            [practice("fx-llm-must", severity="must"), practice("fx-llm-should")]))
+        self.clarity = write_json(self.d, "c.json", {"axes": [
+            {"id": i, "weight": 20, "practice_ids": ["fx-llm-must", "fx-llm-should"]} for i in AXIS_IDS]})
+        self.auto = write_json(self.d, "a.json", {"violations": [], "limitations": []})
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def finalize(self, review, *extra):
+        rv = write_json(self.d, "r.json", review)
+        code, out = run(os.path.join(REVIEW_SCRIPTS, "finalize_review.py"), "--deck", "C:/d/sales2025.pptx",
+                        "--auto", self.auto, "--review", rv, "--practices", self.practices, "--clarity", self.clarity,
+                        "--reviewed-at", "2026-10-30T10:00:00+09:00", *extra)
+        return code, out, json.loads(out[out.index("{"):])
+
+    def llm_should_fail(self):
+        return [{"practice_id": "fx-llm-must", "passed": True}, {"practice_id": "fx-llm-should", "passed": False}]
+
+    def test_T64_min_mode_caps_reviewer_score_at_derived(self):
+        code, out, rec = self.finalize({"axes": axes_of(95), "llm_results": self.llm_should_fail(), "fixes": []})
+        self.assertEqual(rec["score_mode"], "min")
+        self.assertEqual(rec["derived_axis_scores"]["ax0"], 17)
+        self.assertEqual(rec["reviewer_axis_scores"]["ax0"], 19)
+        self.assertEqual(rec["score"], 85)
+        self.assertEqual(rec["axis_basis"]["ax0"], ["fx-llm-should(-3)"])
+        self.assertIn("導出点を採用した", rec["summary"])
+        self.assertEqual(code, 0, out)
+
+    def test_T65_min_mode_keeps_lower_reviewer_score(self):
+        code, out, rec = self.finalize({"axes": axes_of(69), "llm_results": self.llm_should_fail(), "fixes": []})
+        self.assertEqual(rec["score"], 69)
+        self.assertNotIn("導出点を採用した", rec["summary"])
+        self.assertEqual(code, 1, out)
+
+    def test_T66_reviewer_mode_is_previous_behaviour(self):
+        code, out, rec = self.finalize({"axes": axes_of(95), "llm_results": self.llm_should_fail(), "fixes": []},
+                                       "--score-mode", "reviewer")
+        self.assertEqual(rec["score"], 95)
+        self.assertNotIn("axis_basis", rec)
+
+
+class TextBlocksAndJapanese(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_T67_text_blocks_include_table_cells_in_position_order(self):
+        pptx = os.path.join(self.d, "tg.pptx")
+        build_pptx(pptx, "table_group")
+        facts = os.path.join(self.d, "f.json")
+        self.assertEqual(run(EXTRACT, pptx, "-o", facts)[0], 0)
+        with open(facts, encoding="utf-8") as f:
+            blocks = json.load(f)["slides"][0]["text_blocks"]
+        self.assertEqual([b["kind"] for b in blocks], ["table", "text"])
+        self.assertEqual(blocks[0]["rows"], [["aa", "bb"], ["cc", "dd"]])
+        self.assertEqual(blocks[1]["paragraphs"], ["group text"])
+
+    def ja(self, slides):
+        facts = write_json(self.d, "facts.json", {"file": "x.pptx", "slide_count": len(slides), "slides": slides})
+        out = os.path.join(self.d, "ja.json")
+        code, text = run(JA_CHECK, facts, "-o", out)
+        with open(out, encoding="utf-8") as f:
+            return code, {x["check"] for x in json.load(f)["findings"]}, text
+
+    def test_T68_ja_checks_detect_and_stay_quiet(self):
+        bad = [{"no": 1, "title": "見出し", "text_blocks": [
+                   {"kind": "text", "paragraphs": ["導入を進めます。", "効果が大きいことは確かである。", "TODO 数値を入れる"]},
+                   {"kind": "table", "rows": [["(注) 半角", "（注）全角"]]}]},
+               {"no": 2, "title": "次の見出し",
+                "paragraphs": ["導入の効果を毎月確認しています。", "導入の効果を毎月確認しています。"]}]
+        code, checks, text = self.ja(bad)
+        self.assertEqual(code, 0, text)
+        self.assertTrue({"mixed-register", "b2-candidate", "mixed-paren", "duplicate"} <= checks, checks)
+        good = [{"no": 1, "title": "見出し", "text_blocks": [
+                    {"kind": "text", "paragraphs": ["月次集計の自動化", "確認作業の削減"]}]}]
+        code, checks, text = self.ja(good)
+        self.assertEqual((code, checks), (0, set()), text)
+
+    def test_T69_render_reports_missing_renderer_with_exit_2(self):
+        env = dict(os.environ, SOFFICE=os.path.join(self.d, "none.exe"), PDFTOPPM=os.path.join(self.d, "none.exe"),
+                   PATH=self.d)
+        pptx = os.path.join(self.d, "g.pptx")
+        build_pptx(pptx, "good")
+        p = subprocess.run([sys.executable, RENDER, pptx, "-o", os.path.join(self.d, "img")], capture_output=True,
+                           text=True, encoding="utf-8", env=env, cwd=self.d)
+        if p.returncode == 0:
+            self.skipTest("標準の導入先の描画ソフトで描画できた（欠落の再現はできない）")
+        self.assertEqual(p.returncode, 2, p.stderr)
+        self.assertIn("描画未確認", p.stderr)
+
+
 # ================================================================ 公開リポジトリのポリシー
 class PublicRepoPolicy(unittest.TestCase):
-    TARGETS = ["slide-composition-planner", "slide-clarity-review", "_shared/slide-sources"]
+    TARGETS = ["slide-composition-planner", "slide-clarity-review", "slide-japanese-review", "_shared/slide-sources"]
     FILES = ["_shared/slide-best-practices.json", "_shared/scripts/slide_checks.py",
              "_shared/scripts/validate_slide_data.py"]
 

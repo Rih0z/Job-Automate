@@ -1,0 +1,105 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "slide-clarity-review",
+  "reviewed_at": "2026-11-05T23:13:32Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "ac53ebdde8541cc673aa4ffca5a481d2982b342ea0ed7cb0f7bfb73ee70cdcff"
+      },
+      {
+        "path": "criteria/clarity.json",
+        "sha256": "030b79813b21d646fb595c2736df653e4b1638b8bf5e9d001ff23bbe6cd5645b"
+      },
+      {
+        "path": "scripts/check_deck.py",
+        "sha256": "3cc5419d44b798f223deb3d9bee7b7b94ee803d7f5d2110fff37fcdbe74654f3"
+      },
+      {
+        "path": "scripts/extract_deck.py",
+        "sha256": "980d8ef6ab4680c6fd070d44eebfdde2db8736234f5dfbb62d5f3208d4920727"
+      },
+      {
+        "path": "scripts/finalize_review.py",
+        "sha256": "132293d6256d13dec2cd487eb5af89e83d1d34177fa6aceeb98b88c6a0f16e99"
+      },
+      {
+        "path": "scripts/gate.py",
+        "sha256": "36919b26409d85806089cbff7a18da3124ef2d16dcecf85578e8675437fc9681"
+      },
+      {
+        "path": "scripts/render_deck.py",
+        "sha256": "3c3afcbc97506e700cc530dae5dc1485e6f44ff683e70ff423fbc352b6b73f4f"
+      }
+    ],
+    "content_hash": "b210d2cce7ad920f32ba39a3584494ade13a2f22cdf36406509d4cc021d96263"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "a4197c154bbfdf256",
+    "model": "sonnet"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 19
+      },
+      {
+        "id": "output",
+        "score": 17
+      },
+      {
+        "id": "practicality",
+        "score": 16
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:18,24-36",
+        "comment": ".claude/skills/ ルート前提のパスと _shared/ および readonly-reviewer agent への依存があり、単体コピーでは動かない。依存を前提条件として一覧化すると良い。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": "SKILL.md:86",
+        "comment": "ユーザー向け最終報告が項目列挙のみで、出力テンプレートがない。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:97",
+        "comment": "使用例が 1 件のみで、エッジケース（画像化不可・2 回修正後も FAIL など）の例がない。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:20,40",
+        "comment": "実測日（2026-11）を含む暫定値の記述は陳腐化しやすい。更新履歴へ分離すると良い。"
+      }
+    ]
+  }
+}

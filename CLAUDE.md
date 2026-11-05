@@ -117,6 +117,10 @@ research/proposal/report 系の成果物が外部情報・過去データに基�
 
 本 repo は自動 CI 機械検証を持たないため、本項目は **advisory な推奨** であり必須ゲートではない (2026-08-31 時点。将来 review-* skill への組み込みが進めば昇格を検討)。
 
+## 資料（スライド）を作るとき
+
+PowerPoint の資料は [docs/slide-creation-kit.md](docs/slide-creation-kit.md) の 5 段階（`slide-composition-planner` で構成決定 → 作成 skill で作成 → 別エージェントの `slide-clarity-review` → 日本語なら `slide-japanese-review` → 必要なら組織固有の検査）で作る。点数の決め方・修正の上限・他プロジェクトへ貼るルール断片も同文書にある。
+
 ## プロジェクト構成
 
 トップレベルは `CLAUDE.md` / `README.md` / `agents.md` / `.claude/`（skills）/ `workflows/`（業務ワークフロー単位のハーネス）/ `archive/`（旧プロンプト）。ワークフローごとの内訳・各ファイルの所在は [workflows/README.md](workflows/README.md) と [README.md](README.md) を参照（このファイルでは重複記載しない）。

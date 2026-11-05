@@ -1,6 +1,6 @@
 ---
 name: stop-ai-slop-jp
-description: "AI で書いた日本語の文章を、AI 臭(AI slop)の観点で直して人間が書いた文章に戻す。下書きの修正、編集、確定前のレビューと採点に使う。全角ダッシュや偏愛語だけでなく、主体の不在、命題型 H2、壮大化、両論併記、リズムの均一さも直す。Use when the user asks 'AI臭い日本語を直して', '校正して', 'slopチェック', '文章を人間らしく', '日本語をレビューして'. 英語の文章、翻訳そのもの、事実の裏取り(source-verification-scan を使う)、観点の選択だけをしたい場合(select-slop-viewpoints を使う)には使わない。"
+description: "AI で書いた日本語の文章を、AI 臭(AI slop)の観点で直して人間が書いた文章に戻す。下書きの修正、編集、確定前のレビューと採点に使う。全角ダッシュや偏愛語だけでなく、主体の不在、命題型 H2、壮大化、両論併記、リズムの均一さも直す。Use when the user asks 'AI臭い日本語を直して', '校正して', 'slopチェック', '文章を人間らしく', '日本語をレビューして'. 英語の文章、翻訳そのもの、事実の裏取り(source-verification-scan を使う)、観点の選択だけをしたい場合(select-slop-viewpoints を使う)、スライド(pptx)の文面(slide-japanese-review を使う)には使わない。"
 metadata:
   provenance: third-party
   trigger: 日本語の執筆、編集、レビュー、AI臭の検出と修正
@@ -13,6 +13,8 @@ metadata:
 # Stop AI Slop(日本語版)
 
 AIで書いた日本語を、そのまま外に出せる文章に戻す。
+
+> **対象は散文(記事・報告書・メールなど)。スライドの文面には使わない。** この skill は体言止めの連続・箇条書き・短文の連続・リズムの揃いを減点するが、スライドではそれが普通の書き方なので、スライドの日本語は `slide-japanese-review` で点検する(このリポジトリの追記。上流の本文ではない)。
 
 ## 大原則
 

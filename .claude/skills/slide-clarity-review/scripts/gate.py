@@ -29,6 +29,47 @@ def rank_of(score):
     return "D"
 
 
+# 点数の決め方（2026-11 追加）: 軸の点数を、点検員の自由な数字にせず、practice の合否から決める。
+# 軸の点数 = 重み(20) - 失敗した practice の減点の合計（下限 0）。
+#   must の失敗: -6 / should の失敗（llm の判定）: -3 / should の失敗（機械検査）: 違反のスライドが 1〜2 枚なら -2、3 枚以上なら -4
+# 減点の大きさは暫定値（実績で見直す）。点検員が付ける軸の点数は参考情報として残す。
+PENALTY_MUST = 6
+PENALTY_SHOULD_LLM = 3
+PENALTY_SHOULD_AUTO_FEW = 2
+PENALTY_SHOULD_AUTO_MANY = 4
+MANY_SLIDES = 3
+
+
+def derive_axes(violations, llm_results, practices, clarity):
+    """practice の合否から軸の点数を導く。practices は id/severity を持つ定義の一覧。"""
+    severity = {p["id"]: p["severity"] for p in practices}
+    auto_slides = {}
+    for v in violations:
+        auto_slides.setdefault(v["practice_id"], set()).add(v.get("slide"))
+    failed = {pid: ("auto", len(slides)) for pid, slides in auto_slides.items()}
+    for r in llm_results:
+        if not r["passed"]:
+            failed[r["practice_id"]] = ("llm", 1)
+    out = []
+    for a in clarity["axes"]:
+        weight = a.get("weight", AXIS_MAX)
+        penalty, basis = 0, []
+        for pid in a.get("practice_ids", []):
+            if pid not in failed:
+                continue
+            kind, n = failed[pid]
+            if severity.get(pid) == "must":
+                pen = PENALTY_MUST
+            elif kind == "llm":
+                pen = PENALTY_SHOULD_LLM
+            else:
+                pen = PENALTY_SHOULD_AUTO_MANY if n >= MANY_SLIDES else PENALTY_SHOULD_AUTO_FEW
+            penalty += pen
+            basis.append("%s(-%d)" % (pid, pen))
+        out.append({"id": a["id"], "score": max(0, weight - penalty), "basis": basis})
+    return out
+
+
 def validate_axes(axes, clarity):
     expected = [a["id"] for a in clarity["axes"]]
     weights = {a["id"]: a.get("weight", AXIS_MAX) for a in clarity["axes"]}

@@ -6,6 +6,10 @@ harness（`CLAUDE.md` / `.claude/rules/` / `.claude/skills/`）への変更を�
 
 Anthropic 公式ベストプラクティスへの逸脱・改善バックログ（公式原則ごとの採用状況と CR-01〜）は構造化データ → [.claude/skills/_shared/compliance-status.json](../.claude/skills/_shared/compliance-status.json)、再監査手順 → [.claude/skills/_shared/compliance-roadmap.md](../.claude/skills/_shared/compliance-roadmap.md)。
 
+## 2026-11
+
+- **11-05**: 資料作成キットを整備した。PowerPoint を「構成決定（`slide-composition-planner`）→ 作成（標準の `pptx` skill など、差し替え可）→ 分かりやすさの点検（`slide-clarity-review`）→ 日本語の点検（新規 `slide-japanese-review`）→ 組織固有の検査（任意）」の順で作る流れを [docs/slide-creation-kit.md](slide-creation-kit.md) にまとめ、`CLAUDE.md` に参照の節を足した。`slide-clarity-review` は、`render_deck.py`（LibreOffice と poppler でスライドを画像にする）を追加して点検員に全スライドの画像を見させるようにし、画像なしのときは視覚設計と可読性を 14 点までにした。軸の点数は、`gate.py` が practice の合否から導いた点と点検員の点の低い方にした（`finalize_review.py --score-mode`。既定 min）。合格線の ±10 点は別の点検員に再判定させる。`extract_deck.py` を標準ライブラリだけで動く版に置き換え、表のセルを含む文面を位置順に並べた `text_blocks` を足した。`slide-composition-planner` に、強調の対象を名指しする・図の型を変える・図の中の文字を短く・空白を作りすぎない、の運用上の注意を足した。`stop-ai-slop-jp` には、スライドには使わない旨だけを追記した（上流の本文とライセンス表記は変更なし）。由来台帳 `provenance.json` に要素 `slide-creation-kit` を追加し、スライド系 2 skill を `domain-skills-group` から移した。未登録だった `select-slop-viewpoints` も `domain-skills-group` に登録した。あわせて `agent-harness-bootstrap` の description に代表的な依頼の言い回しを足し、台帳の 1 要素の説明文に残っていた特定組織の記事名を一般的な表現に置き換えた。試験 `_shared/scripts/test_slide_skills.py` に、点数の導出・`--score-mode`・`text_blocks`・日本語の機械検査・描画ソフトが無い時の終了コードの 8 件を追加した。
+
 ## 2026-10
 
 - **10-30**: skill の作成・変更時の `/review-skill`（別エージェントのレビューと PASS の記録）を必須にし、`CLAUDE.md` に「YOU MUST: skill の作成・変更は review-skill を通す」の節を新設した。対象（scripts・criteria 等を含む）、完了報告・コミット・push の前に PASS の記録を残すこと、push 前の `skill_review_gate.py --all --strict` の確認、`_shared/` を変えた時の手動での洗い出し（hash に含まれないため gate は検出しない）、Stop hook の限界（最大 3 回・評価不能時は通す）を明記した。`README.md` と `docs/skills-index.md` にも同じ節を指す一文を足した。

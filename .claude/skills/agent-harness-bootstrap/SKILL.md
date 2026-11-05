@@ -1,6 +1,6 @@
 ---
 name: agent-harness-bootstrap
-description: 任意のプロジェクトに対し、Anthropic 公式 Best Practices（"Write an effective CLAUDE.md"）に準拠した CLAUDE.md と、それを支える運用 harness（rules ファイル群 + hooks）を生成・剪定する。公式準拠の核と、独自の運用ノウハウをラベル分離して適用する。要素ごとの由来（公式 / 著者嗜好）を provenance.json で分け、別プロジェクトへ適用する時は著者嗜好をデフォルト非採用にしてユーザーが取捨選択する。単発の SKILL.md 作成・採点、コード実装、README 執筆には使わない（skill-authoring-guide / review-skill 等を使う）。
+description: 任意のプロジェクトに対し、Anthropic 公式 Best Practices（"Write an effective CLAUDE.md"）に準拠した CLAUDE.md と、それを支える運用 harness（rules ファイル群 + hooks）を生成・剪定する。公式準拠の核と、独自の運用ノウハウをラベル分離して適用する。要素ごとの由来（公式 / 著者嗜好）を provenance.json で分け、別プロジェクトへ適用する時は著者嗜好をデフォルト非採用にしてユーザーが取捨選択する。「CLAUDE.md を作って」「親ディレクトリをセットアップして」「この仕組みを別プロジェクトに入れて」等の依頼で使う。単発の SKILL.md 作成・採点、コード実装、README 執筆には使わない（skill-authoring-guide / review-skill 等を使う）。
 when_to_use: 「CLAUDE.md を作って」「`/init` の代わりに公式準拠で生成して」「既存の CLAUDE.md を公式 Best Practices で書き直して」「CLAUDE.md が肥大化したので剪定して」「(この repo の) 仕組みを別プロジェクト 対象 にも入れて」「このリポジトリのノウハウで 対象ディレクトリ をセットアップして」等、**対象(このリポジトリ以外の別ディレクトリ/別リポジトリ) が明示された**依頼全般 (2026-09-01 拡張、リポジトリ CLAUDE.md「他プロジェクトのセットアップ依頼への対応」と同期。対象が明示されない曖昧な「セットアップして」は対象外)
 metadata:
   provenance: mixed
@@ -184,7 +184,18 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 
 ### Step 8: 出力 & 採用セットの実生成 + 引継ぎ
 
-採用セットの実生成（CLAUDE.md 本体・`.claude/rules/*.md`・hooks・roadmap・CHANGELOG）と最終報告の項目は `step8-step9-output-and-verify.md`。最終報告は次の項目を必ず含める: プロジェクト概要（大まかな説明・細かな説明・進捗状況）/ 生成内容の要約 3 行以内 / `> [要確認]` 残項目 / 生成ファイルのフルパス一覧 / 対象側のコミット・gitignore の区分 / 由来別の選択結果 / スケール調整で落とした要素と理由 / レビュア合格の事実と WebFetch 取得日時。
+採用セットの実生成（CLAUDE.md 本体・`.claude/rules/*.md`・hooks・roadmap・CHANGELOG）と最終報告の項目は `step8-step9-output-and-verify.md`。最終報告は次の項目を必ず含める: プロジェクト概要（大まかな説明・細かな説明・進捗状況）/ 生成内容の要約 3 行以内 / `> [要確認]` 残項目 / 生成ファイルのフルパス一覧 / 対象側のコミット・gitignore の区分 / 由来別の選択結果 / スケール調整で落とした要素と理由 / レビュア合格の事実と WebFetch 取得日時。見出しと順序は次で固定する（該当なしの節も「なし」と書いて残す）:
+
+```markdown
+## harness セットアップ結果: <対象の絶対パス>
+### 1. プロジェクト概要（大まかな説明 / 細かな説明 / 進捗状況）
+### 2. 生成内容の要約（3 行以内）
+### 3. 生成ファイル（フルパス一覧。対象側でコミットするもの / gitignore するものを分けて書く）
+### 4. 由来別の選択結果（official / official-derived / author-preference / third-party / domain-prompt / repo-specific ごとに、採用・非採用と decided_by）
+### 5. スケール調整で落とした要素と理由
+### 6. 検証結果（Step 7 レビュアの合否と WebFetch 取得日時 / Step 9 の provenance-check 出力・突合レビューの verdict・既存 skills の tier）
+### 7. 要確認（`> [要確認]` の残項目。無ければ「なし」）
+```
 
 ### Step 9: setup 後レビュー（対象が別プロジェクトの時は必須・省略不可）
 
@@ -198,6 +209,7 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 |---|---|---|
 | 「`<別ディレクトリ>` に、この repo の仕組みを入れて」 | `harness-setup-state.sh start` → Step 0 で由来別に取捨選択 → Step 1〜8 で生成 → Step 9 の `harness-setup-review` | `CLAUDE.md` + 採用 rules + `.claude/harness-selection.json` が生成され、`provenance-check.sh --target` が PASS |
 | 「CLAUDE.md が肥大化したので剪定して」（このリポジトリ内） | Step 0 を省略（新規生成物なし）し、Step 2・3・6 で要否判定・rules への分離・実測サイズ確認 | 剪定後の `CLAUDE.md` と、移した先の rules の一覧 |
+| 「`<別ディレクトリ>` をセットアップして」（対象に既存の CLAUDE.md と skills がある） | Step 0 で選択 → 既存 CLAUDE.md は書き換え前に内容を読み、残す節・移す節を Step 2 で判定 → Step 9 で `skills-audit` も実行 | 既存の記述を失わずに再構成した CLAUDE.md と、既存 skills の tier を含む最終報告 |
 | 「セットアップして」（対象の記載なし） | 起動しない。対象ディレクトリを 1 回だけ聞き返す | 対象が明示されてから本スキルを開始 |
 
 ## エラー時の対処
@@ -213,8 +225,9 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 
 ## 更新履歴
 
-- 2026-09-01: when_to_use を「対象が明示された別プロジェクトのセットアップ依頼」へ拡張
 - 1.1.0: 本文を supporting files へ分離（公式取得先・索引・Step 7〜9 の詳細）、前提節（repo 固有の依存と代替）を追加
+- 2026-09-01: when_to_use を「対象が明示された別プロジェクトのセットアップ依頼」へ拡張
+- 2026-11-05: 由来台帳 `provenance.json` に要素 `slide-creation-kit`（スライド系 3 skill と `docs/slide-creation-kit.md`）を追加し、スライド系 2 skill を `domain-skills-group` から移した。description に代表的な依頼の言い回しを足した。最終報告の見出しと順序を固定し、既存 CLAUDE.md がある対象の使用例を足した。未登録だった `select-slop-viewpoints` を `domain-skills-group` に登録した。台帳の 1 要素の説明文から、特定組織の記事名を一般的な表現に置き換えた
 - 以降の改修は `maintainer-checklist.md` の手順に従い、ここに 1 行で追記する
 
 ---

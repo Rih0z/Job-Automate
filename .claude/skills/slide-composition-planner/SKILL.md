@@ -1,16 +1,16 @@
 ---
 name: slide-composition-planner
-description: "スライドを作る前に、構成（聴衆・結論・各スライドの主張・根拠・図表・視線の起点・配色の役割）を決め、形式非依存の deck-spec.json として出力する。構成は出典付きのベストプラクティス JSON（slide-best-practices.json）で機械検査する。pptx 生成 skill（anthropic-pptx など）へ deck-spec.json を渡して作らせる前段。Use when the user asks 'スライドの構成を決めて', 'スライドを作る前に構成案を作って', '資料の構成を JSON で', 'deck-spec を作って', 'デザインも考えた構成にして'. 使わない場面: pptx の生成そのもの（生成 skill を使う）、完成した pptx のレビュー（slide-clarity-review）、HTML スライドの生成（slides-pro）。"
+description: "スライドを作る前に、構成（聴衆・結論・各スライドの主張・根拠・図表・視線の起点・配色の役割）を決め、形式非依存の deck-spec.json として出力する。構成は出典付きのベストプラクティス JSON（slide-best-practices.json）で機械検査する。pptx 生成 skill（標準の pptx skill など）へ deck-spec.json を渡して作らせる前段。Use when the user asks 'スライドの構成を決めて', 'スライドを作る前に構成案を作って', '資料の構成を JSON で', 'deck-spec を作って', 'デザインも考えた構成にして'. 使わない場面: pptx の生成そのもの（生成 skill を使う）、完成した pptx のレビュー（slide-clarity-review）、HTML スライドの生成（slides-pro）。"
 allowed-tools: Read Write Glob Grep Bash
 argument-hint: "<元資料の絶対パス（任意）> [目的・聴衆・発表時間]"
 metadata:
   provenance: domain-prompt
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # スライド構成決定（pptx 生成の前段）
 
-pptx 生成 skill に任せる前に、「誰に・何を・どの順で・どう見せるか」を決めて `deck-spec.json` に固める。**この skill は pptx を作らない。** 作るのは生成 skill（`anthropic-pptx` など）で、`deck-spec.json` のパスを依頼文に添えて渡す。
+pptx 生成 skill に任せる前に、「誰に・何を・どの順で・どう見せるか」を決めて `deck-spec.json` に固める。**この skill は pptx を作らない。** 作るのは生成 skill（標準の `pptx` skill、または組織の標準テンプレート用の作成 skill など）で、`deck-spec.json` のパスを依頼文に添えて渡す。
 
 根拠データ: `.claude/skills/_shared/slide-best-practices.json`（各 practice に出典 URL・著者・機関・原文の抜粋が付く。取得ログは `_shared/slide-sources/fetch-log.json`）。完成後の点検は `slide-clarity-review` が同じデータで行う。
 
@@ -23,11 +23,15 @@ pptx 生成 skill に任せる前に、「誰に・何を・どの順で・ど�
 1. **結論を決める**: 聴衆に持ち帰ってほしい 1 文を `key_message` にする（結論を先に）。
 2. **流れを決める**: 聴衆の課題を主役にし、現状と望ましい姿を対比させる（`storyline`）。最後は望ましい姿と次の行動で終える（`role: closing`）。
 3. **スライドに割り当てる**: 1 枚 1 要点。`action_title` は話題名でなく主張の一文にする。要点（`points`）は少数に絞る。
-4. **見せ方を決める**: `evidence_type`（図表で示せるものは文章にしない）、`layout_hint`、`focal_element`（最初に視線が向く要素）、`emphasis_role`、`text_size_class`。
+4. **見せ方を決める**: `evidence_type`（図表で示せるものは文章にしない）、`layout_hint`、`focal_element`（最初に視線が向く要素）、`emphasis_role`、`text_size_class`。次の運用上の注意を守る（出典のない運用規則。2026-11 の実測で、作った資料にこの問題が出たため）。
+   - **強調は、その見出しの主張の中心に向ける**: `emphasis_role: focus` を付けるとき、`key_message` に「どの要素を強調するか」を名指しで書く。順番や全体を主張するスライドで、最初の項目だけを強調しない。強調した要素には、色以外の手がかり（太字・番号・短い語）も添える
+   - **図の型を、内容に合わせて変える**: 同じ見せ方（カード・表など）を 3 枚以上続けない。順序は図（シェブロン・時系列）、比較は表、数値は大数字、と使い分ける。順序や流れを、表で済ませない
+   - **1 つの図の中の文字は短く**: 18pt 以上で、折り返しが不自然にならない長さ（1 項目 15 字前後）に収める。収まらなければ、項目を減らすかスライドを分ける
+   - **空白を作りすぎない**: 要素が少ないスライドは、図を大きくするか、他のスライドと統合する
 5. **色は役割だけで指定する**（下表）。色コードは書かない。`palette_ref` があれば `palette` 検査を通す。
 6. **根拠を付ける**: 事実の主張には `content_source`（URL か資料の絶対パス）。意見・提案のスライドだけ `null` でよい。
 7. **検査する**（下記コマンド）。落ちた箇所を直して通す。
-8. **ユーザーの承認を得てから**、生成 skill へ渡す。
+8. **ユーザーの承認を得てから**、生成 skill へ渡す（生成 skill がアウトラインの承認を取る場合は、この承認をそこに統合し、承認は 1 回にする）。
 
 ## deck-spec.json
 
@@ -99,7 +103,7 @@ python .claude/skills/_shared/scripts/validate_slide_data.py palette <palette.js
 
 ## 生成 skill への渡し方
 
-依頼文に `deck-spec.json` の絶対パスを添え、「各スライドの `action_title` を見出しに、`layout_hint` を自分のレイアウトに、`emphasis_role` を自分の配色体系の役割に対応づけて作る」と伝える。語彙が合わない項目は生成側が最も近いものを選ぶ。**ブランドの準拠検査は生成側のゲートで行う**（この skill は関与しない）。生成後は `slide-clarity-review` に渡す。
+依頼文に `deck-spec.json` の絶対パスを添え、「各スライドの `action_title` を見出しに、`layout_hint` を自分のレイアウトに、`emphasis_role` を自分の配色体系の役割に対応づけて作る」と伝える。語彙が合わない項目は生成側が最も近いものを選ぶ。**ブランドの準拠検査は生成側のゲートで行う**（この skill は関与しない）。生成後は `slide-clarity-review` に渡し、日本語の文面は続けて `slide-japanese-review` で点検する（5 段階の流れの全体は `docs/slide-creation-kit.md`。その文書が無い環境では読み飛ばす）。
 
 ## エラー時
 

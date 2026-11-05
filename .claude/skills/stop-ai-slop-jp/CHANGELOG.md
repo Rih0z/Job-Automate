@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.4-local] 追記 - 2026-11-05
+
+- 対象を散文に限り、スライド(pptx)の文面には使わない旨を `SKILL.md` の冒頭と description に追記した。スライドの日本語は、同じリポジトリの `.claude/skills/slide-japanese-review/` で点検する(体言止め・箇条書きを減点しない基準)。上流の本文は変更していない。
+
 ## [0.2.4-local] 追記 - 2026-10-30
 
 - スキルフォルダ直下の `README.md` / `README.en.md` を `references/upstream-readme.ja.md` / `references/upstream-readme.en.md` へ移した(内容は変更なし)。

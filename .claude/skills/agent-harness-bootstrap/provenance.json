@@ -1514,8 +1514,7 @@
         "year-end-adjustment-csv",
         "chatbot-operation-design",
         "review-chatbot-operation-design",
-        "slide-composition-planner",
-        "slide-clarity-review"
+        "select-slop-viewpoints"
       ],
       "rubric_items": [],
       "depends_on": [],
@@ -1523,6 +1522,36 @@
         "shared-review-rubrics"
       ],
       "note": "review-* / research-deliverable-review を選ぶ時は shared-review-rubrics が必須（各 SKILL.md が .claude/skills/_shared/review-rubrics.yaml を参照する）"
+    },
+    {
+      "id": "slide-creation-kit",
+      "kind": "skill",
+      "provenance": "domain-prompt",
+      "summary": "資料作成キット: PowerPoint を「構成決定（slide-composition-planner）→ 作成（標準の pptx skill など、差し替え可）→ 分かりやすさの点検（slide-clarity-review）→ 日本語の点検（slide-japanese-review）→ 組織固有の検査（任意）」の順で作る。点検は別エージェントがスライドを画像にして行う。流れ・点数の決め方・CLAUDE.md に貼るルール断片は docs/slide-creation-kit.md。",
+      "applies_to": [
+        "CLAUDE.md 資料（スライド）を作るとき（docs/slide-creation-kit.md の「そのまま貼れるルール」節が移植用の版）"
+      ],
+      "skills": [
+        "slide-composition-planner",
+        "slide-clarity-review",
+        "slide-japanese-review"
+      ],
+      "files": [
+        "docs/slide-creation-kit.md",
+        ".claude/skills/_shared/slide-best-practices.json",
+        ".claude/skills/_shared/slide-sources/README.md",
+        ".claude/skills/_shared/slide-sources/fetch-log.json",
+        ".claude/skills/_shared/scripts/slide_checks.py",
+        ".claude/skills/_shared/scripts/validate_slide_data.py",
+        ".claude/skills/_shared/scripts/test_slide_skills.py"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "soft_depends_on": [
+        "shared-review-rubrics",
+        "skill-stop-ai-slop-jp"
+      ],
+      "note": "選んだ時は、docs/slide-creation-kit.md の「そのまま貼れるルール」節を対象の CLAUDE.md に貼る。_shared/scripts/append_review_record.py と _shared/review-record.schema.json も一緒にコピーする（research-deliverable-review と共用のため files[] には載せない。載せると非選択時の不在検査が、それらを使う他の skill を選んだ対象で誤検知する）。散文の日本語の点検（stop-ai-slop-jp）は別要素。"
     },
     {
       "id": "claude-md-upload-policy",
@@ -1689,7 +1718,7 @@
       "id": "schema-nullable-fields",
       "kind": "principle",
       "provenance": "author-preference",
-      "summary": "構造化データ（JSON等）のスキーマは、値が不明な可能性のあるフィールドに null（または unknown）を許容する。null を禁止して必須項目にすると、AI は不明な値でも何らかの数値・文字列を埋めるしかなくなり、根拠のない値を正直な注記付きで返した場合でも、その注記は後工程（別プログラム・別AI・表計算ソフトへの取り込み）で失われ、あたかも実測値であるかのようなデータが一人歩きする。Anthropic 公式ドキュメントに直接の根拠はなく、著者が実機テスト（OneNEC記事 110_cc_best、2026-09-17実施：popularity_value を null 禁止にすると根拠のない推定値 3000/15000 が返る一方、null 許容時は正直に未取得と報告された）で確認した運用判断。",
+      "summary": "構造化データ（JSON等）のスキーマは、値が不明な可能性のあるフィールドに null（または unknown）を許容する。null を禁止して必須項目にすると、AI は不明な値でも何らかの数値・文字列を埋めるしかなくなり、根拠のない値を正直な注記付きで返した場合でも、その注記は後工程（別プログラム・別AI・表計算ソフトへの取り込み）で失われ、あたかも実測値であるかのようなデータが一人歩きする。Anthropic 公式ドキュメントに直接の根拠はなく、著者が実機テスト（著者の記事作成時、2026-09-17実施：popularity_value を null 禁止にすると根拠のない推定値 3000/15000 が返る一方、null 許容時は正直に未取得と報告された）で確認した運用判断。",
       "applies_to": [
         "構造化データを扱う skill / rules 全般（出力スキーマ設計時）"
       ],

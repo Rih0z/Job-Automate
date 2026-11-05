@@ -1,23 +1,23 @@
 ---
 name: slide-clarity-review
-description: "完成した .pptx の分かりやすさ（主張と構成・テキスト量・視覚設計・根拠と図表・可読性）を、出典付きのベストプラクティス JSON で採点し、修正案（fixes）を出して直させる。判定は別エージェントが行う（自己レビューしない）。本 skill や slide-composition-planner を通していない既存の pptx にも使える。Use when the user asks 'pptx の分かりやすさをレビューして', 'スライドを点検して修正して', '完成したスライドのデザインを評価して', 'スライドの読みやすさを直して'. 使わない場面: スライドの新規作成（生成 skill）、構成を作る前の検討（slide-composition-planner）、HTML スライドのレビュー（review-slides）。"
+description: "完成した .pptx の分かりやすさ（主張と構成・テキスト量・視覚設計・根拠と図表・可読性）を、出典付きのベストプラクティス JSON で採点し、修正案（fixes）を出して直させる。判定は別エージェントが行う（自己レビューしない）。本 skill や slide-composition-planner を通していない既存の pptx にも使える。Use when the user asks 'pptx の分かりやすさをレビューして', 'スライドを点検して修正して', '完成したスライドのデザインを評価して', 'スライドの読みやすさを直して'. 使わない場面: スライドの新規作成（生成 skill）、構成を作る前の検討（slide-composition-planner）、HTML スライドのレビュー（review-slides）、スライドの文面の日本語の点検（slide-japanese-review）。"
 disable-model-invocation: true
 allowed-tools: Read Write Glob Grep Bash Agent
 argument-hint: "<レビュー対象 .pptx の絶対パス>"
 metadata:
   provenance: domain-prompt
-  version: "1.0.0"
+  version: "1.1.0"
 ---
 
 # 完成スライドの分かりやすさレビュー（点検 → 修正 → 再点検）
 
 対象: $ARGUMENTS（.pptx の絶対パス）
 
-> **判定は別エージェント（`readonly-reviewer`）に任せる。** 現在のセッションで採点しない。作成の意図・会話履歴は渡さない。レビュアーはファイルを書き換えない。修正は作成側セッションが、そのスライドを作った生成 skill（`anthropic-pptx` など）で行う。
+> **判定は別エージェント（`readonly-reviewer`）に任せる。** 現在のセッションで採点しない。作成の意図・会話履歴は渡さない。レビュアーはファイルを書き換えない。修正は作成側セッションが、そのスライドを作った生成 skill（標準の `pptx` skill、または組織の標準テンプレート用の作成 skill など）で行う。
 
 根拠データ: `.claude/skills/_shared/slide-best-practices.json`（出典 URL・著者・機関・原文の抜粋つき）。観点と配点: `criteria/clarity.json`（5 軸・各 20 点）。ランクの意味: `.claude/skills/_shared/review-rubrics.yaml` の `rank5_100`。行動原則（証拠主義・引用義務・非破壊）は同ファイルの `common_principles` を適用する。
 
-依存: python-pptx（`pip install python-pptx`）。画像化（LibreOffice・pdftoppm）は任意。無ければ構造とテキストだけで点検し、結果の limitations に記録する。
+依存: 抽出（`extract_deck.py`）は標準ライブラリのみ。試験の fixture 作成には python-pptx（`pip install python-pptx`）。画像化（LibreOffice で PDF にし、poppler の pdftoppm で画像にする。PowerPoint がある環境では、PowerPoint で書き出した PDF・画像を代わりに渡してもよい）は、視覚設計と可読性の採点に必要。画像が無い場合は構造とテキストだけで点検し、結果の limitations に記録する。その場合、視覚設計と可読性の軸には満点を付けず、上限を 14 点とする（暫定値。2026-11 の実測で、画像なしの採点が、折り返しの不自然さ・空白・同じ見た目の連続・強調と主張の食い違いを見落としたため）。
 
 ## 手順（リポジトリのルートから実行）
 
@@ -26,16 +26,31 @@ metadata:
    - 文字サイズ: 明示指定された最小値。
    - 配置: トップレベル図形の位置と大きさ（インチ）、左端の種類数。
    - 色: 明示された色の種類数、文字色と背景色が両方明示された組の最小コントラスト比。
-   - 取れないもの: 継承されたフォントと色、テーマ色（解決しない）、グループ内の座標、描画結果。limitations に検査できた割合（`font checked` / `color checked` / `color theme-based`）が出る。**描画した画像は作らない**（見た目の最終確認は人が行う）。
+   - 取れないもの: 継承されたフォントと色、テーマ色（解決しない）、グループ内の座標、描画結果。limitations に検査できた割合（`font checked` / `color checked` / `color theme-based`）が出る。このスクリプト自体は画像を作らない。画像は手順 1b で作る。
+1b. **画像化（できる限り行う）**: `python .claude/skills/slide-clarity-review/scripts/render_deck.py <deck.pptx> -o <作業dir>/images`（LibreOffice で PDF にし、poppler でスライドごとの PNG にする。描画ソフトは環境変数 `SOFFICE` / `PDFTOPPM`、PATH、または作業フォルダの上にある持ち運び版（`00_vendor`）から探す。初回は設定の作成に数分かかることがある）。描画ソフトが無ければ終了コード 2 で理由を出す。そのときは PowerPoint で書き出した画像を使うか、「描画未確認」と報告する。
 2. **機械検査**: `python .claude/skills/slide-clarity-review/scripts/check_deck.py <作業dir>/deck-facts.json --practices .claude/skills/_shared/slide-best-practices.json -o <作業dir>/auto-results.json`（違反があれば終了コード 1）。
 3. **別エージェントで観点判定**: `readonly-reviewer` を起動し、下記の入力だけを渡す。
-   - `deck-facts.json`（`shapes` の位置・大きさ・塗りを、整列・余白・視線の起点の判定に使わせる）、`auto-results.json`（画像があれば追加）
+   - `deck-facts.json`（`shapes` の位置・大きさ・塗りを、整列・余白・視線の起点の判定に使わせる。`text_blocks` は、表のセルを含む文面を位置順に並べたもの）、`auto-results.json`、**手順 1b の画像（全スライド。1 枚ずつ開かせる）**
    - `clarity.json` の軸（id・title・practice_ids）と、軸が参照する `method: llm` の practice の `id` / `title` / `rule` / `check.how`（severity は渡さない）
    - 返却形式: `{"axes":[{"id","score","citations":["slide 3: …"]}],"llm_results":[{"practice_id","passed"}],"fixes":[{"slide","practice_id","problem","fix"}]}`。各軸 0〜20 点、citations は成果物内の記述の引用を最低 1 つ。判定できない観点は passed を false にし、理由を fixes に書く。
 4. **検査とゲート判定**: reviewer の JSON を保存し、`python .claude/skills/slide-clarity-review/scripts/finalize_review.py --deck <deck.pptx> --auto <作業dir>/auto-results.json --review <作業dir>/reviewer.json --practices .claude/skills/_shared/slide-best-practices.json --clarity .claude/skills/slide-clarity-review/criteria/clarity.json --write`。
    - 終了コード 3: reviewer の出力が不正（軸の欠落・点数範囲外・citations 空・llm 観点の判定漏れ）。標準エラーの理由を添えて再出力を依頼する。
    - 0=PASS / 1=FAIL。`--write` で `.claude/review-history/slide-clarity-review/` に record が保存される。
+   - **点数の決め方（既定は `--score-mode min`）**: 軸の点数 = min(軸が参照する 24 項目の合否から導いた点数（残りの 5 項目は設計図の段階の検査）, 点検員が付けた点数)。導出は、must の失敗で −6、llm 判定の should の失敗で −3、機械検査の should の失敗で −2（違反が 3 枚以上なら −4）を、20 点から引く（暫定値）。点検員は、引用を付けて点数を下げられるが、導出点より上げられない。出力の `axis_basis` に、軸ごとの減点の内訳が出る。`--score-mode derived` は導出のみ、`reviewer` は点検員の点数のみ（旧方式）。
+   - **点数のぶれ**: 同じ版を別の点検員が採点すると、llm 判定の合否が割れて、点数が 10 点以上動くことがある（2026-11 の実測: 同じ版で 45 点と 60 点）。合計が合格線（80 点）の ±10 点以内のときは、別の点検員にもう 1 回独立に判定させ、低い方を採る。
 5. **修正**: FAIL なら、`fixes` と `auto-results.json` の違反を、生成 skill で該当スライドに適用する。適用後は手順 1 からやり直す。**修正→再点検は最大 2 回**（合計 3 回まで）。2 回直しても FAIL なら止めて、残った違反をユーザーに報告する。
+   - **修正の担当も、画像を自分で見ながら直す**（描画は手順 1b）。機械検査の数値（箇条書きの数、文字サイズ、左端）を満たすことを目的にしない。次の抜け道は使わない: シェブロンや時系列などの図を表に置き換える、文字を表のセルに移して文字量の判定を避ける、フォントを下げて収める。直し方は、項目を減らす・文言を短くする・図を大きくする・スライドを分ける。機械検査は表のセルの文字を数えないので、表に移した文字は、点検員が `text_blocks` で量を見る。
+   - 直した後は、手順 1 からやり直し、新しい版名で保存する（閲覧中のファイルのロックを避けるため）。
+6. **続く点検**: 日本語の文面を含む場合は、PASS の後に `slide-japanese-review` で文面を点検する。組織固有の配色・フォント等の規定がある場合は、その検査も別のエージェントで行う（この skill では扱わない）。
+
+### 画像を渡すときに、reviewer に見させる点（手順 3 の追加）
+
+画像（スライドごとの PNG）が作れる場合は、reviewer に全スライドの画像を 1 枚ずつ開かせ、次を判定させる。見た内容を citations に書かせる。
+- **1 スライド 1 メッセージ**: 主張が 2 つ以上混ざっていないか。見出しの主張を、本文と図が支えているか
+- **デザインと主張の一致**: 色の強調・大きさ・配置が、そのスライドで一番伝えたい点に向いているか。強調が別の点に付いていないか。図の型（シェブロン・時系列・カード・表・大数字）が内容に合っているか
+- **似た見た目のスライドの連続**: 同じレイアウトが続き、メッセージの違いが見た目で区別できないか
+- **文字の折り返しと空白**: 1〜2 文字だけ次の行に落ちる、語の途中で改行される、空白が大きく文字が小さい
+LibreOffice など、実機の PowerPoint と違う描画ソフトを使った場合は、折り返しの指摘に「描画ソフトの差の可能性」を添える。
 
 ### reviewer の返却例（3 軸抜粋）
 
@@ -75,11 +90,10 @@ metadata:
 | 状況 | 対処 |
 |---|---|
 | .pptx が開けない・存在しない | 実行せず、正しい絶対パスを求める |
-| python-pptx が無い | インストールを案内して停止する（代替の推測採点はしない） |
 | `readonly-reviewer` を起動できない | `general-purpose` で再試行し、prompt に「ファイルを作成・変更・削除しない」と明記する。それでも失敗したら未実施と報告し、現セッションで代替採点しない |
-| 画像化できない | 構造とテキストだけで点検し、limitations に「描画未確認」と書く |
+| 画像化できない（`render_deck.py` が終了コード 2） | PowerPoint で書き出した画像があれば使う。無ければ構造とテキストだけで点検し、limitations に「描画未確認」と書き、視覚設計と可読性は 14 点を上限にする |
 | スクリプトが実行できない（python が無い、`slide-best-practices.json` が無い、終了コード 2） | 点検を飛ばさない。実行できなかった内容を報告して停止する |
 
 ## 使用例
 
-「`C:\decks\sales2025.pptx` の分かりやすさを点検して直して」 → 事実の抽出 → 機械検査（違反 3 件）→ `readonly-reviewer` が 5 軸を採点（ランク B・FAIL）→ `fixes` を生成 skill で 3 枚に適用 → 再抽出から再点検 → PASS → record を保存して報告。
+「`C:\decks\sales2025.pptx` の分かりやすさを点検して直して」 → 事実の抽出 → 画像化 → 機械検査（違反 3 件）→ `readonly-reviewer` が 5 軸を採点（ランク B・FAIL）→ `fixes` を生成 skill で 3 枚に適用 → 再抽出から再点検 → PASS → record を保存して報告。

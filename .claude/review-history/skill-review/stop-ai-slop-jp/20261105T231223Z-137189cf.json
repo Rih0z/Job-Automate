@@ -1,0 +1,123 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "stop-ai-slop-jp",
+  "reviewed_at": "2026-11-05T23:12:23Z",
+  "target": {
+    "files": [
+      {
+        "path": ".gitignore",
+        "sha256": "cf237c7aff44efbe6e502e645c3e06da03a69d7bdeb43392108ef3348143417e"
+      },
+      {
+        "path": "CHANGELOG.md",
+        "sha256": "2531b12270ebfc0908c2409198bdfb299e2c73d3aa881695b510a5ccd479318a"
+      },
+      {
+        "path": "LICENSE",
+        "sha256": "f9145903368bf0483fec06d7f2ed12d2e20667190783a7ffea161e92ff39f301"
+      },
+      {
+        "path": "SKILL.md",
+        "sha256": "f3ec13ea6ec4dd37d8e7b01e54f22c9fa2f927a99e6650289059bc29475eb2a9"
+      },
+      {
+        "path": "criteria/calque-terms.json",
+        "sha256": "f344dd3e6a19c30444b7dc265fe60763f1c946b86004af4f534442bf9001101d"
+      },
+      {
+        "path": "criteria/scoring.json",
+        "sha256": "663c10c822b54cb14ed36ea172de45ba18c7499715968dd7ab3e465bf72642b9"
+      },
+      {
+        "path": "references/examples.md",
+        "sha256": "de05877b1dc136adaf3280d536c74e030442507ab90fd0c7c3ce9ca91496331c"
+      },
+      {
+        "path": "references/fact-integrity.md",
+        "sha256": "34a4674dab56787422034f5862b39a87067abf1524d063601f68ebbef9cbc504"
+      },
+      {
+        "path": "references/phrases.md",
+        "sha256": "0e23388b43146d7f560cdc04a1f8ebe3518b57889404e39fa258b025ab4d2003"
+      },
+      {
+        "path": "references/structures.md",
+        "sha256": "af7447458633e522394a153295ac2a5ef8c14c6e82befae212a0650058e52969"
+      },
+      {
+        "path": "references/tech-writing.md",
+        "sha256": "b22ed9d23e18bd841c92c256d0facc34c201dd49eebfe0d213f12c28ca2032b9"
+      },
+      {
+        "path": "references/upstream-readme.en.md",
+        "sha256": "34da14afae2054207dc14c3330587ac9fb2ca49c4ac54562ac9c45063f4c2500"
+      },
+      {
+        "path": "references/upstream-readme.ja.md",
+        "sha256": "aa62e01dc0cbf7e4db4a1c7e9bf5ac94d219679c4cd95a48c9767609d0ca8083"
+      }
+    ],
+    "content_hash": "a0d948dc7c5eb1a95bcdde7e0ed3fd5dab40e7004f2e703916952e0e08300352"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "a27f478466eae7c0f",
+    "model": "sonnet"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 20
+      },
+      {
+        "id": "instructions",
+        "score": 19
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 95,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "stop-ai-slop-jp/SKILL.md:17,198",
+        "comment": "Sibling skills are referenced by repo-relative paths (.claude/skills/slide-japanese-review, select-slop-viewpoints) and 'same repository' is assumed. Portability to other projects is limited, though SKILL.md:198 says it also works standalone."
+      },
+      {
+        "criterion_id": "S3",
+        "severity": "low",
+        "location": "stop-ai-slop-jp/SKILL.md:97-152",
+        "comment": "The long quick-check section could be split into references/ to shorten the body."
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": "stop-ai-slop-jp/SKILL.md:158-178",
+        "comment": "There is no explicit rule that the review/scoring mode must not edit files, and no clear separation between review mode and rewrite mode."
+      }
+    ]
+  }
+}
