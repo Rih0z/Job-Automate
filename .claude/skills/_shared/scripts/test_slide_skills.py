@@ -1,6 +1,6 @@
 """slide-composition-planner / slide-clarity-review 周りの単体テスト（stdlib の unittest）。
 
-対象: slide_checks.py / validate_slide_data.py（_shared/scripts）、
+対象: slide_checks.py / validate_slide_data.py / append_review_record.py の検査（_shared/scripts）、
       extract_deck.py / check_deck.py / gate.py / finalize_review.py / render_deck.py（slide-clarity-review/scripts）、
       check_ja_slide.py（slide-japanese-review/scripts）。
 fixture は全てテスト内で生成する（実データの practice id・閾値には依存しない: id は fx- 接頭辞）。
@@ -974,6 +974,538 @@ class TextBlocksAndJapanese(unittest.TestCase):
             self.skipTest("標準の導入先の描画ソフトで描画できた（欠落の再現はできない）")
         self.assertEqual(p.returncode, 2, p.stderr)
         self.assertIn("描画未確認", p.stderr)
+
+
+# ================================================================ 適用条件のある観点・設計図 v2・機械検査の追加（2026-11 追加。T70〜）
+FINALIZE = os.path.join(REVIEW_SCRIPTS, "finalize_review.py")
+COND = {"deck": {"condition": "the deck shows examples"}}
+TRIG = {"deck": {"condition": "the deck uses external sources",
+                 "auto_trigger": {"any_of": [{"fact": "citation_marker_total", "op": ">=", "value": 1}]}}}
+
+
+def build_pptx2(path, kind):
+    """2026-11 追加の事実（空の枠・重なり・出典番号・章・表の高さ）を確かめる fixture。"""
+    from pptx import Presentation
+    from pptx.util import Inches, Pt
+    prs = Presentation()
+    blank, title_only, title_body = prs.slide_layouts[6], prs.slide_layouts[5], prs.slide_layouts[1]
+
+    def tb(slide, text, left, top, width=4, height=1, size=18):
+        box = slide.shapes.add_textbox(Inches(left), Inches(top), Inches(width), Inches(height))
+        box.text_frame.text = text
+        for r in box.text_frame.paragraphs[0].runs:
+            r.font.size = Pt(size)
+        return box
+
+    def titled(title):
+        s = prs.slides.add_slide(title_only)
+        s.shapes.title.text = title
+        return s
+
+    if kind == "placeholders":       # slide1: 本文の枠が空 / slide2: 本文の枠に文字あり
+        s1 = prs.slides.add_slide(title_body)
+        s1.shapes.title.text = "Empty body"
+        s2 = prs.slides.add_slide(title_body)
+        s2.shapes.title.text = "Filled body"
+        s2.placeholders[1].text = "body text"
+    elif kind == "overlap":          # slide1: 文字と表が部分的に重なる / slide2: 包含 / slide3: 文字の無い地の上の文字
+        from pptx.enum.shapes import MSO_SHAPE
+        s1 = prs.slides.add_slide(blank)
+        tb(s1, "partly covered text", 1, 1, 4, 2)
+        tbl = s1.shapes.add_table(2, 2, Inches(3), Inches(2), Inches(4), Inches(2)).table
+        tbl.cell(0, 0).text = "x"
+        s2 = prs.slides.add_slide(blank)
+        tb(s2, "outer card text", 1, 1, 6, 4)
+        tb(s2, "inner", 2, 2, 2, 1)
+        s3 = prs.slides.add_slide(blank)
+        s3.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(1), Inches(1), Inches(4), Inches(3))
+        tb(s3, "text on a plain box", 1.5, 1.5, 4, 2)
+    elif kind == "citations":
+        s1 = titled("Sales grew")
+        tb(s1, "Sales grew last year [1]", 1, 2)
+        s2 = titled("Code sample")
+        tb(s2, "value = items[1];", 1, 2)
+        s3 = titled("Located claim")
+        tb(s3, "Costs fell [2]", 1, 2)
+        tb(s3, "出典: https://example.com/a", 1, 4)
+        s4 = titled("References")
+        tb(s4, "[3] Example report, 2025", 1, 2)
+        s5 = titled("Listed claim")
+        tb(s5, "Usage doubled [3]", 1, 2)
+        s6 = titled("Linked claim")
+        box = tb(s6, "See the report", 1, 2)
+        box.text_frame.paragraphs[0].runs[0].hyperlink.address = "https://example.com/report"
+    elif kind == "sections":         # 章 2 つ。「承認」「フロー」が両方の章の見出しに出る
+        for t in ("承認フローの基本", "見積もりの作り方", "納品の段取り", "承認フローの例外"):
+            titled(t)
+        from pptx.oxml import parse_xml
+        ids = [s.slide_id for s in prs.slides]
+        p14 = "http://schemas.microsoft.com/office/powerpoint/2010/main"
+        secs = "".join('<p14:section name="%s" id="{%08d-0000-0000-0000-000000000000}"><p14:sldIdLst>%s</p14:sldIdLst></p14:section>'
+                       % (n, i, "".join('<p14:sldId id="%d"/>' % x for x in grp))
+                       for i, (n, grp) in enumerate((("A", ids[:2]), ("B", ids[2:]))))
+        ext = parse_xml('<p:extLst xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" xmlns:p14="%s">'
+                        '<p:ext uri="{521415D9-36F7-43E2-AB2F-B90AF26B5E84}"><p14:sectionLst>%s</p14:sectionLst></p:ext>'
+                        '</p:extLst>' % (p14, secs))
+        prs.part._element.append(ext)
+    elif kind == "two_slides":
+        titled("承認フローの基本")
+        titled("承認フローの例外")
+    elif kind == "table_overflow":   # 狭い列に長い文 → 推定の高さが下の図形を超える
+        s1 = prs.slides.add_slide(blank)
+        frame = s1.shapes.add_table(1, 1, Inches(1), Inches(4), Inches(2), Inches(1))
+        cell = frame.table.cell(0, 0)
+        cell.text = "あ" * 60
+        cell.text_frame.paragraphs[0].runs[0].font.size = Pt(18)
+        tb(s1, "note below the table", 1, 5.2, 4, 0.5)
+    prs.save(path)
+
+
+class DeckConditionFormat(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def v(self, *ps):
+        return run(VALIDATE, "practices", write_json(self.d, "p.json", practices_doc(list(ps))))
+
+    def test_T70_applies_when_deck_format(self):
+        self.assertEqual(self.v(practice("fx-a", applies_when=COND), practice("fx-b", applies_when=TRIG))[0], 0)
+        for bad, msg in (({"deck": {"condition": " "}}, "applies_when.deck.condition missing"),
+                         ({"deck": {"condition": "c", "auto_trigger": {"any_of": [{"fact": "zzz", "op": ">=", "value": 1}]}}},
+                          "auto_trigger unknown fact: zzz"),
+                         ({"deck": {"condition": "c", "auto_trigger": {"any_of": [{"fact": "slide_count", "op": "<", "value": 1}]}}},
+                          "auto_trigger unknown op: <"),
+                         ({"deck": {"condition": "c", "auto_trigger": {"any_of": [{"fact": "slide_count", "op": ">=", "value": "8"}]}}},
+                          "auto_trigger value must be a number"),
+                         ({"deck": {"condition": "c", "extra": 1}}, "applies_when.deck unknown key: extra")):
+            code, out = self.v(practice("fx-a", applies_when=bad))
+            self.assertEqual(code, 1, out)
+            self.assertIn(msg, out)
+        code, out = self.v(auto("fx-auto", "deck", "body_chars", "max", 200, applies_when=COND))
+        self.assertEqual(code, 1)
+        self.assertIn("applies_when.deck is only for llm practices", out)
+        # 既存の applies_when（スライド単位）は deck の検査に影響しない
+        self.assertEqual(self.v(auto("fx-cs", "deck-spec", "content_source_present", "required",
+                                     applies_when={"evidence_type_not_in": ["opinion"]}))[0], 0)
+
+    def test_T71_new_deck_metrics_accepted(self):
+        ps = [auto("fx-empty", "deck", "empty_placeholder_count", "max", 0),
+              auto("fx-overlap", "deck", "partial_overlap_count", "max", 0)]
+        self.assertEqual(self.v(*ps)[0], 0)
+
+
+class ExtractNewFacts(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def facts(self, kind):
+        pptx = os.path.join(self.d, kind + ".pptx")
+        build_pptx2(pptx, kind)
+        out = os.path.join(self.d, kind + ".json")
+        code, text = run(EXTRACT, pptx, "-o", out)
+        self.assertEqual(code, 0, text)
+        with open(out, encoding="utf-8") as f:
+            return json.load(f)
+
+    def check(self, kind, practices=None):
+        f = os.path.join(self.d, kind + ".json")
+        self.facts(kind)
+        pp = write_json(self.d, "p.json", practices_doc(practices or [
+            auto("fx-empty", "deck", "empty_placeholder_count", "max", 0),
+            auto("fx-overlap", "deck", "partial_overlap_count", "max", 0)]))
+        out = os.path.join(self.d, kind + ".auto.json")
+        code, text = run(CHECK, f, "--practices", pp, "-o", out)
+        with open(out, encoding="utf-8") as fh:
+            return code, json.load(fh), text
+
+    def test_T72_empty_placeholder(self):
+        f = self.facts("placeholders")
+        self.assertEqual([s["empty_placeholder_count"] for s in f["slides"]], [1, 0])
+        self.assertEqual((f["slide_width"], f["slide_height"]), (10.0, 7.5))
+        code, res, text = self.check("placeholders")
+        self.assertEqual(code, 1, text)
+        self.assertEqual([v["message"] for v in res["violations"]], ["slide 1: fx-empty violated (1 > 0)"])
+        self.assertEqual([(c["kind"], c["slide"]) for c in res["candidates"]], [("empty_placeholder", 1)])
+
+    def test_T73_partial_overlap_excludes_containment_and_textless_shapes(self):
+        f = self.facts("overlap")
+        self.assertEqual([s["partial_overlap_count"] for s in f["slides"]], [1, 0, 0])
+        pair = f["slides"][0]["overlap_pairs"][0]
+        self.assertEqual((pair["a"].split(":")[0], pair["b"].split(":")[0]), ("text", "table"))
+        self.assertEqual(pair["ratio"], 0.25)
+        self.assertTrue(any(x.startswith("group shapes not checked for overlap") for x in f["limitations"]))
+        code, res, text = self.check("overlap")
+        self.assertEqual([(c["kind"], c["slide"]) for c in res["candidates"]], [("partial_overlap", 1)])
+
+    def test_T74_citations_locators_and_orphan_candidates(self):
+        f = self.facts("citations")
+        cm = [s["citation_markers"] for s in f["slides"]]
+        self.assertEqual(cm[0]["markers"], ["[1]"])
+        self.assertFalse(cm[0]["has_locator"])
+        self.assertEqual(cm[1]["markers"], [])          # コードの中の番号は数えない
+        self.assertEqual((cm[2]["url_text_count"], cm[2]["source_label_count"], cm[2]["has_locator"]), (1, 1, True))
+        self.assertEqual(f["slides"][5]["hyperlinks"], ["https://example.com/report"])
+        self.assertTrue(cm[5]["has_locator"])
+        import slide_checks
+        totals = slide_checks.deck_fact_totals(f)
+        self.assertEqual((totals["citation_marker_total"], totals["hyperlink_total"], totals["url_text_total"],
+                          totals["slide_count"], totals["section_count"]), (4, 1, 1, 6, 0))
+        code, res, text = self.check("citations")
+        orphans = [(c["slide"], c["detail"].split()[0]) for c in res["candidates"] if c["kind"] == "orphan_citations"]
+        self.assertEqual(orphans, [(1, "[1]")])         # [3] は参考文献のページにある、[2] は同じページに所在がある
+
+    def test_T75_sections_and_repeated_topic_terms(self):
+        f = self.facts("sections")
+        self.assertEqual([(s["name"], s["slides"]) for s in f["sections"]], [("A", [1, 2]), ("B", [3, 4])])
+        code, res, text = self.check("sections")
+        terms = sorted(c["detail"].split("'")[1] for c in res["candidates"] if c["kind"] == "repeated_topic_terms")
+        self.assertEqual(terms, ["フロー", "承認"])
+        code, res, text = self.check("two_slides")       # 章が無く、2 枚しか離れていない
+        self.assertEqual([c for c in res["candidates"] if c["kind"] == "repeated_topic_terms"], [])
+
+    def test_T76_candidates_do_not_change_exit_code(self):
+        code, res, text = self.check("placeholders", [auto("fx-body", "deck", "body_chars", "max", 2000)])
+        self.assertEqual((code, res["violations"]), (0, []), text)
+        self.assertTrue(res["candidates"])
+        code, res, text = self.check("sections")
+        self.assertTrue(res["candidates"])
+        self.assertEqual((code, res["violations"]), (0, []), text)
+
+    def test_T77_table_overflow_candidate(self):
+        f = self.facts("table_overflow")
+        est = f["slides"][0]["table_estimates"][0]
+        self.assertGreater(est["estimated_height"], est["frame_height"])
+        self.assertFalse(est["font_assumed"])
+        code, res, text = self.check("table_overflow")
+        self.assertEqual([c["kind"] for c in res["candidates"]], ["table_overflow"])
+        self.assertEqual(res["violations"], [])           # 候補は点数に入れない（表は枠の高さで重なりを判定）
+
+
+class NotApplicable(unittest.TestCase):
+    PRACTICES = [practice("fx-plain"), practice("fx-cond", applies_when=COND),
+                 practice("fx-trig", applies_when=TRIG), practice("fx-must-cond", severity="must", applies_when=COND)]
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+        self.practices = write_json(self.d, "p.json", practices_doc(self.PRACTICES))
+        self.clarity = write_json(self.d, "c.json", {"axes": [
+            {"id": i, "weight": 20, "practice_ids": [p["id"] for p in self.PRACTICES]} for i in AXIS_IDS]})
+        self.auto = write_json(self.d, "a.json", {"violations": [], "limitations": []})
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    @staticmethod
+    def ok(**over):
+        res = {p["id"]: {"practice_id": p["id"], "passed": True} for p in NotApplicable.PRACTICES}
+        res.update(over)
+        return list(res.values())
+
+    @staticmethod
+    def na(pid, reason="the deck has no examples"):
+        return {"practice_id": pid, "applicable": False, "reason": reason}
+
+    def finalize(self, llm, *extra, axes=None):
+        rv = write_json(self.d, "r.json", {"axes": axes or axes_of(95), "llm_results": llm, "fixes": []})
+        code, out = run(FINALIZE, "--deck", os.path.join(self.d, "none.pptx"), "--auto", self.auto, "--review", rv,
+                        "--practices", self.practices, "--clarity", self.clarity,
+                        "--reviewed-at", "2026-11-06T10:00:00+09:00", *extra)
+        return code, out
+
+    def facts(self, markers):
+        return write_json(self.d, "f.json", {"slide_count": 2, "slides": [
+            {"no": 1, "citation_markers": {"markers": markers, "url_text_count": 0, "source_label_count": 0,
+                                           "has_locator": False}}]})
+
+    def test_T78_only_conditional_practices_and_reason_required(self):
+        import gate
+        errs = gate.validate_llm_results(self.ok(**{"fx-plain": self.na("fx-plain")}), self.PRACTICES)
+        self.assertIn("not applicable not allowed: fx-plain", errs)
+        errs = gate.validate_llm_results(self.ok(**{"fx-cond": self.na("fx-cond", " ")}), self.PRACTICES)
+        self.assertIn("reason required for not applicable: fx-cond", errs)
+        bad = dict(self.na("fx-cond"), passed=True)
+        self.assertIn("passed must be omitted when not applicable: fx-cond",
+                      gate.validate_llm_results(self.ok(**{"fx-cond": bad}), self.PRACTICES))
+        self.assertIn("applicable must be bool: fx-cond", gate.validate_llm_results(
+            self.ok(**{"fx-cond": {"practice_id": "fx-cond", "applicable": "no", "reason": "r"}}), self.PRACTICES))
+        self.assertEqual(gate.validate_llm_results(self.ok(**{"fx-cond": self.na("fx-cond")}), self.PRACTICES), [])
+        code, out = self.finalize(self.ok(**{"fx-plain": self.na("fx-plain")}))
+        self.assertEqual(code, 3, out)
+
+    def test_T79_auto_trigger_is_checked_against_facts(self):
+        llm = self.ok(**{"fx-trig": self.na("fx-trig", "no external sources")})
+        code, out = self.finalize(llm)
+        self.assertEqual(code, 3, out)
+        self.assertIn("--facts required to mark fx-trig not applicable", out)
+        code, out = self.finalize(llm, "--facts", self.facts(["[1]"]))
+        self.assertEqual(code, 3, out)
+        self.assertIn("fx-trig cannot be not applicable (auto_trigger holds: citation_marker_total >= 1)", out)
+        code, out = self.finalize(llm, "--facts", self.facts([]))
+        self.assertEqual(code, 0, out)
+
+    def test_T80_not_applicable_is_not_penalized_and_recorded(self):
+        import gate
+        llm = self.ok(**{"fx-cond": self.na("fx-cond"), "fx-must-cond": self.na("fx-must-cond")})
+        derived = gate.derive_axes([], llm, self.PRACTICES, {"axes": [{"id": "ax0", "weight": 20,
+                                                                        "practice_ids": ["fx-cond", "fx-must-cond"]}]})
+        self.assertEqual((derived[0]["score"], derived[0]["basis"]), (20, []))
+        g = gate.compute_gate([], llm, self.PRACTICES, axes_of(95))
+        self.assertEqual(g["verdict"], "PASS")           # must の対象外は must の不合格に数えない
+        code, out = self.finalize(llm)
+        self.assertEqual(code, 0, out)
+        rec = json.loads(out[out.index("{"):])
+        self.assertEqual(rec["not_applicable"], [{"practice_id": "fx-cond", "reason": "the deck has no examples"},
+                                                 {"practice_id": "fx-must-cond", "reason": "the deck has no examples"}])
+        self.assertEqual(rec["derived_axis_scores"]["ax0"], 20)
+        self.assertIn("対象外: fx-cond, fx-must-cond", rec["summary"])
+        # 同じ観点を不合格にすると減点される（対象外と合格は同じ点、不合格だけが下がる）
+        code, out = self.finalize(self.ok(**{"fx-cond": {"practice_id": "fx-cond", "passed": False}}))
+        self.assertEqual(json.loads(out[out.index("{"):])["derived_axis_scores"]["ax0"], 17)
+
+    def test_T81_citation_prefix(self):
+        llm = self.ok(**{"fx-cond": self.na("fx-cond")})
+        axes = axes_of(95)
+        axes[0]["citations"] = ["[fx-cond] slide 4: the improved screen comes first"]
+        self.assertEqual(self.finalize(llm, axes=axes)[0], 3)
+        axes[0]["citations"] = ["[fx-zzz] slide 4: unknown"]
+        code, out = self.finalize(self.ok(), axes=axes)
+        self.assertEqual(code, 3, out)
+        self.assertIn("unknown practice in citation prefix: fx-zzz", out)
+        for ok_cite in ("[1] has no locator on slide 3", "slide 4: plain citation", "[fx-plain] slide 2: fine"):
+            axes[0]["citations"] = [ok_cite]
+            code, out = self.finalize(llm, axes=axes)
+            self.assertEqual(code, 0, ok_cite + out)
+
+
+class RecordHashAndHistory(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+        self.practices = write_json(self.d, "p.json", practices_doc(
+            [practice("fx-llm-must", severity="must"), practice("fx-llm-should")]))
+        self.clarity = write_json(self.d, "c.json", {"axes": [
+            {"id": i, "weight": 20, "practice_ids": ["fx-llm-must", "fx-llm-should"]} for i in AXIS_IDS]})
+        self.auto = write_json(self.d, "a.json", {"violations": [], "limitations": []})
+        self.deck = os.path.join(self.d, "deck.pptx")
+        build_pptx(self.deck, "good")
+        self.history = os.path.join(self.d, "history")
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def finalize(self, deck, llm, *extra):
+        rv = write_json(self.d, "r.json", {"axes": axes_of(90), "llm_results": llm, "fixes": []})
+        return run(FINALIZE, "--deck", deck, "--auto", self.auto, "--review", rv, "--practices", self.practices,
+                   "--clarity", self.clarity, "--reviewed-at", "2026-11-06T10:00:00+09:00", *extra)
+
+    def saved(self):
+        folder = os.path.join(self.history, "slide-clarity-review")
+        return sorted(os.listdir(folder)) if os.path.isdir(folder) else []
+
+    def test_T82_sha256_in_record_or_hash_not_computed(self):
+        code, out = self.finalize(self.deck, llm_ok())
+        rec = json.loads(out[out.index("{"):])
+        with open(self.deck, "rb") as f:
+            self.assertEqual(rec["target"]["sha256"], hashlib.sha256(f.read()).hexdigest())
+        self.assertEqual(rec["not_applicable"], [])
+        self.assertNotIn("hash not computed", rec["summary"])
+        code, out = self.finalize(os.path.join(self.d, "missing.pptx"), llm_ok())
+        self.assertEqual(code, 0, out)                     # 読めなくても終了コードは変えない
+        rec = json.loads(out[out.index("{"):])
+        self.assertIsNone(rec["target"]["sha256"])
+        self.assertIn("hash not computed", rec["summary"])
+
+    def test_T83_history_root_and_verify_latest(self):
+        code, out = self.finalize(self.deck, llm_ok(), "--write", "--history-root", self.history)
+        self.assertEqual(code, 0, out)
+        self.assertEqual(len(self.saved()), 1)
+        self.assertRegex(self.saved()[0], r"^\d{8}-\d{6}__slide-clarity-deck-deck\.json$")
+        code, out = run(FINALIZE, "--verify-latest", self.deck, "--history-root", self.history)
+        self.assertEqual(code, 0, out)
+        self.assertIn("PASS record found", out)
+        other = os.path.join(self.d, "other.pptx")
+        build_pptx(other, "dense")
+        code, out = run(FINALIZE, "--verify-latest", other, "--history-root", self.history)
+        self.assertEqual(code, 1, out)
+        self.assertIn("no record for this version", out)
+        fail = [{"practice_id": "fx-llm-must", "passed": False}, {"practice_id": "fx-llm-should", "passed": True}]
+        self.assertEqual(self.finalize(other, fail, "--write", "--history-root", self.history)[0], 1)
+        code, out = run(FINALIZE, "--verify-latest", other, "--history-root", self.history)
+        self.assertEqual(code, 1, out)
+        self.assertIn("only FAIL", out)
+        # 採点の引数と一緒には使えない（終了コード 2）。採点の必須引数が欠けても 2
+        self.assertEqual(run(FINALIZE, "--verify-latest", self.deck, "--deck", self.deck)[0], 2)
+        self.assertEqual(run(FINALIZE, "--verify-latest", self.deck, "--write")[0], 2)
+        self.assertEqual(run(FINALIZE, "--deck", self.deck)[0], 2)
+
+    def test_T84_both_save_paths_reject_the_same_invalid_record(self):
+        import append_review_record
+        import finalize_review
+        bad = {"schema": "review-record/v1", "skill": "slide-clarity-review", "reviewed_at": "2026-11-06T10:00:00+09:00",
+               "target": {"description": ""}, "verdict": "PASS", "summary": "s", "criteria": [{"id": "ax0"}]}
+        self.assertTrue(append_review_record.validate(bad))
+        path, errors = finalize_review.save_record(bad, self.history)
+        self.assertIsNone(path)
+        self.assertEqual(sorted(errors), sorted(append_review_record.validate(bad)))
+        self.assertEqual(self.saved(), [])
+        p = subprocess.run([sys.executable, os.path.join(HERE, "append_review_record.py"), "-"],
+                           input=json.dumps(bad), capture_output=True, text=True, encoding="utf-8")
+        self.assertEqual(p.returncode, 1, p.stderr)
+        self.assertIn("REJECTED", p.stderr)
+
+
+class DeckSpecV2(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def spec(self, spec):
+        pp = write_json(self.d, "p.json", practices_doc(fx_deck_practices()))  # 新しい観点の practice は無い
+        return run(VALIDATE, "deck-spec", write_json(self.d, "s.json", spec), "--practices", pp)
+
+    @staticmethod
+    def v2(**top):
+        s = good_spec()
+        s["spec_version"] = 2
+        for sl in s["slides"]:
+            if sl["role"] == "content":
+                sl["intent"] = "show how the numbers changed in the trial"
+        s.update(top)
+        return s
+
+    def test_T85_v1_is_unchanged_and_empty_source_list_is_missing(self):
+        s = good_spec()
+        self.assertNotIn("intent", s["slides"][1])
+        self.assertEqual(self.spec(s)[0], 0)                       # v1: 構造の検査は動かない
+        s["slides"][1]["example"] = {"id": "e1", "steps": ["after"]}
+        self.assertEqual(self.spec(s)[0], 0)
+        for empty in ([], ["", " "]):
+            s = good_spec()
+            s["slides"][2]["content_source"] = empty
+            code, out = self.spec(s)
+            self.assertEqual(code, 1, empty)
+            self.assertIn("slide 3: fx-content-source violated (content_source_present required)", out)
+        s = good_spec()
+        s["slides"][2]["content_source"] = ["https://example.com/a", "https://example.com/b"]
+        self.assertEqual(self.spec(s)[0], 0)
+        s["spec_version"] = 3
+        self.assertIn("invalid spec_version", self.spec(s)[1])
+
+    def test_T86_v2_intent_required_on_content_only(self):
+        self.assertEqual(self.spec(self.v2())[0], 0)
+        s = self.v2()
+        s["slides"][1]["intent"] = " "
+        code, out = self.spec(s)
+        self.assertEqual(code, 1)
+        self.assertIn("slide 2: intent missing (purpose-and-premise)", out)
+        self.assertNotIn("slide 1: intent", out)
+        s = self.v2()
+        s["slides"][1]["content_source"] = ["https://example.com/a", ""]
+        self.assertIn("slide 2: content_source has an empty entry (source-locator-visible)", self.spec(s)[1])
+
+    def test_T87_v2_sections(self):
+        s = self.v2(sections=[{"id": "s1", "theme": "Approval steps"}, {"id": "s2", "theme": "approval  steps"}])
+        s["slides"][1]["section"] = "s9"
+        code, out = self.spec(s)
+        self.assertEqual(code, 1)
+        self.assertIn("sections: duplicate theme 'approval  steps' in s1 and s2 (one-topic-one-place)", out)
+        self.assertIn("slide 2: unknown section s9 (one-topic-one-place)", out)
+        s = self.v2(sections=[{"id": "s1", "theme": "Approval steps"}, {"id": "s2", "theme": "Cost"}])
+        s["slides"][1]["section"] = "s1"
+        self.assertEqual(self.spec(s)[0], 0)
+
+    def test_T88_v2_examples(self):
+        def with_examples(e2, e3):
+            s = self.v2()
+            s["slides"][1]["example"], s["slides"][2]["example"] = e2, e3
+            return s
+        good = with_examples({"id": "e1", "pattern": "before-after", "steps": ["before", "result"],
+                              "conditions": "ten offices, one month", "cause": "new form"},
+                             {"id": "e1", "steps": ["after", "effect"], "effect": "inquiries halved",
+                              "cause": "new form"})
+        self.assertEqual(self.spec(good)[0], 0, self.spec(good)[1])
+        cases = [
+            (with_examples({"id": "e1", "pattern": "before-after", "steps": ["after"]},
+                           {"id": "e1", "steps": ["before", "result"], "conditions": "c", "effect": "x"}),
+             "example e1: before must come before after (before-after-order)"),
+            (with_examples({"id": "e1", "pattern": "good-bad", "steps": ["before", "after"]}, None),
+             "example e1: effect missing (before-after-order)"),
+            (with_examples({"id": "e1", "pattern": "before-after", "steps": ["before", "after"], "effect": "x"}, None),
+             "example e1: result required for before-after (before-after-order)"),
+            (with_examples({"id": "e1", "pattern": "good-bad", "steps": ["before"], "cause": "form"},
+                           {"id": "e1", "steps": ["after"], "effect": "x", "cause": "reviewer"}),
+             "example e1: multiple causes (one-example-one-cause)"),
+            (with_examples({"id": "e1", "pattern": "before-after", "steps": ["before", "result"]},
+                           {"id": "e1", "steps": ["after"], "effect": "x"}),
+             "slide 2: example e1 conditions missing (example-matches-conditions)"),
+        ]
+        for spec, msg in cases:
+            code, out = self.spec(spec)
+            self.assertEqual(code, 1, msg)
+            self.assertIn(msg, out)
+        # good-bad では result を求めない
+        ok = with_examples({"id": "e1", "pattern": "good-bad", "steps": ["before", "after"], "effect": "x"}, None)
+        self.assertEqual(self.spec(ok)[0], 0)
+
+    def test_T89_v2_exhibits(self):
+        s = self.v2(exhibits=[{"id": "x1", "kind": "config", "full_text_at": 9}, {"id": "x2", "kind": "prompt"}])
+        s["slides"][1]["exhibit_ref"] = "x3"
+        code, out = self.spec(s)
+        self.assertEqual(code, 1)
+        self.assertIn("exhibit x1: full_text_at slide 9 not found (reproducible-material-complete)", out)
+        self.assertIn("exhibit x2: full_text_at missing (reproducible-material-complete)", out)
+        self.assertIn("slide 2: unknown exhibit x3 (reproducible-material-complete)", out)
+        s = self.v2(exhibits=[{"id": "x1", "kind": "config", "full_text_at": "handout: settings file"}])
+        s["slides"][1]["exhibit_ref"] = ["x1"]
+        self.assertEqual(self.spec(s)[0], 0)
+
+    def test_T90_v2_appendix_order_and_reference_section(self):
+        def deck(roles):
+            s = self.v2()
+            slides = []
+            for i, r in enumerate(roles, 1):
+                role, _, kind = r.partition(":")
+                sl = good_slide(i, role, intent="i")
+                if kind:
+                    sl["kind"] = kind
+                if role in ("closing", "section", "appendix"):
+                    sl.update(evidence_type="proposal", content_source=None, focal_element="title")
+                slides.append(sl)
+            s["slides"] = slides
+            return self.spec(s)
+        self.assertEqual(deck(["content", "closing", "section:reference", "appendix", "appendix"])[0], 0)
+        for roles, msg in (
+                (["content", "closing", "appendix", "content"], "slide 4: content after appendix (main-before-reference)"),
+                (["content", "appendix", "closing"], "closing must come before the first appendix (main-before-reference)"),
+                (["content", "closing", "section:reference"], "slide 3: reference section without appendix"),
+                (["content", "section:reference", "closing", "appendix"],
+                 "slide 2: reference section must be after the last closing and before the first appendix"),
+                (["content:main", "closing"], "slide 1: kind is only for role section")):
+            code, out = deck(roles)
+            self.assertEqual(code, 1, roles)
+            self.assertIn(msg, out)
+
+    def test_T91_v2_glossary_first_use(self):
+        s = self.v2(glossary=[{"term": "Sales", "definition": "revenue", "first_slide": 3}])
+        code, out = self.spec(s)
+        self.assertEqual(code, 1)
+        self.assertIn("glossary 'Sales': used on slide 1 before first_slide 3 (terms-and-references)", out)
+        s = self.v2(glossary=[{"term": "Sales", "definition": "revenue", "first_slide": 1}])
+        self.assertEqual(self.spec(s)[0], 0)
+        s = self.v2(glossary=[{"term": "Sales", "first_slide": 1}])
+        self.assertIn("glossary: term, definition and first_slide required", self.spec(s)[1])
 
 
 # ================================================================ 公開リポジトリのポリシー

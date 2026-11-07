@@ -6,7 +6,7 @@ allowed-tools: Read Write Glob Grep Bash Agent
 argument-hint: "<レビュー対象 .pptx の絶対パス>"
 metadata:
   provenance: domain-prompt
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # 完成スライドの分かりやすさレビュー（点検 → 修正 → 再点検）
@@ -29,19 +29,24 @@ metadata:
    - 取れないもの: 継承されたフォントと色、テーマ色（解決しない）、グループ内の座標、描画結果。limitations に検査できた割合（`font checked` / `color checked` / `color theme-based`）が出る。このスクリプト自体は画像を作らない。画像は手順 1b で作る。
 1b. **画像化（できる限り行う）**: `python .claude/skills/slide-clarity-review/scripts/render_deck.py <deck.pptx> -o <作業dir>/images`（LibreOffice で PDF にし、poppler でスライドごとの PNG にする。描画ソフトは環境変数 `SOFFICE` / `PDFTOPPM`、PATH、または作業フォルダの上にある持ち運び版（`00_vendor`）から探す。初回は設定の作成に数分かかることがある）。描画ソフトが無ければ終了コード 2 で理由を出す。そのときは PowerPoint で書き出した画像を使うか、「描画未確認」と報告する。
 2. **機械検査**: `python .claude/skills/slide-clarity-review/scripts/check_deck.py <作業dir>/deck-facts.json --practices .claude/skills/_shared/slide-best-practices.json -o <作業dir>/auto-results.json`（違反があれば終了コード 1）。
+   - `candidates`（候補）も出る: 空のプレースホルダー（`empty_placeholder`）、図形の部分的な重なり（`partial_overlap`）、複数の章の見出しに出る語（`repeated_topic_terms`）、所在に対応しない出典番号（`orphan_citations`）、表の推定の高さのはみ出し（`table_overflow`）。**候補は点数に入れず、終了コードにも影響しない**。点検員が画像で確かめるための手がかりで、0 件でも問題が無いとは限らない（2026-11 の実測では、重なりの候補は枠が重なるだけのものが大半、出典番号の候補は参考文献のページの見出しが取れない資料で取りこぼした）
 3. **別エージェントで観点判定**: `readonly-reviewer` を起動し、下記の入力だけを渡す。
    - `deck-facts.json`（`shapes` の位置・大きさ・塗りを、整列・余白・視線の起点の判定に使わせる。`text_blocks` は、表のセルを含む文面を位置順に並べたもの）、`auto-results.json`、**手順 1b の画像（全スライド。1 枚ずつ開かせる）**
-   - `clarity.json` の軸（id・title・practice_ids）と、軸が参照する `method: llm` の practice の `id` / `title` / `rule` / `check.how`（severity は渡さない）
-   - 返却形式: `{"axes":[{"id","score","citations":["slide 3: …"]}],"llm_results":[{"practice_id","passed"}],"fixes":[{"slide","practice_id","problem","fix"}]}`。各軸 0〜20 点、citations は成果物内の記述の引用を最低 1 つ。判定できない観点は passed を false にし、理由を fixes に書く。
-4. **検査とゲート判定**: reviewer の JSON を保存し、`python .claude/skills/slide-clarity-review/scripts/finalize_review.py --deck <deck.pptx> --auto <作業dir>/auto-results.json --review <作業dir>/reviewer.json --practices .claude/skills/_shared/slide-best-practices.json --clarity .claude/skills/slide-clarity-review/criteria/clarity.json --write`。
-   - 終了コード 3: reviewer の出力が不正（軸の欠落・点数範囲外・citations 空・llm 観点の判定漏れ）。標準エラーの理由を添えて再出力を依頼する。
-   - 0=PASS / 1=FAIL。`--write` で `.claude/review-history/slide-clarity-review/` に record が保存される。
-   - **点数の決め方（既定は `--score-mode min`）**: 軸の点数 = min(軸が参照する 24 項目の合否から導いた点数（残りの 5 項目は設計図の段階の検査）, 点検員が付けた点数)。導出は、must の失敗で −6、llm 判定の should の失敗で −3、機械検査の should の失敗で −2（違反が 3 枚以上なら −4）を、20 点から引く（暫定値）。点検員は、引用を付けて点数を下げられるが、導出点より上げられない。出力の `axis_basis` に、軸ごとの減点の内訳が出る。`--score-mode derived` は導出のみ、`reviewer` は点検員の点数のみ（旧方式）。
+   - `clarity.json` の軸（id・title・practice_ids）と、軸が参照する `method: llm` の practice の `id` / `title` / `rule` / `check.how` と、適用条件 `applies_when.deck.condition`（ある場合）（severity は渡さない）
+   - 返却形式: `{"axes":[{"id","score","citations":["[practice-id] slide 3: …"]}],"llm_results":[{"practice_id","passed"} | {"practice_id","applicable":false,"reason"}],"fixes":[{"slide","practice_id","problem","fix"}]}`。各軸 0〜20 点、citations は成果物内の記述の引用を最低 1 つ。引用の先頭に、理由にした観点の id を `[practice-id] ` の形で付けてよい（任意）。
+   - **対象外と、判定できないの区別**: 適用条件（`applies_when.deck`）を持つ観点で、資料がその条件に当たらないときだけ `applicable: false` と理由を返す（減点も加点もしない）。適用条件の無い観点は対象外にできない。資料が条件に当たるのに判断材料が足りない観点は、対象外にせず passed を false にし、理由を fixes に書く。
+   - 点検員への指示に「対象外にした観点を理由に、軸の点を下げない」を含める。
+4. **検査とゲート判定**: reviewer の JSON を保存し、`python .claude/skills/slide-clarity-review/scripts/finalize_review.py --deck <deck.pptx> --auto <作業dir>/auto-results.json --review <作業dir>/reviewer.json --practices .claude/skills/_shared/slide-best-practices.json --clarity .claude/skills/slide-clarity-review/criteria/clarity.json --facts <作業dir>/deck-facts.json --write`。
+   - 終了コード 3: reviewer の出力が不正（軸の欠落・点数範囲外・citations 空・llm 観点の判定漏れ・対象外にできない観点の対象外・理由の無い対象外・機械の条件 `auto_trigger` と矛盾する対象外・対象外にした観点や存在しない id を接頭辞にした引用）。標準エラーの理由を添えて再出力を依頼する。`auto_trigger` を持つ観点を対象外にするには `--facts` が要る。
+   - 0=PASS / 1=FAIL。`--write` で `.claude/review-history/slide-clarity-review/` に record が保存される。点検したのが別のリポジトリの資料なら、`--history-root <作業dir>/history` を付けて、この skill を置いたリポジトリに record を書かない。record には点検した .pptx の `target.sha256` と、対象外の一覧 `not_applicable` が入る。
+   - **対象外の事後確認**: record の `not_applicable` と、軸ごとの citations・`reviewer_axis_scores` を並べて読み、対象外にした観点の内容を理由に軸を下げていないかを確かめて報告に書く（接頭辞の無い引用は機械で照合できないため）。下げていたら、その軸の出し直しを依頼する。
+   - **点数の決め方（既定は `--score-mode min`）**: 軸の点数 = min(軸が参照する 28 項目の合否から導いた点数（残りの 5 項目は設計図の段階の検査）, 点検員が付けた点数)。対象外の観点は減点しない（対象外と合格は同じ点）。導出は、must の失敗で −6、llm 判定の should の失敗で −3、機械検査の should の失敗で −2（違反が 3 枚以上なら −4）を、20 点から引く（暫定値）。点検員は、引用を付けて点数を下げられるが、導出点より上げられない。出力の `axis_basis` に、軸ごとの減点の内訳が出る。`--score-mode derived` は導出のみ、`reviewer` は点検員の点数のみ（旧方式）。
    - **点数のぶれ**: 同じ版を別の点検員が採点すると、llm 判定の合否が割れて、点数が 10 点以上動くことがある（2026-11 の実測: 同じ版で 45 点と 60 点）。合計が合格線（80 点）の ±10 点以内のときは、別の点検員にもう 1 回独立に判定させ、低い方を採る。
-5. **修正**: FAIL なら、`fixes` と `auto-results.json` の違反を、生成 skill で該当スライドに適用する。適用後は手順 1 からやり直す。**修正→再点検は最大 2 回**（合計 3 回まで）。2 回直しても FAIL なら止めて、残った違反をユーザーに報告する。
-   - **修正の担当も、画像を自分で見ながら直す**（描画は手順 1b）。機械検査の数値（箇条書きの数、文字サイズ、左端）を満たすことを目的にしない。次の抜け道は使わない: シェブロンや時系列などの図を表に置き換える、文字を表のセルに移して文字量の判定を避ける、フォントを下げて収める。直し方は、項目を減らす・文言を短くする・図を大きくする・スライドを分ける。機械検査は表のセルの文字を数えないので、表に移した文字は、点検員が `text_blocks` で量を見る。
+5. **修正**: FAIL なら、`fixes` と `auto-results.json` の違反を、生成 skill で該当スライドに適用する。適用後は手順 1 からやり直す。**修正→再点検は最大 2 回**（合計 3 回まで）。2 回直しても FAIL なら止めて、残った違反をユーザーに報告する。資料作成の流れの中では、分かりやすさ・組織固有の検査・日本語の 3 種類の点検をまとめて 1 巡と数える（流れの文書 `docs/slide-creation-kit.md` が正）。ユーザーの指摘で直した場合も、点検をやり直す。
+   - **修正の担当も、画像を自分で見ながら直す**（描画は手順 1b）。機械検査の数値（箇条書きの数、文字サイズ、左端）を満たすことを目的にしない。次の抜け道は使わない: シェブロンや時系列などの図を表に置き換える、文字を表のセルに移して文字量の判定を避ける、フォントを下げて収める。次の抜け道も使わない: 重なりを消すために文字を画像にする、出典番号を消して候補の検出を避ける（所在を書くのが直し方）、空の枠を消すために意味の無い文字を入れる、条件に当たる資料で対象外を使う、表を分けずにフォントを下げる。直し方は、項目を減らす・文言を短くする・図を大きくする・スライドを分ける・所在を書く・枠を消す。前回より点が上がった版では、点検員に、上の抜け道が使われていないかを画像で確かめさせる。機械検査は表のセルの文字を数えないので、表に移した文字は、点検員が `text_blocks` で量を見る。
    - 直した後は、手順 1 からやり直し、新しい版名で保存する（閲覧中のファイルのロックを避けるため）。
 6. **続く点検**: 日本語の文面を含む場合は、PASS の後に `slide-japanese-review` で文面を点検する。組織固有の配色・フォント等の規定がある場合は、その検査も別のエージェントで行う（この skill では扱わない）。
+7. **確定前の確認**: 確定する版に対して `python .claude/skills/slide-clarity-review/scripts/finalize_review.py --verify-latest <deck.pptx> [--history-root <dir>]` を実行する。同じハッシュの PASS の record があれば終了コード 0。無ければ 1 で、その版は未点検として扱う（直した後に点検し直していない、など）。この使い方は採点の引数と一緒に使えない（終了コード 2）。
 
 ### 画像を渡すときに、reviewer に見させる点（手順 3 の追加）
 
@@ -50,6 +55,8 @@ metadata:
 - **デザインと主張の一致**: 色の強調・大きさ・配置が、そのスライドで一番伝えたい点に向いているか。強調が別の点に付いていないか。図の型（シェブロン・時系列・カード・表・大数字）が内容に合っているか
 - **似た見た目のスライドの連続**: 同じレイアウトが続き、メッセージの違いが見た目で区別できないか
 - **文字の折り返しと空白**: 1〜2 文字だけ次の行に落ちる、語の途中で改行される、空白が大きく文字が小さい
+- **候補の確認**: `candidates` の空の枠・重なり・表のはみ出しが、画像で本当に見えるか
+- **運用上の注意（出典なし。点数に入れず、気づいた点を fixes に書く）**: 前のスライドからつながらないスライド（章の始め・例・数値）の冒頭に、目的と前提があるか。1 つの例に 2 つの対策が混ざっていないか。聴衆が使う素材（依頼文・設定・計算式など）の全文がどこか 1 か所にあり、説明のスライドで効く部分が対応付けられているか。例や結果が、書いた条件（対象の数・手順）と一致しているか（2026-11 の検証で、完成した資料でのこの 4 点の判定は点検員の間で割れたため、点数に入れない）
 LibreOffice など、実機の PowerPoint と違う描画ソフトを使った場合は、折り返しの指摘に「描画ソフトの差の可能性」を添える。
 
 ### reviewer の返却例（3 軸抜粋）
@@ -67,7 +74,9 @@ LibreOffice など、実機の PowerPoint と違う描画ソフトを使った�
 }
 ```
 
-実際は 5 軸すべてと、軸が参照する llm 観点すべての判定が要る（足りないと手順 4 で終了コード 3）。
+対象外の例: `{"practice_id": "before-after-order", "applicable": false, "reason": "改善の前後や良い例と悪い例の対を含まない"}`。
+
+実際は 5 軸すべてと、軸が参照する llm 観点すべての判定（合否か、対象外）が要る（足りないと手順 4 で終了コード 3）。
 
 ## 判定の定義
 
@@ -83,7 +92,7 @@ LibreOffice など、実機の PowerPoint と違う描画ソフトを使った�
 
 ## 出力
 
-ユーザーへの報告: ゲート結果とランク、軸別の得点、違反の一覧（スライド番号・practice id・出典 URL）、適用した修正、limitations。reviewer の結果を要約し直して緩めない。
+ユーザーへの報告: ゲート結果とランク、軸別の得点、違反の一覧（スライド番号・practice id・出典 URL）、対象外にした観点と理由（`not_applicable`）と手順 4 の事後確認の結果、候補の一覧、適用した修正、limitations。reviewer の結果を要約し直して緩めない。
 
 ## エラー時
 
@@ -97,3 +106,8 @@ LibreOffice など、実機の PowerPoint と違う描画ソフトを使った�
 ## 使用例
 
 「`C:\decks\sales2025.pptx` の分かりやすさを点検して直して」 → 事実の抽出 → 画像化 → 機械検査（違反 3 件）→ `readonly-reviewer` が 5 軸を採点（ランク B・FAIL）→ `fixes` を生成 skill で 3 枚に適用 → 再抽出から再点検 → PASS → record を保存して報告。
+
+## 更新履歴
+
+- 1.2.0（2026-11-06）: 適用条件のある観点（当たらない資料では対象外）と、対象外の返却・検査（`--facts`・引用の接頭辞）を追加。軸の参照を 24 項目から 28 項目に（同じ話題は 1 か所・前後の順序・所在の明示・本編と参考の順序）。機械検査の候補、record のハッシュ、`--history-root`、確定前の `--verify-latest` を追加
+- 1.1.0: このリポジトリに追加

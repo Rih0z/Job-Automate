@@ -23,16 +23,32 @@ fixture を読む）で確かめる。旧版から text_blocks を足した。
   distinct_colors  明示された RGB の色（文字色・図形の塗り・背景）の種類数。明示が無ければ 0
   min_contrast 文字色と背景色（図形の塗り、無ければ明示されたスライド背景）が両方 RGB で明示された組の最小コントラスト比。
                背景が明示されない／文字色が継承の run は判定できないので数えない。1 つも無ければ null
+2026-11 追加（トップ）:
+  slide_width / slide_height  スライドの大きさ（インチ。presentation.xml の sldSz）
+  sections     章の一覧 [{name, slides: [番号]}]（presentation.xml の拡張にある章。無ければ空）
+2026-11 追加（スライド毎）:
+  empty_placeholder_count  文字も画像も無いプレースホルダーの数（日付・フッター・ページ番号・ヘッダーとタイトルは数えない）
+  partial_overlap_count / overlap_pairs  部分的に重なる図形の対の数と一覧。対象は文字を持つ図形（非空の段落がある p:sp）・表・画像と、
+               本文の図形に対するタイトル。重なりが小さい方の面積の 5% 超 95% 未満、かつ 0.05 平方インチ超の対だけ数える
+               （95% 以上の包含は意図的な重ねとして除く）。線・コネクタ・文字の無い図形・グループ内は数えない
+  hyperlinks   外部リンクの行き先（スライドの rels）
+  citation_markers  {markers: 出典番号らしい表記（[1]〜[99]・[^1]・※1・注1）, url_text_count, source_label_count, has_locator}。
+               コードらしい段落（= { ; を含む）の番号は数えない。has_locator は URL の文字列・リンク・「出典」「参考」「Source」で始まる行のどれかがあるか
+  table_estimates  表ごとの {top, left, width, frame_height, estimated_height, font_assumed}。推定の高さは、行ごとに
+               セルの段落の文字幅（全角 1.0・半角 0.55 字幅 × 文字サイズ）を列幅（左右の余白を除く）で割った行数 × 1.2 行送り
+               ＋上下の余白、と枠の行の高さの大きい方の合計。文字サイズが取れない段落は 18pt と仮定し font_assumed を true にする
 limitations には font と color の検査できた範囲（inherited / checked / theme-based）を必ず出す。
 テーマ色（scheme color）は解決しない。解決しないことを `color theme-based: N slides` として記録する。
 グループ内の図形は座標系が異なるため、shapes と left_edge_count には含めない。
 """
 import argparse
 import json
+import math
 import os
 import posixpath
 import re
 import sys
+import unicodedata
 import zipfile
 import xml.etree.ElementTree as ET
 
@@ -49,6 +65,7 @@ NS = {
     "p": "http://schemas.openxmlformats.org/presentationml/2006/main",
     "r": "http://schemas.openxmlformats.org/officeDocument/2006/relationships",
     "rel": "http://schemas.openxmlformats.org/package/2006/relationships",
+    "p14": "http://schemas.microsoft.com/office/powerpoint/2010/main",
 }
 A = "{%s}" % NS["a"]
 P = "{%s}" % NS["p"]
@@ -60,6 +77,15 @@ LEAF_TAGS = (P + "sp", P + "pic", P + "graphicFrame", P + "cxnSp")
 TOP_TAGS = LEAF_TAGS + (P + "grpSp",)
 # レイアウトのプレースホルダの、マスター側の対応種別（python-pptx と同じ表）
 MASTER_TYPE = {"title": "title", "ctrTitle": "title", "dt": "dt", "ftr": "ftr", "sldNum": "sldNum"}
+# 空の枠として数えないプレースホルダーの種類（日付・フッター・ページ番号・ヘッダー・タイトル）
+NOT_COUNTED_PH = ("dt", "ftr", "sldNum", "hdr", "title", "ctrTitle")
+OVERLAP_MIN_RATIO, OVERLAP_MAX_RATIO, OVERLAP_MIN_AREA = 0.05, 0.95, 0.05  # 運用上の値（threshold_origin: adaptation）
+CITATION = re.compile(r"\[\^?([1-9]\d?)\]|※\s?([1-9]\d?)|注\s?([1-9]\d?)")
+CODE_LIKE = re.compile(r"[={;]")
+URL_TEXT = re.compile(r"https?://\S+|www\.\S+", re.I)
+SOURCE_LABEL = re.compile(r"^\s*(出典|参考|source)", re.I)
+DEFAULT_TABLE_PT = 18
+CELL_MAR_LR, CELL_MAR_TB = 91440, 45720  # 表のセルの既定の余白（EMU）
 
 
 def plain(text):
@@ -267,6 +293,145 @@ def notes_nonempty(pkg, slide_path):
     return False
 
 
+def has_text_sp(el):
+    tb = el.find(P + "txBody")
+    return tb is not None and any(plain(para_text(p)).strip() for p in tb.findall(A + "p"))
+
+
+def empty_placeholders(sptree, title_id):
+    n = 0
+    for el in walk(sptree):
+        if el.tag != P + "sp":
+            continue
+        ph = ph_of(el)
+        if ph is None or ph.get("type") in NOT_COUNTED_PH or (title_id is not None and shape_id(el) == title_id):
+            continue
+        if has_text_sp(el) or el.find("p:spPr/a:blipFill", NS) is not None:
+            continue
+        n += 1
+    return n
+
+
+def overlap_items(pkg, slide_path, sptree, title_el):
+    """重なりの判定の対象（トップレベルの、文字を持つ図形・表・画像）。タイトルは別に返す。"""
+    items, title = [], None
+    for el in sptree:
+        if el.tag not in LEAF_TAGS or el.tag == P + "cxnSp":
+            continue
+        if el.tag == P + "sp":
+            if not has_text_sp(el):
+                continue
+            kind = "text"
+            label = plain(frame_text(el.find(P + "txBody"))).strip()[:20]
+        elif el.tag == P + "pic":
+            kind, label = "picture", "picture"
+        elif el.find("a:graphic/a:graphicData/a:tbl", NS) is not None:
+            kind, label = "table", "table"
+        else:
+            continue
+        geo = effective_geometry(pkg, slide_path, el)
+        if None in geo or geo[2] <= 0 or geo[3] <= 0:
+            continue
+        item = {"kind": kind, "label": label, "geo": [g / EMU_PER_INCH for g in geo]}
+        if title_el is not None and el is title_el:
+            title = dict(item, kind="title")
+        else:
+            items.append(item)
+    return items, title
+
+
+def overlap_of(a, b):
+    ax, ay, aw, ah = a["geo"]
+    bx, by, bw, bh = b["geo"]
+    w = min(ax + aw, bx + bw) - max(ax, bx)
+    h = min(ay + ah, by + bh) - max(ay, by)
+    if w <= 0 or h <= 0:
+        return 0.0, 0.0
+    area = w * h
+    return area, area / min(aw * ah, bw * bh)
+
+
+def partial_overlaps(items, title):
+    pairs = []
+    cands = [(a, b) for i, a in enumerate(items) for b in items[i + 1:]]
+    if title is not None:
+        cands += [(title, b) for b in items]
+    for a, b in cands:
+        area, ratio = overlap_of(a, b)
+        if area > OVERLAP_MIN_AREA and OVERLAP_MIN_RATIO < ratio < OVERLAP_MAX_RATIO:
+            pairs.append({"a": "%s: %s" % (a["kind"], a["label"]), "b": "%s: %s" % (b["kind"], b["label"]),
+                          "overlap_in2": round(area, 2), "ratio": round(ratio, 2)})
+    return pairs
+
+
+def hyperlinks_of(pkg, slide_path):
+    out = []
+    for rel in pkg.rels(slide_path):
+        if rel.get("Type") == REL_BASE + "hyperlink" and rel.get("TargetMode") == "External":
+            out.append(rel.get("Target"))
+    return out
+
+
+def citation_facts(lines, hyperlinks):
+    markers, urls, labels = [], 0, 0
+    for line in lines:
+        urls += len(URL_TEXT.findall(line))
+        if SOURCE_LABEL.match(line):
+            labels += 1
+        if CODE_LIKE.search(line):
+            continue
+        for m in CITATION.finditer(line):
+            if m.group(0) not in markers:
+                markers.append(m.group(0))
+    return {"markers": markers, "url_text_count": urls, "source_label_count": labels,
+            "has_locator": bool(urls or labels or hyperlinks)}
+
+
+def char_em(ch):
+    return 1.0 if unicodedata.east_asian_width(ch) in ("W", "F") else 0.55
+
+
+def table_estimate(tbl, geo):
+    cols = [int(c.get("w", "0")) for c in tbl.findall("a:tblGrid/a:gridCol", NS)]
+    assumed = False
+    total = 0
+    for tr in tbl.findall(A + "tr"):
+        row_h = int(tr.get("h", "0"))
+        ci = 0
+        for tc in tr.findall(A + "tc"):
+            span = int(tc.get("gridSpan", "1"))
+            if tc.get("hMerge") or tc.get("vMerge"):
+                ci += span
+                continue
+            width = sum(cols[ci:ci + span]) if cols else geo[2]
+            ci += span
+            pr = tc.find(A + "tcPr")
+            mar_l = int(pr.get("marL", CELL_MAR_LR)) if pr is not None else CELL_MAR_LR
+            mar_r = int(pr.get("marR", CELL_MAR_LR)) if pr is not None else CELL_MAR_LR
+            mar_t = int(pr.get("marT", CELL_MAR_TB)) if pr is not None else CELL_MAR_TB
+            mar_b = int(pr.get("marB", CELL_MAR_TB)) if pr is not None else CELL_MAR_TB
+            avail_pt = max(1.0, (width - mar_l - mar_r) / EMU_PER_INCH * 72)
+            height_pt = 0.0
+            tb = tc.find(A + "txBody")
+            for p in (tb.findall(A + "p") if tb is not None else []):
+                sizes = [int(r.find(A + "rPr").get("sz")) / 100.0 for r in p.findall(A + "r")
+                         if r.find(A + "rPr") is not None and r.find(A + "rPr").get("sz")]
+                end = p.find(A + "endParaRPr")
+                if not sizes and end is not None and end.get("sz"):
+                    sizes = [int(end.get("sz")) / 100.0]
+                if not sizes:
+                    assumed = True
+                size = max(sizes) if sizes else DEFAULT_TABLE_PT
+                text = plain(para_text(p))
+                lines = max(1, math.ceil(sum(char_em(c) for c in text) * size / avail_pt))
+                height_pt += lines * size * 1.2
+            cell_h = height_pt / 72 * EMU_PER_INCH + mar_t + mar_b
+            row_h = max(row_h, cell_h)
+        total += row_h
+    return {"top": inches(geo[1]), "left": inches(geo[0]), "width": inches(geo[2]), "frame_height": inches(geo[3]),
+            "estimated_height": inches(int(total)), "font_assumed": assumed}
+
+
 def slide_facts(no, pkg, slide_path):
     root = pkg.tree(slide_path)
     sptree = root.find("p:cSld/p:spTree", NS)
@@ -358,12 +523,29 @@ def slide_facts(no, pkg, slide_path):
             edges.add(round(round(left / EDGE_STEP) * EDGE_STEP, 2))
     notes = notes_nonempty(pkg, slide_path)
     text_blocks.sort(key=lambda b: (round((b["top"] or 0) / 0.3), b["left"] or 0))
+    items, title_item = overlap_items(pkg, slide_path, sptree, title_el)
+    pairs = partial_overlaps(items, title_item)
+    links = hyperlinks_of(pkg, slide_path)
+    lines = ([title] if title else []) + [x for b in text_blocks for x in
+                                          (b.get("paragraphs") or [c for row in b.get("rows", []) for c in row])]
+    tables = []
+    for el in sptree:
+        if el.tag == P + "graphicFrame":
+            tbl = el.find("a:graphic/a:graphicData/a:tbl", NS)
+            geo = effective_geometry(pkg, slide_path, el)
+            if tbl is not None and None not in geo:
+                tables.append(table_estimate(tbl, geo))
     return {"no": no, "title": title or None, "body_chars": body_chars, "bullet_count": bullets,
             "min_font_pt": number(min(sizes)) if sizes else None, "image_count": images,
             "has_notes": bool(notes), "paragraphs": paragraphs, "text_blocks": text_blocks, "shapes": shapes,
             "left_edge_count": len(edges) if sum(1 for s in shapes if s["kind"] in ("text", "picture", "table")) >= 2 else None,
             "distinct_colors": len(colors),
-            "min_contrast": round(min(contrasts), 2) if contrasts else None}, has_text, theme_used
+            "min_contrast": round(min(contrasts), 2) if contrasts else None,
+            "empty_placeholder_count": empty_placeholders(sptree, title_id),
+            "partial_overlap_count": len(pairs), "overlap_pairs": pairs,
+            "hyperlinks": links, "citation_markers": citation_facts(lines, links),
+            "table_estimates": tables,
+            "has_group": any(el.tag == P + "grpSp" for el in sptree)}, has_text, theme_used
 
 
 def slide_paths(z):
@@ -375,6 +557,20 @@ def slide_paths(z):
         t = target[sld.get(R + "id")]
         paths.append(t.lstrip("/") if t.startswith("/") else posixpath.normpath(posixpath.join("ppt", t)))
     return paths
+
+
+def deck_layout(z):
+    """スライドの大きさ（インチ）と章の一覧。"""
+    pres = ET.fromstring(z.read("ppt/presentation.xml"))
+    size = pres.find("p:sldSz", NS)
+    width = inches(int(size.get("cx"))) if size is not None else None
+    height = inches(int(size.get("cy"))) if size is not None else None
+    order = {sld.get("id"): i for i, sld in enumerate(pres.findall("p:sldIdLst/p:sldId", NS), 1)}
+    sections = []
+    for sec in pres.iter("{%s}section" % NS["p14"]):
+        nos = [order[x.get("id")] for x in sec.iter("{%s}sldId" % NS["p14"]) if x.get("id") in order]
+        sections.append({"name": sec.get("name"), "slides": nos})
+    return width, height, sections
 
 
 def main(argv=None):
@@ -397,14 +593,17 @@ def main(argv=None):
                 inherited += 1
             theme_slides += 1 if theme_used else 0
             slides.append(facts)
+        width, height, sections = deck_layout(z)
     total = len(slides)
     font_checked = sum(1 for s in slides if s["min_font_pt"] is not None)
     color_checked = sum(1 for s in slides if s["min_contrast"] is not None)
-    out = {"file": os.path.basename(args.pptx), "slide_count": total, "slides": slides,
+    out = {"file": os.path.basename(args.pptx), "slide_count": total, "slide_width": width, "slide_height": height,
+           "sections": sections, "slides": slides,
            "limitations": ["font inherited: %d slides" % inherited,
                            "font checked: %d/%d slides" % (font_checked, total),
                            "color checked: %d/%d slides" % (color_checked, total),
-                           "color theme-based: %d slides" % theme_slides]}
+                           "color theme-based: %d slides" % theme_slides,
+                           "group shapes not checked for overlap: %d slides" % sum(1 for s in slides if s.pop("has_group"))]}
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
     return 0

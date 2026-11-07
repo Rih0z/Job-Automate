@@ -1,0 +1,105 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "slide-clarity-review",
+  "reviewed_at": "2026-11-07T03:27:09Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "248571149811f0bbf6fee4bf1c44a877e9c8ffdc0c74bcf25013c50053d1f8d3"
+      },
+      {
+        "path": "criteria/clarity.json",
+        "sha256": "c7e72d9347b996adc27d02ef3f80b81c3998e86d6235fb74d133b8bdc1cbbf89"
+      },
+      {
+        "path": "scripts/check_deck.py",
+        "sha256": "fa3ee63aa252e92a833b0dc2203bf03cbb887fb5ae484a3db1139e3be451235b"
+      },
+      {
+        "path": "scripts/extract_deck.py",
+        "sha256": "d387cc527ebd36c26279d030d5c4abfe4e5a598b73ad25daafceb2369bb86903"
+      },
+      {
+        "path": "scripts/finalize_review.py",
+        "sha256": "3706e8b176e5875feaf0eb85f03e63277be9a3676e54a806ca1a40e5289beeaf"
+      },
+      {
+        "path": "scripts/gate.py",
+        "sha256": "7a68e731c05a16e256dc0579b772420dad1706cd736ee581b787bda88cce9fae"
+      },
+      {
+        "path": "scripts/render_deck.py",
+        "sha256": "3c3afcbc97506e700cc530dae5dc1485e6f44ff683e70ff423fbc352b6b73f4f"
+      }
+    ],
+    "content_hash": "6582bba740c3388df026ea7ee1b9eeb130da0655951634221b6b3c9c591dc1ad"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "afe65d5c112851683",
+    "model": "sonnet"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 19
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": "slide-clarity-review/scripts/__pycache__/gate.cpython-311.pyc",
+        "comment": "スキルフォルダに __pycache__ が混入している。配布時は除外するのが望ましい。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:18,24,31,39,41",
+        "comment": "リポジトリ固有の相対パス前提。別リポジトリでは動かない。前提リポジトリの明記が望ましい。"
+      },
+      {
+        "criterion_id": "D3",
+        "severity": "low",
+        "location": "SKILL.md:3-4",
+        "comment": "disable-model-invocation: true なのに description が長大なトリガー列挙になっている。短くして構わない。"
+      },
+      {
+        "criterion_id": "O2",
+        "severity": "low",
+        "location": "SKILL.md:20,103",
+        "comment": "画像なし時の扱い（上限 14 点）が複数箇所に分散。1 か所に集約すると読みやすい。"
+      }
+    ]
+  }
+}

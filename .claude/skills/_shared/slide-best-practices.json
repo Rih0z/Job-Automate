@@ -627,7 +627,7 @@
       "id": "closing-slide",
       "category": "message",
       "title": "最後に望ましい姿と次の行動を示す",
-      "rule": "最終スライドは礼だけで終えず、望ましい姿と次の行動を示す。",
+      "rule": "本編の最終スライド（参考の区切りより前）は礼だけで終えず、望ましい姿と次の行動を示す。",
       "rationale": "聴衆が持ち帰る内容が最後に決まる。",
       "severity": "should",
       "check": {
@@ -945,6 +945,144 @@
         }
       ],
       "adaptation": "出典はデータ可視化の調査に基づく助言。スライドの背景に広げた解釈。"
+    },
+    {
+      "id": "one-topic-one-place",
+      "category": "message",
+      "title": "1 つの話題は資料の中の 1 か所で説明する",
+      "rule": "同じ話題の説明は資料の中で 1 か所にまとめ、他の箇所では説明を繰り返さず参照だけにする。",
+      "rationale": "同じ話題が離れた章に分かれると、聴衆はどこが正しい説明か分からず、関係もつかみにくい。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "同じ話題（手順・定義・注意点など）の説明が、離れた章やページに分かれて 2 回以上出ていないかを判定する。2 回目以降が「第 N 章の手順で行う」のような参照だけなら合格。同じ文の言い直し（文面の重複）は日本語の点検が数えるので、ここでは話題の置き場所だけを見る。候補 repeated_topic_terms（複数の章の見出しに出る語）は手がかりで、語の一致は話題の一致ではない。例: 承認の手順の説明が 3 章・6 章・9 章に分かれて出る → 3 章にまとめ、6 章と 9 章は参照だけにする。"
+      },
+      "evidence": [
+        {
+          "source_id": "pz-crap",
+          "locator": "Proximity",
+          "quote": "When things are close to each other, we read them as belonging together"
+        }
+      ],
+      "adaptation": "出典は近接の原則（近いものはまとまりとして読まれる）を述べる。同じ話題を資料全体の 1 か所に集めることは、この原則を資料全体の構成に当てはめた本リポジトリの解釈である。",
+      "applies_when": {
+        "deck": {
+          "condition": "8 枚以上の資料、または章が 2 つ以上ある資料",
+          "auto_trigger": {
+            "any_of": [
+              {
+                "fact": "slide_count",
+                "op": ">=",
+                "value": 8
+              },
+              {
+                "fact": "section_count",
+                "op": ">=",
+                "value": 2
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "before-after-order",
+      "category": "message",
+      "title": "改善の前後は、前 → 起きたこと → 後 → 効果の順に置く",
+      "rule": "改善の前後を示すときは、改善前、起きたこと、改善後、何が良くなったか、の順に並べ、効果を言葉で示す。",
+      "rationale": "改善後が先に出たり効果が書かれていなかったりすると、聴衆は何が変わったのかを自分で組み立てる必要がある。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "改善の前後・良い例と悪い例・現状と提案の対について、判定の前に、対ごとに改善前（悪い例・現状）と改善後（良い例・提案・その結果）のページ番号を書き出す。改善後やその結果のページの番号が、対応する改善前のページより小さい（先に出る）なら不合格。資料が長い場合も、全ページを通して対を探す。改善後に何が良くなったか（効果）が言葉で書かれていなければ不合格。良い例と悪い例の対で、起きたことが無い場合は、その段階を求めない。例: 改善後の画面が先で改善前が後ろ → 改善前 → 起きたこと（問い合わせが増えた）→ 改善後 → 効果（問い合わせが半分になった）。"
+      },
+      "evidence": [
+        {
+          "source_id": "duarte-storytelling",
+          "locator": "tip 4: Add Contrast",
+          "quote": "using the contrast to keep the audience engaged"
+        }
+      ],
+      "adaptation": "出典は話の中で対比を使うことを述べる。対比を「前 → 後 → 効果」の順に置くことは、本リポジトリの解釈である。資料全体に対比があるかは storyline-contrast が見る。",
+      "applies_when": {
+        "deck": {
+          "condition": "改善の前後・良い例と悪い例・現状と提案の対を含む資料"
+        }
+      }
+    },
+    {
+      "id": "source-locator-visible",
+      "category": "evidence",
+      "title": "外部の根拠は、辿れる所在を同じページで示す",
+      "rule": "外部の根拠に基づく主張のページには、読み手が辿れる所在（URL・文献名・資料名）を同じページに示す。番号で参照する場合は、その番号が同じページか参考文献のページで所在に対応していること。",
+      "rationale": "所在が無い根拠は、読み手が確かめられず、主張の信頼性が下がる。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "外部の資料・調査・記事・公式文書に基づく主張のページに、URL・文献名・資料名のいずれかがあるか、出典番号（[1]・※1 など）が同じページか参考文献のページで所在に対応しているかを判定する。候補 orphan_citations（所在に対応しない出典番号）は手がかりで、コードの中の番号は出典ではない。例: 本文に [2] とあるのに、そのページにも参考文献のページにも所在が無い → 所在を書く（番号を消すのは直し方ではない）。"
+      },
+      "evidence": [
+        {
+          "source_id": "nngroup-scan",
+          "locator": "credibility paragraph",
+          "quote": "We found that credibility is important for Web users"
+        }
+      ],
+      "adaptation": "出典は読み手にとって信頼性が重要であることを述べる。所在を同じページに示すことは、信頼性を保つための本リポジトリの解釈である。content-source は設計図の段階の検査で、この観点は完成後の資料での所在の見え方を見る。",
+      "applies_when": {
+        "deck": {
+          "condition": "外部の根拠（資料・調査・記事・公式文書）を使う資料",
+          "auto_trigger": {
+            "any_of": [
+              {
+                "fact": "citation_marker_total",
+                "op": ">=",
+                "value": 1
+              },
+              {
+                "fact": "hyperlink_total",
+                "op": ">=",
+                "value": 1
+              },
+              {
+                "fact": "url_text_total",
+                "op": ">=",
+                "value": 1
+              },
+              {
+                "fact": "source_label_total",
+                "op": ">=",
+                "value": 1
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "main-before-reference",
+      "category": "message",
+      "title": "本編と参考を分け、まとめは本編の最後に置く",
+      "rule": "本編には聴衆に持ち帰ってほしい内容だけを置く。補足・詳細・付録は「参考」と分かる区切りの後ろに置き、まとめは本編の最後（区切りの前）に置く。",
+      "rationale": "本編と補足が混ざると要点が埋もれ、まとめが付録の後ろにあると聴衆が最後に受け取る話がずれる。",
+      "severity": "should",
+      "check": {
+        "method": "llm",
+        "how": "判定の前に、まとめのページ（要点の振り返り・持ち帰ってほしいこと）と、「参考」「付録」などの区切りのページと、補足・詳細・付録のページの番号を書き出す。まとめの番号が区切りや付録の番号より大きい（付録の後ろにある）、本編の途中に詳細の資料が挟まる、区切りが無く本編と付録の境目が分からない場合は不合格。資料が長い場合も、最後のページまで確かめる。例: まとめのページが付録の後ろにある → まとめを本編の最後に移し、その後ろに「参考」の区切りを置く。"
+      },
+      "evidence": [
+        {
+          "source_id": "nngroup-scan",
+          "locator": "scannable text list",
+          "quote": "the inverted pyramid style, starting with the conclusion"
+        }
+      ],
+      "adaptation": "出典は結論を先に置く逆ピラミッドの書き方を述べる。本編（要点）を先に、詳細を参考の区切りの後ろに置くことは、これを資料の構成に当てはめた本リポジトリの解釈である。まとめがあるかは closing-slide が見る。",
+      "applies_when": {
+        "deck": {
+          "condition": "補足・詳細・付録を含む資料"
+        }
+      }
     }
   ]
 }

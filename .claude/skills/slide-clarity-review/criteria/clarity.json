@@ -10,7 +10,10 @@
         "conclusion-first",
         "storyline-contrast",
         "closing-slide",
-        "one-idea"
+        "one-idea",
+        "one-topic-one-place",
+        "before-after-order",
+        "main-before-reference"
       ]
     },
     {
@@ -45,7 +48,8 @@
       "weight": 20,
       "practice_ids": [
         "visual-evidence",
-        "content-source"
+        "content-source",
+        "source-locator-visible"
       ]
     },
     {

@@ -3,6 +3,7 @@
 
   practices <slide-best-practices.json> [--fetch-log F] [--sources-dir D] [--today YYYY-MM-DD]
   deck-spec <deck-spec.json> --practices <slide-best-practices.json>
+            spec_version 2 の設計図では、practice と無関係に「設計図の構造の検査」（check_structure_v2）も行う
   clarity   <clarity.json>   --practices <slide-best-practices.json>
   palette   <palette.json>
 
@@ -33,7 +34,10 @@ ORIGINS = ("source", "adaptation")
 NUMERIC_RULE = re.compile(r"\d+(?:\.\d+)?\s*(?:pt|px|文字|項目|行|枚|%)")
 NUMBER_TOKEN = re.compile(r"(?<![\d.])\d+(?:\.\d+)?(?![\d.])")
 RAW_COLOR = re.compile(r"#[0-9A-Fa-f]{6}\b|rgb\(", re.I)
-ROLES_OK = ("title", "agenda", "section", "content", "closing")
+ROLES_OK = ("title", "agenda", "section", "content", "closing", "appendix")
+SECTION_KINDS = ("main", "reference")
+EXAMPLE_PATTERNS = ("before-after", "good-bad")
+EXAMPLE_STEPS = ("before", "result", "after", "effect")
 EVIDENCE_TYPES = ("chart", "diagram", "image", "table", "quote", "list", "opinion", "proposal")
 LAYOUTS = ("title", "section", "content-1col", "content-2col", "chart", "image", "closing")
 FOCALS = ("title", "figure", "number", "image", "none")
@@ -124,6 +128,12 @@ def check_practices(doc, rep, today):
             origin = chk.get("threshold_origin")
             if origin not in ORIGINS:
                 rep.err("%s: threshold_origin missing" % pid)
+        deck_cond = (p.get("applies_when") or {}).get("deck")
+        if deck_cond is not None:
+            for e in sc.deck_condition_errors(pid, deck_cond):
+                rep.err(e)
+            if chk.get("method") != "llm":
+                rep.err("%s: applies_when.deck is only for llm practices" % pid)
         origin_ok = chk.get("threshold_origin") == "source" and "threshold" in chk
         if NUMERIC_RULE.search(p.get("rule", "")) and not (origin_ok or p.get("numeric_in_rule_ok")):
             rep.err("%s: numeric in rule requires threshold_origin=source" % pid)
@@ -196,12 +206,21 @@ def check_fetch_log(doc, log, rep, sources_dir):
 
 
 # ------------------------------------------------------------------ deck-spec
+def source_value(value):
+    """content_source の値を、required の判定用に正規化する。文字列の配列も受け付ける（2026-11）。
+    空の配列・空文字だけの配列は「無い」（None）とする。evaluate_check の required は空の配列を
+    「ある」と判定してしまうため、ここで変換する（v1 の設計図にも同じく適用する。不具合の修正）。"""
+    if isinstance(value, list):
+        return value if any(isinstance(v, str) and v.strip() for v in value) else None
+    return value
+
+
 def spec_metrics(slide, spec):
     fe = slide.get("focal_element")
     return {
         "points_count": len(slide.get("points") or []),
         "action_title_chars": len(str(slide.get("action_title") or "").strip()),
-        "content_source_present": slide.get("content_source"),
+        "content_source_present": source_value(slide.get("content_source")),
         "focal_element_present": None if fe in (None, "", "none") else fe,
     }
 
@@ -215,7 +234,146 @@ def applies(practice, slide):
     return True
 
 
+def _norm(text):
+    return squash(str(text)).casefold()
+
+
+def _nonempty(v):
+    return (isinstance(v, str) and bool(v.strip())) or (isinstance(v, int) and not isinstance(v, bool))
+
+
+def check_structure_v2(spec, slides, rep):
+    """設計図の構造の検査（spec_version 2 のときだけ動く）。practice の有無に関係なく同じに動かす。
+    メッセージの括弧内の id は、関係する観点の名前（参考）。practice でない観点も、手順の運用上の注意の名前として残す。"""
+    nos = [s.get("no") for s in slides]
+    # 章立て（one-topic-one-place）
+    section_ids, themes = [], {}
+    for sec in spec.get("sections") or []:
+        sid = sec.get("id") if isinstance(sec, dict) else None
+        if not _nonempty(sid) or not _nonempty(sec.get("theme")):
+            rep.err("sections: id and theme required (one-topic-one-place)")
+            continue
+        if sid in section_ids:
+            rep.err("sections: duplicate id %s (one-topic-one-place)" % sid)
+        section_ids.append(sid)
+        key = _norm(sec["theme"])
+        if key in themes:
+            rep.err("sections: duplicate theme '%s' in %s and %s (one-topic-one-place)" % (sec["theme"], themes[key], sid))
+        else:
+            themes[key] = sid
+    # 素材（reproducible-material-complete）
+    exhibit_ids = []
+    for ex in spec.get("exhibits") or []:
+        eid = ex.get("id") if isinstance(ex, dict) else None
+        if not _nonempty(eid):
+            rep.err("exhibits: id required (reproducible-material-complete)")
+            continue
+        exhibit_ids.append(eid)
+        at = ex.get("full_text_at")
+        if not _nonempty(at):
+            rep.err("exhibit %s: full_text_at missing (reproducible-material-complete)" % eid)
+        elif isinstance(at, int) and at not in nos:
+            rep.err("exhibit %s: full_text_at slide %s not found (reproducible-material-complete)" % (eid, at))
+
+    examples = {}
+    for idx, s in enumerate(slides):
+        no = s.get("no")
+        if s.get("role") == "content" and not _nonempty(s.get("intent")):
+            rep.err("slide %s: intent missing (purpose-and-premise)" % no)
+        if "section" in s and s["section"] not in section_ids:
+            rep.err("slide %s: unknown section %s (one-topic-one-place)" % (no, s["section"]))
+        if "kind" in s:
+            if s.get("role") != "section":
+                rep.err("slide %s: kind is only for role section (main-before-reference)" % no)
+            elif s["kind"] not in SECTION_KINDS:
+                rep.err("slide %s: invalid kind (main-before-reference)" % no)
+        refs = s.get("exhibit_ref")
+        for r in (refs if isinstance(refs, list) else [refs] if refs is not None else []):
+            if r not in exhibit_ids:
+                rep.err("slide %s: unknown exhibit %s (reproducible-material-complete)" % (no, r))
+        cs = s.get("content_source")
+        if isinstance(cs, list) and not all(isinstance(v, str) and v.strip() for v in cs):
+            rep.err("slide %s: content_source has an empty entry (source-locator-visible)" % no)
+        ex = s.get("example")
+        if ex is None:
+            continue
+        if not isinstance(ex, dict) or not _nonempty(ex.get("id")):
+            rep.err("slide %s: example id required (before-after-order)" % no)
+            continue
+        steps = ex.get("steps")
+        if not isinstance(steps, list) or not steps or any(x not in EXAMPLE_STEPS for x in steps):
+            rep.err("slide %s: example steps must be a list of %s (before-after-order)" % (no, "/".join(EXAMPLE_STEPS)))
+            steps = [x for x in steps if x in EXAMPLE_STEPS] if isinstance(steps, list) else []
+        if "result" in steps and not _nonempty(ex.get("conditions")):
+            rep.err("slide %s: example %s conditions missing (example-matches-conditions)" % (no, ex["id"]))
+        e = examples.setdefault(ex["id"], {"patterns": set(), "steps": {}, "effect": False, "causes": set()})
+        if "pattern" in ex:
+            e["patterns"].add(ex["pattern"])
+        for x in steps:
+            e["steps"].setdefault(x, idx)
+        e["effect"] = e["effect"] or _nonempty(ex.get("effect"))
+        cause = ex.get("cause")
+        if isinstance(cause, list):
+            if len(cause) != 1:
+                rep.err("slide %s: example %s cause must be one (one-example-one-cause)" % (no, ex["id"]))
+            cause = cause[0] if cause else None
+        if _nonempty(cause):
+            e["causes"].add(_norm(cause))
+    for eid, e in examples.items():
+        pattern = next(iter(e["patterns"])) if len(e["patterns"]) == 1 else None
+        if pattern not in EXAMPLE_PATTERNS:
+            rep.err("example %s: pattern must be one of %s (before-after-order)" % (eid, "/".join(EXAMPLE_PATTERNS)))
+        st = e["steps"]
+        if "before" not in st or "after" not in st:
+            rep.err("example %s: before and after required (before-after-order)" % eid)
+        elif st["before"] > st["after"]:
+            rep.err("example %s: before must come before after (before-after-order)" % eid)
+        if pattern == "before-after" and "result" not in st:
+            rep.err("example %s: result required for before-after (before-after-order)" % eid)
+        if not e["effect"]:
+            rep.err("example %s: effect missing (before-after-order)" % eid)
+        if len(e["causes"]) > 1:
+            rep.err("example %s: multiple causes (one-example-one-cause)" % eid)
+
+    # 本編と参考の順序（main-before-reference）
+    roles = [s.get("role") for s in slides]
+    appendix = [i for i, r in enumerate(roles) if r == "appendix"]
+    closing = [i for i, r in enumerate(roles) if r == "closing"]
+    ref_sections = [i for i, s in enumerate(slides) if s.get("role") == "section" and s.get("kind") == "reference"]
+    if appendix:
+        first_app = appendix[0]
+        for i in range(first_app + 1, len(slides)):
+            if roles[i] in ("content", "closing"):
+                rep.err("slide %s: %s after appendix (main-before-reference)" % (nos[i], roles[i]))
+        if closing and closing[0] > first_app:
+            rep.err("closing must come before the first appendix (main-before-reference)")
+    for i in ref_sections:
+        if not appendix:
+            rep.err("slide %s: reference section without appendix (main-before-reference)" % nos[i])
+        elif (closing and i < closing[-1]) or i > appendix[0]:
+            rep.err("slide %s: reference section must be after the last closing and before the first appendix "
+                    "(main-before-reference)" % nos[i])
+
+    # 用語の一覧（日本語点検の軸 terms-and-references の、作成前の対）
+    for g in spec.get("glossary") or []:
+        g = g if isinstance(g, dict) else {}
+        term, first = g.get("term"), g.get("first_slide")
+        if not _nonempty(term) or not _nonempty(g.get("definition")) or isinstance(first, bool) or not isinstance(first, int):
+            rep.err("glossary: term, definition and first_slide required (terms-and-references)")
+            continue
+        for s in slides:
+            if isinstance(s.get("no"), int) and s["no"] < first:
+                text = " ".join(_strings([s.get("action_title"), s.get("key_message"), s.get("points")]))
+                if term in text:
+                    rep.err("glossary '%s': used on slide %s before first_slide %s (terms-and-references)"
+                            % (term, s["no"], first))
+                    break
+
+
 def check_deck_spec(spec, practices, rep):
+    version = spec.get("spec_version", 1)
+    if version not in (1, 2) or isinstance(version, bool):
+        rep.err("invalid spec_version (1 or 2)")
     for k in TOP_KEYS:
         if k not in spec:
             rep.err("missing key: %s" % k)
@@ -249,6 +407,8 @@ def check_deck_spec(spec, practices, rep):
     if any(RAW_COLOR.search(v) for k in TOP_KEYS[:4] for v in _strings(spec.get(k))):
         raw_color = True
         rep.err("raw color not allowed")
+    if version == 2:
+        check_structure_v2(spec, valid_slides, rep)
 
     autos = [p for p in practices if p["check"].get("method") == "auto" and p["check"].get("scope") == "deck-spec"]
     for p in autos:

@@ -1,0 +1,93 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "slide-japanese-review",
+  "reviewed_at": "2026-11-07T03:27:10Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "33acffe61deb51f2ac71976f07b4164ba3ba67a56f500f7280ff870a49ebdbdc"
+      },
+      {
+        "path": "criteria/axes.json",
+        "sha256": "2e614bc3dcde32e21d7a747ec4187637d134ff2be71645f1ed88f55593242609"
+      },
+      {
+        "path": "criteria/memo-words.json",
+        "sha256": "e60ecf97fee657ce4ae1f0923d615e863365f20f7275ecbd0e8159fe5804119e"
+      },
+      {
+        "path": "scripts/check_ja_slide.py",
+        "sha256": "b53f615142685503835075de718153130df83614a4e252d01a5fdd12c9910e18"
+      }
+    ],
+    "content_hash": "895dd4d1f066a622ed8a0264e3e5b43eb43906d8a91dd71857faf1cc511b4543"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "a4bbbea2ea00c05b9",
+    "model": "sonnet"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 20
+      }
+    ],
+    "score": 94,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": "SKILL.md:63-70",
+        "comment": "axes.json の軸の要旨を SKILL.md が繰り返しており、更新が二重になる。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "scripts/check_ja_slide.py:71-72",
+        "comment": "text_blocks が無い deck-facts.json への fallback があるが、SKILL.md に記載が無い。"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": "SKILL.md:100-108",
+        "comment": "check_ja_slide.py 自体の失敗(JSON 不正など)の対処がエラー表に無い。"
+      },
+      {
+        "criterion_id": "O2",
+        "severity": "low",
+        "location": "criteria/memo-words.json:3-4",
+        "comment": "『〜してください。』『〜することが重要です』は先頭の『〜』込みの文字列照合になり、実文面に一致しにくい。検出が実質無効の可能性。"
+      }
+    ]
+  }
+}
