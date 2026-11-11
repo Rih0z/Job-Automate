@@ -1,0 +1,103 @@
+{
+  "schema": "model-selection-operator/v1",
+  "updated": "2026-11-10",
+  "purpose": "このリポジトリの運用者が決めたモデルの割り当てと advisor の採用。公式の要件と枠組みは .claude/model-selection.json にあり、ここは運用者の指定だけを置く（全要件 origin: operator）。両方がある時はこちらの割り当てが優先する。",
+  "assignment": {
+    "default": {
+      "tier": "default",
+      "model": "opus",
+      "effort": "medium"
+    },
+    "hardest": {
+      "tier": "hardest",
+      "model": "fable",
+      "effort": "high"
+    },
+    "well_specified": {
+      "tier": "everyday",
+      "model": "sonnet",
+      "effort": "medium"
+    }
+  },
+  "classification": {
+    "rule": "上から順に見て、最初に当たった行で決める。",
+    "rows": [
+      {
+        "order": 1,
+        "if": "Opus を xhigh にしても解けなかった、または最初から次のいずれかに当たる: 複数日・複数 session にわたる自律作業、正解の決まっていない設計を一から立てる、深い調査を完成文書まで通す",
+        "use": "hardest"
+      },
+      {
+        "order": 2,
+        "if": "要件が明確: 入力・出力・受け入れ基準（テストや期待値）・対象ファイルが依頼の時点で決まっていて、設計の判断が残っていない。例: 計画が PASS した後の実装、決まった書式への変換、指定した観点だけの機械的な点検",
+        "use": "well_specified"
+      },
+      {
+        "order": 3,
+        "if": "上のどれにも当たらない（計画、設計、レビューの採点、原因の分からない障害の調査、CLAUDE.md・skill の変更の採否を含む）",
+        "use": "default"
+      }
+    ],
+    "return_to_default": "Sonnet で始めた作業で、判断の分かれる論点が出た、対象が広がった、同じ指示で 2 回続けて期待と違う結果になった時は、Opus に戻す。",
+    "escalate_to_hardest": "Opus で足りない時は、まず effort を high → xhigh に上げ（model-selection.json MS-02）、それでも足りない時に Fable に移す。",
+    "fallback_without_fable": "Fable が使えない時の最難関は Opus を /effort xhigh で使う。",
+    "return_after_hardest": "Fable の作業が終わったら /model opus と /effort medium に戻す（session の effort は /model を替えても持ち越され、戻さないと Opus が high のまま動く）。"
+  },
+  "reviewers": "readonly-reviewer は model を指定せず本体（Opus・medium）を継承する。採点は判断を伴うため、要件が明確でも Sonnet に下げない。",
+  "requirements": [
+    {
+      "id": "OP-01",
+      "origin": "operator",
+      "rule": "既定は Opus・effort medium。"
+    },
+    {
+      "id": "OP-02",
+      "origin": "operator",
+      "rule": "最難関の課題は Fable・effort high（本体は /model fable → /effort high、委任は Agent の model: \"fable\" と effort: \"high\"）。"
+    },
+    {
+      "id": "OP-03",
+      "origin": "operator",
+      "rule": "要件が明確な作業は Sonnet。委任は Agent の model: \"sonnet\" で行う。"
+    },
+    {
+      "id": "OP-04",
+      "origin": "operator",
+      "rule": "advisor は fable を使う（本体 Opus が受ける advisor は Fable か Opus 5 以上）。",
+      "note": "公式（model-selection.json MS-06・MS-07）は、単一モデルの effort 曲線を上回ることを計測してから組み合わせる、としている。Opus medium + Fable advisor の公開計測は無く、Opus high では effort を上げた場合とほぼ同じ位置だった。採用は運用者の判断で、次の stop_condition で見直す。"
+    }
+  ],
+  "advisor": {
+    "model": "fable",
+    "configured_in": ".claude/settings.local.json の advisorModel（gitignore 対象。clone した人には効かない）",
+    "cost_note": "subagent（Agent の model: \"sonnet\" の委任や readonly-reviewer を含む）も advisor を継承し、呼ばれれば Fable の単価で会話全体を読む。",
+    "stop_condition": "10 session 程度で Advising 行がほぼ 0、またはコスト増に見合う差が見えない時は /advisor off にし、settings.local.json の advisorModel を消す。effort は既定（medium）のままなので、公式の『consult が減ったら executor の effort を戻す』は該当しない。",
+    "if_unavailable": "Fable の利用権・usage credits の同意が無い間は、Claude Code は advisor を付けずに送信し通知を出す。/model fable で同意すると有効になる。"
+  },
+  "checks": {
+    "note": "settings.local.json は gitignore 対象で移植されない。移植先や clone ではファイルが無く、常に SKIP になる。この repo の運用者の環境では全件 PASS・SKIP 0 件を完了条件とする。",
+    "items": [
+      {
+        "id": "CK-01",
+        "file": ".claude/settings.local.json",
+        "key": "model",
+        "expected": "opus",
+        "if_missing": "SKIP"
+      },
+      {
+        "id": "CK-02",
+        "file": ".claude/settings.local.json",
+        "key": "effortLevel",
+        "expected": "medium",
+        "if_missing": "SKIP"
+      },
+      {
+        "id": "CK-03",
+        "file": ".claude/settings.local.json",
+        "key": "advisorModel",
+        "expected": "fable",
+        "if_missing": "SKIP"
+      }
+    ]
+  }
+}

@@ -1195,6 +1195,42 @@
       "severity": "Low",
       "status": "backlog",
       "note": "hook の入力に Agent の識別子と応答が含まれるかを、実機で確かめる必要がある。レビュー開始時の hash（--expected-hash）と両立させる設計も要る"
+    },
+    {
+      "id": "CR-40",
+      "date": "2026-11-11",
+      "finding": "home の CLAUDE.md の起動時手順『chat paste の引継ぎが無ければ .tmp/handoffs/ の最新ファイルを Read』と、agent-harness-bootstrap の operational-knowhow.md:140『最新 handoff の本文を session 開始時に自動 Read しない』が食い違う",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "home の CLAUDE.md は git 管理外で、他の作業場所にも効く。どちらに揃えるかは運用者が決める"
+    },
+    {
+      "id": "CR-41",
+      "date": "2026-11-11",
+      "finding": "provenance.json の model-selection-policy の when_unselected が file_absent だけで、移植先の CLAUDE.md に model-selection.json への参照が残る状態を見逃す（session-boundary-policy は grep_absent を足してある）",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "直すと agent-harness-bootstrap の再レビューが要る。テストの単独ケース（選択済みで参照が無い → 1 件）や、T68 が note の文面を手で写している点と一緒に直すとよい"
+    },
+    {
+      "id": "CR-42",
+      "date": "2026-11-11",
+      "finding": "home の Stop hook hook-stop.ps1 (a) が、最新 handoff が 1 時間より古いと毎回『/clear 前に handoff を更新・作成して』と促し、session-boundary.json の判定（作るのは利用者が頼んだ時・別の人や別の PC が引き取る時などだけ）と食い違う",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "hook-stop.ps1 は home（git 管理外）にあり、dump repo の運用にも効く。文言を session-boundary の基準に合わせるか、(a) を外すかを運用者が決める"
+    },
+    {
+      "id": "CR-43",
+      "date": "2026-11-11",
+      "finding": "home の claude-md skill（template.md:14、maintainers.md:7、rubric.md:16）に旧方式の handoff 規約『次 handoff 作成まで保持』が残り、home CLAUDE.md の新方式（受領を台帳に記録し完了時に done で削除）と食い違う",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "~/.claude/skills/claude-md は home の skill で、このリポジトリの agent-harness-bootstrap 1.4.0 の handoff 規約に合わせて直すとよい"
     }
   ],
   "audit_log": [

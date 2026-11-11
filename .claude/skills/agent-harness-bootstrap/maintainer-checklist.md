@@ -4,7 +4,7 @@
 
 - [ ] Step 7 で WebFetch が要件化されているか
 - [ ] Step 8 で `/clear` + handoff 保存が指示されているか
-- [ ] handoff 規約（ファイル名 `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、次 handoff 作成まで保持、issue ファイルへの完全パス記載）が一貫しているか
+- [ ] handoff 規約（ファイル名 `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、受領を台帳に記録し完了時に `done` で削除、未受領で 30 日超は確認なしで `sweep --apply` で退避、issue ファイルへの完全パス記載）が一貫しているか
 - [ ] skills 更新時の公式 Skills ガイド WebFetch レビューが要件化されているか
 - [ ] 「公式準拠の核」と「独自運用」のラベル分離が崩れていないか
 - [ ] 新規要素（独自運用項目・rules・hooks・skills・CLAUDE.md セクション）を追加した時、`provenance.json` に id / provenance / rubric_items / depends_on を登録し、`bash .claude/skills/agent-harness-bootstrap/scripts/provenance-check.sh` が PASS するか（regression: `scripts/provenance-check.test.sh`）

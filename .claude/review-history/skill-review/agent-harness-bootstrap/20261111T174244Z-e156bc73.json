@@ -1,0 +1,179 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "agent-harness-bootstrap",
+  "reviewed_at": "2026-11-11T17:42:44Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "4fcc18b586ebf43f439c323084e54080544691e963a9a32b801e1ac9e7f06a82"
+      },
+      {
+        "path": "criteria/porting-reconciliation.json",
+        "sha256": "4971685379d9078d5e950a2a14d83d465680bb7d168154ff8c97489476acc1a7"
+      },
+      {
+        "path": "hooks-reference.md",
+        "sha256": "2dcf5cd30cdf4e0b57c22ed865eb53c031f8a41a4cb0ce8089d09bba9f0f196f"
+      },
+      {
+        "path": "maintainer-checklist.md",
+        "sha256": "233f082ff7468276c1cbc7ad69121c07ca2324e64c8a525fcb8fbdb5ee4953b3"
+      },
+      {
+        "path": "official-sources.md",
+        "sha256": "29b46a9bda8fce000fa511cb1dced303bf11e6d77dff5320fcd8758f5d3c83ea"
+      },
+      {
+        "path": "operational-knowhow-index.md",
+        "sha256": "7b485685d74a8edb147cc1f8e06d5492bb4f8987f4a5e14b4c96b92648db66e1"
+      },
+      {
+        "path": "operational-knowhow.md",
+        "sha256": "8fbd1d1935ed53b0e8e29ca38aad3196c6fcffae33096754b291697ec40daacf"
+      },
+      {
+        "path": "provenance.json",
+        "sha256": "92719dba59de600bec946090bba0737935406fa029ebef03942a19c9907b0f1b"
+      },
+      {
+        "path": "rubric.md",
+        "sha256": "e0e45c5d5bff2c9f17925016cab1ca12de1454de6515f527b414526b52b1610a"
+      },
+      {
+        "path": "scripts/contract-selfcheck.sh",
+        "sha256": "27acfd7a3b7de0d77204974f144a9bd6105810af697460a62b2083298f471819"
+      },
+      {
+        "path": "scripts/handoff-remind.sh",
+        "sha256": "d5e1f3f5ab6bdde22de68a7cb6762e0c43396024a7da8602903d47a36fb4307c"
+      },
+      {
+        "path": "scripts/handoff-remind.test.sh",
+        "sha256": "dc2443aa97abe8902b475e493ae63bd4f4ee105ecf5ebf67dfcdee23e87aa701"
+      },
+      {
+        "path": "scripts/handoff_lifecycle.py",
+        "sha256": "7bde729491ba5104100e3c23ad99170d9736d145fa60cbf6fce8c6bb6d52ec56"
+      },
+      {
+        "path": "scripts/harness-setup-state.sh",
+        "sha256": "2027b6845a07a89d7a6c547a6fa44adf1b8587e0ae67f8fa817b0dcc36e69ff8"
+      },
+      {
+        "path": "scripts/hook-session-start-setup.sh",
+        "sha256": "7cd66ec7c45339900acc3c9d534579f3ee777706584c40339801a17167ff8c1f"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.sh",
+        "sha256": "fb79fed4e778270c0606707197cee91044bc1a223fe7538b6c62ef530de90783"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.test.sh",
+        "sha256": "fe50edb26d5784d0fa1f3506e0dfcd0d6df6c190907ab191eda7eec83d49ef23"
+      },
+      {
+        "path": "scripts/provenance-check.sh",
+        "sha256": "43362629085f70fb5abb0e23ddbe9d7504e36085bc48b13c58efaea5d16294b9"
+      },
+      {
+        "path": "scripts/provenance-check.test.sh",
+        "sha256": "3de57de058613ca2a48bc9c59f56ba9598b847ec490350dc0657a98ca0f91331"
+      },
+      {
+        "path": "scripts/test_handoff_lifecycle.py",
+        "sha256": "5dd0f9c96b0b4a09e6fb391487bfd94d1610335bf6f94aca4c347f9cfbd8958c"
+      },
+      {
+        "path": "selection-flow.md",
+        "sha256": "13b9bb086de7c78447b7b0da6ad7a8094bc176b50f55bf183f6228b444ea4f96"
+      },
+      {
+        "path": "step7-reviewer-procedure.md",
+        "sha256": "29ff05a014db51ba7146eeb437f9333fd071eab18a276d17cb339e1d73503d05"
+      },
+      {
+        "path": "step8-step9-output-and-verify.md",
+        "sha256": "05b3d966da4436cc75f1bece9f52ac0cbd07532cf201f9e7114e4529edb8f1a2"
+      },
+      {
+        "path": "template.md",
+        "sha256": "e610e78ba31f921adc4b6ebe64a6cd1c0d954670f61f800c5fb3f859d127cadc"
+      }
+    ],
+    "content_hash": "a27643fc76025c4a392cae88b5edf938f31a45bc13bba25adf2c972976f1a560"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a7848ca9273faab8b",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 19
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/hooks-reference.md:95",
+        "comment": "Windows の例が python を直接呼ぶため、bash ラッパーが避けている WindowsApps の python スタブで固まる問題と、python が無い時の扱いに対処していない。注記を添えるか py -3 を使う例にするとよい。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:228-233",
+        "comment": "更新履歴の並びが昇順と降順で混ざっている。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:204",
+        "comment": "handoff の保存条件が session-boundary-policy の判定を参照しているが、対象側でこの要素を選ばなかった時に、どの判定表を使うかが書かれていない。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/maintainer-checklist.md:6",
+        "comment": "チェック項目が Step 8 での無条件の handoff 保存を前提にした書き方のままで、Step 8 の条件付き保存とずれている。"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/scripts/handoff_lifecycle.py:209-212",
+        "comment": "本体が無くなった受領済みの項目を remind が台帳から外さないため、古い項目が残り続ける（害はない）。"
+      }
+    ]
+  }
+}

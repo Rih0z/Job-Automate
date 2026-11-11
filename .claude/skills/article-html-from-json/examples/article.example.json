@@ -1,0 +1,26 @@
+{
+  "schema": "article-json/v1",
+  "meta": {
+    "title": "定型作業を自動化する前に決めておく 3 つのこと",
+    "output": "article.example.html",
+    "lang": "ja",
+    "template": "page"
+  },
+  "blocks": [
+    {"bid": "intro", "type": "p", "html": "自動化の前に、目的・範囲・確認方法を決めておくと手戻りが減ります。ここでは <strong>3 つの決めごと</strong> を順に説明します。"},
+    {"bid": "toc", "type": "toc"},
+    {"bid": "s1", "type": "heading", "level": 2, "id": "purpose", "html": "1. 目的を 1 文で書く"},
+    {"bid": "s1-p", "type": "p", "html": "何を減らしたいのかを 1 文で書きます。たとえば「月末の集計にかかる時間を半分にする」です。ワークフロー全体の目的もここで決めます。"},
+    {"bid": "s2", "type": "heading", "level": 2, "id": "scope", "html": "2. 範囲を表で決める"},
+    {"bid": "s2-t", "type": "table", "caption": "範囲の例", "columns": ["対象", "自動化する", "人が確認する"], "rows": [["データの取り込み", "する", "件数だけ"], ["集計", "する", "差分が出た時"], ["報告の文面", "しない", "全文"]]},
+    {"bid": "s3", "type": "heading", "level": 2, "id": "check", "html": "3. 確認方法を先に決める"},
+    {"bid": "s3-l", "type": "list", "ordered": true, "items": ["期待する結果を先に書く", {"html": "結果を比べる方法を決める", "list": {"items": ["件数", "合計値"]}}, "合わない時に止める"]},
+    {"bid": "s3-code", "type": "code", "language": "bash", "code": "python check.py --expected expected.csv --actual out.csv"},
+    {"bid": "s3-note", "type": "note", "html": "数値の目安は組織ごとに決めてください。"},
+    {"bid": "faq", "type": "qa", "items": [{"q": "全部を一度に自動化してよいですか。", "a": "小さく始め、確認方法が決まったものから広げます。"}]},
+    {"bid": "gloss", "type": "glossary", "terms": [{"term": "ワークフロー", "desc": "仕事を進める手順のつながり"}]},
+    {"bid": "refs", "type": "references", "items": [{"id": "ref-1", "html": "<a href=\"https://example.com/guide\">自動化の進め方（例）</a>"}]},
+    {"bid": "disc", "type": "include", "name": "disclaimer"},
+    {"bid": "foot", "type": "include", "name": "footer"}
+  ]
+}

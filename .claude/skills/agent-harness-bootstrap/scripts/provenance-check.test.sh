@@ -344,6 +344,55 @@ t "T54 語句を含めれば claude-md-tdd-order の違反は出ない" 0 "$(run
 gen_real_sel real/.claude/harness-selection.json claude-md-tdd-order skill-single-session-tdd
 t "T55 claude-md-tdd-order を選び skill-single-session-tdd を外すと depends_on で違反" 1 "$(runreal --selection real/.claude/harness-selection.json)"
 
+# 実台帳の model-selection-policy / model-selection-operator-defaults の --target 契約
+runid() { local id="$1"; shift; env -u PROVENANCE_ROOT -u PROVENANCE_KNOWHOW bash "$CHECK" "$@" 2>&1 | grep -c "^C12 $id "; }
+rm -rf ms && mkdir -p ms/.claude
+printf '# CLAUDE.md\n\n## モデルの選び方\n.claude/model-selection.json に従う。\n' > ms/CLAUDE.md
+printf '{"requirements": [{"id": "MS-01", "origin": "official"}]}\n' > ms/.claude/model-selection.json
+gen_real_sel ms/.claude/harness-selection.json model-selection-policy model-selection-operator-defaults
+t "T60 model-selection-policy を選び JSON と CLAUDE.md の参照があれば違反は出ない" 0 "$(runid model-selection-policy --target ms)"
+rm -f ms/.claude/model-selection.json
+t "T61 model-selection-policy を選び .claude/model-selection.json が無ければ違反（file_exists と files[] の 2 件）" 2 "$(runid model-selection-policy --target ms)"
+printf '{"requirements": [{"id": "OP-01", "origin":"operator"}]}\n' > ms/.claude/model-selection.json
+printf '{}\n' > ms/.claude/model-selection.operator.json
+t "T62 operator を選ばずに operator ファイルと origin operator が持ち込まれると違反（file_absent・files[]・grep_absent の 3 件）" 3 "$(runid model-selection-operator-defaults --target ms)"
+rm -f ms/.claude/model-selection.operator.json
+printf '{"requirements": [{"id": "MS-01", "origin": "official"}]}\n' > ms/.claude/model-selection.json
+t "T63 operator を選ばず持ち込みも無ければ operator の違反は出ない" 0 "$(runid model-selection-operator-defaults --target ms)"
+gen_real_sel ms/.claude/harness-selection.json model-selection-operator-defaults ""
+t "T64 operator を選んだのに .claude/model-selection.operator.json が無ければ違反（file_exists と files[] の 2 件）" 2 "$(runid model-selection-operator-defaults --target ms)"
+
+# 実台帳の session-boundary-policy の --target 契約（handoff-management を選ばない移植先）
+rm -rf sb && mkdir -p sb/.claude
+printf '# CLAUDE.md\n\n## セッションの区切り方\n同じ session で続けるか、区切るか、引継ぎメモを書くかは .claude/session-boundary.json の判定表（上から順に当てはめる）で決める。後始末や同じ作業の続きは同じ session で続け、引継ぎメモは作らない。\n' > sb/CLAUDE.md
+printf '{"schema": "session-boundary/v1"}\n' > sb/.claude/session-boundary.json
+gen_real_sel sb/.claude/harness-selection.json session-boundary-policy handoff-management
+t "T65 session-boundary-policy を選び JSON と CLAUDE.md の参照があれば違反は出ない" 0 "$(runid session-boundary-policy --target sb)"
+t "T68 session-boundary-policy を選び handoff-management を選ばない時、note の文面を貼っても handoff-management の違反は出ない" 0 "$(runid handoff-management --target sb)"
+rm -f sb/.claude/session-boundary.json
+t "T66 session-boundary-policy を選び .claude/session-boundary.json が無ければ違反（file_exists と files[] の 2 件）" 2 "$(runid session-boundary-policy --target sb)"
+printf '{"schema": "session-boundary/v1"}\n' > sb/.claude/session-boundary.json
+gen_real_sel sb/.claude/harness-selection.json "" session-boundary-policy
+t "T67 session-boundary-policy を選ばずに JSON と CLAUDE.md の参照が持ち込まれると違反（file_absent・files[]・grep_absent の 3 件）" 3 "$(runid session-boundary-policy --target sb)"
+
+# 実台帳の handoff-management / session-restore-hook の script 契約（移植先に script が無ければ検出する）
+rm -rf hm && mkdir -p hm/.claude/rules hm/.claude/scripts
+printf '# CLAUDE.md\n\nhandoff は利用者が貼った時だけ受領する。\n' > hm/CLAUDE.md
+printf 'handoff の規約\n' > hm/.claude/rules/issue-workflow.md
+printf '.tmp/\n' > hm/.gitignore
+printf '{"hooks": {"SessionStart": []}}\n' > hm/.claude/settings.json
+gen_real_sel hm/.claude/harness-selection.json handoff-management,session-restore-hook ""
+t "T69 handoff-management を選んだのに .claude/scripts/handoff_lifecycle.py が無ければ違反 1 件" 1 "$(runid handoff-management --target hm)"
+t "T70 session-restore-hook を選んだのに .claude/scripts/handoff-remind.sh が無ければ違反 1 件" 1 "$(runid session-restore-hook --target hm)"
+printf '# x\n' > hm/.claude/scripts/handoff_lifecycle.py
+printf '# x\n' > hm/.claude/scripts/handoff-remind.sh
+t "T71 script が両方あれば handoff-management と session-restore-hook の違反は出ない" 0 "$(( $(runid handoff-management --target hm) + $(runid session-restore-hook --target hm) ))"
+printf '# CLAUDE.md\n' > hm/CLAUDE.md
+rm -rf hm/.claude/rules
+printf '{}\n' > hm/.claude/settings.json
+gen_real_sel hm/.claude/harness-selection.json "" handoff-management,session-restore-hook
+t "T72 handoff-management と session-restore-hook を選ばないのに script を持ち込むと、それぞれ違反 1 件" 2 "$(( $(runid handoff-management --target hm) + $(runid session-restore-hook --target hm) ))"
+
 echo "---"
 echo "PASS=$PASS FAIL=$FAIL"
 [[ $FAIL -eq 0 ]]

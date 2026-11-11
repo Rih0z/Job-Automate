@@ -1,0 +1,159 @@
+{
+  "schema": "model-selection/v1",
+  "updated": "2026-11-10",
+  "purpose": "Claude のモデル・effort・advisor を選ぶときの要件の正本。Anthropic 公式文書に書かれていることだけを置く（全要件 origin: official）。運用者が決めた割り当ては .claude/model-selection.operator.json にあり、両方がある時は operator の割り当てが優先、operator が無い時は各 tier の official_recommendation に従う。",
+  "related": {
+    "operator_assignment": ".claude/model-selection.operator.json（無い環境では無視し、各 tier の official_recommendation に従う）",
+    "generic_routing_skill": ".claude/skills/model-cost-optimization-routing/SKILL.md（司令塔 / 低コスト / 高コストの役割名で書いた汎用の振り分け方針。モデル名と effort の具体はこのファイルが正本）"
+  },
+  "sources": [
+    {
+      "id": "S1",
+      "title": "Choosing the right model",
+      "url": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+      "fetched": "2026-11-10"
+    },
+    {
+      "id": "S2",
+      "title": "Optimizing for cost and intelligence",
+      "url": "https://platform.claude.com/docs/en/about-claude/models/optimizing-for-cost-and-intelligence",
+      "fetched": "2026-11-10"
+    },
+    {
+      "id": "S3",
+      "title": "Claude Code: Escalate hard decisions with the advisor tool",
+      "url": "https://code.claude.com/docs/en/advisor",
+      "fetched": "2026-11-10"
+    },
+    {
+      "id": "S4",
+      "title": "Claude Code: Model configuration / Settings reference",
+      "url": "https://code.claude.com/docs/en/model-config",
+      "url_2": "https://code.claude.com/docs/en/settings-reference",
+      "fetched": "2026-11-10"
+    },
+    {
+      "id": "S5",
+      "title": "Claude Code: Subagents - Choose a model",
+      "url": "https://code.claude.com/docs/en/sub-agents",
+      "fetched": "2026-11-10"
+    }
+  ],
+  "requirements": [
+    {
+      "id": "MS-01",
+      "origin": "official",
+      "source": "S1",
+      "rule": "大半の作業は Opus から始める（Most workloads start with Claude Opus 5.5）。"
+    },
+    {
+      "id": "MS-02",
+      "origin": "official",
+      "source": "S1",
+      "rule": "モデルを替える前に effort を調整する（Tuning effort is often a better lever than switching models）。既定の effort から始め、評価の結果で上下させる。"
+    },
+    {
+      "id": "MS-03",
+      "origin": "official",
+      "source": "S1",
+      "rule": "Opus を xhigh / max にしても足りない、難しい推論や長時間の自律作業は Fable に移す。"
+    },
+    {
+      "id": "MS-04",
+      "origin": "official",
+      "source": "S1",
+      "rule": "Sonnet は日常のコーディング・エージェント・業務作業で速度と能力を両立させる用途（コード生成、データ分析、文書作成、ツール利用）。Haiku は最小の遅延と価格が要る用途と subagent の作業。"
+    },
+    {
+      "id": "MS-05",
+      "origin": "official",
+      "source": "S1",
+      "rule": "モデルを替えるかは、自分の用途の評価（実際のプロンプトとデータ、正確さ・品質・端のケース）とコストで決める。"
+    },
+    {
+      "id": "MS-06",
+      "origin": "official",
+      "source": "S2",
+      "rule": "2 つのモデルを組み合わせるのは、単一モデルの effort を振った時の点数とコストの曲線を上回る時だけ（Build a pairing only if it beats the single model's whole curve）。"
+    },
+    {
+      "id": "MS-07",
+      "origin": "official",
+      "source": "S2",
+      "rule": "executor + advisor は、大半の手順が定型で、要所の判断だけが難しい直列の作業に向く。advisor は呼ばれた時だけ効き、ツール定義だけでもコストが乗る。consult rate を自分の作業で測り、モデルの更新ごとに見直す。executor の effort を下げて consult が減ったら effort を戻す。"
+    },
+    {
+      "id": "MS-08",
+      "origin": "official",
+      "source": "S2",
+      "rule": "orchestrator + 安価な workers は、独立に分けられる大量の作業（1 つの context に収まらない量、または費用の長い裾がある定型作業。後者は以前のモデルでの計測）で使う。1 本の依存した作業、または長い裾が無く 1 つの context に収まる作業では、orchestrator のモデル単体を低い effort で使う方が、以前のモデルで計測したすべての例で勝った。"
+    },
+    {
+      "id": "MS-09",
+      "origin": "official",
+      "source": "S4, S1",
+      "rule": "Claude Code の effort 既定は Fable 5.2 / Opus 5.5 / Sonnet 5.5 / Haiku 5.5 で medium（API の既定は Fable 5.2 / Sonnet 5.5 が high、Opus 5.5 / Haiku 5.5 が medium で、Claude Code とは異なる）。project / local / managed settings の effortLevel は全モデルに効く。max は effortLevel に書けず、session 限定（/effort max）。"
+    },
+    {
+      "id": "MS-10",
+      "origin": "official",
+      "source": "S5, S4",
+      "rule": "subagent のモデルは、Agent 呼び出しの model 引数（sonnet / opus / haiku / fable の alias のみ）> 定義の model frontmatter > CLAUDE_CODE_SUBAGENT_MODEL > 本体のモデル、の順で決まる。effort は、Agent 呼び出しの effort 引数（fork 以外の subagent、Claude Code v2.1.292 以降）> 定義の effort frontmatter の順で、CLAUDE_CODE_EFFORT_LEVEL はその両方より優先する。本体と違うモデルで動く subagent には session で選んだ effort は効かず、settings（モデルごとに保存した値か effortLevel）、無ければモデルの既定で動く。"
+    },
+    {
+      "id": "MS-11",
+      "origin": "official",
+      "source": "S3",
+      "rule": "advisor は Anthropic API または Claude Platform on AWS でのみ使える（Bedrock / Vertex / Foundry 不可）。advisor は本体と同等以上のモデルでなければ付かない。subagent も設定された advisor を継承し、自分のモデルで同じ組み合わせ検査を受ける。"
+    }
+  ],
+  "tiers": [
+    {
+      "id": "default",
+      "official_recommendation": {
+        "model": "opus",
+        "effort": "medium（Opus 5.5 の既定）",
+        "source": "S1"
+      },
+      "use_when": "下の 2 つに当たらない作業すべて。",
+      "how_to_switch": "/model opus。effort は /effort medium。"
+    },
+    {
+      "id": "hardest",
+      "official_recommendation": {
+        "model": "fable",
+        "effort": "high（S1 は既定 high から始めると書くが、これは API の既定。Claude Code の既定は medium なので明示する）",
+        "source": "S1"
+      },
+      "use_when": "Opus を xhigh にしても足りない難しい推論・長時間の自律作業・調査から完成文書までを通す作業。",
+      "how_to_use_fable": "本体で使う時は /model fable に切り替え、続けて /effort high（effortLevel を medium にしている環境では、2 つ目を省くと medium のまま動く）。Agent で委任する時は model: \"fable\" と effort: \"high\" を渡す（effort を渡さないと settings の effortLevel かモデルの既定 medium で動く）。session で選んだ effort は /model を替えても持ち越されるので、終わったら /model と /effort を元に戻す。",
+      "prerequisite": "Fable の利用権。組織が Fable を使えない時は /model の picker で Fable の行がグレー表示になり、Fable を扱うよう設定されていない gateway は要求を拒否する。プランによっては usage credits への課金の同意を /model fable で 1 回だけ聞かれる。"
+    },
+    {
+      "id": "everyday",
+      "official_recommendation": {
+        "model": "sonnet",
+        "effort": "medium（Claude Code の Sonnet 5.5 既定）",
+        "source": "S1"
+      },
+      "use_when": "日常のコード生成・データ分析・文書作成・ツール利用のうち、Opus の判断力が要らないもの。",
+      "how_to_switch": "委任なら Agent の model: \"sonnet\"。本体なら /model sonnet。"
+    }
+  ],
+  "advisor_facts": {
+    "source": "S3",
+    "settings": {
+      "persistent": "settings ファイルの advisorModel（\"fable\" / \"opus\" / \"sonnet\" または完全なモデル ID）。どの settings ファイルでも有効",
+      "one_session": "claude --advisor <model>",
+      "in_session": "/advisor <model>（ユーザー設定の advisorModel に保存される）"
+    },
+    "pairing_for_opus_5_main": "Fable、または Opus 5 以上",
+    "pairing_for_sonnet_5_5_main": "Fable、Opus 5 以上、Sonnet 5.5",
+    "pairing_for_fable_main": "Fable（Opus / Sonnet の advisor は付かない）",
+    "when_it_helps": "長い多段の作業で、大半の手順は定型だが計画の質が結果を決めるもの（大きなリファクタリング、同じエラーが繰り返すデバッグ、完了前の独立した確認）。短い作業、毎手順に最強モデルが要る作業では効果が小さい。",
+    "cost": "advisor が呼ばれるたびに会話全体を advisor のモデルの単価で読む（advisor 側の読み込みはキャッシュされない）。サブスクリプションでは利用枠に数え、プランによって Fable の advisor は usage credits に課金される。/advisor の切替は本体のプロンプトキャッシュを壊さない。",
+    "how_to_measure_consult_rate": "transcript に出る Advising 行（Reviewed / Declined / Unavailable）の数を session ごとに数え、/usage の Usage by model のうち advisor のモデル（Fable なら Fable）の行と並べる。/usage に advisor 専用の欄は無く、advisor の利用は session の合計に含まれる。",
+    "how_to_turn_off": "/advisor off、または環境変数 CLAUDE_CODE_DISABLE_ADVISOR_TOOL=1（advisorModel は無視される）",
+    "measured": "S2: Opus 5.5 high + Fable 5.1 advisor は +1.7 点・約 2.1 倍のコスト（Opus 自身の effort 曲線とほぼ同じ位置）。Opus 5.5 low + Fable 5.1 advisor は executor 単体より 7 点低い。Opus medium での計測は公開されていない。"
+  }
+}

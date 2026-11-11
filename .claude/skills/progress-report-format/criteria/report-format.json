@@ -1,0 +1,67 @@
+{
+  "schema": "progress-report-format/v1",
+  "version": "1.1.0",
+  "origin": "利用者が提示した進捗報告の出力例（2026-10-31）から、章立てと書き方の型だけを抜き出した。内容（製品名・件数・日付）は含めない。",
+  "placement": "進捗報告の最後に、この形式で出力する。",
+  "example_note": "出力例は型を示すためのもので、内容の雛形ではない。章の数・順序・見出し・行の書式は固定。中身は毎回の作業の事実から書く。",
+  "title_template": "【今週の進捗（{start}〜{end}）】",
+  "heading_prefix": "■ ",
+  "bullet_prefix": "・",
+  "stages": ["設計", "実装", "部品テスト", "実機確認"],
+  "progress_phrases": {
+    "未着手": "{stage}は未着手",
+    "途中": "{stage}の途中",
+    "ほぼ完了": "ほぼ完了",
+    "完了": "完了",
+    "完走せず": "{stage}で完走せず"
+  },
+  "note_wrap": ["（", "）"],
+  "initiative_line": "{name}: {phrase}{note}",
+  "sections": [
+    {
+      "id": "achieved",
+      "heading": "今回できるようになったこと",
+      "kind": "bullets",
+      "required": true,
+      "guidance": "何ができるようになったか、何が分かったかを結果で書く。作業名の羅列にしない。調べて原因を特定した不具合と、解決した問題（ログや応答の診断で分かったことを含む）は必ずここに書く。"
+    },
+    {
+      "id": "remaining",
+      "heading": "まだ課題として残っていること",
+      "kind": "bullets",
+      "required": true,
+      "guidance": "未完・未確認・原因不明を明示する。何がまだなのかを書く。"
+    },
+    {
+      "id": "initiatives",
+      "heading": "取り組み別の状況（{stages}）",
+      "kind": "initiatives",
+      "required": true,
+      "guidance": "取り組みごとに、いまの段階と状態を 1 行で書く。補足は note に入れる。"
+    },
+    {
+      "id": "external",
+      "heading": "対外活動",
+      "kind": "bullets",
+      "required": true,
+      "guidance": "面談・掲載・登壇など。無ければ「なし」と書く。把握できないものは「記録なし（要記入）」と書き、推測で埋めない。"
+    },
+    {
+      "id": "next_week",
+      "heading": "来週の予定",
+      "kind": "bullets",
+      "required": true,
+      "guidance": "着手する作業を、課題の項と対応するように書く。"
+    }
+  ],
+  "writing_rules": [
+    {"id": "w-plain", "rule": "非技術者にも伝わる平易な語で書く。内部の識別子や略語は避ける。"},
+    {"id": "w-result", "rule": "「今回できるようになったこと」は結果で書く。何をしたかの列挙にしない。"},
+    {"id": "w-issues", "rule": "不具合・障害は「何が起きたか → 原因（ログや応答の診断で分かったこと）→ どう直したか」を 1 項目にまとめて書く。原因が未確定なら「原因は未確定」と書いて課題の章にも載せる。直した問題を省かない。"},
+    {"id": "w-unfinished", "rule": "未完は「未実施」「未着手」「原因は未確定」と明示する。完了と書かない。"},
+    {"id": "w-measured", "rule": "数字は実測または集計したものだけを書く。見積もりや推測の数字を入れない。"},
+    {"id": "w-one-line", "rule": "1 項目は 1 行。改行や先頭の記号（・ ■ -）を入れない。記号は整形で付ける。"},
+    {"id": "w-no-invent", "rule": "把握できない項目は埋めずに「記録なし（要記入）」と書く。"},
+    {"id": "w-order", "rule": "章の順序と見出しは固定。章を省かない。"}
+  ]
+}

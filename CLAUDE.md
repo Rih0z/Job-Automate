@@ -35,7 +35,7 @@ Claude Code でプロンプトを開発・改善するときのガイドです�
 - **書式**: 自由文ではなく **JSON Lines（1オブジェクト1行）**。後から grep/jq 等で機械的に拾い漏れを検知できるようにするため。
   `{"ts": "<ISO8601日時>", "summary": "<気づいた内容を1文で>", "location": "<手がかりとなるファイル:行 または文脈>", "status": "queued"}`
 - **位置づけ**: 正式なタスク化・修正の代わりではなく、人間が直すかどうか・いつ直すかを判断するまでの一時的な備忘バッファ。
-- **見返し（drain）のタイミング**: イテレーション完了時、`/compact` 実行前、**引継ぎ資料 (`.tmp/handoffs/`) を作成する時点を含む**。
+- **見返し（drain）のタイミング**: イテレーション完了時、`/compact` 実行前、session の区切り（`/clear`・新しい session・後日の `--resume`）を提案する時、**引継ぎ資料 (`.tmp/handoffs/`) を作成する時点を含む**。
 - **drain の判断**: `status` を `"done"`（対応済み）に更新するか、本リポジトリの Issue 相当物である `.claude/skills/_shared/compliance-status.json` の `findings` へ CR-xx として追加し `status` を `"issued"` にした上で発行した CR-id を併記するかを決めてから当該行を消す（残したまま「完了」と報告しない）。
 - **引継ぎ資料作成時の gate**: 作成前に `status: "queued"` のまま残っているエントリが無いことを確認する（残っていれば先に `"done"`/`"issued"` のいずれかへ倒してから作成する）。
 
@@ -120,6 +120,19 @@ research/proposal/report 系の成果物が外部情報・過去データに基�
 ## 資料（スライド）を作るとき
 
 PowerPoint の資料は [docs/slide-creation-kit.md](docs/slide-creation-kit.md) の 5 段階（`slide-composition-planner` で構成決定 → 作成 skill で作成 → 別エージェントの `slide-clarity-review` → 日本語なら `slide-japanese-review` → 必要なら組織固有の検査）で作る。点数の決め方・修正の上限・他プロジェクトへ貼るルール断片も同文書にある。
+
+## 記事の HTML を JSON から作るとき
+
+記事の HTML は `article.json` を正本にし、[article-html-from-json](.claude/skills/article-html-from-json/SKILL.md) skill の変換器で作る。HTML は直接直さず、修正の依頼は `fix-ledger.json` に原文で記録して JSON に反映し、全件反映後に作り直す。流れ・他プロジェクトへ貼るルール断片は [docs/article-html-kit.md](docs/article-html-kit.md)。
+
+## モデルの選び方
+
+モデル・effort・advisor は [.claude/model-selection.json](.claude/model-selection.json)（公式由来の要件と判定の枠組み）と [.claude/model-selection.operator.json](.claude/model-selection.operator.json)（運用者の割り当てと判定表。両方ある時はこちらが優先）に従って選ぶ。subagent に委任する時は、判定表で決めたモデルを Agent の `model` 引数で渡す。
+
+## セッションの区切り方
+
+同じ session で続けるか、区切るか（`/clear`・新しい session・後日 `--resume`）、引継ぎメモを書くかは [.claude/session-boundary.json](.claude/session-boundary.json) の判定表（上から順に当てはめる）で決める。デプロイ・commit などの後始末や同じ作業の続きは同じ session で続け、引継ぎメモは作らない。
+このリポジトリでは、引継ぎメモ（判定表 R1〜R3、R3 の進捗メモを含む）は `.tmp/handoffs/` に置いて上の「引継ぎ資料作成時の gate」を当てる。`/compact` を提案する時は、上の「`/compact` 実行時は必ず以下を残す」の 3 点を焦点に入れる。
 
 ## プロジェクト構成
 

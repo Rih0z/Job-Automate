@@ -137,11 +137,11 @@ Claude はタスク開始時に関連 docs を最低 1 つ読み、**宣言の�
 
 > provenance: author-preference · id: handoff-management
 
-handoff は **user の明示指示でのみ受領**する（① user が chat に paste、または ② 「handoff X を読んで」と指示）。**最新 handoff の本文を session 開始時に自動 Read しない**（無関係な最新 handoff の誤受領と、本文の毎 session 注入による context 汚染を防ぐ）。受領後は役割のみ実施・scope creep を避け、関連気付きは別 Issue 起票する。
+handoff は **user の明示指示でのみ受領**する（① user が chat に paste、または ② 「handoff X を読んで」と指示）。貼られたもの・指定されたものは確認を挟まずに読んで受領する。**最新 handoff の本文を session 開始時に自動 Read しない**（無関係な最新 handoff の誤受領と、本文の毎 session 注入による context 汚染を防ぐ）。受領後は役割のみ実施・scope creep を避け、関連気付きは別 Issue 起票する。
 
 SessionStart hook は**本文を注入せず、ポインタと verdict のみ通知する**: 中断作業の一覧（issue タイトル + handoff ファイル名のみ）と並走 4 軸 verdict（clean / 痕跡あり）を提示し「どれを再開しますか？」と問う。**本文 Read は user が再開対象を選択した後にその 1 件だけ**行う。
 
-**stale handoff 誤受領防止**: 提示する handoff のうち **7 日以上前 / 既に「## 完了」marker 済 / 「次 session 不要」明記**のものは "stale" と注記する。**archive ローテーション**: 一定期間（例: 90 日）経過した handoff は `.tmp/archive/handoffs/` に退避し context 肥大化を防ぐ。
+**stale handoff 誤受領防止**: 提示する handoff のうち **7 日以上前 / 既に「## 完了」marker 済 / 「次 session 不要」明記**のものは "stale" と注記する。**archive ローテーション**: 未受領のまま 30 日（既定）を超えた handoff は、SessionStart の通知に出たら利用者に確かめずに `handoff_lifecycle.py sweep --apply` を実行して `.tmp/archive/handoffs/` に退避し、context 肥大化を防ぐ（`--apply` を付けない時は一覧だけ。退避は移動なので戻せる。判定は更新日時だけなので、issue から参照される進行中の handoff でも 30 日経てば移る。台帳が壊れていると exit 2 で止まるので、その時は退避せず利用者に報告する）。
 
 ### 独自運用: 並走 agent 痕跡 4 軸 recheck（並走衝突防止）
 
@@ -228,9 +228,10 @@ PC 再起動 / session 切断後に進行中タスクを自動検出し、User �
 > provenance: author-preference · id: handoff-management
 
 - ファイル名: `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`（issue 紐付けあり）／ `[YYYY-MM-DD]-[識別単語].md`（紐付けなし）。識別単語は 2〜4 語 kebab-case、作業内容が一目で分かるもの
-- 保持と削除: handoff は引継ぎが**完了するまで**保持し、完了したら削除する（履歴は Git に残る）。issue 側は削除せず `issues/close/` へ `git mv` で移動するだけにする
+- 保持と削除: handoff は引継ぎが**完了するまで**保持し、完了したら `handoff_lifecycle.py done <パス>` で削除する（受領済みのものだけを消す。git で追跡していれば履歴から戻せるが、`.tmp/` を gitignore している時は戻せない）。issue 側は削除せず `issues/close/` へ `git mv` で移動するだけにする
 - 同期: `.tmp/handoffs/` は `.gitignore` で除外せず追跡対象にし、作成したら当日中に commit して push する（未 commit の handoff は GitHub に上がらず、別 PC・別 session から見えない）。Stop hook で未 commit の handoff を検出して終了を block すると忘れない
-- 作業中マーカー: frontmatter に `created_at`（作成日時）を作成者が書く。受領側は着手時に `work_status: in_progress` と `work_started_at: <ISO 8601 +offset>`（作業開始日時）を追記し、完了時に handoff ごと削除する。マーカーが残ったまま閾値（既定 4 時間）を超えた handoff は「作業が中断された疑い」として SessionStart hook が**ファイル名のみ**通知する（本文は注入しない）。再開時は `work_started_at` を更新する
+- 受領の記録: handoff の本体は書き換えず、受領側は着手時に `handoff_lifecycle.py receive <パス>`（パスが無ければ `--title "<最初の見出し>"`）で台帳 `.tmp/handoff-ledger.json` に受領日時と sha256 を記録する。受領から閾値（既定 4 時間）を超えて残る handoff と、未受領で 30 日を超えた handoff は、SessionStart hook（`handoff-remind.sh`）が**ファイル名のみ**通知する（本文は注入しない）。未受領で 30 日超の通知を見たら、確認なしで `sweep --apply` で archive へ退避する（hook は通知だけで、ファイルは動かさない）。作業中に本体を更新したら receive をやり直す（`done` は受領後の変更を exit 7 で止める）。見出しで特定したものは `done --confirmed` の前に利用者に確かめる。作成者は最初の見出しの直後に `このファイル: <完全パス>` を書く
+- script: 本スキルの `scripts/handoff_lifecycle.py`（Python 標準ライブラリのみ、試験は `scripts/test_handoff_lifecycle.py`）。移植先では Step 8 で `.claude/scripts/handoff_lifecycle.py` にコピーする。台帳 `.tmp/handoff-ledger.json` は PC ごとの絶対パスを持つので git で追跡しない（`.tmp/handoffs/` を追跡する運用でも、台帳は gitignore する。`.gitignore` が `.tmp/` を除外している時は、`!.tmp/handoffs/` の否定行で handoffs だけを追跡に戻す。台帳 `.tmp/handoff-ledger.json` は除外のまま）。台帳の項目が壊れていると台帳全体が `handoff-ledger.json.bak-<時刻>` に退避されて空から作り直されるので、受領済みの記録を戻したい時は `.bak` から手で戻す。追跡している handoff を `done` で消した時は、削除を commit する
 - issue 連携: `issues/open|processing/[ID].md` 本文冒頭に「進行中 handoff: [完全パス]」を記載。handoff 更新時は issue 側も同期更新する
 - 受領: handoff は user 明示指示でのみ受領し、本文は再開対象に選ばれた 1 件のみ Read する
 - 構成: ゴール / 完了したこと / 残課題 / 関連ファイル（path:line）/ 落とし穴

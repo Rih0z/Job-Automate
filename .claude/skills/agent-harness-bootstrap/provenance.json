@@ -1,6 +1,6 @@
 {
   "schema": "harness-provenance/v1",
-  "updated": "2026-09-25",
+  "updated": "2026-11-11",
   "purpose": "このリポジトリの harness 要素（原則・rules・hooks・skills・CLAUDE.md セクション）ごとに『Anthropic 公式ベストプラクティス由来』か『著者の運用嗜好』かの由来（provenance）を記録する唯一の SoT。別プロジェクトへのセットアップ時に selection-flow.md がこのファイルを読み、由来別にユーザーへ提示して取捨選択させる。両者を混ぜたまま他環境へ持ち込まないための分離台帳。",
   "provenance_levels": {
     "official": {
@@ -856,6 +856,7 @@
       "summary": "handoff の命名規約（[YYYY-MM-DD]-issue-[ID]-[識別単語].md）・保持・issue 連携・user 明示指示でのみ受領・stale 注記・archive ローテーション。",
       "applies_to": [
         "operational-knowhow.md handoff 受領 / handoff 管理",
+        "scripts/handoff_lifecycle.py（受領の台帳・done・sweep）",
         "template.md 起動時手順 4・5",
         "生成 rules issue-workflow.md"
       ],
@@ -870,6 +871,7 @@
         "issue-lifecycle"
       ],
       "note": "issue-lifecycle 非採用時は issue 紐付けなしの命名 [YYYY-MM-DD]-[識別単語].md のみを使う",
+      "history": "2026-11-11: 受領は利用者が貼った・指定したものだけ、完了時に done で削除する方式にした。同日、未受領で 30 日を超えたものは確認なしで sweep --apply により archive へ退避する標準動作にした（sweep の既定を 90 日から 30 日へ。hook は通知だけ）。",
       "target_contract": {
         "when_selected": [
           {
@@ -885,9 +887,17 @@
           {
             "type": "gitignore",
             "pattern": ".tmp/"
+          },
+          {
+            "type": "file_exists",
+            "path": ".claude/scripts/handoff_lifecycle.py"
           }
         ],
         "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/scripts/handoff_lifecycle.py"
+          },
           {
             "type": "grep_absent",
             "path": "CLAUDE.md",
@@ -952,6 +962,7 @@
       "provenance": "author-preference",
       "summary": "SessionStart hook で中断作業のポインタ（handoff ファイル名 + processing issue タイトル）と並走 4 軸 verdict のみ注入し、本文は user 選択後に 1 件だけ Read する。",
       "applies_to": [
+        "scripts/handoff-remind.sh（SessionStart の通知）",
         "operational-knowhow.md PC 再起動・session 復元の自動化",
         "hooks-reference.md hook-session-start"
       ],
@@ -973,6 +984,10 @@
             "type": "grep",
             "path": ".claude/settings.json",
             "pattern": "SessionStart"
+          },
+          {
+            "type": "file_exists",
+            "path": ".claude/scripts/handoff-remind.sh"
           }
         ],
         "when_unselected": [
@@ -980,6 +995,10 @@
             "type": "grep_absent",
             "path": ".claude/settings.json",
             "pattern": "hook-session-start"
+          },
+          {
+            "type": "file_absent",
+            "path": ".claude/scripts/handoff-remind.sh"
           }
         ]
       }
@@ -1314,7 +1333,6 @@
       "soft_depends_on": [
         "skill-review-gate"
       ],
-      "note": "skill-review-gate 非選択時は SKILL.md「イテレーション内の工程順序」末尾の review-gate 参照の 1 文を落とす（3 ターミナル分離のレビューだけで回す）",
       "files": [
         "workflows/software-development/three-agent/README.md",
         "workflows/software-development/three-agent/leader.md",
@@ -1322,7 +1340,7 @@
         "workflows/software-development/three-agent/reviewer.md",
         "workflows/software-development/rules/coding-principles.md"
       ],
-      "note": "SKILL.md は上記 files の全文貼付を前提にするため、skill 単体でなく files ごとコピーする"
+      "note": "SKILL.md は上記 files の全文貼付を前提にするため、skill 単体でなく files ごとコピーする。skill-review-gate 非選択時は SKILL.md「イテレーション内の工程順序」末尾の review-gate 参照の 1 文を落とす（3 ターミナル分離のレビューだけで回す）"
     },
     {
       "id": "skill-repo-hygiene-patrol",
@@ -1493,6 +1511,7 @@
         "mcp-server-setup",
         "model-cost-optimization-routing",
         "playwright-mcp-e2e-testing",
+        "progress-report-format",
         "research-deliverable-review",
         "review-ai-automation",
         "review-blog",
@@ -1552,6 +1571,143 @@
         "skill-stop-ai-slop-jp"
       ],
       "note": "選んだ時は、docs/slide-creation-kit.md の「そのまま貼れるルール」節を対象の CLAUDE.md に貼る。_shared/scripts/append_review_record.py と _shared/review-record.schema.json も一緒にコピーする（research-deliverable-review と共用のため files[] には載せない。載せると非選択時の不在検査が、それらを使う他の skill を選んだ対象で誤検知する）。散文の日本語の点検（stop-ai-slop-jp）は別要素。"
+    },
+    {
+      "id": "article-html-kit",
+      "kind": "skill",
+      "provenance": "domain-prompt",
+      "summary": "記事 HTML キット: 記事の HTML を article.json（正本）から article-html-from-json の変換器で決定的に作る。HTML は直接直さず、修正の依頼は fix-ledger.json に原文で記録して JSON に反映し、全件が反映済みか理由つき却下になるまで再生成しない。流れ・CLAUDE.md に貼るルール断片は docs/article-html-kit.md。",
+      "applies_to": [
+        "CLAUDE.md 記事の HTML を JSON から作るとき（docs/article-html-kit.md の「そのまま貼れるルール」節が移植用の版）"
+      ],
+      "skills": [
+        "article-html-from-json"
+      ],
+      "files": [
+        "docs/article-html-kit.md"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "note": "選んだ時は、docs/article-html-kit.md の「そのまま貼れるルール」節を対象の CLAUDE.md に貼る。依存は Python 3.8 以上（標準ライブラリのみ）。"
+    },
+    {
+      "id": "model-selection-policy",
+      "kind": "asset",
+      "provenance": "official-derived",
+      "source": "https://platform.claude.com/docs/en/about-claude/models/choosing-a-model",
+      "summary": "モデル選択の要件の正本 .claude/model-selection.json: Anthropic 公式文書（choosing-a-model / optimizing-for-cost-and-intelligence / Claude Code の advisor・model-config・sub-agents）に書かれた要件だけを origin: official で置き、tier の枠組み（使う条件・切替方法・各 tier の公式推奨）と advisor の事実（組み合わせ・費用・計測方法・停止方法）を持つ。CLAUDE.md『モデルの選び方』節がこのファイルを指す。",
+      "applies_to": [
+        "CLAUDE.md モデルの選び方"
+      ],
+      "files": [
+        ".claude/model-selection.json"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/model-selection.json"
+          },
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "model-selection\\.json"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/model-selection.json"
+          }
+        ]
+      },
+      "note": "移植先の CLAUDE.md に貼る文面（operator 要素を選ばない時）: 『モデル・effort・advisor は .claude/model-selection.json の要件に従い、各 tier の official_recommendation で選ぶ。』 公式文書の更新に合わせて sources の fetched と要件を見直す。"
+    },
+    {
+      "id": "model-selection-operator-defaults",
+      "kind": "asset",
+      "provenance": "author-preference",
+      "summary": "運用者のモデル割り当て .claude/model-selection.operator.json: 既定 Opus・medium、最難関 Fable・high、要件が明確なら Sonnet の判定表、advisor = fable の採用（公式の『計測してから組み合わせる』と食い違う点と見直し条件を note に記録）、settings.local.json の期待値の checks。実際の設定値は gitignore 対象の .claude/settings.local.json に置くため移植されない。",
+      "applies_to": [
+        "CLAUDE.md モデルの選び方（operator ファイルへの参照部分）"
+      ],
+      "files": [
+        ".claude/model-selection.operator.json"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "model-selection-policy"
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/model-selection.operator.json"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/model-selection.operator.json"
+          },
+          {
+            "type": "grep_absent",
+            "path": ".claude/model-selection.json",
+            "pattern": "\"origin\"\\s*:\\s*\"operator\""
+          },
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "model-selection\\.operator\\.json"
+          }
+        ]
+      },
+      "note": "選んだ時も、settings.local.json（model / effortLevel / advisorModel）は移植先の利用者が自分で作る。advisor は Anthropic API / Claude Platform on AWS 限定で、Fable の advisor は Fable の利用権が要る。"
+    },
+    {
+      "id": "session-boundary-policy",
+      "kind": "asset",
+      "provenance": "official-derived",
+      "source": "https://code.claude.com/docs/en/best-practices",
+      "summary": "セッションの区切りと引継ぎメモの判定表の正本 .claude/session-boundary.json: Anthropic 公式文書（Claude Code の best-practices・sessions・context-window、prompting best practices の複数 context window の節、長時間エージェントの harness 記事）の要件を origin 付きで置き、上から順に当てはめる判定表（R1〜R8）で『同じ session で続ける／/clear・新しい session・--resume で区切る／引継ぎメモを書く』を決める。デプロイなどの後始末や同じ作業の続きは同じ session で続け、引継ぎメモを作らない。CLAUDE.md『セッションの区切り方』節がこのファイルを指す。",
+      "applies_to": [
+        "CLAUDE.md セッションの区切り方"
+      ],
+      "files": [
+        ".claude/session-boundary.json"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "soft_depends_on": [
+        "handoff-management"
+      ],
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/session-boundary.json"
+          },
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "session-boundary\\.json"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/session-boundary.json"
+          },
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "session-boundary\\.json"
+          }
+        ]
+      },
+      "note": "移植先の CLAUDE.md に貼る文面（handoff-management を選ばない時）: 『同じ session で続けるか、区切るか、引継ぎメモを書くかは .claude/session-boundary.json の判定表（上から順に当てはめる）で決める。後始末や同じ作業の続きは同じ session で続け、引継ぎメモは作らない。』 handoff-management を選んだ時は、引継ぎメモの置き場所と命名をその規則に合わせる一文を足す。公式文書の更新に合わせて sources の fetched と要件を見直す。"
     },
     {
       "id": "claude-md-upload-policy",

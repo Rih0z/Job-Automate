@@ -54,7 +54,7 @@ SKILL.md 本体「独自運用: 規約の hooks 化判断」と生成手順 Step
 
 | イベント | 用途 | reject/notify |
 |---|---|---|
-| `SessionStart` | **ポインタと verdict のみ注入**: `.tmp/handoffs/` 最新の**ファイル名** + `issues/processing/*.md` 全 scan（タイトル + handoff ファイル名）+ 並走 4 軸 **verdict**（clean / 痕跡あり）+ 作業中マーカー（`work_status: in_progress`）が閾値（既定 4h）超で残る handoff の**ファイル名**（中断の疑い）。**本文は注入しない**（汚染防止）。再開対象は user 選択後にその 1 件のみ Read | notify |
+| `SessionStart` | **ポインタと verdict のみ注入**: `.tmp/handoffs/` 最新の**ファイル名** + `issues/processing/*.md` 全 scan（タイトル + handoff ファイル名）+ 並走 4 軸 **verdict**（clean / 痕跡あり）。別の hook `handoff-remind.sh`（`handoff_lifecycle.py remind` を呼ぶ）が、受領から閾値（既定 4h）超で残る handoff と未受領で 30 日超の handoff の**ファイル名**（中断の疑い・片付け忘れ）を出す（hook は通知だけでファイルを動かさない。未受領で 30 日超のものは、通知を見たエージェントが確認なしで `sweep --apply` で archive へ退避する）。**本文は注入しない**（汚染防止）。再開対象は user 選択後にその 1 件のみ Read | notify |
 | `UserPromptSubmit` | `docs/*.md` 直近 3 ファイルを候補として注入し関連 docs 宣言を促す | notify |
 | `PreToolUse(Write)` | `.tmp/handoffs/` への Write 時に命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` を検証 | reject (`exit 2`) |
 | `PostToolUse(Edit\|Write\|MultiEdit)` | CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 更新時に公式 WebFetch + 別エージェントレビューを促す | notify (additionalContext JSON) |
@@ -90,7 +90,9 @@ Windows（PowerShell）の例:
   "hooks": {
     "SessionStart": [{ "matcher": "startup|resume|clear|compact|fork",
       "hooks": [{ "type": "command", "shell": "powershell", "timeout": 30,
-        "command": "pwsh -NoProfile -File \"$env:CLAUDE_PROJECT_DIR/.claude/scripts/hook-session-start.ps1\"" }] }],
+        "command": "pwsh -NoProfile -File \"$env:CLAUDE_PROJECT_DIR/.claude/scripts/hook-session-start.ps1\"" },
+        { "type": "command", "shell": "powershell", "timeout": 30,
+        "command": "python \"$env:CLAUDE_PROJECT_DIR/.claude/scripts/handoff_lifecycle.py\" remind --dir \"$env:CLAUDE_PROJECT_DIR/.tmp/handoffs\"" }] }],
     "UserPromptSubmit": [{ "hooks": [{ "type": "command", "shell": "powershell", "timeout": 20,
       "command": "pwsh -NoProfile -File \"$env:CLAUDE_PROJECT_DIR/.claude/scripts/hook-user-prompt-submit.ps1\"" }] }],
     "PreToolUse": [{ "matcher": "Write",
@@ -112,7 +114,9 @@ Mac / Linux（bash）の例 — 各 command を bash script 呼び出しに置�
   "hooks": {
     "SessionStart": [{ "matcher": "startup|resume|clear|compact|fork",
       "hooks": [{ "type": "command", "timeout": 30,
-        "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/scripts/hook-session-start.sh" }] }]
+        "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/scripts/hook-session-start.sh" },
+        { "type": "command", "timeout": 30,
+        "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/scripts/handoff-remind.sh" }] }]
   }
 }
 ```
@@ -126,6 +130,7 @@ Mac / Linux（bash）の例 — 各 command を bash script 呼び出しに置�
 役割は言語共通:
 
 - `hook-session-start` — ポインタ（handoff ファイル名 + `issues/processing/*.md` のタイトル）と並走 4 軸 verdict のみ注入（**本文は Read/注入しない**）。検出時は (a)hold+確認 (b)引継ぎ切替 (c)scope 弁別 (d)handoff 明示を促す。本文は user 選択後にその 1 件のみ Read（PC 再起動復元 + 並走衝突防止 + context 汚染防止）
+- `handoff-remind.sh`（bash）— `handoff_lifecycle.py remind` を呼び、残っている handoff のファイル名だけを出す（ファイルは動かさない。未受領で 30 日超のものの退避は、通知を見たエージェントが確認なしで `sweep --apply` を実行する）。python が無い時と `.tmp/handoffs` が無い時は何も出さない（WindowsApps の python stub は避ける）。PowerShell で組む時は wrapper を作らず、上の Windows の例のように `python .../handoff_lifecycle.py remind --dir ...` を直接登録する。どちらも python 3 が要る
 - `hook-user-prompt-submit` — `docs/*.md` 直近 3 ファイルを context 注入
 - `hook-pre-tool-use-handoff` — handoff 命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` 検証、違反なら `exit 2` + stderr で reject
 - `hook-post-tool-use` — CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 編集時に `hookSpecificOutput.additionalContext` JSON で公式 WebFetch レビュー reminder

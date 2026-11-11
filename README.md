@@ -27,6 +27,7 @@ Job-Automate/
 | [docs/setup-guide.md](docs/setup-guide.md) | 別プロジェクトへの移植手順・品質の保証範囲・検証と再同期 |
 | [docs/skills-index.md](docs/skills-index.md) | 同梱スラッシュコマンド／Skills の一覧、移植時にサンプル扱いになるものの区別 |
 | [docs/slide-creation-kit.md](docs/slide-creation-kit.md) | 資料作成キット: PowerPoint を構成決定 → 作成 → 別エージェントの点検（分かりやすさ・日本語）の順で作る流れ、点数の決め方、他プロジェクトへの入れ方 |
+| [docs/article-html-kit.md](docs/article-html-kit.md) | 記事 HTML キット: 記事の HTML を JSON（正本）から決定的に作り、修正の依頼は指摘台帳に記録して JSON に反映し、全件反映後に作り直す流れ、他プロジェクトへの入れ方 |
 | [docs/design-philosophy.md](docs/design-philosophy.md) | 作成/レビュープロンプトの設計思想、ハーネス自体の組み立て方 |
 | [docs/CHANGELOG.md](docs/CHANGELOG.md) | 変更履歴 |
 | [workflows/README.md](workflows/README.md) | 業務ワークフロー（プロンプト本体）の一覧・追加手順 |

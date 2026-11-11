@@ -4,7 +4,7 @@ description: 任意のプロジェクトに対し、Anthropic 公式 Best Practi
 when_to_use: 「CLAUDE.md を作って」「`/init` の代わりに公式準拠で生成して」「既存の CLAUDE.md を公式 Best Practices で書き直して」「CLAUDE.md が肥大化したので剪定して」「(この repo の) 仕組みを別プロジェクト 対象 にも入れて」「このリポジトリのノウハウで 対象ディレクトリ をセットアップして」等、**対象(このリポジトリ以外の別ディレクトリ/別リポジトリ) が明示された**依頼全般 (2026-09-01 拡張、リポジトリ CLAUDE.md「他プロジェクトのセットアップ依頼への対応」と同期。対象が明示されない曖昧な「セットアップして」は対象外)
 metadata:
   provenance: mixed
-  version: 1.1.0
+  version: 1.4.1
 ---
 
 # CLAUDE.md 生成 harness
@@ -201,7 +201,7 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 
 生成後は `bash <本スキル dir>/scripts/harness-setup-state.sh phase generated` を実行し、`harness-setup-review` skill で機械検査（`provenance-check.sh --target`）と別エージェントの突合レビューを両方 PASS させてから `done` にする（3 回 FAIL で中断してユーザーに報告）。詳細手順と最終報告への記載事項は `step8-step9-output-and-verify.md`。
 
-大タスク完了のため `/clear` を促す。対象で `handoff-management` が選択済みなら `/clear` 前に handoff を保存する（規約本体は「独自運用: handoff 管理」）。非選択なら handoff は作らず、最終報告を引継ぎとする。
+大タスク完了のため `/clear` を促す。対象で `handoff-management` が選択済みなら、`scripts/handoff_lifecycle.py` を対象の `.claude/scripts/` にコピーし（`session-restore-hook` も選択済みなら `scripts/handoff-remind.sh` も同じディレクトリにコピーして SessionStart に登録する）、`session-boundary-policy` の判定（別の人や別の PC が続きを引き取る時など）に当たる時だけ `/clear` 前に handoff を保存する（規約本体は「独自運用: handoff 管理」）。非選択なら handoff は作らず、最終報告を引継ぎとする。
 
 ## 使用例
 
@@ -228,6 +228,10 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 - 1.1.0: 本文を supporting files へ分離（公式取得先・索引・Step 7〜9 の詳細）、前提節（repo 固有の依存と代替）を追加
 - 2026-09-01: when_to_use を「対象が明示された別プロジェクトのセットアップ依頼」へ拡張
 - 2026-11-05: 由来台帳 `provenance.json` に要素 `slide-creation-kit`（スライド系 3 skill と `docs/slide-creation-kit.md`）を追加し、スライド系 2 skill を `domain-skills-group` から移した。description に代表的な依頼の言い回しを足した。最終報告の見出しと順序を固定し、既存 CLAUDE.md がある対象の使用例を足した。未登録だった `select-slop-viewpoints` を `domain-skills-group` に登録した。台帳の 1 要素の説明文から、特定組織の記事名を一般的な表現に置き換えた
+- 2026-11-11 (1.4.1): 未受領で 30 日を超えた handoff は、SessionStart の通知を見たエージェントが確認なしで `sweep --apply` で archive へ退避する標準動作にした。`sweep --days` の既定を 90 から 30 にし、remind の案内を `sweep --apply` に変えた（試験 U16・U24・U29）
+- 2026-11-11 (1.4.0): handoff の受領を台帳（`.tmp/handoff-ledger.json`）に記録し、使い終わったら消す script `scripts/handoff_lifecycle.py`（receive / done / remind / sweep。試験 `scripts/test_handoff_lifecycle.py`）と SessionStart の通知 `scripts/handoff-remind.sh`（試験 `scripts/handoff-remind.test.sh`）を追加した。受領は利用者が貼った・指定したものだけを確認なしで行い、作業の完了時に `done` で削除する。rubric 10・template・maintainer-checklist・hooks-reference の「次 handoff 作成まで保持」「作業中マーカー」の記述をこの方式にそろえ、Step 8 の handoff 保存を session-boundary の判定に従う形にした
+- 2026-11-11 (1.3.0): 由来台帳に要素 `session-boundary-policy`（official-derived、`.claude/session-boundary.json`。セッションの区切りと引継ぎメモの判定表、`soft_depends_on: handoff-management`）を追加し、`--target` の試験 T65〜T68 を足した。台帳の `updated` を 2026-11-11 にした
+- 2026-11-10 (1.2.0): 由来台帳に要素 `article-html-kit`（記事 HTML キット）と、モデル選択の 2 要素 `model-selection-policy`（official-derived、`.claude/model-selection.json`）・`model-selection-operator-defaults`（author-preference、`.claude/model-selection.operator.json`）を追加し、`--target` の試験 T60〜T64 を足した。未登録だった `progress-report-format` を `domain-skills-group` に登録した。要素 `skill-three-agent-tdd-workflow` の重複していた `note` キーを 1 つにまとめた
 - 以降の改修は `maintainer-checklist.md` の手順に従い、ここに 1 行で追記する
 
 ---

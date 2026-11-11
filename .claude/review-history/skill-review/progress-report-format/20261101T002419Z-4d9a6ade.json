@@ -1,0 +1,97 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "progress-report-format",
+  "reviewed_at": "2026-11-01T00:24:19Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "13dc71553a41f3da1a311e429ca2178aeebd7de625f72af95449bc69ed939f63"
+      },
+      {
+        "path": "criteria/report-format.json",
+        "sha256": "1a2094583edb912274b58b38c97ddc94bfbeb95ebd2407466b7ece71f22f0b6d"
+      },
+      {
+        "path": "examples/report.example.json",
+        "sha256": "e9c9ddab889d4e210fecab6a8bd1f32f1749a6b229e1f4f1c84fc54cf790614a"
+      },
+      {
+        "path": "scripts/render_report.py",
+        "sha256": "f21e841d25611f67800b7fe3cdc899a1c66e37c0a64314be775a5d7e430d216d"
+      },
+      {
+        "path": "scripts/test_render_report.py",
+        "sha256": "062cda5f083b0201d9cc6dceaa05650649ca2c6994d4d49a01f056864082239b"
+      }
+    ],
+    "content_hash": "70f1f6028cfcde1c4472114fcee32cba9299607e1d96a79e4d3e3f8c3d683ede"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "aae2cebde36aa3084",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": ".claude/skills/progress-report-format/scripts/__pycache__/render_report.cpython-311.pyc",
+        "comment": "コンパイル済みファイルが存在する。.gitignore:4 で除外済みで影響は軽微。削除は任意。"
+      },
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": ".claude/skills/progress-report-format/SKILL.md:3",
+        "comment": "英語トリガーと「状況報告」の言い換えが少ない。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/progress-report-format/SKILL.md:19",
+        "comment": "git 前提で、python と git が必要であることや OS 依存が明記されていない。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/progress-report-format/SKILL.md:1",
+        "comment": "README.md のスキル一覧への追記は未確認。リポジトリの規則上は追記が必要。"
+      }
+    ]
+  }
+}

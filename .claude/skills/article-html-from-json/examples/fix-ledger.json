@@ -1,0 +1,50 @@
+{
+  "schema": "fix-ledger/v1",
+  "article": "article.example.html",
+  "fixes": [
+    {
+      "id": "F-001",
+      "received": "2026-11-05",
+      "request": "目的の節に、具体例を 1 つ入れてほしい。",
+      "status": "applied",
+      "targets": [
+        "s1-p"
+      ],
+      "change": "s1-p に「月末の集計にかかる時間を半分にする」の例と、目的を 1 文で書く旨を追加",
+      "applied": "2026-11-05",
+      "source_sync": "not-needed"
+    },
+    {
+      "id": "F-002",
+      "received": "2026-11-05",
+      "request": "見出しの番号は消してほしい。",
+      "status": "rejected",
+      "reason": "目次と本文で節を指す時に番号を使っているため残す（依頼者に確認済み）"
+    }
+  ],
+  "renders": [
+    {
+      "at": "2026-11-05T00:00:00Z",
+      "kind": "baseline",
+      "block_hashes": {
+        "meta": "8bbfaa60413c114b",
+        "intro": "3da9e4180bbe1222",
+        "toc": "c357b96cea84d451",
+        "s1": "c0fb522f0f7d3824",
+        "s1-p": "34de707b3646691e",
+        "s2": "c8a1d8e2184dcbfc",
+        "s2-t": "6c90984870d1d729",
+        "s3": "6eb8d48c0180f645",
+        "s3-l": "53c70ce964b9d733",
+        "s3-code": "2fb2e33ad280cce3",
+        "s3-note": "5ebf49c5e8157bc6",
+        "faq": "5322b864e945f26e",
+        "gloss": "af3d6cf18ddfd4f8",
+        "refs": "ee04a580c08cd81e",
+        "disc": "e932326aacd6528c",
+        "foot": "6dd126d2d8abcb90"
+      },
+      "fixes": []
+    }
+  ]
+}

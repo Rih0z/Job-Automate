@@ -1,0 +1,287 @@
+{
+  "schema": "session-boundary/v1",
+  "updated": "2026-11-11",
+  "purpose": "作業をいつ同じ session で続け、いつ区切り（/clear・新しい session・後日の再開）、いつ引継ぎメモを書くかを決める。区切りの判定をせずに毎回引継ぎメモを作ることを避ける。判定は decision.rows を上から順に当てはめ、最初に当てはまった行に従う。",
+  "terms": {
+    "引継ぎメモ": "次の session・別の人・別の環境が、会話の履歴なしで作業を再開するためのファイル。完全パス・現在の状態・次の一手を書く。進捗メモ（公式の例: progress.txt）や構造化した状態ファイル（公式の例: tests.json）もここに含む。",
+    "区切る": "/clear するか、新しい session を始めるか、session を離れて後日 --resume で戻ること。"
+  },
+  "sources": {
+    "S1": {
+      "url": "https://code.claude.com/docs/en/best-practices",
+      "sections": [
+        "Keep cost and context down",
+        "Steer the session",
+        "Brainstorm with Claude first",
+        "What you can stop doing"
+      ],
+      "fetched": "2026-11-11"
+    },
+    "S2": {
+      "url": "https://code.claude.com/docs/en/sessions",
+      "fetched": "2026-11-11"
+    },
+    "S3": {
+      "url": "https://code.claude.com/docs/en/context-window",
+      "sections": [
+        "What survives compaction",
+        "When your context fills up"
+      ],
+      "fetched": "2026-11-11"
+    },
+    "S4": {
+      "url": "https://platform.claude.com/docs/en/build-with-claude/prompt-engineering/claude-prompting-best-practices",
+      "sections": [
+        "Workflows across multiple context windows",
+        "State management best practices"
+      ],
+      "fetched": "2026-11-11"
+    },
+    "S5": {
+      "url": "https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents",
+      "fetched": "2026-11-11"
+    }
+  },
+  "origin_labels": {
+    "official": "出典の原文に書かれている。",
+    "inferred-from-official": "公式の記述から推論した。based_on に根拠の要件を書く。",
+    "official-derived": "公式の要件（based_on）を、この判定表の行に当てはめた。",
+    "user-instruction": "利用者の指示による。"
+  },
+  "requirements": [
+    {
+      "id": "SB-01",
+      "origin": "official",
+      "source": "S1, S3",
+      "text": "現在のモデルの多くは 1M トークンのコンテキストを持ち、上限の手前で自動 compaction が走るので、context が尽きることはまれ。長い session でも続けてよい。"
+    },
+    {
+      "id": "SB-02",
+      "origin": "official",
+      "source": "S1, S3",
+      "text": "無関係な作業の間では /clear する。費用はかからず、次の作業が前の作業の履歴を毎回読み直す費用を払わずに済み、答えも良くなる。/clear <名前> で離れる session に名前を付ければ後で戻れる。"
+    },
+    {
+      "id": "SB-03",
+      "origin": "official",
+      "source": "S2",
+      "text": "session は作業中に継続して保存され、/clear の後や終了後も /resume や claude --resume で戻れる。再開すると会話の履歴・モデルなどが戻る。"
+    },
+    {
+      "id": "SB-04",
+      "origin": "official",
+      "source": "S1, S2",
+      "text": "数日にまたがる作業は /rename <名前> で名前を付け、claude --resume <名前> で再開する（checkpoint も戻る）。claude --continue は直前の session に戻る。"
+    },
+    {
+      "id": "SB-05",
+      "origin": "official",
+      "source": "S2",
+      "text": "transcript はローカルの ~/.claude/projects/ に保存され、既定 30 日で消える（cleanupPeriodDays で変更できる）。"
+    },
+    {
+      "id": "SB-06",
+      "origin": "inferred-from-official",
+      "based_on": [
+        "SB-03",
+        "SB-05"
+      ],
+      "text": "transcript はその PC のローカルにあり保持期間もあるので、別の人・別の session で動くエージェント（同じ session 内の subagent への委任は除く）・別の PC や環境・保持期間を過ぎた再開には、session の再開では届かない。この場合だけ、会話の外に状態を書き残す必要がある。"
+    },
+    {
+      "id": "SB-07",
+      "origin": "official",
+      "source": "S1",
+      "text": "同じ修正を 2 回しても直らない時は、3 回目の修正ではなく、/clear して学んだことを含めた新しい依頼文を 1 つ出す方がほぼ常に良い。"
+    },
+    {
+      "id": "SB-08",
+      "origin": "official",
+      "source": "S1",
+      "text": "仕様（SPEC.md など）が書けたら、新しい session で実装を始める。clean な context と、書かれた完了条件から始められる。"
+    },
+    {
+      "id": "SB-09",
+      "origin": "official",
+      "source": "S4, S5",
+      "text": "複数の context window にまたがる長時間の作業では、構造化した状態（tests.json など）・自由文の進捗メモ（progress.txt など）・git の commit で状態を残す。新しい context window はファイルシステムから状態を見つけるのが得意で、compaction より新しく始める方が良い場合もある。"
+    },
+    {
+      "id": "SB-10",
+      "origin": "official",
+      "source": "S1, S3",
+      "text": "/compact <残す焦点> で、要約に残すものを指定できる。長い session では /compact 自体が大きな要求になる。"
+    },
+    {
+      "id": "SB-11",
+      "origin": "official",
+      "source": "S3",
+      "text": "compaction の後も、project root の CLAUDE.md・auto memory・plan mode の plan はディスクから再注入される。会話の履歴と hook が足した内容は要約される。compaction を越えて残したい決まりは、project root の CLAUDE.md（paths: の無い rule を含む）に書く。"
+    },
+    {
+      "id": "SB-12",
+      "origin": "official",
+      "source": "S1",
+      "text": "会話の中で述べただけの禁止（例: レビューまで push しない）は compaction で失われうる。必ず守らせたい権限の境界は deny rule に書く。"
+    }
+  ],
+  "decision": {
+    "how_to_apply": "上から順に当てはめ、最初に当てはまった行に従う。どの行も『引継ぎメモを作るか』『区切るか』を決める。",
+    "rows": [
+      {
+        "id": "R1",
+        "origin": "user-instruction",
+        "when": "利用者が引継ぎメモを明示的に頼んだ。",
+        "do": "引継ぎメモを作る。",
+        "memo": true,
+        "based_on": [],
+        "examples": [
+          "「引継ぎ資料を作っておいて」と言われた。"
+        ]
+      },
+      {
+        "id": "R2",
+        "origin": "inferred-from-official",
+        "when": "続きを引き取るのが別の人・別の session で動くエージェント（同じ session 内の subagent への委任は除く）・別の PC や環境である。または、再開が transcript の保持期間（既定 30 日）を過ぎる見込み。",
+        "do": "引継ぎメモを作る（完全パス・現在の状態・次の一手）。",
+        "memo": true,
+        "based_on": [
+          "SB-05",
+          "SB-06"
+        ],
+        "examples": [
+          "続きは同僚が自分の PC でやる。",
+          "40 日後に再開する。"
+        ]
+      },
+      {
+        "id": "R3",
+        "origin": "official-derived",
+        "when": "長時間の自律作業で、複数の context window にまたがる。",
+        "do": "進捗メモと構造化した状態を残し、git があれば区切りごとに commit する（git が無ければ進捗メモだけ）。これを引継ぎメモとして扱う。",
+        "memo": true,
+        "based_on": [
+          "SB-09"
+        ],
+        "examples": [
+          "数十の機能を順に実装する、数時間かかる自律実行。"
+        ]
+      },
+      {
+        "id": "R4",
+        "origin": "official-derived",
+        "when": "計画や仕様が書けていて、大きな実装を新しい session で始める。",
+        "do": "新しい session で、計画・仕様ファイルを指して始める。計画・仕様ファイルが引継ぎの実体なので、別の引継ぎメモは作らない。",
+        "memo": false,
+        "based_on": [
+          "SB-08"
+        ],
+        "examples": [
+          "計画レビューが PASS し、別の session で実装に入る。"
+        ]
+      },
+      {
+        "id": "R5",
+        "origin": "official-derived",
+        "when": "同じ指摘を 2 回直しても直らない。",
+        "do": "/clear を提案し、学んだことを含めた依頼文を出し直す（依頼文の案を応答に書く）。引継ぎメモは作らない。",
+        "memo": false,
+        "based_on": [
+          "SB-07"
+        ],
+        "examples": [
+          "同じテストの失敗を 2 回直したが、まだ落ちる。"
+        ]
+      },
+      {
+        "id": "R6",
+        "origin": "official-derived",
+        "when": "同じ利用者が同じ PC で、保持期間内に後日続ける。",
+        "do": "/rename <名前> を提案し、再開は claude --resume <名前>。引継ぎメモは作らない。",
+        "memo": false,
+        "based_on": [
+          "SB-03",
+          "SB-04",
+          "SB-05"
+        ],
+        "examples": [
+          "今日はここまでで、明日の朝に続ける。"
+        ]
+      },
+      {
+        "id": "R7",
+        "origin": "official-derived",
+        "when": "次の作業が、今の作業と無関係。",
+        "do": "/clear を提案する（戻る可能性があれば /clear <名前>）。引継ぎメモは作らない。",
+        "memo": false,
+        "based_on": [
+          "SB-02",
+          "SB-03"
+        ],
+        "examples": [
+          "skill の修正が終わり、次は別のスライド作成を頼まれた。"
+        ]
+      },
+      {
+        "id": "R8",
+        "origin": "official-derived",
+        "when": "上のどれにも当たらない。同じ作業の続きと、終わった作業の後始末（デプロイ・commit・push・テストの再実行・小さな修正）を含む。",
+        "do": "同じ session で続ける。長くなっても自動 compaction に任せ、必要なら /compact <残す焦点> を提案する。引継ぎメモは作らない。",
+        "memo": false,
+        "based_on": [
+          "SB-01",
+          "SB-10"
+        ],
+        "examples": [
+          "実装が終わったので、そのままデプロイする。",
+          "レビューの指摘を同じ session で直す。"
+        ],
+        "also_from": "user-instruction（依頼: デプロイするだけで引継ぎメモを作らない）"
+      }
+    ],
+    "overlap_examples": [
+      {
+        "case": "別の PC でデプロイだけする。",
+        "expected_row": "R2",
+        "why": "R2 は R8 より上にある。transcript は別の PC から見えない。"
+      },
+      {
+        "case": "仕様ができてから、数時間の自律実装を始める。",
+        "expected_row": "R3",
+        "why": "R3 は R4 より上にある。複数の context window にまたがるので進捗メモが要る。"
+      },
+      {
+        "case": "同じ指摘を 2 回直しても直らず、今日はここまでにして明日続ける。",
+        "expected_row": "R5",
+        "why": "R5 は R6 より上にある。--resume で戻ると失敗 2 回分の履歴ごと戻るので、/clear して依頼文を出し直す。"
+      },
+      {
+        "case": "同じ PC で、翌日にデプロイする。",
+        "expected_row": "R6",
+        "why": "R6 は R8 より上にある。--resume で会話ごと戻れる。"
+      },
+      {
+        "case": "subagent にレビューを頼む。",
+        "expected_row": "R8",
+        "why": "同じ session 内の委任は R2 に当たらない。"
+      },
+      {
+        "case": "デプロイだけで、今日中に終わる。",
+        "expected_row": "R8",
+        "why": "R1〜R7 のどれにも当たらない。"
+      }
+    ]
+  },
+  "memo_location": [
+    "プロジェクトに引継ぎメモの置き場所や命名の規則があれば、それに従う。",
+    "規則が無ければ、既存の計画ファイルか進捗ファイル（公式の例: progress.txt）に書き足す。",
+    "どちらも無ければ、置き場所を利用者に 1 回確かめる。"
+  ],
+  "agent_actions": [
+    "エージェントは /clear・/rename・/compact や新しい session の開始を自分では実行できない。R4〜R8 で区切りや compact が要る時は、応答の最後でコマンドを 1 行提案するだけにする。",
+    "R2 に当たるか（別の人や別の PC が続きを引き取るか）は利用者しか知らない。分からず、判定を左右する時だけ 1 行で聞く。聞けない時の既定は『引継ぎメモを作らない』。",
+    "区切りを提案する前・引継ぎメモを作る前に、プロジェクトの CLAUDE.md に決まった手順（備忘の見返し、/compact の時に残す項目など）があれば先に済ませる。",
+    "R1〜R3 以外では、引継ぎメモのファイルを作らない。",
+    "compaction を越えて守らせたい決まりは会話で済ませず、project root の CLAUDE.md（paths: の無い rule を含む）に書くか（SB-11）、権限の境界なら deny rule にする（SB-12）。"
+  ]
+}

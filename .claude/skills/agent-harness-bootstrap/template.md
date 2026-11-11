@@ -31,9 +31,9 @@
 <!-- id: separate-agent-review-cycle / official-adversarial-review / review-cycle-parameters / issue-lifecycle -->
 3. 作業 → 自検証 → 他者レビュー（別エージェント）を作業節目で実施する。CLAUDE.md / skills 更新時は公式準拠を WebFetch ベースでレビュー（skills → レビュー用 skill で 90 点合格／3 回 FAIL で `issues/open/[ID].md` 起票・中断）
 <!-- id: handoff-management / session-restore-hook / concurrent-agent-4-axis-recheck -->
-4. session 開始時（新規 chat / `/clear` 直後）: handoff は **user 明示指示でのみ受領**（最新を自動 Read しない）。hook が提示するポインタ + 並走 4 軸 verdict を見て、user が再開対象を選んだら**その 1 件のみ本文 Read**（stale = 7 日以上前 / 完了済 / 次 session 不要 は選ばない）。受領後は役割のみ実施・scope creep を避ける
+4. session 開始時（新規 chat / `/clear` 直後）: handoff は **user 明示指示でのみ受領**（最新を自動 Read しない）。hook が提示するポインタ + 並走 4 軸 verdict を見て、user が再開対象を選んだら**その 1 件のみ本文 Read**（user が貼った・指定したものは確認なしで受領）（stale = 7 日以上前 / 完了済 / 次 session 不要 は選ばない）。受領後は役割のみ実施・scope creep を避ける
 <!-- id: handoff-management / issue-lifecycle -->
-5. handoff 規約: ファイル名 `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、次 handoff 作成まで保持、`issues/open|processing/[ID].md` 冒頭に進行中 handoff の完全パス記載（詳細 `issue-workflow.md`）
+5. handoff 規約: ファイル名 `[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、受領は `.claude/scripts/handoff_lifecycle.py receive` で記録し作業の完了時に `done` で削除、未受領で 30 日を超えたものは確認なしで `sweep --apply` で archive へ退避、`issues/open|processing/[ID].md` 冒頭に進行中 handoff の完全パス記載（詳細 `issue-workflow.md`）
 
 <!-- id: claude-md-tdd-order -->
 ## 実装の工程順序

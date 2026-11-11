@@ -22,7 +22,7 @@ id 列と台帳の整合（双方向）は `scripts/provenance-check.sh` で機�
 | 7 | 別エージェントレビューサイクルが `review.md` に記載されている | separate-agent-review-cycle / official-adversarial-review |  |
 | 8 | handoff は user 明示指示で受領し本文は選択 1 件のみ Read（最新を自動 Read しない）運用が `issue-workflow.md` に明記されている | handoff-management |  |
 | 9 | handoff 命名規約（`[YYYY-MM-DD]-issue-[ID]-[識別単語].md`、識別単語は 2〜4 語 kebab-case）が明記されている | handoff-management |  |
-| 10 | handoff 保持規約（次 handoff 作成まで前 handoff を削除しない）が明記されている | handoff-management |  |
+| 10 | handoff 保持規約（作業の完了時に受領済みの handoff を `done` で削除し、未受領で 30 日を超えたものは確認なしで archive へ退避する）が明記されている | handoff-management |  |
 | 11 | issue ファイル連携（`issues/open\|processing/[ID].md` 冒頭に進行中 handoff の完全パス記載）が明記されている | issue-lifecycle |  |
 | 12 | 各 issue ファイル冒頭ヘッダ（タイトル / 概要 1〜2 行 / 状態 / 最新 handoff 完全パス / 起票日）の標準形式が明記され、handoff 更新時の同期更新ルールがある | issue-lifecycle |  |
 | 13 | issues/ 3 段階（または pending 検証バッファを挟む 4 段階・採用判定は該当条件に基づく）のフォルダ管理（git mv 遷移）と問題発見即起票（scope creep 禁止・現タスクで触らない）が独立セクションとして明記されている | issue-lifecycle |  |

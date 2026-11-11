@@ -1,0 +1,97 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "progress-report-format",
+  "reviewed_at": "2026-11-01T05:11:52Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "fb21e0da00e7c24309006221a8016991616283163d161bce0780291483f2a326"
+      },
+      {
+        "path": "criteria/report-format.json",
+        "sha256": "eeefcc61f4d15379a087f9b38141bbcdf5f3795dcaca36d1e316b25547feec45"
+      },
+      {
+        "path": "examples/report.example.json",
+        "sha256": "e9c9ddab889d4e210fecab6a8bd1f32f1749a6b229e1f4f1c84fc54cf790614a"
+      },
+      {
+        "path": "scripts/render_report.py",
+        "sha256": "f21e841d25611f67800b7fe3cdc899a1c66e37c0a64314be775a5d7e430d216d"
+      },
+      {
+        "path": "scripts/test_render_report.py",
+        "sha256": "062cda5f083b0201d9cc6dceaa05650649ca2c6994d4d49a01f056864082239b"
+      }
+    ],
+    "content_hash": "4830316ba34c49096f84c2a3b5caa1a40638f3a175ac3580c9d0e962a65b767d"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a7f685ff39863ad0e",
+    "model": "claude-sonnet-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 20
+      }
+    ],
+    "score": 93,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": ".claude/skills/progress-report-format/scripts/__pycache__",
+        "comment": "生成物の pycache が skill 内にある。commit 対象に含めない方がよい。"
+      },
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": "SKILL.md:3",
+        "comment": "関連ファイル種別（json）への言及が description に無い。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": "SKILL.md:17-26",
+        "comment": "発言から出力までの短い実例が SKILL.md 内に無い（examples/ のデータはある）。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:24",
+        "comment": "Python のバージョン要件が未記載。"
+      }
+    ]
+  }
+}

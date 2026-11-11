@@ -1,0 +1,74 @@
+{
+  "schema": "article-html-from-json-criteria/v1",
+  "description": "article-html-from-json skill の正本。article.json のブロック定義・限定インライン HTML・指摘台帳の書式・再生成を止める条件を持つ。scripts/render_article.py はこのファイルを読んで検査する（SKILL.md に同じ内容を重ねて書かない）。",
+  "article": {
+    "schema_id": "article-json/v1",
+    "top_level": {
+      "schema": "\"article-json/v1\"",
+      "meta": "object。必須: title, output。任意: lang（既定 ja）, template（fragment | page。既定 fragment）, partials_dir（既定 partials）, glossary_links（真なら本文の用語を用語解説へリンク。既定 true）, labels（toc / glossary / references の見出し文言）",
+      "blocks": "配列。文書順にブロックを並べる"
+    },
+    "label_defaults": {"toc": "目次", "glossary": "用語解説", "references": "参考文献"},
+    "bid_pattern": "^[a-z0-9][a-z0-9-]*$",
+    "bid_rule": "全ブロックに固定の bid を付ける（台帳の targets が指す）。一度付けた bid は変えない。後から足すブロックには、既存と重ならない値を付ける",
+    "block_types": {
+      "heading": {"required": ["level", "html"], "optional": ["id", "toc"], "note": "level は 2〜4。id があり level 2 で toc が false でなければ目次に載る"},
+      "p": {"required": ["html"], "optional": []},
+      "note": {"required": ["html"], "optional": [], "note": "注記段落（class=note）"},
+      "list": {"required": ["items"], "optional": ["ordered"], "note": "items は html 文字列、または {html, list}（入れ子）"},
+      "table": {"required": ["columns", "rows"], "optional": ["caption", "row_header"], "note": "rows の各行は columns と同じ列数。row_header が真なら各行の先頭セルを th scope=row にする"},
+      "quote": {"required": ["paragraphs"], "optional": ["cite"]},
+      "code": {"required": ["language", "code"], "optional": [], "note": "code はエスケープ前の文字列。language は英小文字・数字・+・-"},
+      "qa": {"required": ["items"], "optional": [], "note": "items は {q, a}"},
+      "image": {"required": ["src", "alt"], "optional": ["caption"], "note": "alt は空にしない"},
+      "toc": {"required": [], "optional": [], "note": "目次の位置。中身は生成する。ちょうど 1 つまで"},
+      "glossary": {"required": ["terms"], "optional": [], "note": "terms は {term, desc}。本文の後ろ（references の前）に置く。ちょうど 1 つまで"},
+      "references": {"required": ["items"], "optional": [], "note": "items は {id?, html}"},
+      "include": {"required": ["name"], "optional": [], "note": "partials_dir/<name>.html を逐語で差し込む（組織の定型文など）。例外は {{YEAR}} を生成時の西暦に置き換えることだけ。他の {{ が残れば停止"},
+      "raw_html": {"required": ["html"], "optional": [], "note": "上で表せない要素だけ。check が件数を出す。script タグは不可"}
+    },
+    "inline_html": {
+      "allowed_tags": {"strong": [], "em": [], "code": [], "br": [], "sup": [], "sub": [], "a": ["href", "title"], "span": ["lang"]},
+      "rules": [
+        "html を持つ項目は上のタグと属性だけを使う。閉じ忘れは不可",
+        "用語リンク（a.term）は書かない。render が付ける",
+        "外部リンクの target / rel は render が付ける（http で始まる href に target=_blank rel=noopener）"
+      ]
+    },
+    "forbidden_everywhere": ["絵文字・記号アイコン（U+2600-27BF, U+1F000-1FAFF, U+2B50, U+2B55）", "<script"]
+  },
+  "ledger": {
+    "schema_id": "fix-ledger/v1",
+    "file_name": "fix-ledger.json",
+    "fields": {
+      "fixes[].id": "F-001 から連番",
+      "fixes[].received": "受けた日（YYYY-MM-DD）",
+      "fixes[].request": "依頼者の原文。要約・言い換えをしない",
+      "fixes[].status": "open | applied | rejected",
+      "fixes[].targets": "applied のとき必須。直したブロックの bid の配列",
+      "fixes[].change": "applied のとき必須。何をどう変えたか",
+      "fixes[].applied": "applied のとき必須。反映した日",
+      "fixes[].reason": "rejected のとき必須。直さない理由",
+      "fixes[].source_sync": "applied のとき必須。done | not-needed（JSON 以外に同じ本文を持つ原稿があれば、そちらにも反映したか）",
+      "renders[]": "render が追記する記録（at, kind=baseline|render, year, json_sha256, output, block_hashes, fixes）"
+    },
+    "render_blocked_when": [
+      "台帳が無い",
+      "status が open の指摘がある",
+      "applied に targets / change / applied / source_sync（done | not-needed）のどれかが無い",
+      "rejected に reason が無い",
+      "targets に、現在にも前回記録にも無い bid がある",
+      "前回の記録以降に applied にした指摘の targets のブロックが、前回の記録から変わっていない",
+      "id が無い・重複している、request が空"
+    ],
+    "init_ledger_refused_when": "出力 HTML が既にある（台帳を消して作り直すことでゲートを避けられないように）"
+  },
+  "workflow": {
+    "principles": [
+      "HTML は直接編集しない。直すのは常に article.json で、HTML は render が作る",
+      "修正の依頼は、受けた時点で台帳に原文のまま記録する（status open）",
+      "依頼が一通り終わったと依頼者が示すまで render しない。全件が applied か理由つき rejected になってから render する",
+      "同じ JSON・同じ partials・同じ年なら、出力は同じバイト列になる"
+    ]
+  }
+}

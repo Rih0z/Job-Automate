@@ -1,0 +1,115 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "article-html-from-json",
+  "reviewed_at": "2026-11-06T04:01:21Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "807a80e4e3b6a8a7f0804ae3496c0ea36da6fc04652426c8ea7bf0e37387b5c1"
+      },
+      {
+        "path": "criteria/article-schema.json",
+        "sha256": "715a44fae5c0465af6c333dd96b2ffee455a5e85fe44a0a3777faaa4e052baa2"
+      },
+      {
+        "path": "examples/article.example.json",
+        "sha256": "2d55e1303ad9dfe7ab3f5c9a64920465c4d7ad0a03a6e89fe05369eb6fe3c912"
+      },
+      {
+        "path": "examples/fix-ledger.json",
+        "sha256": "9a8183b177b37b8edec4e31fda83332b1bf7e18f9eb0c20db31dc625bd4762ba"
+      },
+      {
+        "path": "examples/partials/disclaimer.html",
+        "sha256": "f12c941c9e89fe2e351d898c2331f183b58f20538b04e5aa6b07547eb95f5830"
+      },
+      {
+        "path": "examples/partials/footer.html",
+        "sha256": "95af88edf80828539df5bbe4cc58a33f196f54e97cacfc6c9456dbffa5b336a9"
+      },
+      {
+        "path": "scripts/render_article.py",
+        "sha256": "1ff0c7145a6e8028aa4582d2eb329ac84bd4a5b6927d2fbeb4419c1de79ab48c"
+      },
+      {
+        "path": "scripts/test_render_article.py",
+        "sha256": "357131ecb4ed61e8b1e79d2cc2362d329f62f55a0c93b05b76e655d6ade523e1"
+      }
+    ],
+    "content_hash": "aeec8f1ed250cb7a01a07f5f0009192f0c2ef1460c4d3c2618f8c9038eaae820"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "general-purpose",
+    "agent_id": "a5305f3bf98355953",
+    "model": "sonnet"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 19
+      },
+      {
+        "id": "output",
+        "score": 17
+      },
+      {
+        "id": "practicality",
+        "score": 16
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "S2",
+        "severity": "low",
+        "location": "SKILL.md:5",
+        "comment": "argument-hint に山括弧のプレースホルダ(<article.json の絶対パス…>)がある。XML タグとは言えないが、「フロントマターに山括弧のタグがない」という check に厳密には触れうる。角括弧などへの変更が無難。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:90",
+        "comment": "docs/article-html-kit.md はスキルフォルダ外のプロジェクト固有パスで、コピー先では存在しない可能性がある。主手順の外にあり実行は妨げない。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:6-8",
+        "comment": "metadata.version はあるが更新履歴がない。変換器の仕様は criteria に集約されていて保守しやすい。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": "SKILL.md:40",
+        "comment": "HTML の出力仕様(57-63 行)と台帳の書式は明確。一方、依頼者への最終報告(反映した指摘の id と HTML パス)は 1 文の指示だけで、書式のひな形がない。"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": "SKILL.md:13, 42-46, 86-88",
+        "comment": "HTML を直接編集しないこと、台帳を事実と違う内容に書き換えて通さないこと、変換器が検査するのは形だけで事実は検査しないことが明記されている。問題なし。"
+      }
+    ]
+  }
+}

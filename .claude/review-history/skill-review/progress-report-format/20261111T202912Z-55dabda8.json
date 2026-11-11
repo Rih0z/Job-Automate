@@ -1,0 +1,103 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "progress-report-format",
+  "reviewed_at": "2026-11-11T20:29:12Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "fb21e0da00e7c24309006221a8016991616283163d161bce0780291483f2a326"
+      },
+      {
+        "path": "criteria/report-format.json",
+        "sha256": "eeefcc61f4d15379a087f9b38141bbcdf5f3795dcaca36d1e316b25547feec45"
+      },
+      {
+        "path": "examples/report.example.json",
+        "sha256": "e9c9ddab889d4e210fecab6a8bd1f32f1749a6b229e1f4f1c84fc54cf790614a"
+      },
+      {
+        "path": "scripts/render_report.py",
+        "sha256": "f21e841d25611f67800b7fe3cdc899a1c66e37c0a64314be775a5d7e430d216d"
+      },
+      {
+        "path": "scripts/test_render_report.py",
+        "sha256": "a31287b9d46f914b941542237269280c663ed75294a2a8275a1c2378370f51a8"
+      }
+    ],
+    "content_hash": "7129fdb8beacdf06c30a68f543d41cc2be64efc1eb0660d3d33e61ff59eac54e"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a06c4225fdd83263a",
+    "model": "claude-opus-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 16
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/progress-report-format/SKILL.md:30",
+        "comment": "R7 は REPORT_FORBIDDEN_WORDS か .tmp/forbidden-words.txt が無いと skip することが SKILL.md に書かれていない"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/progress-report-format/scripts/test_render_report.py:119",
+        "comment": "open(...).read() を閉じずに使っていて ResourceWarning が出る"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": ".claude/skills/progress-report-format/SKILL.md:17",
+        "comment": "利用者の発言から出力までの流れを示す Examples の節が無い"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": ".claude/skills/progress-report-format/SKILL.md:25",
+        "comment": "終了コード 2 と git log が使えない時の代わりの手順が書かれていない"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/progress-report-format/SKILL.md:24",
+        "comment": "Python 3 が必要なことと repo ルートから実行する前提が明記されていない"
+      }
+    ]
+  }
+}
