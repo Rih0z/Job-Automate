@@ -39,30 +39,64 @@ _DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 REQUIRED_KEYS = ("id", "category", "source", "section", "statement", "quote", "check", "verified", "used_by")
 
 
+def _enum_ok(value, allowed):
+    """値が文字列で、allowed に入っているか（リスト等の unhashable な値で落ちないように型を先に見る）。"""
+    return isinstance(value, str) and value in allowed
+
+
 def check(cache, status, root):
     v = []
     sources = cache.get("sources") or {}
     principles = cache.get("principles") or []
+    if not isinstance(principles, list):
+        v.append("V6 cache の principles が配列でない")
+        principles = []
+    if not isinstance(sources, dict):
+        v.append("V6 cache の sources が object でない")
+        sources = {}
     seen_p = set()
-    for p in principles:
+    for i, p in enumerate(principles):
+        if not isinstance(p, dict):
+            v.append(f"V6 cache の principles[{i}] が object でない")
+            continue
         pid = p.get("id", "<id なし>")
+        if not isinstance(pid, str):
+            v.append(f"V6 cache の principles[{i}] の id {pid!r} が文字列でない")
+            continue
         if pid in seen_p:
             v.append(f"V6 principle id {pid} が重複している")
         seen_p.add(pid)
         for k in REQUIRED_KEYS:
             if k not in p:
                 v.append(f"V6 principle {pid} に必須キー {k} が無い")
-        if "source" in p and p["source"] not in sources:
+        if "source" in p and (not isinstance(p["source"], str) or p["source"] not in sources):
             v.append(f"V6 principle {pid} の source {p['source']} が sources に無い")
 
-    cache_ids = {p.get("id") for p in principles if p.get("id")}
+    cache_ids = {p.get("id") for p in principles if isinstance(p, dict) and isinstance(p.get("id"), str)}
     st = status.get("principles") or {}
+    if not isinstance(st, dict):
+        v.append("V2 status の principles が object でない")
+        st = {}
+    for pid in sorted(k for k, e in st.items() if not isinstance(e, dict)):
+        v.append(f"V2 {pid} が object でない")
+    st = {k: e for k, e in st.items() if isinstance(e, dict)}
     for pid in sorted(cache_ids - set(st)):
         v.append(f"V1 cache の principle {pid} が status に無い")
     for pid in sorted(set(st) - cache_ids):
         v.append(f"V1 status の {pid} が cache に無い")
 
-    findings = status.get("findings") or []
+    raw_findings = status.get("findings") or []
+    if not isinstance(raw_findings, list):
+        v.append("V5 status の findings が配列でない")
+        raw_findings = []
+    findings = []
+    for i, f in enumerate(raw_findings):
+        if not isinstance(f, dict):
+            v.append(f"V5 findings[{i}] が object でない")
+        elif not isinstance(f.get("id"), str):
+            v.append(f"V5 findings[{i}] の id {f.get('id')!r} が文字列でない")
+        else:
+            findings.append(f)
     seen, finding_ids = set(), set()
     for f in findings:
         fid = f.get("id")
@@ -70,9 +104,9 @@ def check(cache, status, root):
             v.append(f"V5 findings の id {fid} が重複している")
         seen.add(fid)
         finding_ids.add(fid)
-        if f.get("severity") not in FINDING_SEVERITY:
+        if not _enum_ok(f.get("severity"), FINDING_SEVERITY):
             v.append(f"V5 finding {fid} の severity {f.get('severity')} が enum 外（{sorted(FINDING_SEVERITY)}）")
-        if f.get("status") not in FINDING_STATUS:
+        if not _enum_ok(f.get("status"), FINDING_STATUS):
             v.append(f"V5 finding {fid} の status {f.get('status')} が enum 外（{sorted(FINDING_STATUS)}）")
         if "requests" in f:
             reqs = f["requests"]
@@ -90,7 +124,9 @@ def check(cache, status, root):
     enums = status.get("enums")
     if isinstance(enums, dict):
         for key, const in (("finding_status", FINDING_STATUS), ("finding_priority", FINDING_PRIORITY)):
-            if key in enums and (not isinstance(enums[key], list) or set(enums[key]) != const):
+            val = enums.get(key)
+            if key in enums and (not isinstance(val, list) or not all(isinstance(x, str) for x in val)
+                                 or set(val) != const):
                 v.append(f"V8 enums.{key} {enums[key]} が検査の定数 {sorted(const)} と食い違う")
 
     for pid, e in sorted(st.items()):
@@ -98,9 +134,16 @@ def check(cache, status, root):
         cr_f = by_id.get(e["cr"]) if isinstance(e.get("cr"), str) else None
         if cr_f is not None and cr_f.get("status") == "obsolete":
             v.append(f"V8 {pid} の cr {e.get('cr')} が obsolete の finding を指している（principle の status と cr を見直す）")
-        if s not in PRINCIPLE_STATUS:
+        if not _enum_ok(s, PRINCIPLE_STATUS):
             v.append(f"V2 {pid} の status {s} が enum 外（{sorted(PRINCIPLE_STATUS)}）")
-        for path in e.get("evidence") or []:
+        evidence = e.get("evidence") or []
+        if not isinstance(evidence, list):
+            v.append(f"V3 {pid} の evidence が配列でない")
+            evidence = []
+        for path in evidence:
+            if not isinstance(path, str):
+                v.append(f"V3 {pid} の evidence {path!r} が文字列でない")
+                continue
             full = os.path.normpath(os.path.join(root, path))
             try:
                 inside = os.path.commonpath([os.path.abspath(root), os.path.abspath(full)]) == os.path.abspath(root)
@@ -111,7 +154,10 @@ def check(cache, status, root):
             elif not os.path.exists(full):
                 v.append(f"V3 {pid} の evidence {path} が実在しない")
         cr = e.get("cr")
-        if s in NEEDS_CR and not cr:
+        if cr is not None and not isinstance(cr, str):
+            v.append(f"V4 {pid} の cr {cr!r} が文字列でない")
+            continue
+        if isinstance(s, str) and s in NEEDS_CR and not cr:
             v.append(f"V4 {pid} は {s} なのに cr が無い")
         if cr and cr not in finding_ids:
             v.append(f"V4 {pid} の cr {cr} が findings に無い")
@@ -129,6 +175,8 @@ def _inside(root, path):
 def _premise_path_ok(root, path):
     if not isinstance(path, str) or not path:
         return False
+    if ".." in path.replace("\\", "/").split("/"):
+        return False
     if path.startswith("~/"):
         return True
     if os.path.isabs(path) or path.startswith(("/", "\\")) or re.match(r"^[A-Za-z]:", path):
@@ -139,7 +187,7 @@ def _premise_path_ok(root, path):
 def _check_triage_fields(f, finding_ids, root):
     v = []
     fid = f.get("id")
-    if "priority" in f and f["priority"] not in FINDING_PRIORITY:
+    if "priority" in f and not _enum_ok(f["priority"], FINDING_PRIORITY):
         v.append(f"V8 finding {fid} の priority {f['priority']} が enum 外（{sorted(FINDING_PRIORITY)}）")
     if "reviewed" in f:
         r = f["reviewed"]
@@ -166,7 +214,7 @@ def _check_triage_fields(f, finding_ids, root):
         sb = f["superseded_by"]
         if f.get("status") != "obsolete":
             v.append(f"V8 finding {fid} の superseded_by は status が obsolete の時だけ書ける")
-        elif sb == fid or sb not in finding_ids:
+        elif not isinstance(sb, str) or sb == fid or sb not in finding_ids:
             v.append(f"V8 finding {fid} の superseded_by {sb} が自分か、findings に無い")
     return v
 
@@ -178,16 +226,23 @@ def main():
     ap.add_argument("--root", default=DEFAULT_ROOT)
     a = ap.parse_args()
     try:
-        cache = json.load(open(a.cache, encoding="utf-8"))
-        status = json.load(open(a.status, encoding="utf-8"))
+        with open(a.cache, encoding="utf-8-sig") as fc:
+            cache = json.load(fc)
+        with open(a.status, encoding="utf-8-sig") as fs:
+            status = json.load(fs)
     except (OSError, ValueError) as ex:
         print(f"ERROR 入力を読めない: {ex}")
+        return 2
+    if not isinstance(cache, dict) or not isinstance(status, dict):
+        print("ERROR cache と status の最上位は object でなければならない")
         return 2
     v = check(cache, status, a.root)
     for line in v:
         print(line)
-    n = len(cache.get("principles") or [])
-    print(f"SUMMARY principles={n} findings={len(status.get('findings') or [])} violations={len(v)}")
+    def count(x):
+        return len(x) if isinstance(x, list) else 0
+
+    print(f"SUMMARY principles={count(cache.get('principles'))} findings={count(status.get('findings'))} violations={len(v)}")
     return 1 if v else 0
 
 

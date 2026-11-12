@@ -140,6 +140,58 @@ class TestLedgerGate(unittest.TestCase):
         self.assertFalse(self.denied(out), out)
         self.assertIn("評価できない", (out or {}).get("systemMessage", ""))
 
+    # 計画 2026-11-12-issue-bp-alignment.md r2 の J3i〜J3k
+    def use_json_source(self, bom=False):
+        """fixture に json_findings の source を足し、related の無い CR-01 を base に commit する。"""
+        (self.root / ".claude" / "issue-tracker.json").write_text(json.dumps({
+            "sources": [{"type": "md_dirs", "root": "issues", "active": ["open"], "closed": ["closed"]},
+                        {"type": "json_findings", "path": "data/findings.json", "array": "findings",
+                         "id": "id", "title": "finding", "status": "status", "closed_values": ["done"]}],
+            "related_field": "関連:"}, ensure_ascii=False), encoding="utf-8")
+        self.write_findings([{"id": "CR-01", "finding": "x", "status": "backlog"}], bom)
+        git(self.root, "add", "-A"); git(self.root, "commit", "-qm", "json")
+
+    def write_findings(self, items, bom=False):
+        f = self.root / "data" / "findings.json"
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_bytes((b"\xef\xbb\xbf" if bom else b"")
+                      + json.dumps({"findings": items}, ensure_ascii=False).encode("utf-8"))
+
+    def test_J3i_long_command_is_still_checked(self):
+        self.use_json_source()
+        self.write_findings([{"id": "CR-01", "finding": "x", "status": "backlog"},
+                             {"id": "CR-02", "finding": "y", "status": "backlog"}])
+        git(self.root, "add", "-A")
+        rc, out, err = self.run_hook("git commit -m x " + "a" * 200000)
+        self.assertEqual(rc, 0, err)
+        self.assertTrue(self.denied(out), (out, err[-500:]))
+        self.assertIn("CR-02", out["hookSpecificOutput"]["permissionDecisionReason"])
+
+    def test_J3j_bom_ledger_new_finding_is_denied(self):
+        self.use_json_source(bom=True)
+        self.write_findings([{"id": "CR-01", "finding": "x", "status": "backlog"},
+                             {"id": "CR-02", "finding": "y", "status": "backlog"}], bom=True)
+        git(self.root, "add", "-A")
+        rc, out, err = self.run_hook("git commit -m x")
+        self.assertTrue(self.denied(out), out)
+        self.assertIn("CR-02", out["hookSpecificOutput"]["permissionDecisionReason"])
+
+    def test_J3k_python_crash_passes_with_system_message(self):
+        self.ledger("queued")
+        bad = self.top / "badpy"
+        bad.mkdir()
+        (bad / "json.py").write_text("raise RuntimeError('壊れた json')\n", encoding="utf-8")
+        self.env["PYTHONPATH"] = str(bad)
+        payload = {"tool_name": "Bash", "tool_input": {"command": "git commit -m x"}, "hook_event_name": "PreToolUse"}
+        p = subprocess.run([BASH, str(HOOK)], input=json.dumps(payload), cwd=self.root, capture_output=True,
+                           text=True, encoding="utf-8", env=self.env, timeout=60)
+        rc, err = p.returncode, p.stderr
+        out = json.loads(p.stdout) if p.stdout.strip() else None  # python は -S で起動するので .pth の出力は混ざらない
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(self.denied(out), out)
+        self.assertIn("評価できない", (out or {}).get("systemMessage", ""))
+        self.assertIn("終了コード", (out or {}).get("systemMessage", ""))
+
     def test_J3f_repo_without_ledgers_is_ignored(self):
         (self.root / ".claude" / "knowhow.json").unlink()
         (self.root / ".claude" / "issue-tracker.json").unlink()

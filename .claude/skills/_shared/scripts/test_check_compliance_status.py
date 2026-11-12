@@ -236,6 +236,96 @@ class CheckComplianceStatusTest(unittest.TestCase):
         self.status["enums"] = {"finding_status": ["open", "backlog", "done", "false-positive", "obsolete"]}
         self.assertNoViolation(self.run_check())
 
+    # 計画 2026-11-12-issue-bp-alignment.md r2 の A4・A5・m3
+    def assertNoCrash(self, r):
+        self.assertNotIn("Traceback", r.stdout + r.stderr)
+
+    def test_c24_finding_not_object_is_violation(self):
+        self.status["findings"].append("x")
+        r = self.run_check()
+        self.assertNoCrash(r)
+        self.assertViolation(r, "V5", "findings[1]")
+
+    def test_c25_principle_value_not_object_is_violation(self):
+        self.status["principles"]["a.one"] = "adopted"
+        r = self.run_check()
+        self.assertNoCrash(r)
+        self.assertViolation(r, "V2", "a.one")
+
+    def test_c26_unhashable_values_are_violations(self):
+        self.status["findings"][0]["severity"] = ["Low"]
+        r = self.run_check()
+        self.assertNoCrash(r)
+        self.assertViolation(r, "V5", "CR-01")
+        self.status["findings"][0]["severity"] = "Low"
+        self.status["findings"][0]["priority"] = ["P1"]
+        r = self.run_check()
+        self.assertNoCrash(r)
+        self.assertViolation(r, "V8", "CR-01")
+
+    def test_c26b_finding_id_not_string_is_violation(self):
+        self.status["findings"].append({"id": ["CR-02"], "date": "2026-09-25", "finding": "f",
+                                        "severity": "Low", "status": "open", "note": ""})
+        r = self.run_check()
+        self.assertNoCrash(r)
+        self.assertViolation(r, "V5", "id")
+
+    def test_c26c_top_level_not_object_exits_2(self):
+        r = self.run_check(status=[])
+        self.assertNoCrash(r)
+        self.assertEqual(r.returncode, 2, r.stdout + r.stderr)
+        self.assertIn("object", r.stdout + r.stderr)
+
+    def test_c26d_cache_principle_not_object_is_violation(self):
+        self.cache["principles"].append("x")
+        r = self.run_check()
+        self.assertNoCrash(r)
+        self.assertViolation(r, "V6", "principles[4]")
+
+    def test_c26e_enum_list_with_unhashable_is_violation(self):
+        self.status["enums"] = {"finding_status": [["open"]]}
+        r = self.run_check()
+        self.assertNoCrash(r)
+        self.assertViolation(r, "V8", "finding_status")
+
+    def test_c29_container_and_id_types_are_violations(self):
+        cache = copy.deepcopy(self.cache)
+        cache["principles"][0]["id"] = ["a.one"]
+        r = self.run_check(cache=cache)
+        self.assertNoCrash(r)
+        self.assertViolation(r, "V6", "principles[0]")
+        st = copy.deepcopy(self.status)
+        st["findings"] = 3
+        r = self.run_check(status=st)
+        self.assertNoCrash(r)
+        self.assertViolation(r, "V5", "findings")
+        cache = copy.deepcopy(self.cache)
+        cache["principles"] = 3
+        r = self.run_check(cache=cache)
+        self.assertNoCrash(r)
+        self.assertViolation(r, "V6", "principles")
+        st = copy.deepcopy(self.status)
+        st["principles"]["a.one"]["evidence"] = 3
+        r = self.run_check(status=st)
+        self.assertNoCrash(r)
+        self.assertViolation(r, "V3", "a.one")
+
+    def test_c27_premise_home_path_with_dotdot_is_violation(self):
+        self.status["findings"][0]["premise"] = [{"path": "~/../x.md"}]
+        self.assertViolation(self.run_check(), "V8", "CR-01")
+
+    def test_c28_bom_status_is_read(self):
+        sp = os.path.join(self.root, "status_bom.json")
+        cp = os.path.join(self.root, "cache_bom.json")
+        with open(sp, "wb") as f:
+            f.write(b"\xef\xbb\xbf" + json.dumps(self.status).encode("utf-8"))
+        with open(cp, "wb") as f:
+            f.write(b"\xef\xbb\xbf" + json.dumps(self.cache).encode("utf-8"))
+        env = dict(os.environ, PYTHONUTF8="1")
+        r = subprocess.run([sys.executable, SCRIPT, "--cache", cp, "--status", sp, "--root", self.root],
+                           capture_output=True, text=True, encoding="utf-8", env=env)
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
     def test_c11_real_repository_data(self):
         cache = os.path.join(REPO, ".claude", "skills", "_shared", "anthropic-best-practices.json")
         status = os.path.join(REPO, ".claude", "skills", "_shared", "compliance-status.json")

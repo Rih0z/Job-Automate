@@ -11,11 +11,13 @@
 #     どちらも無い repo では何もしない。
 #   - どちらかが exit 1（欠け）か exit 2（台帳・設定が不正）なら止める:
 #     {"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":...}}
-#   - 評価できない時（python が無い・時間切れ・その他の終了コード）は止めず、systemMessage で知らせて通す。
+#   - 評価できない時（python が無い・検査の python が途中で落ちた・時間切れ・その他の終了コード）は止めず、
+#     systemMessage で知らせて通す。入力の JSON は stdin で python に渡す（argv だと長いコマンドで溢れ、黙って通るため）。
 # 既知の限界: コマンド文字列の照合なので、git の別名・変数で組み立てたコマンド・スクリプトの中の commit は見ない。
 #   見るのは常にこの repo の台帳なので、`git -C <別の repo> commit` でも、この repo の検査が失敗していれば止まる。
 #   check-new は index（staged）を見るので、commit -a で未ステージの新規 file が入ることはない（新規 file は add が要る）。
-# 試験用の継ぎ目: LEDGER_GATE_TIMEOUT_SEC（検査 1 つを待つ秒数。既定 20）。
+# 試験用の継ぎ目: LEDGER_GATE_TIMEOUT_SEC（検査 1 つを待つ秒数。既定 20。検査は最大 2 つなので計 40 秒で、
+#   settings.json の hook の timeout 60 秒に収まる）。
 # リポジトリのルート: CLAUDE_PROJECT_DIR > この script の位置（.claude/hooks/ の 2 つ上）。script の場所は先頭の ISSUE_TRACKER・KNOWHOW_CHECK（既定はこの hook の隣の .claude/skills/ の中）。
 # 緊急時に外すのは人（リポジトリの管理者）が行う: .claude/settings.json の PreToolUse にある本 hook の登録を外す。
 
@@ -41,14 +43,16 @@ for cand in python3 python py; do
   fi
 done
 if [[ -z "$PYTHON" ]]; then
-  echo '{"systemMessage": "[ledger-gate] python が見つからないため、git commit の前の「関連:」欄と knowhow 台帳の確認を評価できません（止めていません）。"}'
+  echo '{"systemMessage": "[ledger-gate] python が見つからないため、git commit の前の「関連:」欄と knowhow 台帳の確認を評価できない（止めていません）。"}'
   exit 0
 fi
 export PYTHONUTF8=1
 
-"$PYTHON" - "$ROOT" "$ISSUE_TRACKER" "$KNOWHOW_CHECK" "$INPUT" <<'PY'
+# heredoc を $( ) の中に書くと古い bash（3.2）が本文の括弧や引用符を誤解析するので、read で受ける
+IFS= read -r -d '' PYSCRIPT <<'PY'
 import json, os, re, subprocess, sys
-root, issue_tracker, knowhow_check, raw = sys.argv[1:5]
+root, issue_tracker, knowhow_check = sys.argv[1:4]
+raw = sys.stdin.read()
 PFX = "[ledger-gate] "
 try:
     ev = json.loads(raw) if raw.strip() else {}
@@ -92,6 +96,7 @@ for label, args in checks:
         notes.append(f"{label} を評価できない（{type(ex).__name__}）")
         continue
     if p.returncode in (1, 2):
+        # 理由は deny の表示に出るので、欠けの一覧の先頭が読める長さで切る（全文は手で検査を実行すれば見られる）
         detail = " / ".join(l for l in (p.stdout + "\n" + p.stderr).splitlines() if l.strip())[:700]
         denies.append(f"{label}: {detail}")
     elif p.returncode != 0:
@@ -106,4 +111,10 @@ elif notes:
     print(json.dumps({"systemMessage": PFX + " / ".join(notes) + "（止めていません）"}, ensure_ascii=False))
 sys.exit(0)
 PY
+# -S: site（.pth）を読まない。標準ライブラリだけを使い、環境の .pth が stdout に出す行を混ぜないため
+"$PYTHON" -S -c "$PYSCRIPT" "$ROOT" "$ISSUE_TRACKER" "$KNOWHOW_CHECK" <<<"$INPUT"
+rc=$?
+if [[ $rc -ne 0 ]]; then
+  echo "{\"systemMessage\": \"[ledger-gate] 検査の python が終了コード $rc で終わったため、git commit の前の「関連:」欄と knowhow 台帳の確認を評価できない（止めていません）。\"}"
+fi
 exit 0

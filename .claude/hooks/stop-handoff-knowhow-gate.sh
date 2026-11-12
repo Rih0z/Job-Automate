@@ -45,9 +45,12 @@ if [[ -z "$PYTHON" ]]; then
 fi
 export PYTHONUTF8=1
 
-"$PYTHON" - "$ROOT" "$HANDOFF_LIFECYCLE" "$KNOWHOW_CHECK" "$INPUT" <<'PY'
+# 入力の JSON は stdin で python に渡す（argv だと長い入力で溢れ、黙って通るため）
+# heredoc を $( ) の中に書くと古い bash（3.2）が本文の括弧や引用符を誤解析するので、read で受ける
+IFS= read -r -d '' PYSCRIPT <<'PY'
 import json, os, re, subprocess, sys
-root, handoff_lifecycle, knowhow_check, raw = sys.argv[1:5]
+root, handoff_lifecycle, knowhow_check = sys.argv[1:4]
+raw = sys.stdin.read()
 PFX = "[handoff-knowhow-gate] "
 try:
     ev = json.loads(raw) if raw.strip() else {}
@@ -111,4 +114,10 @@ elif notes:
     print(json.dumps({"systemMessage": PFX + " / ".join(notes)}, ensure_ascii=False))
 sys.exit(0)
 PY
+# -S: site（.pth）を読まない。標準ライブラリだけを使い、環境の .pth が stdout に出す行を混ぜないため
+"$PYTHON" -S -c "$PYSCRIPT" "$ROOT" "$HANDOFF_LIFECYCLE" "$KNOWHOW_CHECK" <<<"$INPUT"
+rc=$?
+if [[ $rc -ne 0 ]]; then
+  echo "{\"systemMessage\": \"[handoff-knowhow-gate] 検査の python が終了コード $rc で終わったため、受領した handoff と knowhow の未反映を評価できない（止めていません）。\"}"
+fi
 exit 0

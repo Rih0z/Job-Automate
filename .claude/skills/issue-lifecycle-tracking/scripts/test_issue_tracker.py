@@ -248,6 +248,54 @@ class TestRequest(Base):
         rc, out, err = self.run_cli("request", "issues/open/nope.md", "--text", "x", "--now", NOW_S)
         self.assertEqual(rc, 2)
 
+    def test_RQB1_request_on_bom_crlf_ledger_keeps_bom_and_crlf(self):
+        text = json.dumps({"findings": [{"id": "CR-01", "finding": "x", "status": "backlog"}]},
+                          ensure_ascii=False, indent=2).replace("\n", "\r\n") + "\r\n"
+        f = self.put("data/findings.json", None, raw=b"\xef\xbb\xbf" + text.encode("utf-8"))
+        rc, out, err = self.run_cli("request", "CR-01", "--text", "要望E", "--now", NOW_S)
+        self.assertEqual(rc, 0, out + err)
+        raw = f.read_bytes()
+        self.assertTrue(raw.startswith(b"\xef\xbb\xbf"))
+        self.assertNotIn(b"\n", raw.replace(b"\r\n", b""))
+        self.assertIn("要望E".encode("utf-8"), raw)
+
+    def test_RQB3_request_on_undecodable_ledger_exits_2_with_reason(self):
+        self.put("data/findings.json", None, raw=b'{"findings": [{"id": "CR-01", "finding": "\xff"}]}')
+        rc, out, err = self.run_cli("request", "CR-01", "--text", "x", "--now", NOW_S)
+        self.assertEqual(rc, 2, out + err)
+        self.assertIn("data/findings.json", err)
+        self.assertNotIn("想定外のエラー", err)
+
+    def test_RQB2_request_on_broken_ledger_exits_2_with_reason(self):
+        """回帰（今も exit 2）。理由が「見つからない」でなく JSON が読めないことだと出す。"""
+        self.put("data/findings.json", '{"findings": [{"id": "CR-01"},]}\n')
+        rc, out, err = self.run_cli("request", "CR-01", "--text", "x", "--now", NOW_S)
+        self.assertEqual(rc, 2, out + err)
+        self.assertIn("JSON", err)
+        self.assertIn("data/findings.json", err)
+        self.assertNotIn("見つからない", err)
+        self.assertNotIn("Traceback", err)
+
+
+class TestMainCatchAll(Base):
+    def test_unexpected_exception_exits_2_not_1(self):
+        import contextlib
+        import importlib.util
+        import io
+        spec = importlib.util.spec_from_file_location("issue_tracker_under_test", SCRIPT)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+
+        def boom(a):
+            raise RuntimeError("想定外")
+
+        mod.cmd_triage = boom
+        buf = io.StringIO()
+        with contextlib.redirect_stderr(buf):
+            rc = mod.main(["triage", "--config", str(self.cfg)])
+        self.assertEqual(rc, 2)
+        self.assertIn("RuntimeError", buf.getvalue())
+
 
 SRC_BODY = "\n".join(f"本文の行 {i} は統合元の内容" for i in range(40))
 
@@ -459,6 +507,52 @@ class TestCheckNew(Base):
         rc, out, err = self.run_cli("check-new", "--base", "no-such-ref")
         self.assertEqual(rc, 2, out + err)
         shutil.rmtree(self.root / ".git", onerror=_force_remove)
+        rc, out, err = self.run_cli("check-new")
+        self.assertEqual(rc, 2, out + err)
+
+    # 計画 2026-11-12-issue-bp-alignment.md r2 の CN-B1〜B6（B4 は取り下げ）
+    def findings_raw(self, items, bom=False, crlf=False):
+        text = json.dumps({"findings": items}, ensure_ascii=False, indent=2) + "\n"
+        if crlf:
+            text = text.replace("\n", "\r\n")
+        return self.put("data/findings.json", None, raw=(b"\xef\xbb\xbf" if bom else b"") + text.encode("utf-8"))
+
+    def test_CNB1_bom_staged_json_new_finding_without_related_is_missing(self):
+        self.findings_raw([{"id": "CR-01", "finding": "x", "status": "backlog"},
+                           {"id": "CR-02", "finding": "y", "status": "backlog"}], bom=True)
+        self.stage("data")
+        rc, out, err = self.run_cli("check-new")
+        self.assertEqual(rc, 1, out + err)
+        self.assertIn("CR-02", out)
+
+    def test_CNB2_unparsable_staged_json_exits_2(self):
+        self.put("data/findings.json", '{"findings": [{"id": "CR-01"},]}\n')
+        self.stage("data")
+        rc, out, err = self.run_cli("check-new")
+        self.assertEqual(rc, 2, out + err)
+        self.assertIn("data/findings.json", err)
+
+    def test_CNB3_staged_json_without_array_exits_2(self):
+        self.put("data/findings.json", '{"x": []}\n')
+        self.stage("data")
+        rc, out, err = self.run_cli("check-new")
+        self.assertEqual(rc, 2, out + err)
+
+    def test_CNB5_bom_in_base_and_index_compares_ids(self):
+        """回帰: base（HEAD）も BOM 付きの時、既存の finding を新規と数えない。"""
+        self.findings_raw([{"id": "CR-01", "finding": "x", "status": "backlog"}], bom=True)
+        self.stage("data"); git(self.root, "commit", "-qm", "bom")
+        self.findings_raw([{"id": "CR-01", "finding": "x", "status": "backlog"},
+                           {"id": "CR-02", "finding": "y", "status": "backlog", "related": []}], bom=True)
+        self.stage("data")
+        rc, out, err = self.run_cli("check-new")
+        self.assertEqual(rc, 0, out + err)
+
+    def test_CNB6_unparsable_base_json_exits_2(self):
+        self.put("data/findings.json", '{"findings": [,]}\n')
+        self.stage("data"); git(self.root, "commit", "-qm", "broken")
+        self.findings([{"id": "CR-01", "finding": "x", "status": "backlog"}])
+        self.stage("data")
         rc, out, err = self.run_cli("check-new")
         self.assertEqual(rc, 2, out + err)
 
@@ -726,6 +820,13 @@ class Triage(Base):
         self.assertEqual(list(s), SECTIONS)
         for k in SECTIONS:
             self.assertEqual(s[k], ["（なし）"], k)
+
+    def test_T14_premise_with_dotdot_is_invalid(self):
+        self.findings([fnd("CR-1", premise=[{"path": "~/../x.md"}]),
+                       fnd("CR-2", premise=[{"path": "../x.md"}])])
+        s = self.ok()
+        self.line_with(s["前提が崩れた候補"], "CR-1", "前提のパスが不正")
+        self.line_with(s["前提が崩れた候補"], "CR-2", "前提のパスが不正")
 
 
 if __name__ == "__main__":

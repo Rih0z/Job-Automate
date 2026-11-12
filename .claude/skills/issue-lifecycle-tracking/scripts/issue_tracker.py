@@ -46,7 +46,10 @@ import time
 from datetime import date, datetime
 from pathlib import Path, PurePosixPath
 
+# 本文は先頭 8KB だけを related の得点に使う。題名と冒頭の症状で近さは決まり、長い記録や出力の貼り付けで
+# 語が増えて無関係な issue の得点が上がるのを抑えるため。
 BODY_BYTES = 8 * 1024
+# related の時間上限（秒）。commit 前の hook（1 検査 20 秒）の中でも使われるので、それより短くする。
 DEFAULT_DEADLINE = 10.0
 REQUEST_HEADING = "## 利用者の要望"
 EMPTY_TREE = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
@@ -272,7 +275,20 @@ def iter_issues(cfg, include_closed, deadline=None, counter=None):
                 yield (f"findings:{item.get(s['status'])}", f"{s['path']}#{item.get(s['id'])}", title, body)
 
 
-def _load_json_source(s, warn_missing=False, text=None):
+def _load_json_source(s, warn_missing=False, text=None, strict=False):
+    """JSON source の配列を返す。読めなければ、strict なら exit 2、そうでなければ警告して None。
+
+    strict は台帳の形を確かめる場面（check-new・request）で使う。読めない台帳を飛ばして通すと、
+    検査が黙って OK になるため。related・triage は一覧なので、読める source だけで続ける。
+    """
+    def bad(msg):
+        if strict:
+            raise CliError(2, f"{msg}（台帳を直してから再実行する）")
+        warn(f"{msg}ので飛ばす")
+        return None
+
+    if text is not None:
+        text = text[1:] if text.startswith("\ufeff") else text  # git show の出力は BOM を残す
     if text is None:
         if not s["_path"].is_file():
             if warn_missing:
@@ -281,17 +297,14 @@ def _load_json_source(s, warn_missing=False, text=None):
         try:
             text = s["_path"].read_text(encoding="utf-8-sig")
         except (OSError, UnicodeDecodeError) as ex:
-            warn(f"source を読めないので飛ばす: {s['path']}（{ex}）")
-            return None
+            return bad(f"source を読めない: {s['path']}（{ex}）")
     try:
         doc = json.loads(text)
     except ValueError as ex:
-        warn(f"source の JSON が壊れているので飛ばす: {s['path']}（{ex}）")
-        return None
+        return bad(f"source の JSON を読めない: {s['path']}（{ex}）")
     arr = doc.get(s["array"]) if isinstance(doc, dict) else None
     if not isinstance(arr, list):
-        warn(f"source に配列 {s['array']} が無いので飛ばす: {s['path']}")
-        return None
+        return bad(f"source に配列 {s['array']} が無い: {s['path']}")
     return arr
 
 
@@ -321,7 +334,7 @@ def cmd_related(a):
         bl = body.casefold()
         tc = sum(1 for w in q if w in tt) / len(q)
         bc = sum(1 for w in q if w in bl) / len(q)
-        score = 0.7 * tc + 0.3 * bc
+        score = 0.7 * tc + 0.3 * bc  # 題名を重く見る: 題名は 1 文の要約で、本文には周辺の語が多く混じる
         if score > 0:
             scored.append((score, state, path, title))
     if counter["timed_out"]:
@@ -340,9 +353,7 @@ def _find_finding(cfg, ident):
     for s in cfg["sources"]:
         if s["type"] != "json_findings" or not s["_path"].is_file():
             continue
-        arr = _load_json_source(s)
-        if arr is None:
-            continue
+        arr = _load_json_source(s, strict=True)
         for item in arr:
             if isinstance(item, dict) and str(item.get(s["id"])) == ident:
                 return s
@@ -397,10 +408,20 @@ def _atomic_write(path, data):
 
 
 def _rewrite_json(s, mutate):
-    raw = s["_path"].read_text(encoding="utf-8")
-    doc = json.loads(raw)
-    mutate(doc[s["array"]])
-    _atomic_write(s["_path"], (json.dumps(doc, ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+    """JSON source を書き換える。先頭の BOM と改行（CRLF）の形は元のまま保つ。"""
+    try:
+        raw = s["_path"].read_bytes()
+        bom = raw.startswith(b"\xef\xbb\xbf")
+        text = raw[3:].decode("utf-8") if bom else raw.decode("utf-8")
+        doc = json.loads(text)
+        arr = doc[s["array"]]
+    except (OSError, UnicodeDecodeError, ValueError, KeyError, TypeError) as ex:
+        raise CliError(2, f"source を読めない: {s['path']}（{ex}）")
+    mutate(arr)
+    out = json.dumps(doc, ensure_ascii=False, indent=2) + "\n"
+    if "\r\n" in text:
+        out = out.replace("\n", "\r\n")
+    _atomic_write(s["_path"], (b"\xef\xbb\xbf" if bom else b"") + out.encode("utf-8"))
 
 
 def cmd_request(a):
@@ -521,6 +542,7 @@ def _handoff_candidates(base, src_path, src_text):
     if hd.is_dir():
         for p in sorted(hd.glob("*.md")):
             try:
+                # frontmatter は先頭にあり、60 行あれば足りる（本文全体は読まない）
                 head = p.read_text(encoding="utf-8-sig", errors="replace").split("\n")[:60]
             except OSError:
                 continue
@@ -682,10 +704,9 @@ def cmd_check_new(a):
             new = _git(top, "show", f":{rel}")
             if new.returncode != 0:
                 continue  # index に無い（追跡していない）
-            old_arr = _load_json_source(s, text=old.stdout) if old.returncode == 0 else []
-            new_arr = _load_json_source(s, text=new.stdout)
-            if new_arr is None:
-                continue
+            # 読めない台帳は exit 2（飛ばすと検査が黙って OK になる）。base に無い時（初回）は空と比べる
+            old_arr = _load_json_source(s, text=old.stdout, strict=True) if old.returncode == 0 else []
+            new_arr = _load_json_source(s, text=new.stdout, strict=True)
             old_ids = {str(x.get(s["id"])) for x in (old_arr or []) if isinstance(x, dict)}
             for item in new_arr:
                 if not isinstance(item, dict):
@@ -843,6 +864,9 @@ def _premise_reasons(it, repo_root, home):
         if not isinstance(e, dict) or not isinstance(e.get("path"), str) or not e["path"]:
             continue
         path = e["path"]
+        if ".." in PurePosixPath(path.replace("\\", "/")).parts:
+            reasons.append(f"前提のパスが不正（.. を含む）: {path}")
+            continue
         full = (home / path[2:]) if path.startswith("~/") else (repo_root / path)
         if not full.is_file():
             reasons.append(f"前提のファイルが無い: {path}")
@@ -957,7 +981,8 @@ def build_parser():
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("related")
     r.add_argument("--text", required=True)
-    r.add_argument("--limit", type=int, default=8)
+    r.add_argument("--limit", type=int, default=8,
+                   help="出す候補の数（既定 8: 起票の前に人が目で見比べられる数）")
     r.add_argument("--include-closed", action="store_true")
     r.add_argument("--deadline", type=float, default=DEFAULT_DEADLINE)
     r.add_argument("--config")
@@ -975,8 +1000,11 @@ def build_parser():
     c.add_argument("--config")
     t = sub.add_parser("triage")
     t.add_argument("--now")
-    t.add_argument("--stale-days", type=int, default=30)
-    t.add_argument("--dup-threshold", type=float, default=0.5)
+    t.add_argument("--stale-days", type=int, default=30,
+                   help="確認が古いとみなす日数（既定 30: 月 1 回の棚卸しで一巡する間隔）")
+    t.add_argument("--dup-threshold", type=float, default=0.5,
+                   help="重複の候補にする題名の語の Jaccard の下限（既定 0.5: 題名の語の半分以上が重なる。"
+                        "低いと言い換えの別 issue まで並び、高いと語順や助詞の違いだけの重複を落とす）")
     t.add_argument("--json", action="store_true")
     t.add_argument("--config")
     return ap
@@ -991,6 +1019,9 @@ def main(argv=None):
     except CliError as e:
         print(str(e), file=sys.stderr)
         return e.code
+    except Exception as e:  # 1 は「欠け」専用。想定外の失敗を欠けと読ませない
+        print(f"想定外のエラー: {type(e).__name__}: {e}", file=sys.stderr)
+        return 2
 
 
 if __name__ == "__main__":

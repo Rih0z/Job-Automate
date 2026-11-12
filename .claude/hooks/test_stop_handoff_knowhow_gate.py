@@ -205,6 +205,30 @@ class TestStopKnowhow(Base):
         rc, out, err = self.stop("S1", active=True)
         self.assertIsNone(out)
 
+    # 計画 2026-11-12-issue-bp-alignment.md r2 の S-long・S-crash
+    def test_S_long_input_is_still_checked(self):
+        self.ledger([kh("KH-0001", "queued"), kh("KH-0002", "queued")])
+        rc, out, err = self.run_hook(HOOK, {"session_id": "S1", "stop_hook_active": False,
+                                            "hook_event_name": "Stop", "padding": "a" * 200000})
+        self.assertEqual(rc, 0, err)
+        self.assertEqual(out and out.get("decision"), "block", (out, err[-500:]))
+
+    def test_S_crash_passes_with_system_message(self):
+        self.ledger([kh("KH-0001", "queued"), kh("KH-0002", "queued")])
+        bad = self.top / "badpy"
+        bad.mkdir()
+        (bad / "json.py").write_text("raise RuntimeError('壊れた json')\n", encoding="utf-8")
+        self.env["PYTHONPATH"] = str(bad)
+        payload = {"session_id": "S1", "stop_hook_active": False, "hook_event_name": "Stop"}
+        p = subprocess.run([BASH, str(HOOK)], input=json.dumps(payload), cwd=self.root, capture_output=True,
+                           text=True, encoding="utf-8", env=self.env, timeout=60)
+        rc, err = p.returncode, p.stderr
+        out = json.loads(p.stdout) if p.stdout.strip() else None  # python は -S で起動するので .pth の出力は混ざらない
+        self.assertEqual(rc, 0, err)
+        self.assertNotEqual((out or {}).get("decision"), "block", out)
+        self.assertIn("評価できない", (out or {}).get("systemMessage", ""))
+        self.assertIn("終了コード", (out or {}).get("systemMessage", ""))
+
     def test_J2b_only_old_queued_passes_with_system_message(self):
         rc, out, err = self.stop("S1", active=False)
         self.assertEqual(rc, 0, err)

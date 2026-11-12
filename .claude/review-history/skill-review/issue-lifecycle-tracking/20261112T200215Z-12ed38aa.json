@@ -1,0 +1,97 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "issue-lifecycle-tracking",
+  "reviewed_at": "2026-11-12T20:02:15Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "2532a1b8360459e609291c952691489b0101c96ace5e397e33df967916cb02f3"
+      },
+      {
+        "path": "references/issue-template.md",
+        "sha256": "38ffcd753745fcd9b4c5fe327baec9c8093b09ad19729b416a0537f478761c81"
+      },
+      {
+        "path": "references/issue-tracker-config.md",
+        "sha256": "1025c4cb80a633756ea5c3c7a0064ed63671237acdd934c293d6edd7ac1650ef"
+      },
+      {
+        "path": "scripts/issue_tracker.py",
+        "sha256": "31e141b1c9a3e732dd7bcee1407d7ece5eaf618046555467a24cf9a5594946c1"
+      },
+      {
+        "path": "scripts/test_issue_tracker.py",
+        "sha256": "1e555a337a7a9a86f5088f18454344997005cae6c1151de1864945722a8c3038"
+      }
+    ],
+    "content_hash": "30dfadff8f6cb4c2ef0468d9a2e3eddf96d69d256fda392b50d67b5c2a8b1a9d"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a0ca92478c1c7a580",
+    "model": "claude-opus-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 19
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "README.md (該当行なし)",
+        "comment": "README.md のスキル一覧に issue-lifecycle-tracking の記載が見当たらない。CLAUDE.md と agent-harness-bootstrap 系の文書からは参照されている"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/issue-lifecycle-tracking/SKILL.md:85",
+        "comment": "『このリポジトリでは principles[].cr』と KH アンカー（:56, :64, :66）が repo 固有で、移植先では意味を持たない"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/issue-lifecycle-tracking/references/issue-template.md:17",
+        "comment": "frontmatter の related: [] と本文の『関連:』欄が並んでいて混同しやすい（注記はある）"
+      },
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": ".claude/skills/issue-lifecycle-tracking/SKILL.md:3",
+        "comment": "description に対象のファイル種別（issues/*.md、.claude/issue-tracker.json）の記述が無い"
+      }
+    ]
+  }
+}
