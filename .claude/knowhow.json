@@ -1,6 +1,6 @@
 {
   "schema": "knowhow/v1",
-  "updated": "2026-11-11",
+  "updated": "2026-11-12",
   "description": "このリポジトリで今後も守る決まりの台帳（1 件 1 文）。反映先の file に ID のアンカー（md は HTML コメントの KH-xxxx、json は knowhow 配列）を置き、knowhow_check.py（.claude/skills/agent-harness-bootstrap/scripts/）が反映を確かめる。git commit の前は .claude/hooks/pre-git-ledger-gate.sh が全件を、Stop では stop-handoff-knowhow-gate.sh が増えた queued を見る。形は knowhow.schema.json。",
   "entries": [
     {
@@ -89,6 +89,20 @@
         {"path": "CLAUDE.md"},
         {"path": ".claude/session-boundary.json"},
         {"path": ".claude/skills/agent-harness-bootstrap/operational-knowhow.md"}
+      ],
+      "status": "reflected",
+      "retired_reason": null
+    },
+    {
+      "id": "KH-0008",
+      "added": "2026-11-12",
+      "source": "user",
+      "statement": "issue の棚卸しは、イテレーション完了時・引継ぎ資料を作る時・起票で active が増えた時に issue_tracker.py triage で行い、前提が崩れた候補と重複の候補を確かめて、終端（obsolete / withdrawn）・related・priority・reviewed を更新する。物理削除はしない。",
+      "why": "優先度の欄も前提を確かめた日も無いと、前提が変わって不要になった issue が backlog に残り続け、どれから直すかも決まらないため。消すと経緯と参照（principles[].cr）が失われ、同じ問題を再起票しやすいため。",
+      "reflect_to": [
+        {"path": ".claude/skills/issue-lifecycle-tracking/SKILL.md", "must_contain": "IT triage"},
+        {"path": "CLAUDE.md", "must_contain": "triage"},
+        {"path": ".claude/issue-tracker.json", "must_contain": "triage"}
       ],
       "status": "reflected",
       "retired_reason": null

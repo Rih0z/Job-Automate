@@ -24,6 +24,7 @@ python .claude/skills/_shared/scripts/test_check_compliance_status.py   # 検査
 
 ## findings の書式と drain
 
-- 1 件 = `findings[]` の 1 オブジェクト: `id`（CR-xx）/ `date` / `finding` / `principles`（関係する principle id）/ `severity`（High・Medium・Low）/ `status`（open・backlog・done・false-positive）/ `note`
+- 1 件 = `findings[]` の 1 オブジェクト: `id`（CR-xx）/ `date` / `finding` / `principles`（関係する principle id）/ `severity`（High・Medium・Low）/ `status`（open・backlog・done・false-positive・obsolete）/ `note`。任意で `related` / `requests` / `priority`（P1・P2・P3）/ `reviewed`（YYYY-MM-DD）/ `premise` / `resolution`（obsolete の時は必須）/ `superseded_by`
+- 棚卸しは `python .claude/skills/issue-lifecycle-tracking/scripts/issue_tracker.py triage` で候補を出し、手順は issue-lifecycle-tracking の SKILL.md「棚卸し」節に従う。前提が変わって不要になった CR は消さずに `obsolete` と `resolution` にする
 - CLAUDE.md の discovery-log を drain する時、Issue 相当として切り出すものはここに新しい CR として追加する
 - shell スクリプトの CR を done にする時は、GNU 実装依存（sed / awk）を疑い、可能なら BSD 環境（macOS）でも実行して確認する（CR-13 の教訓）

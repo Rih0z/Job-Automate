@@ -24,7 +24,15 @@ source は 2 種類:
       状態の移動・base の同じ source の別の状態に同じ file 名があるものは新規に数えない。json は base と index の id の差で
       増えた要素に related キー（list。空なら確認済み）があるかを見る。欠けていれば exit 1 と一覧。
 
-終了コード: 0 正常 / 1 check-new で欠けがある / 2 引数・設定・対象が不正（何も変えない）
+  triage [--now YYYY-MM-DD] [--stale-days 30] [--dup-threshold 0.5] [--json]
+      active な issue の棚卸しの候補を出す（読み取り専用。exit は常に 0、引数・設定の不正だけ 2）。節は
+      優先度順（priority → severity → 起票日 → id の自然順）/ 前提が崩れた候補（premise のファイル・文言が無い、
+      本文の backtick のパスが無い）/ 確認が古い（reviewed、無ければ起票日から stale-days 日を超えた）/
+      欄の欠け（priority・関連）/ 重複の候補（題名の token の Jaccard 係数が閾値以上の組）。
+      起票日の欄名は source の created（既定 created）。md は frontmatter の行の値（ # 以降と引用符を外す）を読み、
+      premise は json だけ。判定はしない（終端・priority・reviewed の更新はエージェントか人が行う）。
+
+終了コード: 0 正常 / 1 check-new で欠けがある / 2 引数・設定・対象が不正（何も変えない。例外は merge の「統合済みだが統合元が残った」）
 """
 import argparse
 import fnmatch
@@ -35,7 +43,7 @@ import subprocess
 import sys
 import tempfile
 import time
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path, PurePosixPath
 
 BODY_BYTES = 8 * 1024
@@ -119,6 +127,9 @@ def load_config(given):
             s["_path"] = (base / s["path"]).resolve()
         else:
             raise CliError(2, f"設定の {where} の type が md_dirs / json_findings でない: {t}")
+    for i, s in enumerate(cfg["sources"]):
+        if "created" in s and not (isinstance(s["created"], str) and s["created"]):
+            raise CliError(2, f"設定の sources[{i}] の created が文字列でない")
     field = cfg.get("related_field", "関連:")
     if not isinstance(field, str) or not field.strip():
         raise CliError(2, "設定の related_field が文字列でない")
@@ -717,10 +728,232 @@ def cmd_check_new(a):
     return 0
 
 
+# ---------- triage ----------
+
+TRIAGE_SECTIONS = [("order", "優先度順"), ("premise_broken", "前提が崩れた候補"), ("stale", "確認が古い"),
+                   ("missing", "欄の欠け"), ("duplicates", "重複の候補")]
+_PRIORITY_RANK = {"P1": 0, "P2": 1, "P3": 2}
+_SEVERITY_RANK = {"high": 0, "medium": 1, "low": 2}
+_DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
+_BACKTICK = re.compile(r"`([^`\n]+)`")
+_LINE_SUFFIX = re.compile(r":\d+(?:-\d+)?$")
+
+
+def natural_key(s):
+    return [(0, int(x), "") if x.isdigit() else (1, 0, x) for x in re.split(r"(\d+)", str(s)) if x != ""]
+
+
+def parse_day(v):
+    """YYYY-MM-DD を date にする。形が違う・日付として読めない時は None。"""
+    if not isinstance(v, str) or not _DATE_RE.fullmatch(v):
+        return None
+    try:
+        return date.fromisoformat(v)
+    except ValueError:
+        return None
+
+
+def _front_value(front, key):
+    """frontmatter の「key: 値」を読む。最初の「 #」以降（行末のコメント）と前後の空白・引用符を外す。"""
+    m = re.search(r"^" + re.escape(key) + r":[ \t]*(.*)$", front, re.M)
+    if not m:
+        return None
+    v = m.group(1)
+    if " #" in v:
+        v = v[:v.index(" #")]
+    v = v.strip().strip("'\"").strip()
+    return v or None
+
+
+def _str_or_none(v):
+    return v if isinstance(v, str) and v else None
+
+
+def collect_triage_items(cfg):
+    """active な issue を、triage の判定に要る欄の dict にする（ファイルは書かない）。"""
+    base = cfg["_base"]
+    items = []
+    for s in cfg["sources"]:
+        created_key = s.get("created", "created")
+        if s["type"] == "md_dirs":
+            if not s["_root"].is_dir():
+                warn(f"source の root が無いので飛ばす: {s['root']}")
+                continue
+            for d in s["active"]:
+                sd = s["_root"] / d
+                if not sd.is_dir():
+                    continue
+                for p in sorted(sd.iterdir()):
+                    if not p.is_file() or p.suffix.casefold() != ".md" or _excluded(f"{d}/{p.name}", s.get("exclude")):
+                        continue
+                    try:
+                        with p.open("rb") as f:
+                            raw = f.read(BODY_BYTES)
+                    except OSError as ex:
+                        warn(f"読めないので飛ばす: {_rel(base, p)}（{ex}）")
+                        continue
+                    text = _decode_head(raw, len(raw) == BODY_BYTES)
+                    if text is None:
+                        warn(f"UTF-8 で読めないので飛ばす: {_rel(base, p)}")
+                        continue
+                    text = text.replace("\r\n", "\n")
+                    front, _ = _split_front(text)
+                    reviewed = _front_value(front, "reviewed")
+                    items.append({
+                        "id": _front_value(front, "id") or p.stem, "path": _rel(base, p),
+                        "title": md_title(text, p.stem), "body": text,
+                        "priority": _front_value(front, "priority"), "severity": _front_value(front, "severity"),
+                        "created": _front_value(front, created_key),
+                        "reviewed": reviewed, "has_reviewed": reviewed is not None,
+                        "premise": [], "related_ok": _related_ok(text, cfg["related_field"]), "sort_id": _rel(base, p)})
+        else:
+            data = _load_json_source(s, warn_missing=True)
+            for it in data or []:
+                if not isinstance(it, dict) or it.get(s["status"]) in s["closed_values"]:
+                    continue
+                fid = str(it.get(s["id"], ""))
+                premise = it.get("premise") if isinstance(it.get("premise"), list) else []
+                items.append({
+                    "id": fid, "path": f"{s['path']}#{fid}", "title": str(it.get(s["title"], "")),
+                    "body": " ".join(v for v in it.values() if isinstance(v, str)),
+                    "priority": _str_or_none(it.get("priority")), "severity": _str_or_none(it.get("severity")),
+                    "created": _str_or_none(it.get(created_key)),
+                    "reviewed": it.get("reviewed"), "has_reviewed": "reviewed" in it,
+                    "premise": premise, "related_ok": "related" in it, "sort_id": fid})
+    return items
+
+
+def _body_paths(text):
+    out = []
+    for m in _BACKTICK.finditer(text):
+        v = m.group(1).strip()
+        if not v or any(c in v for c in "<>* \t") or "/" not in v:
+            continue
+        if v.startswith(("~", "/", "\\")) or re.match(r"^[A-Za-z]:", v):
+            continue
+        v = _LINE_SUFFIX.sub("", v)
+        if v not in out:
+            out.append(v)
+    return out
+
+
+def _premise_reasons(it, repo_root, home):
+    reasons = []
+    for e in it["premise"]:
+        if not isinstance(e, dict) or not isinstance(e.get("path"), str) or not e["path"]:
+            continue
+        path = e["path"]
+        full = (home / path[2:]) if path.startswith("~/") else (repo_root / path)
+        if not full.is_file():
+            reasons.append(f"前提のファイルが無い: {path}")
+            continue
+        c = e.get("contains")
+        if isinstance(c, str) and c:
+            try:
+                content = full.read_text(encoding="utf-8-sig", errors="replace")
+            except OSError:
+                content = ""
+            if c not in content:
+                reasons.append(f"前提の文言が無い: {path}")
+    for path in _body_paths(f"{it['title']}\n{it['body']}"):
+        top = path.split("/", 1)[0]
+        if top in ("", ".", "..") or not (repo_root / top).exists():
+            continue
+        if not (repo_root / path).exists():
+            reasons.append(f"本文のパスが無い: {path}")
+    return reasons
+
+
+def triage_report(items, now, stale_days, threshold, repo_root, home):
+    """棚卸しの候補を dict で返す（判定だけ。ファイルは読むだけで書かない）。"""
+    def order_key(it):
+        c = parse_day(it["created"])
+        return (_PRIORITY_RANK.get(it["priority"], 3),
+                _SEVERITY_RANK.get((it["severity"] or "").casefold(), 3),
+                (0, c) if c else (1, date.min), natural_key(it.get("sort_id", it["id"])))
+
+    rep = {"now": now.isoformat(), "order": [], "premise_broken": [], "stale": [], "missing": [], "duplicates": []}
+    ordered = sorted(items, key=order_key)
+    for it in ordered:
+        rep["order"].append({k: it[k] for k in ("id", "path", "priority", "severity", "created", "title")})
+        for r in _premise_reasons(it, repo_root, home):
+            rep["premise_broken"].append({"id": it["id"], "path": it["path"], "reason": r})
+        raw = it["reviewed"] if it["has_reviewed"] else it["created"]
+        if raw is None:
+            reason = "日付なし"
+        else:
+            day = parse_day(raw)
+            if day is None:
+                reason = f"日付が読めない: {raw}"
+            else:
+                days = (now - day).days
+                reason = f"確認から {days} 日" if days > stale_days else None
+        if reason:
+            rep["stale"].append({"id": it["id"], "path": it["path"], "reason": reason})
+        fields = [f for f, ok in (("priority", it["priority"]), ("関連", it["related_ok"])) if not ok]
+        if fields:
+            rep["missing"].append({"id": it["id"], "path": it["path"], "fields": fields})
+    toks = [(it, tokens(it["title"])) for it in ordered]
+    pairs = []
+    for i in range(len(toks)):
+        for j in range(i + 1, len(toks)):
+            a, ta = toks[i]
+            b, tb = toks[j]
+            if not ta or not tb:
+                continue
+            score = len(ta & tb) / len(ta | tb)
+            if score + 1e-9 >= threshold:
+                x, y = sorted((a["id"], b["id"]), key=natural_key)
+                pairs.append({"a": x, "b": y, "score": round(score, 2)})
+    pairs.sort(key=lambda q: (-q["score"], natural_key(q["a"]), natural_key(q["b"])))
+    rep["duplicates"] = pairs
+    return rep
+
+
+def _triage_text(rep):
+    lines = []
+    for key, name in TRIAGE_SECTIONS:
+        lines.append(f"## {name}")
+        rows = rep[key]
+        if not rows:
+            lines.append("（なし）")
+        for r in rows:
+            if key == "order":
+                lines.append("  ".join([r["priority"] or "-", r["severity"] or "-", r["created"] or "-", r["id"], r["title"]]))
+            elif key == "missing":
+                lines.append(f"{r['id']}  {r['path']}  {', '.join(r['fields'])}")
+            elif key == "duplicates":
+                lines.append(f"{r['score']:.2f}  {r['a']}  {r['b']}")
+            else:
+                lines.append(f"{r['id']}  {r['path']}  {r['reason']}")
+        lines.append("")
+    return "\n".join(lines)
+
+
+def cmd_triage(a):
+    if a.now is None:
+        now = date.today()
+    else:
+        now = parse_day(a.now)
+        if now is None:
+            raise CliError(2, f"--now が YYYY-MM-DD の日付でない: {a.now}")
+    if a.stale_days < 0:
+        raise CliError(2, f"--stale-days は 0 以上: {a.stale_days}")
+    if not (0 < a.dup_threshold <= 1):
+        raise CliError(2, f"--dup-threshold は 0 より大きく 1 以下: {a.dup_threshold}")
+    cfg = load_config(a.config)
+    rep = triage_report(collect_triage_items(cfg), now, a.stale_days, a.dup_threshold, cfg["_base"], Path.home())
+    if a.json:
+        print(json.dumps(rep, ensure_ascii=False, indent=2))
+    else:
+        print(_triage_text(rep))
+    return 0
+
+
 # ---------- main ----------
 
 def build_parser():
-    ap = argparse.ArgumentParser(description="関連 issue の確認・要望の記録・統合・起票の検査")
+    ap = argparse.ArgumentParser(description="関連 issue の確認・要望の記録・統合・起票の検査・棚卸しの候補")
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("related")
     r.add_argument("--text", required=True)
@@ -740,12 +973,19 @@ def build_parser():
     c = sub.add_parser("check-new")
     c.add_argument("--base", default="HEAD")
     c.add_argument("--config")
+    t = sub.add_parser("triage")
+    t.add_argument("--now")
+    t.add_argument("--stale-days", type=int, default=30)
+    t.add_argument("--dup-threshold", type=float, default=0.5)
+    t.add_argument("--json", action="store_true")
+    t.add_argument("--config")
     return ap
 
 
 def main(argv=None):
     a = build_parser().parse_args(argv)
-    fn = {"related": cmd_related, "request": cmd_request, "merge": cmd_merge, "check-new": cmd_check_new}[a.cmd]
+    fn = {"related": cmd_related, "request": cmd_request, "merge": cmd_merge, "check-new": cmd_check_new,
+          "triage": cmd_triage}[a.cmd]
     try:
         return fn(a)
     except CliError as e:

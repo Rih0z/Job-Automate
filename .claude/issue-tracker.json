@@ -1,6 +1,6 @@
 {
-  "description": "issue_tracker.py（issue-lifecycle-tracking skill）の設定。このリポジトリの issue は compliance-status.json の findings（CR-xx）だけで、md の issue ディレクトリは無い。起票（finding の追加）の時は related で関連 finding を確かめ、新しい finding に related: [<id>...]（無ければ []）を書く。git commit の前に .claude/hooks/pre-git-ledger-gate.sh が check-new で確かめる。",
-  "knowhow": ["KH-0005", "KH-0006"],
+  "description": "issue_tracker.py（issue-lifecycle-tracking skill）の設定。このリポジトリの issue は compliance-status.json の findings（CR-xx）だけで、md の issue ディレクトリは無い。起票（finding の追加）の時は related で関連 finding を確かめ、新しい finding に related: [<id>...]（無ければ []）を書く。git commit の前に .claude/hooks/pre-git-ledger-gate.sh が check-new で確かめる。棚卸しは issue_tracker.py triage（created は起票日のキー date。obsolete は終わったものとして扱う）。",
+  "knowhow": ["KH-0005", "KH-0006", "KH-0008"],
   "sources": [
     {
       "type": "json_findings",
@@ -9,7 +9,8 @@
       "id": "id",
       "title": "finding",
       "status": "status",
-      "closed_values": ["done", "false-positive"]
+      "closed_values": ["done", "false-positive", "obsolete"],
+      "created": "date"
     }
   ],
   "related_field": "関連:"

@@ -1,0 +1,103 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "issue-lifecycle-tracking",
+  "reviewed_at": "2026-11-12T15:49:01Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "2532a1b8360459e609291c952691489b0101c96ace5e397e33df967916cb02f3"
+      },
+      {
+        "path": "references/issue-template.md",
+        "sha256": "38ffcd753745fcd9b4c5fe327baec9c8093b09ad19729b416a0537f478761c81"
+      },
+      {
+        "path": "references/issue-tracker-config.md",
+        "sha256": "1025c4cb80a633756ea5c3c7a0064ed63671237acdd934c293d6edd7ac1650ef"
+      },
+      {
+        "path": "scripts/issue_tracker.py",
+        "sha256": "237b252527da586c9aad8d60c0d92d624754be9369a4aa0e312bab830c35946e"
+      },
+      {
+        "path": "scripts/test_issue_tracker.py",
+        "sha256": "d5cefdea42f1d1c64d0a28209b7bd083a2a15d911204173afc27aa692aea3797"
+      }
+    ],
+    "content_hash": "47d916bc5907d8321d190b5e4218e1c5b49a957b1fb8f003a5da6d5473919084"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a5c1ceb047b631f5a",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 92,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": ".claude/skills/issue-lifecycle-tracking/SKILL.md:3",
+        "comment": "description に related/request/merge 機能のトリガーになる言い回し（例: 関連 issue を探して・要望を記録して・issue を統合して）が無い"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": ".claude/skills/issue-lifecycle-tracking/SKILL.md:133",
+        "comment": "重要な禁止事項が終盤にある。冒頭近くへ移すか要約を置くとよい"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": ".claude/skills/issue-lifecycle-tracking/references/issue-tracker-config.md:70",
+        "comment": "--json の出力キーの列挙に、実際に出る now（issue_tracker.py:875）が無い"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "README.md:1",
+        "comment": "README.md に skill 名が見当たらない（CLAUDE.md:28/41 には反映済み）"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/issue-lifecycle-tracking/SKILL.md:58",
+        "comment": "IT の略と handoff script のパス（:99）が repo の配置に依存する。triage の出力例（references/issue-tracker-config.md:54-67）もこの repo 固有の CR の id とパスを使う"
+      }
+    ]
+  }
+}

@@ -1,7 +1,7 @@
 {
   "schema": "compliance-status/v1",
-  "updated": "2026-11-11",
-  "description": "Job-Automate 自身の、公式原則（anthropic-best-practices.json の principle id）ごとの採用状況・findings（CR-xx）・監査ログ。観点の SoT は anthropic-best-practices.json、本ファイルはその採用状況だけを持つ（repo-specific・移植不可）。整合は scripts/check_compliance_status.py が検査する（全単射・evidence 実在・enum・backlog/partial の cr 必須）。 findings の任意のキー: requests（利用者の要望の原文の記録 [{\"at\", \"text\"}]。issue_tracker.py request が足す）と related（finding を足した時に issue_tracker.py related で確かめた関連 finding の id の配列。無ければ []。新しい finding に無いと git commit の前に pre-git-ledger-gate.sh の check-new が止める）。形は check_compliance_status.py の V7 が検査する。",
+  "updated": "2026-11-12",
+  "description": "Job-Automate 自身の、公式原則（anthropic-best-practices.json の principle id）ごとの採用状況・findings（CR-xx）・監査ログ。観点の SoT は anthropic-best-practices.json、本ファイルはその採用状況だけを持つ（repo-specific・移植不可）。整合は scripts/check_compliance_status.py が検査する（全単射・evidence 実在・enum・backlog/partial の cr 必須）。 findings の任意のキー: requests（利用者の要望の原文の記録 [{\"at\", \"text\"}]。issue_tracker.py request が足す）と related（finding を足した時に issue_tracker.py related で確かめた関連 finding の id の配列。無ければ []。新しい finding に無いと git commit の前に pre-git-ledger-gate.sh の check-new が止める）。形は check_compliance_status.py の V7 が検査する。 棚卸しの任意のキー: priority（P1・P2・P3）、reviewed（前提を確かめた日 YYYY-MM-DD）、premise（[{path, contains?}]。前提のファイルと記述）、resolution（status obsolete の時は必須）、superseded_by（obsolete の時だけ。統合先の id）。status obsolete は前提が変わって不要になったもの（消さずに残す）。形は V8 が検査し、候補は issue_tracker.py triage が出す。",
   "enums": {
     "principle_status": [
       "adopted",
@@ -18,7 +18,13 @@
       "open",
       "backlog",
       "done",
-      "false-positive"
+      "false-positive",
+      "obsolete"
+    ],
+    "finding_priority": [
+      "P1",
+      "P2",
+      "P3"
     ]
   },
   "principles": {
@@ -755,7 +761,10 @@
       ],
       "severity": "Low",
       "status": "backlog",
-      "note": "移設前の表記: 優先度「Low」/ 状態「open / backlog」/ 原則列「`skills.description-key-use-case-first`（style 目安であり違反ではない）」。他の理由でそのスキルを触る時に機会があれば整える。一括修正はしない"
+      "note": "移設前の表記: 優先度「Low」/ 状態「open / backlog」/ 原則列「`skills.description-key-use-case-first`（style 目安であり違反ではない）」。他の理由でそのスキルを触る時に機会があれば整える。一括修正はしない。2026-11-12 の棚卸しで再計測: 60/65 skills が 250 文字超（frontmatter の簡易な読み取りによる。問題は残る）。",
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "related": []
     },
     {
       "id": "CR-03",
@@ -786,7 +795,10 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "移設前の表記: 優先度「Low / long-term」/ 状態「open / backlog」/ 原則列「（SKILL.md 500行ルールは非該当。structured lookup data）」。`provenance-check.test.sh` がこのファイルの厳密な構造に依存するため、再構成は「意味を変えずに分割する」計画と再テストが前提。今は着手しない"
+      "note": "移設前の表記: 優先度「Low / long-term」/ 状態「open / backlog」/ 原則列「（SKILL.md 500行ルールは非該当。structured lookup data）」。`provenance-check.test.sh` がこのファイルの厳密な構造に依存するため、再構成は「意味を変えずに分割する」計画と再テストが前提。今は着手しない。2026-11-12 の棚卸しで再計測: 2,089 行（増えている。問題は残る）。",
+      "priority": "P3",
+      "reviewed": "2026-11-12",
+      "related": []
     },
     {
       "id": "CR-06",
@@ -850,7 +862,10 @@
       ],
       "severity": "Low",
       "status": "backlog",
-      "note": "移設前の表記: 優先度「Low」/ 状態「open / backlog」/ 原則列「`skills.spec-fields-outside-claude-code`」。Claude Code 専用利用なら実害なし。claude.ai 等への配布を計画する時にまとめて対応"
+      "note": "移設前の表記: 優先度「Low」/ 状態「open / backlog」/ 原則列「`skills.spec-fields-outside-claude-code`」。Claude Code 専用利用なら実害なし。claude.ai 等への配布を計画する時にまとめて対応",
+      "priority": "P3",
+      "reviewed": "2026-11-12",
+      "related": []
     },
     {
       "id": "CR-12",
@@ -861,7 +876,12 @@
       ],
       "severity": "Medium",
       "status": "backlog",
-      "note": "移設前の表記: 優先度「Medium」/ 状態「open / backlog」/ 原則列「`hooks.deterministic-zero-exceptions`」。候補: `review-gate/SKILL.md` が定めるコミットメッセージ規約 `review-gate:<stage> PASS <score>` を commit 直前の hook で検査する（該当工程の行が無ければ block）。誤検出（docs のみの変更・規約導入前のコミット）の除外条件を先に決める必要がある。次のフル判定スイープ（四半期）で再検討。それまでは `review-gate/SKILL.md` の「強制の限界」の表記で運用する。**関連 (2026-09-14 追加)**: レビュー結果自体（観点別合否・出典URL・要約）の永続化は `review-record/v1`（`.claude/skills/_shared/review-record.schema.json` + `.claude/review-history/`）で対応済み（`research-deliverable-review`/`source-verification-scan`/`staged-investigation-workflow` に導入）。本CR-12が指す「工程順序の通過そのものの機械的検査」は別課題として残る。`review-gate` が同機構を採用する場合は同じスキーマ・スクリプトをそのまま流用できる"
+      "note": "移設前の表記: 優先度「Medium」/ 状態「open / backlog」/ 原則列「`hooks.deterministic-zero-exceptions`」。候補: `review-gate/SKILL.md` が定めるコミットメッセージ規約 `review-gate:<stage> PASS <score>` を commit 直前の hook で検査する（該当工程の行が無ければ block）。誤検出（docs のみの変更・規約導入前のコミット）の除外条件を先に決める必要がある。次のフル判定スイープ（四半期）で再検討。それまでは `review-gate/SKILL.md` の「強制の限界」の表記で運用する。**関連 (2026-09-14 追加)**: レビュー結果自体（観点別合否・出典URL・要約）の永続化は `review-record/v1`（`.claude/skills/_shared/review-record.schema.json` + `.claude/review-history/`）で対応済み（`research-deliverable-review`/`source-verification-scan`/`staged-investigation-workflow` に導入）。本CR-12が指す「工程順序の通過そのものの機械的検査」は別課題として残る。`review-gate` が同機構を採用する場合は同じスキーマ・スクリプトをそのまま流用できる",
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "related": [
+        "CR-39"
+      ]
     },
     {
       "id": "CR-13",
@@ -1064,7 +1084,12 @@
       ],
       "severity": "Medium",
       "status": "backlog",
-      "note": "57 skill 分を 1 回の作業で作る量ではないため backlog。ガイドとチェックリストには反映済み。新規作成・大きな改訂の時に当該 skill から作る。skill-creator の evals / claude plugin eval の採用可否も合わせて検討する"
+      "note": "57 skill 分を 1 回の作業で作る量ではないため backlog。ガイドとチェックリストには反映済み。新規作成・大きな改訂の時に当該 skill から作る。skill-creator の evals / claude plugin eval の採用可否も合わせて検討する",
+      "priority": "P3",
+      "reviewed": "2026-11-12",
+      "related": [
+        "CR-28"
+      ]
     },
     {
       "id": "CR-28",
@@ -1075,7 +1100,12 @@
       ],
       "severity": "Low",
       "status": "backlog",
-      "note": "CR-27 の評価を作る時に、モデル別の結果欄を設ける"
+      "note": "CR-27 の評価を作る時に、モデル別の結果欄を設ける",
+      "priority": "P3",
+      "reviewed": "2026-11-12",
+      "related": [
+        "CR-27"
+      ]
     },
     {
       "id": "CR-29",
@@ -1086,7 +1116,10 @@
       ],
       "severity": "Low",
       "status": "backlog",
-      "note": "公式の time-sensitive は『〇年〇月以前は旧方式』のような日付で分岐する手順を指し、変更履歴の日付注記はこれに当たらないと判断した。日付で分岐する手順が無いかは次の四半期フル判定で確認する。ガイドには指針を追加済み"
+      "note": "公式の time-sensitive は『〇年〇月以前は旧方式』のような日付で分岐する手順を指し、変更履歴の日付注記はこれに当たらないと判断した。日付で分岐する手順が無いかは次の四半期フル判定で確認する。ガイドには指針を追加済み",
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "related": []
     },
     {
       "id": "CR-30",
@@ -1140,7 +1173,10 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "候補: hooks の onFailure: \"block\"（hook 自体の失敗時にも block）・PostToolBatch など新イベント・skills の disallowed-tools / skillOverrides / allowManagedPermissionRulesOnly・/doctor prompt-audit・auto mode が既定になった点。あわせて、現行 docs に同等根拠が見つからず verified:false にした 6 件（claude-md.emphasis-single-line は現行 docs が強調の追加を勧めない方向に変わった / claude-md.treat-like-code / claude-md.compaction-instructions / permissions.preapprove-and-sandbox / workflow.explore-plan-code / workflow.self-contained-spec）の採否は main が決める。path-scoped rules が Write / Edit でも読み込まれる仕様に変わったため、本 repo の rules 運用への影響も確認する"
+      "note": "候補: hooks の onFailure: \"block\"（hook 自体の失敗時にも block）・PostToolBatch など新イベント・skills の disallowed-tools / skillOverrides / allowManagedPermissionRulesOnly・/doctor prompt-audit・auto mode が既定になった点。あわせて、現行 docs に同等根拠が見つからず verified:false にした 6 件（claude-md.emphasis-single-line は現行 docs が強調の追加を勧めない方向に変わった / claude-md.treat-like-code / claude-md.compaction-instructions / permissions.preapprove-and-sandbox / workflow.explore-plan-code / workflow.self-contained-spec）の採否は main が決める。path-scoped rules が Write / Edit でも読み込まれる仕様に変わったため、本 repo の rules 運用への影響も確認する",
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "related": []
     },
     {
       "id": "CR-35",
@@ -1172,7 +1208,12 @@
       ],
       "severity": "Low",
       "status": "backlog",
-      "note": "今回の gate の対象は .claude/skills 直下の skill だけ。同じ形の記録と検査を広げるかは未定"
+      "note": "今回の gate の対象は .claude/skills 直下の skill だけ。同じ形の記録と検査を広げるかは未定",
+      "priority": "P3",
+      "reviewed": "2026-11-12",
+      "related": [
+        "CR-38"
+      ]
     },
     {
       "id": "CR-38",
@@ -1183,7 +1224,12 @@
       ],
       "severity": "Medium",
       "status": "backlog",
-      "note": "台帳の免除は、内容が登録時と同じ間だけ有効。全件レビューの費用は約 430〜540 万トークン（再レビューを含めるとさらに 5 割程度）。実施するかは利用者の判断"
+      "note": "台帳の免除は、内容が登録時と同じ間だけ有効。全件レビューの費用は約 430〜540 万トークン（再レビューを含めるとさらに 5 割程度）。実施するかは利用者の判断",
+      "priority": "P3",
+      "reviewed": "2026-11-12",
+      "related": [
+        "CR-37"
+      ]
     },
     {
       "id": "CR-39",
@@ -1194,7 +1240,12 @@
       ],
       "severity": "Low",
       "status": "backlog",
-      "note": "hook の入力に Agent の識別子と応答が含まれるかを、実機で確かめる必要がある。レビュー開始時の hash（--expected-hash）と両立させる設計も要る"
+      "note": "hook の入力に Agent の識別子と応答が含まれるかを、実機で確かめる必要がある。レビュー開始時の hash（--expected-hash）と両立させる設計も要る",
+      "priority": "P3",
+      "reviewed": "2026-11-12",
+      "related": [
+        "CR-12"
+      ]
     },
     {
       "id": "CR-40",
@@ -1202,8 +1253,20 @@
       "finding": "home の CLAUDE.md の起動時手順『chat paste の引継ぎが無ければ .tmp/handoffs/ の最新ファイルを Read』と、agent-harness-bootstrap の operational-knowhow.md:140『最新 handoff の本文を session 開始時に自動 Read しない』が食い違う",
       "principles": [],
       "severity": "Low",
-      "status": "backlog",
-      "note": "home の CLAUDE.md は git 管理外で、他の作業場所にも効く。どちらに揃えるかは運用者が決める"
+      "status": "obsolete",
+      "note": "home の CLAUDE.md は git 管理外で、他の作業場所にも効く。どちらに揃えるかは運用者が決める",
+      "reviewed": "2026-11-12",
+      "premise": [
+        {
+          "path": "~/CLAUDE.md",
+          "contains": "最新ファイルを Read"
+        }
+      ],
+      "resolution": "home の CLAUDE.md の起動時手順が『最新の handoff は自動で Read しない』に変わり、operational-knowhow.md の規約との食い違いは解消した（2026-11-12 の triage で premise の文言が無いことを確認）",
+      "related": [
+        "CR-42",
+        "CR-43"
+      ]
     },
     {
       "id": "CR-41",
@@ -1212,7 +1275,12 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "直すと agent-harness-bootstrap の再レビューが要る。テストの単独ケース（選択済みで参照が無い → 1 件）や、T68 が note の文面を手で写している点と一緒に直すとよい。CR-44 と同じく C12 の契約を直すので、まとめて直す"
+      "note": "直すと agent-harness-bootstrap の再レビューが要る。テストの単独ケース（選択済みで参照が無い → 1 件）や、T68 が note の文面を手で写している点と一緒に直すとよい。CR-44 と同じく C12 の契約を直すので、まとめて直す",
+      "priority": "P1",
+      "reviewed": "2026-11-12",
+      "related": [
+        "CR-44"
+      ]
     },
     {
       "id": "CR-42",
@@ -1221,7 +1289,19 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "hook-stop.ps1 は home（git 管理外）にあり、dump repo の運用にも効く。文言を session-boundary の基準に合わせるか、(a) を外すかを運用者が決める"
+      "note": "hook-stop.ps1 は home（git 管理外）にあり、dump repo の運用にも効く。文言を session-boundary の基準に合わせるか、(a) を外すかを運用者が決める",
+      "priority": "P3",
+      "reviewed": "2026-11-12",
+      "premise": [
+        {
+          "path": "~/.claude/scripts/hook-stop.ps1",
+          "contains": "update or create a new handoff"
+        }
+      ],
+      "related": [
+        "CR-40",
+        "CR-43"
+      ]
     },
     {
       "id": "CR-43",
@@ -1230,7 +1310,19 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "~/.claude/skills/claude-md は home の skill で、このリポジトリの agent-harness-bootstrap 1.4.0 の handoff 規約に合わせて直すとよい"
+      "note": "~/.claude/skills/claude-md は home の skill で、このリポジトリの agent-harness-bootstrap 1.4.0 の handoff 規約に合わせて直すとよい",
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "premise": [
+        {
+          "path": "~/.claude/skills/claude-md/template.md",
+          "contains": "次 handoff 作成まで保持"
+        }
+      ],
+      "related": [
+        "CR-40",
+        "CR-42"
+      ]
     },
     {
       "id": "CR-44",
@@ -1239,7 +1331,18 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "契約を config（.claude/handoff-lifecycle.json の script・git_tracked）で判定する形と、deny の表記の同値（./.env と **/.env）を認める形に直す。移植先では選択記録の note に例外として記録して回避している。直す時に一緒に決めること: permissions-deny-sensitive は settings.json 全体の grep をやめ deny 配列だけを照合する（allow に Read(./.env) がある設定を誤って合格にしない）。session-restore-hook の handoff-remind.sh は自分と同じディレクトリの handoff_lifecycle.py を呼ぶので、同じ config で配置を判定する。config の値（空文字・文字列以外・対象ルートの外を指すパス）は既定値に倒さず違反にする。git_tracked の真偽は handoff_lifecycle.py と同じ bool() で解釈する。config の handoffs_dir を移した repo では dir_absent .tmp/handoffs と gitignore .tmp/ が既定の配置を前提にしたままになる。設計とテスト戦略は別エージェントの design ゲートを 3 回通らず、実装は保留している"
+      "note": "契約を config（.claude/handoff-lifecycle.json の script・git_tracked）で判定する形と、deny の表記の同値（./.env と **/.env）を認める形に直す。移植先では選択記録の note に例外として記録して回避している。直す時に一緒に決めること: permissions-deny-sensitive は settings.json 全体の grep をやめ deny 配列だけを照合する（allow に Read(./.env) がある設定を誤って合格にしない）。session-restore-hook の handoff-remind.sh は自分と同じディレクトリの handoff_lifecycle.py を呼ぶので、同じ config で配置を判定する。config の値（空文字・文字列以外・対象ルートの外を指すパス）は既定値に倒さず違反にする。git_tracked の真偽は handoff_lifecycle.py と同じ bool() で解釈する。config の handoffs_dir を移した repo では dir_absent .tmp/handoffs と gitignore .tmp/ が既定の配置を前提にしたままになる。設計とテスト戦略は別エージェントの design ゲートを 3 回通らず、実装は保留している",
+      "priority": "P1",
+      "reviewed": "2026-11-12",
+      "premise": [
+        {
+          "path": ".claude/skills/agent-harness-bootstrap/provenance.json",
+          "contains": "Read(./.env)"
+        }
+      ],
+      "related": [
+        "CR-41"
+      ]
     },
     {
       "id": "CR-45",
@@ -1248,7 +1351,18 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "BSD の date -j -f は時刻を指定しないと現在の時分秒で埋め、不正な日付も正規化して受け入れる。両方の日付を同じ時刻で変換し、書き戻して入力と一致するかを確かめ、夏時間の ±1 時間を丸めで吸収する。テストのために今日の日付を外から渡せるようにすると、境界（max_age_days ちょうど・1 日超過）を固定の日付で試せる。設計は別エージェントの design ゲートを通っておらず、実装は保留している"
+      "note": "BSD の date -j -f は時刻を指定しないと現在の時分秒で埋め、不正な日付も正規化して受け入れる。両方の日付を同じ時刻で変換し、書き戻して入力と一致するかを確かめ、夏時間の ±1 時間を丸めで吸収する。テストのために今日の日付を外から渡せるようにすると、境界（max_age_days ちょうど・1 日超過）を固定の日付で試せる。設計は別エージェントの design ゲートを通っておらず、実装は保留している",
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "premise": [
+        {
+          "path": ".claude/skills/harness-compliance-audit/scripts/harness_check.sh",
+          "contains": "date -d"
+        }
+      ],
+      "related": [
+        "CR-49"
+      ]
     },
     {
       "id": "CR-46",
@@ -1257,7 +1371,10 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "件数を書いていた 3 行は principles を参照する書き方に直した。check_compliance_status.py に、同じ行に anthropic-best-practices と『数字 + 原則 / principle』または『原則 … 数字 + 件』がある行を違反にする検査を足す案がある。CHANGELOG.md・archive/・.tmp/・review-history は除く。『一覧が 0 件』のような原則と無関係な件数を誤検出しないことを実データで確かめ、規則とテストの入力例を揃えてから実装する"
+      "note": "件数を書いていた 3 行は principles を参照する書き方に直した。check_compliance_status.py に、同じ行に anthropic-best-practices と『数字 + 原則 / principle』または『原則 … 数字 + 件』がある行を違反にする検査を足す案がある。CHANGELOG.md・archive/・.tmp/・review-history は除く。『一覧が 0 件』のような原則と無関係な件数を誤検出しないことを実データで確かめ、規則とテストの入力例を揃えてから実装する",
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "related": []
     },
     {
       "id": "CR-47",
@@ -1266,7 +1383,12 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "review-skill の 3 回目（PASS）に残った medium。どちらに揃えるかを決め、見出しか段落の一方を直す。直すと agent-harness-bootstrap の再レビューが要る"
+      "note": "review-skill の 3 回目（PASS）に残った medium。どちらに揃えるかを決め、見出しか段落の一方を直す。直すと agent-harness-bootstrap の再レビューが要る",
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "related": [
+        "CR-52"
+      ]
     },
     {
       "id": "CR-48",
@@ -1275,7 +1397,16 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "review-skill の 3 回目（PASS）に残った medium 2 件。起票は呼び出し元に依頼すると書くか、起票ファイルへの Write を許す。実ファイルの回帰ケースは fixture に移すか、写す時は外すと SKILL.md に書く。直すと harness-compliance-audit の再レビューが要る"
+      "note": "review-skill の 3 回目（PASS）に残った medium 2 件。起票は呼び出し元に依頼すると書くか、起票ファイルへの Write を許す。実ファイルの回帰ケースは fixture に移すか、写す時は外すと SKILL.md に書く。直すと harness-compliance-audit の再レビューが要る",
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "premise": [
+        {
+          "path": ".claude/skills/harness-compliance-audit/SKILL.md",
+          "contains": "Write は、この報告ファイルの保存にだけ使う"
+        }
+      ],
+      "related": []
     },
     {
       "id": "CR-49",
@@ -1284,7 +1415,22 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "Windows の Git Bash の配置を前提にした作り方。同じ作り方の `.claude/hooks/test_pre_git_skill_review_gate.py` の test_H15_python_missing_passes_with_notice_for_push も、同じ理由で macOS では errors=1 になる。bash と hook が使う coreutils だけを置いた一時ディレクトリを PATH にするなど、OS に依存しない作り方を決めてから直す。直すと review-skill の再レビューが要る"
+      "note": "Windows の Git Bash の配置を前提にした作り方。同じ作り方の `.claude/hooks/test_pre_git_skill_review_gate.py` の test_H15_python_missing_passes_with_notice_for_push も、同じ理由で macOS では errors=1 になる。bash と hook が使う coreutils だけを置いた一時ディレクトリを PATH にするなど、OS に依存しない作り方を決めてから直す。直すと review-skill の再レビューが要る",
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "premise": [
+        {
+          "path": ".claude/skills/review-skill/scripts/tests/test_hook.py",
+          "contains": "test_hook_reports_when_python_is_unavailable"
+        },
+        {
+          "path": ".claude/hooks/test_pre_git_skill_review_gate.py",
+          "contains": "test_H15_python_missing_passes_with_notice_for_push"
+        }
+      ],
+      "related": [
+        "CR-45"
+      ]
     },
     {
       "id": "CR-50",
@@ -1294,7 +1440,51 @@
       "severity": "Low",
       "status": "backlog",
       "note": "移植先の 1 つで、分類用のサブフォルダを持つ issue が release できないと報告された。移植先では『受領済みは done、未受領は 30 日 sweep』で回避している。直す時は、issue を所属 source の root 配下で照合し、root からの最初の段を状態として読む形にする。テストを先に足し、agent-harness-bootstrap の review-skill を通す",
-      "related": []
+      "related": [],
+      "priority": "P1",
+      "reviewed": "2026-11-12",
+      "premise": [
+        {
+          "path": ".claude/skills/agent-harness-bootstrap/scripts/handoff_lifecycle.py",
+          "contains": "_closed_dirs_for"
+        }
+      ]
+    },
+    {
+      "id": "CR-51",
+      "date": "2026-11-12",
+      "finding": "issue の棚卸しの仕組みが無かった。優先度を付け直す欄、前提が変わって不要になった issue を理由つきで終える status、最後に前提を確かめた日が無く、related は 50 件中 1 件しか書かれていなかった",
+      "principles": [],
+      "severity": "Medium",
+      "status": "done",
+      "note": "issue_tracker.py に読み取り専用の triage（優先度順・前提が崩れた候補・確認が古い・欄の欠け・重複の候補）を足し、findings に任意の欄 priority / reviewed / premise / resolution / superseded_by と status obsolete を足して check_compliance_status.py の V8 で検査する。物理削除はせず終端 status にする（principles[].cr の参照と経緯を残すため）。検証: 試験（issue_tracker 48 件・検査 26 件・hook 8 件）PASS、実データの triage で CR-40 だけが前提の崩れとして出た（.tmp/close-verify/2026-11-12-triage-phaseA.txt）。計画 .tmp/plans/2026-11-12-issue-triage.md r3",
+      "related": [],
+      "requests": [
+        {
+          "at": "2026-11-12T07:26:36-08:00",
+          "text": "issue wo seiri site yuusendo wo saikousei sitari, hurui issue mou imaha zenntei gakawattamono wo sakujosuru sikumiwo tukutte konoyouna sikumihaaru? issue kihyou surutokini kizonnno issue to tyouhukuganaika, tunagerareru tokorhanakika,m mata issue fairuni kannrenn issue wo kisaisuru koumokuhaaruka? issuenokannrini  tekiseruin json nadono kouzouka data ha riyou dekiteiruka motto umaku kouritutekini issue kannri dekiruyouninarunodehanika kentousite"
+        }
+      ]
+    },
+    {
+      "id": "CR-52",
+      "date": "2026-11-12",
+      "finding": "agent-harness-bootstrap の使用例が、対象の無い『セットアップして』に『対象ディレクトリを 1 回だけ聞き返す』としていて、CLAUDE.md の『対象が明示されない依頼は本節を発火させない（通常の応答。聞き返すのは対象が明示され依頼が曖昧な時だけ）』と食い違う。あわせて SKILL.md の更新履歴が 2026-11-05 までは古い順、2026-11-11 以降は新しい順で並び順が途中で変わる",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "2026-11-12 の review-skill（PASS 95 点）の low 指摘 2 件。直すと agent-harness-bootstrap の再レビューが要るので、同じ skill の CR-47 と一緒に直す",
+      "related": [
+        "CR-47"
+      ],
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "premise": [
+        {
+          "path": ".claude/skills/agent-harness-bootstrap/SKILL.md",
+          "contains": "対象ディレクトリを 1 回だけ聞き返す"
+        }
+      ]
     }
   ],
   "audit_log": [

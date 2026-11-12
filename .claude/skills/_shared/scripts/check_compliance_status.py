@@ -9,6 +9,11 @@
   V6 cache の principle が必須キーを欠く、source が sources に無い、または id が重複している
   V7 findings の requests（利用者の要望の記録）が [{"at": 文字列, "text": 文字列}] でない、
      または related（起票時に確かめた関連 finding の id）が文字列の配列でない。どちらも任意のキー
+  V8 棚卸しの欄（任意）の不正: priority が P1/P2/P3 でない、reviewed が YYYY-MM-DD でない、
+     premise が [{"path": リポジトリ相対か ~/ 始まり, "contains"?: 文字列}] でない、status obsolete なのに
+     resolution が空、superseded_by が obsolete 以外に付いている・実在しない・自分、principle の cr が
+     obsolete の finding を指している（principle の status を問わない）、enums.finding_status /
+     enums.finding_priority が定数と食い違う（enums かそのキーが無ければ比べない）
 違反が 1 件でもあれば exit 1、無ければ exit 0。
 
 使い方:
@@ -18,6 +23,8 @@
 import argparse
 import json
 import os
+import re
+from datetime import date
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -26,7 +33,9 @@ DEFAULT_ROOT = os.path.abspath(os.path.join(HERE, "..", "..", "..", ".."))
 PRINCIPLE_STATUS = {"adopted", "partial", "not-applicable", "backlog"}
 NEEDS_CR = {"partial", "backlog"}
 FINDING_SEVERITY = {"High", "Medium", "Low"}
-FINDING_STATUS = {"open", "backlog", "done", "false-positive"}
+FINDING_STATUS = {"open", "backlog", "done", "false-positive", "obsolete"}
+FINDING_PRIORITY = {"P1", "P2", "P3"}
+_DATE = re.compile(r"\d{4}-\d{2}-\d{2}")
 REQUIRED_KEYS = ("id", "category", "source", "section", "statement", "quote", "check", "verified", "used_by")
 
 
@@ -75,8 +84,20 @@ def check(cache, status, root):
             if not isinstance(rel, list) or not all(isinstance(x, str) for x in rel):
                 v.append(f"V7 finding {fid} の related が文字列の配列でない")
 
+    by_id = {f.get("id"): f for f in findings}
+    for f in findings:
+        v.extend(_check_triage_fields(f, finding_ids, root))
+    enums = status.get("enums")
+    if isinstance(enums, dict):
+        for key, const in (("finding_status", FINDING_STATUS), ("finding_priority", FINDING_PRIORITY)):
+            if key in enums and (not isinstance(enums[key], list) or set(enums[key]) != const):
+                v.append(f"V8 enums.{key} {enums[key]} が検査の定数 {sorted(const)} と食い違う")
+
     for pid, e in sorted(st.items()):
         s = e.get("status")
+        cr_f = by_id.get(e["cr"]) if isinstance(e.get("cr"), str) else None
+        if cr_f is not None and cr_f.get("status") == "obsolete":
+            v.append(f"V8 {pid} の cr {e.get('cr')} が obsolete の finding を指している（principle の status と cr を見直す）")
         if s not in PRINCIPLE_STATUS:
             v.append(f"V2 {pid} の status {s} が enum 外（{sorted(PRINCIPLE_STATUS)}）")
         for path in e.get("evidence") or []:
@@ -94,6 +115,59 @@ def check(cache, status, root):
             v.append(f"V4 {pid} は {s} なのに cr が無い")
         if cr and cr not in finding_ids:
             v.append(f"V4 {pid} の cr {cr} が findings に無い")
+    return v
+
+
+def _inside(root, path):
+    full = os.path.normpath(os.path.join(root, path))
+    try:
+        return os.path.commonpath([os.path.abspath(root), os.path.abspath(full)]) == os.path.abspath(root)
+    except ValueError:  # Windows で別ドライブのパス
+        return False
+
+
+def _premise_path_ok(root, path):
+    if not isinstance(path, str) or not path:
+        return False
+    if path.startswith("~/"):
+        return True
+    if os.path.isabs(path) or path.startswith(("/", "\\")) or re.match(r"^[A-Za-z]:", path):
+        return False
+    return _inside(root, path)
+
+
+def _check_triage_fields(f, finding_ids, root):
+    v = []
+    fid = f.get("id")
+    if "priority" in f and f["priority"] not in FINDING_PRIORITY:
+        v.append(f"V8 finding {fid} の priority {f['priority']} が enum 外（{sorted(FINDING_PRIORITY)}）")
+    if "reviewed" in f:
+        r = f["reviewed"]
+        ok = isinstance(r, str) and _DATE.fullmatch(r) is not None
+        if ok:
+            try:
+                date.fromisoformat(r)
+            except ValueError:
+                ok = False
+        if not ok:
+            v.append(f"V8 finding {fid} の reviewed {r} が YYYY-MM-DD の日付でない")
+    if "premise" in f:
+        pr = f["premise"]
+        good = isinstance(pr, list) and all(
+            isinstance(x, dict) and _premise_path_ok(root, x.get("path"))
+            and ("contains" not in x or isinstance(x["contains"], str)) for x in pr)
+        if not good:
+            v.append(f"V8 finding {fid} の premise が [{{\"path\": リポジトリ相対か ~/ 始まり, \"contains\"?: 文字列}}] の形でない")
+    if f.get("status") == "obsolete":
+        res = f.get("resolution")
+        if not isinstance(res, str) or not res.strip():
+            v.append(f"V8 finding {fid} は obsolete なのに resolution（何が変わって不要になったか）が無い")
+    if "superseded_by" in f:
+        sb = f["superseded_by"]
+        if f.get("status") != "obsolete":
+            v.append(f"V8 finding {fid} の superseded_by は status が obsolete の時だけ書ける")
+        elif sb == fid or sb not in finding_ids:
+            v.append(f"V8 finding {fid} の superseded_by {sb} が自分か、findings に無い")
     return v
 
 

@@ -158,6 +158,84 @@ class CheckComplianceStatusTest(unittest.TestCase):
             self.status["findings"][0]["related"] = bad
             self.assertViolation(self.run_check(), "V7", "CR-01")
 
+    # ---------- V8（棚卸しの欄。計画 2026-11-12-issue-triage.md r3 の C17〜C23b） ----------
+
+    def add_cr02(self, **kw):
+        f = {"id": "CR-02", "date": "2026-09-25", "finding": "g", "principles": [],
+             "severity": "Low", "status": "obsolete", "note": "", "resolution": "前提が変わった"}
+        f.update(kw)
+        self.status["findings"].append(f)
+        return f
+
+    def assertNoViolation(self, r):
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+
+    def test_c17_priority_enum(self):
+        self.status["findings"][0]["priority"] = "P1"
+        self.assertNoViolation(self.run_check())
+        self.status["findings"][0]["priority"] = "P9"
+        self.assertViolation(self.run_check(), "V8", "CR-01")
+
+    def test_c18_reviewed_format(self):
+        self.status["findings"][0]["reviewed"] = "2026-11-12"
+        self.assertNoViolation(self.run_check())
+        for bad in ("2026/11/12", "2026-13-01"):
+            self.status["findings"][0]["reviewed"] = bad
+            self.assertViolation(self.run_check(), "V8", "CR-01")
+
+    def test_c19_premise_shape(self):
+        for good in ([{"path": "ev.md"}], [{"path": "~/x.md", "contains": "a"}]):
+            self.status["findings"][0]["premise"] = good
+            self.assertNoViolation(self.run_check())
+        abs_path = os.path.join(self.root, "ev.md")
+        for bad in ("ev.md", [{"contains": "a"}], [{"path": ""}], [{"path": "ev.md", "contains": 1}],
+                    [{"path": abs_path}], [{"path": "../x.md"}], ["ev.md"]):
+            self.status["findings"][0]["premise"] = bad
+            self.assertViolation(self.run_check(), "V8", "CR-01")
+
+    def test_c20_obsolete_requires_resolution(self):
+        f = self.add_cr02()
+        self.assertNoViolation(self.run_check())
+        del f["resolution"]
+        self.assertViolation(self.run_check(), "V8", "CR-02")
+        f["resolution"] = ""
+        self.assertViolation(self.run_check(), "V8", "CR-02")
+
+    def test_c21_superseded_by(self):
+        f = self.add_cr02(superseded_by="CR-01")
+        self.assertNoViolation(self.run_check())
+        for bad in ("CR-99", "CR-02"):
+            f["superseded_by"] = bad
+            self.assertViolation(self.run_check(), "V8", "CR-02")
+        f["superseded_by"] = "CR-01"
+        self.status["findings"][0]["superseded_by"] = "CR-02"  # CR-01 は open（obsolete でない）
+        self.assertViolation(self.run_check(), "V8", "CR-01")
+
+    def test_c22_principle_cr_pointing_to_obsolete(self):
+        self.status["findings"][0]["status"] = "obsolete"
+        self.status["findings"][0]["resolution"] = "r"
+        self.assertViolation(self.run_check(), "V8", "a.two")  # backlog の principle
+        self.status["findings"][0]["status"] = "open"
+        self.add_cr02()
+        self.status["principles"]["a.one"]["cr"] = "CR-02"
+        self.assertViolation(self.run_check(), "V8", "a.one")  # adopted の principle
+
+    def test_c23_enums_match_constants(self):
+        self.status["enums"] = {"finding_status": ["open", "backlog", "done", "false-positive", "obsolete"],
+                                "finding_priority": ["P1", "P2", "P3"]}
+        self.assertNoViolation(self.run_check())
+        self.status["enums"]["finding_status"] = ["open", "backlog", "done", "false-positive"]
+        self.assertViolation(self.run_check(), "V8", "finding_status")
+        self.status["enums"]["finding_status"] = ["open", "backlog", "done", "false-positive", "obsolete"]
+        self.status["enums"]["finding_priority"] = ["P1", "P2"]
+        self.assertViolation(self.run_check(), "V8", "finding_priority")
+
+    def test_c23b_missing_enums_is_not_compared(self):
+        self.status.pop("enums", None)
+        self.assertNoViolation(self.run_check())
+        self.status["enums"] = {"finding_status": ["open", "backlog", "done", "false-positive", "obsolete"]}
+        self.assertNoViolation(self.run_check())
+
     def test_c11_real_repository_data(self):
         cache = os.path.join(REPO, ".claude", "skills", "_shared", "anthropic-best-practices.json")
         status = os.path.join(REPO, ".claude", "skills", "_shared", "compliance-status.json")

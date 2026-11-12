@@ -12,6 +12,8 @@ severity: high        # high / medium / low
 category: bug         # bug / improvement / docs など運用側で決めた語
 created: 2026-01-15
 status: open          # ディレクトリ名と一致させる
+priority: P2          # 任意。P1 次に着手 / P2 関係する所を触る時 / P3 判断待ち・保留
+reviewed: 2026-01-15  # 任意。棚卸し（triage）で前提を確かめた日
 related: []           # 再発時は過去 Issue の id を入れる（commit 前の check-new が見るのは本文の「関連:」欄で、ここではない）
 ---
 

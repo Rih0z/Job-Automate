@@ -517,5 +517,216 @@ class TestConfig(Base):
         self.assertIn("nope", err)
 
 
+SECTIONS = ["優先度順", "前提が崩れた候補", "確認が古い", "欄の欠け", "重複の候補"]
+
+
+def fnd(fid, title="t", **kw):
+    """triage 用の finding。既定は欄がそろっていて、どの節にも引っかからない。None を渡したキーは消す。"""
+    f = {"id": fid, "finding": title, "status": "backlog", "severity": "Low", "date": "2026-11-01",
+         "priority": "P2", "related": [], "reviewed": "2026-11-10"}
+    f.update(kw)
+    return {k: v for k, v in f.items() if v is not None}
+
+
+class Triage(Base):
+    """計画 2026-11-12-issue-triage.md r3 の T1〜T13。"""
+
+    def setUp(self):
+        super().setUp()
+        self.write_config([md_source(), json_source(created="date",
+                                                    closed_values=["done", "false-positive", "obsolete"])])
+        (self.root / "issues" / "open").mkdir(parents=True, exist_ok=True)
+
+    def md(self, state, iid, title="md issue", front="", body="関連: なし（related 確認済み）"):
+        text = f"---\nid: {iid}\ntitle: {title}\nstatus: {state}\n{front}---\n\n# {title}\n\n{body}\n"
+        return self.put(f"issues/{state}/{iid}.md", text)
+
+    def triage(self, *args, now="2026-11-12"):
+        return self.run_cli("triage", "--now", now, *args)
+
+    def sections(self, out):
+        cur, sec = None, {}
+        for line in out.splitlines():
+            if line.startswith("## "):
+                cur = line[3:].strip()
+                sec[cur] = []
+            elif cur and line.strip():
+                sec[cur].append(line)
+        return sec
+
+    def ok(self, *args, **kw):
+        rc, out, err = self.triage(*args, **kw)
+        self.assertEqual(rc, 0, out + err)
+        return self.sections(out)
+
+    def line_with(self, lines, *needles):
+        hits = [l for l in lines if all(n in l for n in needles)]
+        self.assertTrue(hits, f"{needles} を含む行が無い: {lines}")
+        return hits[0]
+
+    def test_T1_premise_path_missing_is_listed_as_broken(self):
+        self.findings([fnd("CR-1", premise=[{"path": "docs/none.md"}])])
+        s = self.ok()
+        self.line_with(s["前提が崩れた候補"], "CR-1", "前提のファイルが無い", "docs/none.md")
+
+    def test_T2_premise_contains_absent_is_broken_and_present_is_not(self):
+        self.put("docs/a.md", "hello world\n")
+        self.findings([fnd("CR-1", premise=[{"path": "docs/a.md", "contains": "hello"}]),
+                       fnd("CR-2", premise=[{"path": "docs/a.md", "contains": "goodbye"}])])
+        s = self.ok()
+        self.line_with(s["前提が崩れた候補"], "CR-2", "前提の文言が無い")
+        self.assertFalse([l for l in s["前提が崩れた候補"] if "CR-1" in l], s)
+
+    def test_T2b_premise_home_path_expands_to_home(self):
+        home = self.root / "home"
+        home.mkdir()
+        (home / "x.md").write_text("x\n", encoding="utf-8")
+        self.env.update(HOME=str(home), USERPROFILE=str(home))
+        self.findings([fnd("CR-1", premise=[{"path": "~/x.md"}]),
+                       fnd("CR-2", premise=[{"path": "~/none.md"}])])
+        s = self.ok()
+        self.line_with(s["前提が崩れた候補"], "CR-2", "前提のファイルが無い")
+        self.assertFalse([l for l in s["前提が崩れた候補"] if "CR-1" in l], s)
+
+    def test_T3_body_path_under_existing_top_dir_missing_is_broken(self):
+        self.put(".claude/x.md", "x\n")
+        self.findings([fnd("CR-1", "`.claude/none.md` が古い"),
+                       fnd("CR-2", "`.claude/x.md:12` と `.claude/x.md:12-30` を直す"),
+                       fnd("CR-3", "`references/y.md` を直す")])
+        s = self.ok()
+        self.line_with(s["前提が崩れた候補"], "CR-1", "本文のパスが無い", ".claude/none.md")
+        self.assertEqual(len(s["前提が崩れた候補"]), 1, s)
+
+    def test_T3b_body_path_with_placeholder_glob_space_home_or_absolute_is_ignored(self):
+        self.findings([fnd("CR-1", "`.claude/<name>.md` `.claude/*.md` `.claude/a b.md` "
+                                   "`~/none.md` `/abs/none.md` `C:/x/none.md`")])
+        s = self.ok()
+        self.assertEqual(s["前提が崩れた候補"], ["（なし）"])
+
+    def test_T4_stale_uses_reviewed_then_created_and_boundary_is_exclusive(self):
+        self.findings([fnd("CR-1", reviewed="2026-10-12"),
+                       fnd("CR-2", reviewed="2026-10-13"),
+                       fnd("CR-3", reviewed=None, date="2026-10-12")])
+        s = self.ok("--stale-days", "30")
+        self.line_with(s["確認が古い"], "CR-1", "確認から 31 日")
+        self.line_with(s["確認が古い"], "CR-3", "確認から 31 日")
+        self.assertFalse([l for l in s["確認が古い"] if "CR-2" in l], s)
+
+    def test_T4b_missing_or_unreadable_date_is_listed(self):
+        self.findings([fnd("CR-1", reviewed=None, date=None),
+                       fnd("CR-2", reviewed="2026/11/12")])
+        s = self.ok()
+        self.line_with(s["確認が古い"], "CR-1", "日付なし")
+        self.line_with(s["確認が古い"], "CR-2", "日付が読めない", "2026/11/12")
+
+    def test_T5_missing_priority_and_related_are_listed(self):
+        self.findings([fnd("CR-1", priority=None), fnd("CR-2", related=None)])
+        self.md("open", "md-1", front="priority: P2\nreviewed: 2026-11-10\n", body="本文だけ")
+        self.md("open", "md-2", front="priority: P2\nreviewed: 2026-11-10\n", body="関連: <related の結果を書く>")
+        self.md("open", "md-3", front="priority: P2\nreviewed: 2026-11-10\n")
+        s = self.ok()
+        miss = s["欄の欠け"]
+        self.line_with(miss, "CR-1", "priority")
+        self.line_with(miss, "CR-2", "関連")
+        self.line_with(miss, "md-1", "関連")
+        self.line_with(miss, "md-2", "関連")
+        self.assertFalse([l for l in miss if "md-3" in l], miss)
+        self.assertFalse([l for l in miss if "CR-1" in l and "関連" in l], miss)
+
+    def test_T6_duplicate_pair_is_listed_once_smaller_id_first(self):
+        self.findings([fnd("CR-10", "login page returns 500 error now"),
+                       fnd("CR-9", "login page returns 500 error"),
+                       fnd("CR-3", "slide font color")])
+        s = self.ok()
+        self.assertEqual(s["重複の候補"], ["0.83  CR-9  CR-10"])
+
+    def test_T6b_jaccard_equal_to_threshold_is_listed(self):
+        self.findings([fnd("CR-1", "alpha beta gamma delta"), fnd("CR-2", "alpha beta gamma epsilon")])
+        s = self.ok("--dup-threshold", "0.6")
+        self.assertEqual(s["重複の候補"], ["0.60  CR-1  CR-2"])
+
+    def test_T7_order_is_priority_then_case_insensitive_severity_then_created_then_natural_id(self):
+        rows = [("CR-1", "P2", "High", "10-01"), ("CR-2", "P1", "low", "10-01"), ("CR-3", None, "High", "10-01"),
+                ("CR-4", "P1", "High", "10-01"), ("CR-5", "P1", "Medium", "10-01"), ("CR-6", "P1", "other", "10-01"),
+                ("CR-7", "P1", "High", "10-05"), ("CR-10", "P1", "High", "10-05"), ("CR-9", "P1", "High", "10-05")]
+        self.findings([fnd(i, f"題 {i}", priority=p, severity=sv, date=f"2026-{d}") for i, p, sv, d in rows])
+        s = self.ok()
+        got = [l.split("  ")[3] for l in s["優先度順"]]
+        self.assertEqual(got, ["CR-4", "CR-7", "CR-9", "CR-10", "CR-5", "CR-2", "CR-6", "CR-1", "CR-3"])
+
+    def test_T7b_text_line_format(self):
+        self.findings([fnd("CR-1", "題名", priority="P1", severity="High", date="2026-10-01"),
+                       fnd("CR-2", "x", priority=None, severity=None, date="2026-10-02")])
+        s = self.ok()
+        self.assertEqual(s["優先度順"], ["P1  High  2026-10-01  CR-1  題名", "-  -  2026-10-02  CR-2  x"])
+
+    def test_T8_closed_and_obsolete_and_withdrawn_are_excluded(self):
+        self.findings([fnd("ZZ-1", "dup words here", status="done", priority=None),
+                       fnd("ZZ-2", "dup words here", status="obsolete", priority=None, premise=[{"path": "no.md"}])])
+        self.md("closed", "ZZ-3", body="x")
+        self.md("withdrawn", "ZZ-4", body="x")
+        rc, out, err = self.triage()
+        self.assertEqual(rc, 0, err)
+        self.assertNotIn("ZZ-", out)
+
+    def test_T9_json_output_has_documented_shape(self):
+        self.findings([fnd("CR-1", "same title words", priority=None, premise=[{"path": "no.md"}], reviewed="2020-01-01"),
+                       fnd("CR-2", "same title words")])
+        rc, out, err = self.triage("--json")
+        self.assertEqual(rc, 0, err)
+        d = json.loads(out)
+        self.assertEqual(set(d), {"now", "order", "premise_broken", "stale", "missing", "duplicates"})
+        self.assertEqual(d["now"], "2026-11-12")
+        self.assertEqual(set(d["order"][0]), {"id", "path", "priority", "severity", "created", "title"})
+        for k in ("premise_broken", "stale"):
+            self.assertEqual(set(d[k][0]), {"id", "path", "reason"}, k)
+        self.assertEqual(set(d["missing"][0]), {"id", "path", "fields"})
+        self.assertEqual(set(d["duplicates"][0]), {"a", "b", "score"})
+        self.assertEqual(d["missing"][0]["fields"], ["priority"])
+
+    def test_T10_invalid_arguments_exit_2(self):
+        self.findings([fnd("CR-1")])
+        for args in (["--now", "2026-13-01"], ["--stale-days", "-1"], ["--stale-days", "x"],
+                     ["--dup-threshold", "0"], ["--dup-threshold", "1.5"], ["--dup-threshold", "x"]):
+            rc, out, err = self.run_cli("triage", *args)
+            self.assertEqual(rc, 2, f"{args}: {out}{err}")
+            self.assertNotIn("invalid choice", err, "triage が未実装の時の exit 2 と区別する")
+        self.write_config([md_source(), json_source(created=1)])
+        rc, out, err = self.triage()
+        self.assertEqual(rc, 2, out + err)
+
+    def test_T10b_boundary_arguments_are_accepted(self):
+        self.findings([fnd("CR-1", reviewed="2026-11-11"), fnd("CR-2", reviewed="2026-11-12")])
+        s = self.ok("--stale-days", "0")
+        self.line_with(s["確認が古い"], "CR-1")
+        self.assertFalse([l for l in s["確認が古い"] if "CR-2" in l], s)
+        self.ok("--dup-threshold", "1")
+
+    def test_T11_triage_does_not_modify_files(self):
+        self.findings([fnd("CR-1", priority=None, premise=[{"path": "no.md"}])])
+        self.md("open", "md-1", body="x")
+        before = self.snapshot()
+        self.ok()
+        self.ok("--json")
+        self.assertEqual(self.snapshot(), before)
+
+    def test_T12_md_frontmatter_values_strip_comment_and_quotes(self):
+        self.md("open", "md-1", title="md one",
+                front='priority: P1   # P1/P2/P3\ncreated: "2026-10-01"\n')
+        s = self.ok()
+        self.line_with(s["優先度順"], "P1", "2026-10-01", "md-1")
+        self.line_with(s["確認が古い"], "md-1", "確認から 42 日")
+        self.assertFalse([l for l in s["欄の欠け"] if "md-1" in l and "priority" in l], s)
+
+    def test_T13_no_active_issue_prints_none_in_each_section(self):
+        self.write_config([md_source()])
+        rc, out, err = self.triage()
+        self.assertEqual(rc, 0, err)
+        s = self.sections(out)
+        self.assertEqual(list(s), SECTIONS)
+        for k in SECTIONS:
+            self.assertEqual(s[k], ["（なし）"], k)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

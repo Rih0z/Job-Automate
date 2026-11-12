@@ -1,9 +1,9 @@
 ---
 name: issue-lifecycle-tracking
-description: "バグ・改善点を、リポジトリ内の Issue ファイルとディレクトリ移動(open→processing→closed)で起票・追跡・close する。Use when the user asks to '問題を起票して', 'バグを記録したい', 'issueをcloseして', 'Issueをディレクトリ移動で管理して', '課題管理の仕組みを作りたい', 'issue-lifecycle-tracking'. 使わない場面: GitHub Issues など外部トラッカーでの管理、定期バッチ等の高頻度な失敗記録(ログ集約を使う)、文書の文体レビュー(stop-ai-slop-jp)、skill の採点(review-skill)."
+description: "バグ・改善点を、リポジトリ内の Issue ファイルとディレクトリ移動(open→processing→closed)で起票・追跡・close する。Use when the user asks to '問題を起票して', 'バグを記録したい', 'issueをcloseして', 'Issueをディレクトリ移動で管理して', '課題管理の仕組みを作りたい', 'issueを棚卸しして優先度を付け直して', 'issue-lifecycle-tracking'. 使わない場面: GitHub Issues など外部トラッカーでの管理、定期バッチ等の高頻度な失敗記録(ログ集約を使う)、文書の文体レビュー(stop-ai-slop-jp)、skill の採点(review-skill)."
 metadata:
   provenance: author-preference
-  version: 1.4.0
+  version: 1.5.0
 ---
 
 # Issue ライフサイクル追跡（ファイルベース状態遷移）
@@ -15,7 +15,7 @@ metadata:
 - 必要なもの: git 管理下のリポジトリと、ファイル移動に使う `git mv`。`issues/` ディレクトリは無ければ最初の起票時に `mkdir -p issues/open` で作る。
 - 使うツール: Bash(`git mv` / `mkdir -p`)、ファイルの Read / Write。
 - 本文テンプレートと応答形式: [references/issue-template.md](references/issue-template.md)
-- 関連 issue の確認・要望の記録・統合・起票の検査: `scripts/issue_tracker.py`（Python 3 の標準ライブラリだけ。試験は `scripts/test_issue_tracker.py`）。設定 `.claude/issue-tracker.json` の書き方と例は [references/issue-tracker-config.md](references/issue-tracker-config.md)。使い方は下の「起票の前に関連 issue を確かめる」節
+- 関連 issue の確認・要望の記録・統合・起票の検査・棚卸しの候補: `scripts/issue_tracker.py`（Python 3 の標準ライブラリだけ。試験は `scripts/test_issue_tracker.py`）。設定 `.claude/issue-tracker.json` の書き方と例は [references/issue-tracker-config.md](references/issue-tracker-config.md)。使い方は下の「起票の前に関連 issue を確かめる」節
 
 この repo 固有の依存と、無い環境での最小動作は次のとおり。
 
@@ -36,13 +36,13 @@ metadata:
 
 ## 状態遷移
 
-`issues/open/` → `issues/processing/` → (`issues/pending/`・任意) → `issues/closed/`。取り下げ(誤起票・重複)だけは専用の終端 `issues/withdrawn/` へ移す。状態遷移はファイル移動(`git mv`)で表現し、移動そのものが履歴として残る。
+`issues/open/` → `issues/processing/` → (`issues/pending/`・任意) → `issues/closed/`。取り下げ(誤起票・重複・前提が変わって不要になったもの)だけは専用の終端 `issues/withdrawn/` へ移す。状態遷移はファイル移動(`git mv`)で表現し、移動そのものが履歴として残る。
 
 - `open/`: 発見済み・未着手
 - `processing/`: 着手中
 - `pending/` (任意ステージ): 修正は実施済みだが効果検証がまだの一時置き場
 - `closed/`: **効果を実測して PASS したもの限定**で移動する(未検証のまま closed へ移動しない — 「直した"つもり"」を「直った」と混同しないための最終ゲート)
-- `withdrawn/`: 誤起票・重複で修正せずに終えるもの。効果の実測は不要で、検証記録は作らない。取り下げの理由(誤起票か、重複なら統合先の Issue 番号)を本文に1文で書く。closed には入れない
+- `withdrawn/`: 誤起票・重複・前提が変わって不要になったもので、修正せずに終えるもの。効果の実測は不要で、検証記録は作らない。取り下げの理由(誤起票か、重複なら統合先の Issue 番号か、「前提が変わった: <何が>」)を本文に1文で書く。closed には入れない。消さずに残すのは、なぜ不要になったかが残らないと同じ問題を再起票しやすいため
 
 ## 各遷移の条件
 
@@ -59,9 +59,33 @@ metadata:
 
 1. `IT related --text "<題名や要約>"` を実行する。出力は `score  state  path  title` で、近いものほど上に出る（判断材料で、合否は出さない。再発の確認は `--include-closed`）。
 2. 近いものがあれば新規にしない。利用者の要望なら `IT request <issue のパス> --text "<原文>"` で「## 利用者の要望」節に原文を足し、重複した issue どうしは `IT merge <src のパス> --into <dst のパス>` で統合する（src に「統合先:」を書いて `merged_dir` へ移す。この skill の状態遷移では重複の終端は `issues/withdrawn/` なので、設定の `merged_dir` は `withdrawn` にする。src と dst が同じ・src が active な状態に無い・dst が closed や統合済みの場所にある・`merged_dir` に同名がある時は、何も変えずに exit 2 で拒否される）。
-3. 新規にする時は、本文に「関連: <候補のパス>（別にした理由を 1 文）」か「関連: なし（related 確認済み）」を書く。JSON の issue（finding）なら `related: [<確かめた id>...]`（無ければ `[]`）を書く。`IT check-new` は index で新しく足された issue だけを見て、欄が無ければ exit 1 になる（rename・状態の移動は新規に数えない）。commit 前の hook（`pre-git-ledger-gate.sh`）を登録した repo では commit が止まる。登録していなければ、commit の前に手で実行する。
+3. 新規にする時は、本文に「関連: <候補のパス>（別にした理由を 1 文）」か「関連: なし（related 確認済み）」を書く。JSON の issue（finding）なら `related: [<確かめた id>...]`（無ければ `[]`）を書く。前提が特定のファイルの記述に依存する issue は、JSON なら `premise: [{"path": <リポジトリ相対か ~/ 始まり>, "contains": <その記述>}]` を、md なら本文に backtick でそのパスを書く（下の棚卸しで、前提が崩れた時に候補に出る）。`IT check-new` は index で新しく足された issue だけを見て、欄が無ければ exit 1 になる（rename・状態の移動は新規に数えない）。commit 前の hook（`pre-git-ledger-gate.sh`）を登録した repo では commit が止まる。登録していなければ、commit の前に手で実行する。
 
 作業中に利用者が新しい要望・好み・やり方の指定を述べたら、関係する issue を `related` で探して `request` で原文を残す。1 回きりの指示で関係する issue も無ければ記録しない（issue を乱立させない）。 <!-- KH-0006 -->
+
+## 棚卸し（優先度の付け直しと、前提が変わった issue の終わらせ方） <!-- KH-0008 -->
+
+イテレーション完了時・引継ぎ資料を作る時・起票で active が増えた時に、`IT triage` で棚卸しをする（`IT` は上と同じ略）。triage は読み取り専用で、候補を出すだけで判定しない（前提が変わったかは解釈が要るため）。出力の節は、優先度順 / 前提が崩れた候補 / 確認が古い / 欄の欠け / 重複の候補。`--json` で機械向けの形、`--now` `--stale-days`（既定 30）`--dup-threshold`（既定 0.5）で条件を変えられる。出力例は [references/issue-tracker-config.md](references/issue-tracker-config.md) の「`triage` の出力例」。
+
+棚卸しで使う欄（すべて任意。md は frontmatter の同名の行、JSON は finding のキー）:
+
+| 欄 | 値 | 意味 |
+|---|---|---|
+| `priority` | P1 / P2 / P3 | P1 = 次に着手する、P2 = 関係する所を触る時に直す、P3 = 判断待ち・保留。`severity`（影響の大きさ）とは別 |
+| `reviewed` | YYYY-MM-DD | 最後に棚卸しで前提を確かめた日。無ければ起票日（設定の `created`）で古さを測る |
+| `premise` | `[{"path", "contains"?}]` | JSON だけ。成り立つ前提のファイルと記述 |
+| `resolution` / `superseded_by` | 文字列 / id | JSON の status `obsolete` の時の理由と統合先 |
+
+手順:
+
+1. `IT triage` を実行する。
+2. 前提が崩れた候補は実物を確かめ、(i) 今も成り立つ → `reviewed` を今日に（premise が古い書き方なら直す）、(ii) 前提が消えて不要 → JSON は `status: obsolete` と `resolution`、md は `issues/withdrawn/` へ移して理由を書く、(iii) 別 issue に吸収 → JSON は `obsolete` + `resolution` + `superseded_by`、md は `IT merge`。
+3. 重複の候補は、同じ問題なら (iii)。別の問題なら、両方の `related`（md は「関連:」欄）に互いを書く。
+4. 優先度順を見て `priority` を付け直し、確かめたものの `reviewed` を今日にする。件数や数値を本文に書いた issue は、数え直して note に追記する。
+5. JSON で、他のデータ（このリポジトリでは `principles[].cr`）から参照されている issue を obsolete にする時は、参照している側も見直す。
+6. 解釈が割れるもの（前提が変わったかが読み方次第のもの、方針の転換になるもの）は終端にせず、利用者に判断を求める。
+
+使い分け: 直して終えたら closed（JSON は `done`）、直さずに前提が消えた・吸収されたら withdrawn（JSON は `obsolete`）、最初から誤りなら withdrawn（JSON は `false-positive`）。物理削除はしない。
 
 ## 起票の例
 
@@ -79,7 +103,7 @@ metadata:
 
 ## Issue ファイルの必須項目
 
-- frontmatter: `id` / `title` / `severity` / `category` / `created` / `status`
+- frontmatter: `id` / `title` / `severity` / `category` / `created` / `status`（任意で `priority` / `reviewed`。上の「棚卸し」節）
 - 本文: 症状・再現手順・該当箇所(ファイルパス:行番号)・仮説・修正候補・関連ファイル
 - close 時に追記する項目: 修正内容・関連コミットハッシュ・検証結果(テスト実測など効果の証跡。「直したはず」の申告だけでは close しない)
 - 同一バグが再発した場合は新規 Issue ファイルを作成し、frontmatter で過去 Issue と相互リンクする(古い Issue を書き換えて再利用しない — 再発の履歴自体が情報になる)
@@ -124,8 +148,10 @@ close 時に追記する検証結果は、確かめた条件を1文で書く(例
 | 検証結果が本文に無いのに close を頼まれた | closed へ移さず processing のまま、「効果の実測が未記載」と理由を伝える |
 | closed 後に再現した | closed のファイルは書き換えず、`git mv` でも戻さず、新規 Issue を起票して相互リンクする(再発の履歴を残す)。検証 FAIL を close 前に見つけた場合だけ、その Issue を processing に置く |
 | `git mv` が「not under version control」で失敗した | 対象ファイルが未追跡。`git add` してから `git mv` するか、通常の `mv` で移して後で `git add` する |
-| `issue_tracker.py` が exit 2 で止まった | 設定（`.claude/issue-tracker.json`）か引数が不正。何も変えていないので、メッセージの指す箇所を直して再実行する |
+| `issue_tracker.py` が exit 2 で止まった | 設定（`.claude/issue-tracker.json`）か引数が不正。何も変えていないので、メッセージの指す箇所を直して再実行する。例外は merge の「統合済みだが統合元が残った」で、統合先と移動先は書き終えている。再実行せず、メッセージのとおり統合元だけを手で消し、git で追跡していれば統合元の削除と移動先の add を手で stage する |
 | commit が「関連:」欄の欠けで止まった | `related` で関連 issue を確かめ、新規の issue に「関連:」欄（JSON なら `related`）を書いて stage し直す |
+| triage の「前提が崩れた候補」に出た | すぐ終端にしない。実物を確かめ、「棚卸し」節の手順 2 の (i)〜(iii) のどれかにする。読み方次第なら利用者に聞く |
+| triage の「確認が古い」に「日付が読めない」が出た | `reviewed` か起票日を `YYYY-MM-DD` に直す |
 | 移動先に同名ファイルがある | 上書きしない。ID の重複を疑って内容を比べ、別 Issue なら新しい ID を採番する |
 | `status` とディレクトリ名が食い違っている | ディレクトリ(実際の置き場)を正とし、`status` を直す。どちらが正か判断できなければ変更せず利用者に確認する |
 
@@ -148,3 +174,4 @@ close 時に追記する検証結果は、確かめた条件を1文で書く(例
 - 1.3.0 (2026-10-30): repo 固有の依存を「前提と代替」の表に集約し最小動作の手順を追加、open から closed への直行不可を明記、エラー対処を表に拡充
 - 1.3.1 (2026-10-30): closed 後の再現は新規起票に統一、取り下げ専用の終端 `withdrawn/` を追加(検証記録は不要)
 - 1.4.0 (2026-11-11): 起票の前に関連 issue を確かめる `scripts/issue_tracker.py`（related / request / merge / check-new。設定 `.claude/issue-tracker.json`、試験 `scripts/test_issue_tracker.py`）と、「関連:」欄・「## 利用者の要望」節を足した。close・取り下げ・統合の最後に handoff の `release` を入れた。設定の書き方 `references/issue-tracker-config.md`、hook が無い時の手順、「してはいけないこと」の節を足した
+- 1.5.0 (2026-11-12): 棚卸しの `issue_tracker.py triage`（読み取り専用。優先度順・前提が崩れた候補・確認が古い・欄の欠け・重複の候補）と、任意の欄 `priority` / `reviewed` / `premise` / `resolution` / `superseded_by`、JSON の終端 `obsolete` を足した。withdrawn の理由に「前提が変わった」を足した。起票時に前提のファイルを `premise` か本文のパスで書く
