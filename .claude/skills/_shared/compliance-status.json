@@ -1516,6 +1516,27 @@
         }
       ],
       "note": "2026-11-12 harness-compliance-audit の別エージェント照合 3 本（SKILL.md PASS 69 / CLAUDE.md PASS 74 / script・hook FAIL 61、blocker 1）を受けて直した。check-new は stage・base の台帳を読めない時に exit 2、BOM を外して読む。hook は入力を stdin で渡し、python の失敗を systemMessage で知らせる。handoff を書く前の queued は pre-handoff-discovery-gate.sh が止める。CLAUDE.md は起動条件と書式だけを残し、手順は issue-lifecycle-tracking 1.6.0 の節へ移した。skill の評価シナリオ（authoring.evaluations-first）は CR-27 に含めて見送り。計画は .tmp/plans/2026-11-12-issue-bp-alignment.md（追跡外）"
+    },
+    {
+      "id": "CR-54",
+      "date": "2026-11-12",
+      "finding": "agent-harness-bootstrap の Step 5 の rubric 判定は、decided_by が user か scale の時だけを『opt-out 記録済み』として Y にする（SKILL.md の Step 5・rubric.md の冒頭）。非対話で C 群を非採用にした要素は selection-flow.md の規定で decided_by: default になるため Y にならず、『N が 1 つでもあれば書き直す』が終わらないか、既定で非採用の要素を持ち込むことになる",
+      "principles": [],
+      "severity": "Medium",
+      "status": "backlog",
+      "note": "2026-11-12 の review-skill（sns-square-slides を台帳に登録した変更のレビュー、90 点 PASS）で medium として指摘された。今回の変更の範囲外のため直していない。直す時は、opt-out として認める decided_by に default（と excluded）を加えるか、非対話で落とした要素の記録値を決め、rubric.md・SKILL.md・selection-flow.md をそろえる。provenance-check.test.sh に非対話の選択記録のケースを足し、同じ skill の CR-47・CR-52 と一緒に直して agent-harness-bootstrap の review-skill を通す",
+      "related": [
+        "CR-47",
+        "CR-52"
+      ],
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "premise": [
+        {
+          "path": ".claude/skills/agent-harness-bootstrap/rubric.md",
+          "contains": "`decided_by: \"scale\"` または `\"user\"`"
+        }
+      ]
     }
   ],
   "audit_log": [

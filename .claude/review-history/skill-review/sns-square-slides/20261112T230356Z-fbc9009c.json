@@ -1,0 +1,97 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "sns-square-slides",
+  "reviewed_at": "2026-11-12T23:03:56Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "f6193de438193af16e8918d552d4a266ff71c99a1c71bf43150922943ab75ef2"
+      },
+      {
+        "path": "criteria/card-rules.json",
+        "sha256": "d1f41ea912adfe7069128919568adaf628bcab0df08d343dfd211b3967ff6980"
+      },
+      {
+        "path": "examples/cards.example.json",
+        "sha256": "affe949458e2b362f51a718903364b270118300394c73069d0406f4fd58b5647"
+      },
+      {
+        "path": "scripts/make_square_cards.py",
+        "sha256": "f8bb723401f55fbabfc51d4bd1826926e5109c29255587282d7c4856d08dc6c3"
+      },
+      {
+        "path": "scripts/test_make_square_cards.py",
+        "sha256": "c002400bc22299320640dc5d2fb9f263179a8e3a7a4cb2f38d9388c288eee4d9"
+      }
+    ],
+    "content_hash": "ff008397f6267352962d2420501b32a0e3bce640d8be4e1853f765b1dad71d55"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a9e665b50decfcc5c",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 17
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": "SKILL.md:64",
+        "comment": "R6 (スライドに無い一次の補足) を点検者が判定するのに、元の資料か supplement_source の中身を読ませるかが決まっていない。渡す物が JPEG・cards.json・criteria だけだと判定がぶれる"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": "SKILL.md:78-86",
+        "comment": "報告の 5 項目は決まっているが、余計な情報を入れない制約が無い"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": "SKILL.md:11-15",
+        "comment": "禁止事項 (元の資料や配色ファイルを編集しない等) をまとめた節が無い。投稿しないことだけが明記されている"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:27",
+        "comment": "画像化は隣の slide-clarity-review/scripts/render_deck.py に依存する (make_square_cards.py:40)。依存は明記済みだが、--check は単独で動くという案内を前提条件の表の近くにも置くと良い"
+      }
+    ]
+  }
+}

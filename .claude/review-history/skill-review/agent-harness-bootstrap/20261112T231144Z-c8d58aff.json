@@ -1,0 +1,185 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "agent-harness-bootstrap",
+  "reviewed_at": "2026-11-12T23:11:44Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "becf2a432f7ffc99f83538bac5a1415fc9ed22433c47d4ca6597ba86115d4801"
+      },
+      {
+        "path": "criteria/porting-reconciliation.json",
+        "sha256": "b5ef06d5d42a2adcc9596484c06162be04e77c11c25914f44508cfadf761feeb"
+      },
+      {
+        "path": "hooks-reference.md",
+        "sha256": "10419229b8641daa39684a8be3c61e22925fc09044669de011a7f7bf50e4afdd"
+      },
+      {
+        "path": "maintainer-checklist.md",
+        "sha256": "3aa8da23402ca0b25cdbc5f91dad90af928ad4a68352b8aaa723ed6eee4487f7"
+      },
+      {
+        "path": "official-sources.md",
+        "sha256": "29b46a9bda8fce000fa511cb1dced303bf11e6d77dff5320fcd8758f5d3c83ea"
+      },
+      {
+        "path": "operational-knowhow-index.md",
+        "sha256": "0ad4b3e931ff5e37df313f291f88b89b814e88cafc8080d896781d4019211545"
+      },
+      {
+        "path": "operational-knowhow.md",
+        "sha256": "44620ed228a29ac9c8ab6e014364acb535dad1576dd98307c6cf70bec26a1f0e"
+      },
+      {
+        "path": "provenance.json",
+        "sha256": "3797bce7ceefa0bfc0c1d2e2d834ca0c7cfdea70ae6feeed18d4d821ce705d22"
+      },
+      {
+        "path": "rubric.md",
+        "sha256": "80dacaffef39b2b6a024b692fe62a48a8529c2eb4aaf567615c7279f8206bd86"
+      },
+      {
+        "path": "scripts/contract-selfcheck.sh",
+        "sha256": "27acfd7a3b7de0d77204974f144a9bd6105810af697460a62b2083298f471819"
+      },
+      {
+        "path": "scripts/handoff-remind.sh",
+        "sha256": "62c68a358ea1443256bb9f1aad15d7d54271b147875982f12b3614392afd4566"
+      },
+      {
+        "path": "scripts/handoff-remind.test.sh",
+        "sha256": "ae3c5305c0e289d971a61774c49ad73aeacc7a164f40c5715deb662495830dbe"
+      },
+      {
+        "path": "scripts/handoff_lifecycle.py",
+        "sha256": "83fdcf265c055e7854c562dfdf32222b15f55fa2ce32982eda3b5962f354002b"
+      },
+      {
+        "path": "scripts/harness-setup-state.sh",
+        "sha256": "2027b6845a07a89d7a6c547a6fa44adf1b8587e0ae67f8fa817b0dcc36e69ff8"
+      },
+      {
+        "path": "scripts/hook-session-start-setup.sh",
+        "sha256": "fb813c613653d4be8e982ae89503bc5410e9309abe6c7a97012c30afddcf6485"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.sh",
+        "sha256": "fb79fed4e778270c0606707197cee91044bc1a223fe7538b6c62ef530de90783"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.test.sh",
+        "sha256": "fe50edb26d5784d0fa1f3506e0dfcd0d6df6c190907ab191eda7eec83d49ef23"
+      },
+      {
+        "path": "scripts/knowhow.schema.json",
+        "sha256": "16940a31ce7be38de26420f4b7bce437bfcc3935e1c3980ccf062b5ce5d6edbc"
+      },
+      {
+        "path": "scripts/knowhow_check.py",
+        "sha256": "fc5a95f407497af8243a9b348e196ff4c95ed69e691795f443d1efb76c50a35b"
+      },
+      {
+        "path": "scripts/provenance-check.sh",
+        "sha256": "43362629085f70fb5abb0e23ddbe9d7504e36085bc48b13c58efaea5d16294b9"
+      },
+      {
+        "path": "scripts/provenance-check.test.sh",
+        "sha256": "2cd0d2a2b3fd87929591b8862ecd2f0fece1358ccdc6a8380618bae8742f10f6"
+      },
+      {
+        "path": "scripts/test_handoff_lifecycle.py",
+        "sha256": "ce170c1d31f49725d3c98f57a213e0fd86fa0f3a4b89468e96c0077ea04bdeed"
+      },
+      {
+        "path": "scripts/test_knowhow_check.py",
+        "sha256": "967a83ac6f23c0d37e13b7577ab91bc1d23fec3945dbf1357a5dc2c8cc1b1bb6"
+      },
+      {
+        "path": "selection-flow.md",
+        "sha256": "3718be6511d805a597c6fee4408b3d6209ded2003673abc6b5ae3473e6cadceb"
+      },
+      {
+        "path": "step7-reviewer-procedure.md",
+        "sha256": "bcb0ac59a36f0e2d7604169e0aca39ee26300848cfa2ddff4b6398332090e1b4"
+      },
+      {
+        "path": "step8-step9-output-and-verify.md",
+        "sha256": "81ffde7c6dce3285db8e58fb7ed8a393d6b0305d2fc695899b4dbe95be2a97e1"
+      },
+      {
+        "path": "template.md",
+        "sha256": "8dd1e9bd45a23821572a4106f9a06b86e8401b73a3bf09d17b60adab7fe9a9c9"
+      }
+    ],
+    "content_hash": "b7526acfb8285faff1dd681dc5860daacc10377e78ce5b3fd9ce6836c0f73a72"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a9fab0f785daa0b41",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 92,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:205",
+        "comment": "本文は phase generated の後すぐ done としているが、harness-setup-state.sh:13 では done は phase=verified の時しか使えず、その前に verify --machine/--review が要る。step8-step9-output-and-verify.md:52 に手順があるので壊れてはいないが、本文だけでは一手抜ける。"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:207-219",
+        "comment": "Step 9 (setup 後のレビュー) の後ろに、生成の作業 (script・hook のコピー、handoff の保存) が置かれている。レビューの PASS とコピーの前後関係が本文から読み取れない。Step 8 へ移すとよい。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:243-254",
+        "comment": "更新履歴の並びが混ざっている (1.1.0、日付だけの 2 件、1.6.3 から 1.2.0 への降順)。順序をそろえ、全部の行に版番号を付けるとよい。"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:259-267",
+        "comment": "生成物の禁止事項はあるが、実行するエージェント自身の禁止事項 (既存ファイルを読まずに上書きしない等) を 1 つの節にまとめると守られやすい。"
+      }
+    ]
+  }
+}

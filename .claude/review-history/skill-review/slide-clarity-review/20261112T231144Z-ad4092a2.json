@@ -1,0 +1,111 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "slide-clarity-review",
+  "reviewed_at": "2026-11-12T23:11:44Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "ecff57eac5eadaa1b100858eb8697fc2c637ad6c16f2236c7a8617dbee6728c4"
+      },
+      {
+        "path": "criteria/clarity.json",
+        "sha256": "c7e72d9347b996adc27d02ef3f80b81c3998e86d6235fb74d133b8bdc1cbbf89"
+      },
+      {
+        "path": "scripts/check_deck.py",
+        "sha256": "fa3ee63aa252e92a833b0dc2203bf03cbb887fb5ae484a3db1139e3be451235b"
+      },
+      {
+        "path": "scripts/extract_deck.py",
+        "sha256": "d387cc527ebd36c26279d030d5c4abfe4e5a598b73ad25daafceb2369bb86903"
+      },
+      {
+        "path": "scripts/finalize_review.py",
+        "sha256": "3706e8b176e5875feaf0eb85f03e63277be9a3676e54a806ca1a40e5289beeaf"
+      },
+      {
+        "path": "scripts/gate.py",
+        "sha256": "7a68e731c05a16e256dc0579b772420dad1706cd736ee581b787bda88cce9fae"
+      },
+      {
+        "path": "scripts/render_deck.py",
+        "sha256": "932033ddec7c831b4c911f6e2ba929db3308cb1822a53d83bbcd8ac622643515"
+      }
+    ],
+    "content_hash": "a170e026f5c74d800b553e2b92c73de94fb836ebda12e61940de1c1d72750ef2"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a9f9f069ed4195b7d",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 93,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": ".claude/skills/slide-clarity-review/SKILL.md:116",
+        "comment": "エラー時の表に finalize_review.py の終了コード 3（reviewer 出力不正）と record 保存失敗（finalize_review.py:263-266 / 273-274 の終了コード 2）の行が無い。手順 4 の本文には記述あり"
+      },
+      {
+        "criterion_id": "S3",
+        "severity": "low",
+        "location": ".claude/skills/slide-clarity-review/SKILL.md:35",
+        "comment": "手順 3〜5 が 1 行の長い段落の連なりで読みにくい。下位の箇条への分割を推奨"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": ".claude/skills/slide-clarity-review/SKILL.md:125",
+        "comment": "使用例が 1 件のみ。画像化不可・別リポジトリの資料などの端の場合の例があると良い"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/slide-clarity-review/SKILL.md:22",
+        "comment": "『2026-11 の実測』『暫定値』の記述が複数（22, 46, 47, 62 行）あり時期依存。見直し条件の明記を推奨"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/slide-clarity-review/SKILL.md:20",
+        "comment": "_shared/ 一式への依存が大きく、skill フォルダ単体のコピーでは動かない（移植前提は明記済み）"
+      }
+    ]
+  }
+}

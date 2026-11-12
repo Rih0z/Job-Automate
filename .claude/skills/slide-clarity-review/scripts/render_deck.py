@@ -12,6 +12,7 @@
 PDF を画像にする pdftoppm も同様（環境変数 PDFTOPPM、PATH、`00_vendor/poppler/Library/bin/`）。
 注意: LibreOffice の描画は、PowerPoint の実機と、フォントの代替などで折り返しが少し違うことがある。初回の起動は、設定の作成のため数分かかることがある。
 標準ライブラリのみ。
+find_soffice / find_pdftoppm は sns-square-slides（scripts/make_square_cards.py）も import する。名前・引数・戻り値を変えたら、同 skill の試験（test_make_square_cards.py）も回す。
 """
 import argparse
 import glob
