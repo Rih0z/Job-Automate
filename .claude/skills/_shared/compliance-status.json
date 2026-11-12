@@ -1231,6 +1231,15 @@
       "severity": "Low",
       "status": "backlog",
       "note": "~/.claude/skills/claude-md は home の skill で、このリポジトリの agent-harness-bootstrap 1.4.0 の handoff 規約に合わせて直すとよい"
+    },
+    {
+      "id": "CR-44",
+      "date": "2026-11-11",
+      "finding": "provenance.json の契約が配置と表記を固定で求め、repo ごとの配置規則に合わせた移植を判定できない。handoff-management は .claude/scripts/handoff_lifecycle.py と .gitignore の .tmp/ 行を、permissions-deny-sensitive は Read(./.env) の表記を grep で求めるため、config の script 欄で別の場所に置いた repo、.tmp/handoffs/ を追跡する repo、より広い Read(**/.env) 形式の deny がいずれも違反になる",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "契約を config（.claude/handoff-lifecycle.json の script・git_tracked）で判定する形と、deny の表記の同値（./.env と **/.env）を認める形に直す。移植先では選択記録の note に例外として記録して回避している"
     }
   ],
   "audit_log": [
