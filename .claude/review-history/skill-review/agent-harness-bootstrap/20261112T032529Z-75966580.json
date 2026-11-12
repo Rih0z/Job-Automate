@@ -1,7 +1,7 @@
 {
   "schema": "skill-review-record/v1",
   "skill": "agent-harness-bootstrap",
-  "reviewed_at": "2026-11-12T03:24:52Z",
+  "reviewed_at": "2026-11-12T03:25:29Z",
   "target": {
     "files": [
       {
@@ -147,31 +147,31 @@
       {
         "criterion_id": "I1",
         "severity": "medium",
-        "location": "/Users/kokiriho/Documents/Projects/Job-Automate/.claude/skills/agent-harness-bootstrap/SKILL.md:48",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:48",
         "comment": "WebFetch 失敗時に「取得できるまで生成を中断する」と言い切っているが、同ファイル 52 行目とエラー表 219 行目は「fetched が max_age_days 以内なら構造化データで続行」としており、続行か中断かが一意に決まらない。48 行目に max_age_days 超過時のみ中断という条件を加えてそろえる。"
       },
       {
         "criterion_id": "S1",
         "severity": "low",
-        "location": "/Users/kokiriho/Documents/Projects/Job-Automate/.claude/skills/agent-harness-bootstrap/scripts/__pycache__/handoff_lifecycle.cpython-314.pyc",
+        "location": ".claude/skills/agent-harness-bootstrap/scripts/__pycache__/handoff_lifecycle.cpython-314.pyc",
         "comment": "生成物の .pyc がスキルフォルダ内に残っている。削除するか .gitignore で除外する。"
       },
       {
         "criterion_id": "P2",
         "severity": "low",
-        "location": "/Users/kokiriho/Documents/Projects/Job-Automate/.claude/skills/agent-harness-bootstrap/SKILL.md:228-236",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:228-236",
         "comment": "更新履歴の並びが 1.1.0 → 日付 → 1.5.0 → 1.4.1 → 1.4.0 → 1.3.0 → 1.2.0 と昇順と降順が混在している。降順か昇順に統一する。"
       },
       {
         "criterion_id": "D3",
         "severity": "low",
-        "location": "/Users/kokiriho/Documents/Projects/Job-Automate/.claude/skills/agent-harness-bootstrap/SKILL.md:3",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:3",
         "comment": "description が長く、provenance の仕組みの説明が要点を埋もれさせている。仕組みの説明は本文に移し、description は何をするか・いつ使うか・使わない場面に絞ると発火判定が明瞭になる。"
       },
       {
         "criterion_id": "P3",
         "severity": "low",
-        "location": "/Users/kokiriho/Documents/Projects/Job-Automate/.claude/skills/agent-harness-bootstrap/SKILL.md:31",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:31",
         "comment": "../_shared/anthropic-best-practices.json というスキルフォルダ外への依存がある。代替は 71-80 行目に書かれているが、単独でコピーした時の挙動を前提節に 1 行足すと移植しやすい。"
       }
     ]
