@@ -7,6 +7,8 @@
   V4 backlog / partial なのに cr が無い、または cr が findings に無い
   V5 findings の id 重複、severity / status が enum 外
   V6 cache の principle が必須キーを欠く、source が sources に無い、または id が重複している
+  V7 findings の requests（利用者の要望の記録）が [{"at": 文字列, "text": 文字列}] でない、
+     または related（起票時に確かめた関連 finding の id）が文字列の配列でない。どちらも任意のキー
 違反が 1 件でもあれば exit 1、無ければ exit 0。
 
 使い方:
@@ -63,6 +65,15 @@ def check(cache, status, root):
             v.append(f"V5 finding {fid} の severity {f.get('severity')} が enum 外（{sorted(FINDING_SEVERITY)}）")
         if f.get("status") not in FINDING_STATUS:
             v.append(f"V5 finding {fid} の status {f.get('status')} が enum 外（{sorted(FINDING_STATUS)}）")
+        if "requests" in f:
+            reqs = f["requests"]
+            if not isinstance(reqs, list) or not all(
+                    isinstance(r, dict) and isinstance(r.get("at"), str) and isinstance(r.get("text"), str) for r in reqs):
+                v.append(f"V7 finding {fid} の requests が [{{\"at\": 文字列, \"text\": 文字列}}] の形でない")
+        if "related" in f:
+            rel = f["related"]
+            if not isinstance(rel, list) or not all(isinstance(x, str) for x in rel):
+                v.append(f"V7 finding {fid} の related が文字列の配列でない")
 
     for pid, e in sorted(st.items()):
         s = e.get("status")

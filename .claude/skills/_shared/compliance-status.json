@@ -1,7 +1,7 @@
 {
   "schema": "compliance-status/v1",
-  "updated": "2026-11-11",
-  "description": "Job-Automate 自身の、公式原則（anthropic-best-practices.json の principle id）ごとの採用状況・findings（CR-xx）・監査ログ。観点の SoT は anthropic-best-practices.json、本ファイルはその採用状況だけを持つ（repo-specific・移植不可）。整合は scripts/check_compliance_status.py が検査する（全単射・evidence 実在・enum・backlog/partial の cr 必須）。",
+"updated": "2026-11-11",
+  "description": "Job-Automate 自身の、公式原則（anthropic-best-practices.json の principle id）ごとの採用状況・findings（CR-xx）・監査ログ。観点の SoT は anthropic-best-practices.json、本ファイルはその採用状況だけを持つ（repo-specific・移植不可）。整合は scripts/check_compliance_status.py が検査する（全単射・evidence 実在・enum・backlog/partial の cr 必須）。 findings の任意のキー: requests（利用者の要望の原文の記録 [{\"at\", \"text\"}]。issue_tracker.py request が足す）と related（finding を足した時に issue_tracker.py related で確かめた関連 finding の id の配列。無ければ []。新しい finding に無いと git commit の前に pre-git-ledger-gate.sh の check-new が止める）。形は check_compliance_status.py の V7 が検査する。",
   "enums": {
     "principle_status": [
       "adopted",

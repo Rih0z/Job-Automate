@@ -137,6 +137,27 @@ class CheckComplianceStatusTest(unittest.TestCase):
         self.status["principles"]["a.one"]["evidence"] = [abs_path]
         self.assertViolation(self.run_check(), "V3", "ev.md")
 
+    def test_c14_requests_and_related_valid(self):
+        self.status["findings"][0]["requests"] = [{"at": "2026-11-11T12:00:00-08:00", "text": "利用者の要望"}]
+        self.status["findings"][0]["related"] = ["CR-02"]
+        r = self.run_check()
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.status["findings"][0]["related"] = []
+        r = self.run_check()
+        self.assertEqual(r.returncode, 0, r.stdout + r.stderr)
+        self.status["findings"][0]["related"] = "CR-02"
+        self.assertViolation(self.run_check(), "V7", "CR-01")  # 対の確認: 形が違えば違反
+
+    def test_c15_requests_malformed(self):
+        for bad in ("text", [{"at": "2026-11-11"}], [{"text": "x"}], [{"at": 1, "text": "x"}], ["x"]):
+            self.status["findings"][0]["requests"] = bad
+            self.assertViolation(self.run_check(), "V7", "CR-01")
+
+    def test_c16_related_malformed(self):
+        for bad in ("CR-02", [1], [{"id": "CR-02"}]):
+            self.status["findings"][0]["related"] = bad
+            self.assertViolation(self.run_check(), "V7", "CR-01")
+
     def test_c11_real_repository_data(self):
         cache = os.path.join(REPO, ".claude", "skills", "_shared", "anthropic-best-practices.json")
         status = os.path.join(REPO, ".claude", "skills", "_shared", "compliance-status.json")

@@ -1,0 +1,97 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "issue-lifecycle-tracking",
+  "reviewed_at": "2026-11-12T06:21:22Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "6ca0e405e179f2ba272c00e943421bab2ffb53d608f4725824b4532e7555fdd8"
+      },
+      {
+        "path": "references/issue-template.md",
+        "sha256": "a7bf82e1b6e963c5fab9e600e376ceb12d20818d99e26d0fce92cb32c97d83af"
+      },
+      {
+        "path": "references/issue-tracker-config.md",
+        "sha256": "0ff37f7136f3c2a9943d3fc90efa7c38f72ca229f64cc9e8fb0aff705f0debd4"
+      },
+      {
+        "path": "scripts/issue_tracker.py",
+        "sha256": "5f074099236af0c343ed108bc7d4045d54dcdc9cdbd6d3d19ac2589d74d0a64d"
+      },
+      {
+        "path": "scripts/test_issue_tracker.py",
+        "sha256": "ff1bc8c4bb8c532d68441512ecc0b523a2ead888f482675869345b0506145fb2"
+      }
+    ],
+    "content_hash": "83bc4569253a8ce4d44ad456e3a05f3dc3969f68382c024d5079010a43c45931"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "ab61fa3c2a33d573b",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": "SKILL.md:58",
+        "comment": "IT の別名が .claude/skills/issue-lifecycle-tracking/scripts/issue_tracker.py に固定されている。SKILL.md:75 の handoff の script と同じく、移植先で別の場所に置いた時の読み替えを一文足すと揃う"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": "references/issue-tracker-config.md:14",
+        "comment": "exclude の _evidence/** は、script が状態ディレクトリの直下だけを照合するため（issue_tracker.py:228-232）実際には効かない。害は無いが誤解を招く"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": "SKILL.md:146",
+        "comment": "更新履歴の 1.1.0 の日付が未記録"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": "SKILL.md:109",
+        "comment": "禁止事項が後ろの方にある。冒頭に要約を置くと I2 の「重要な命令を冒頭に」に合う"
+      }
+    ]
+  }
+}

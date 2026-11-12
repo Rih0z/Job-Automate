@@ -12,8 +12,11 @@ severity: high        # high / medium / low
 category: bug         # bug / improvement / docs など運用側で決めた語
 created: 2026-01-15
 status: open          # ディレクトリ名と一致させる
-related: []           # 再発時は過去 Issue の id を入れる
+related: []           # 再発時は過去 Issue の id を入れる（commit 前の check-new が見るのは本文の「関連:」欄で、ここではない）
 ---
+
+関連: <related の結果を書く>
+<!-- issue_tracker.py related --text "<題名>" で確かめてから、「関連: <関連 issue のパス>（別にした理由）」か「関連: なし（related 確認済み）」に書き換える。書き換えないと commit 前の check-new が止める -->
 
 ## 症状
 ## 再現手順
@@ -23,6 +26,9 @@ related: []           # 再発時は過去 Issue の id を入れる
 ## 仮説
 ## 修正候補
 ## 関連ファイル
+
+## 利用者の要望
+<!-- issue_tracker.py request が「- <日時> <原文>」を足す。手で書く時も同じ形 -->
 
 ## close 時に追記
 - 修正内容:
