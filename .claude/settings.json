@@ -23,6 +23,16 @@
             "timeout": 60
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-handoff-discovery-gate.sh",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "SessionStart": [

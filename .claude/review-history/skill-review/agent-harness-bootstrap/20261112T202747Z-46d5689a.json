@@ -1,0 +1,179 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "agent-harness-bootstrap",
+  "reviewed_at": "2026-11-12T20:27:47Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "5d98c6f214f77dbd76a0d1cfe14da7e7ab4320e5222b71e62b1da8bb8bacb72e"
+      },
+      {
+        "path": "criteria/porting-reconciliation.json",
+        "sha256": "b5ef06d5d42a2adcc9596484c06162be04e77c11c25914f44508cfadf761feeb"
+      },
+      {
+        "path": "hooks-reference.md",
+        "sha256": "10419229b8641daa39684a8be3c61e22925fc09044669de011a7f7bf50e4afdd"
+      },
+      {
+        "path": "maintainer-checklist.md",
+        "sha256": "3aa8da23402ca0b25cdbc5f91dad90af928ad4a68352b8aaa723ed6eee4487f7"
+      },
+      {
+        "path": "official-sources.md",
+        "sha256": "29b46a9bda8fce000fa511cb1dced303bf11e6d77dff5320fcd8758f5d3c83ea"
+      },
+      {
+        "path": "operational-knowhow-index.md",
+        "sha256": "0ad4b3e931ff5e37df313f291f88b89b814e88cafc8080d896781d4019211545"
+      },
+      {
+        "path": "operational-knowhow.md",
+        "sha256": "44620ed228a29ac9c8ab6e014364acb535dad1576dd98307c6cf70bec26a1f0e"
+      },
+      {
+        "path": "provenance.json",
+        "sha256": "da528f97b80f902fe7216a663e3a3a0b5f8621cc64830e007d227ae2b0e1f238"
+      },
+      {
+        "path": "rubric.md",
+        "sha256": "80dacaffef39b2b6a024b692fe62a48a8529c2eb4aaf567615c7279f8206bd86"
+      },
+      {
+        "path": "scripts/contract-selfcheck.sh",
+        "sha256": "27acfd7a3b7de0d77204974f144a9bd6105810af697460a62b2083298f471819"
+      },
+      {
+        "path": "scripts/handoff-remind.sh",
+        "sha256": "62c68a358ea1443256bb9f1aad15d7d54271b147875982f12b3614392afd4566"
+      },
+      {
+        "path": "scripts/handoff-remind.test.sh",
+        "sha256": "ae3c5305c0e289d971a61774c49ad73aeacc7a164f40c5715deb662495830dbe"
+      },
+      {
+        "path": "scripts/handoff_lifecycle.py",
+        "sha256": "83fdcf265c055e7854c562dfdf32222b15f55fa2ce32982eda3b5962f354002b"
+      },
+      {
+        "path": "scripts/harness-setup-state.sh",
+        "sha256": "2027b6845a07a89d7a6c547a6fa44adf1b8587e0ae67f8fa817b0dcc36e69ff8"
+      },
+      {
+        "path": "scripts/hook-session-start-setup.sh",
+        "sha256": "fb813c613653d4be8e982ae89503bc5410e9309abe6c7a97012c30afddcf6485"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.sh",
+        "sha256": "fb79fed4e778270c0606707197cee91044bc1a223fe7538b6c62ef530de90783"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.test.sh",
+        "sha256": "fe50edb26d5784d0fa1f3506e0dfcd0d6df6c190907ab191eda7eec83d49ef23"
+      },
+      {
+        "path": "scripts/knowhow.schema.json",
+        "sha256": "16940a31ce7be38de26420f4b7bce437bfcc3935e1c3980ccf062b5ce5d6edbc"
+      },
+      {
+        "path": "scripts/knowhow_check.py",
+        "sha256": "fc5a95f407497af8243a9b348e196ff4c95ed69e691795f443d1efb76c50a35b"
+      },
+      {
+        "path": "scripts/provenance-check.sh",
+        "sha256": "43362629085f70fb5abb0e23ddbe9d7504e36085bc48b13c58efaea5d16294b9"
+      },
+      {
+        "path": "scripts/provenance-check.test.sh",
+        "sha256": "2cd0d2a2b3fd87929591b8862ecd2f0fece1358ccdc6a8380618bae8742f10f6"
+      },
+      {
+        "path": "scripts/test_handoff_lifecycle.py",
+        "sha256": "ce170c1d31f49725d3c98f57a213e0fd86fa0f3a4b89468e96c0077ea04bdeed"
+      },
+      {
+        "path": "scripts/test_knowhow_check.py",
+        "sha256": "967a83ac6f23c0d37e13b7577ab91bc1d23fec3945dbf1357a5dc2c8cc1b1bb6"
+      },
+      {
+        "path": "selection-flow.md",
+        "sha256": "3718be6511d805a597c6fee4408b3d6209ded2003673abc6b5ae3473e6cadceb"
+      },
+      {
+        "path": "step7-reviewer-procedure.md",
+        "sha256": "bcb0ac59a36f0e2d7604169e0aca39ee26300848cfa2ddff4b6398332090e1b4"
+      },
+      {
+        "path": "step8-step9-output-and-verify.md",
+        "sha256": "81ffde7c6dce3285db8e58fb7ed8a393d6b0305d2fc695899b4dbe95be2a97e1"
+      },
+      {
+        "path": "template.md",
+        "sha256": "8dd1e9bd45a23821572a4106f9a06b86e8401b73a3bf09d17b60adab7fe9a9c9"
+      }
+    ],
+    "content_hash": "85cf00c11a1449214458dbc07493b769d09ada38e7151063cbd6423ef4f8276e"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "ad777069ca5841495",
+    "model": "claude-opus-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:219",
+        "comment": "hook を持ち込まない時の手動の代わりに、pre-handoff-discovery-gate.sh の分（handoff を書く前に discovery-log の queued が 0 件か確かめる）が無い"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:216",
+        "comment": "書き換える変数を 3 つまとめて挙げているが、実際は hook ごとに違う（pre-git-ledger-gate.sh は ISSUE_TRACKER と KNOWHOW_CHECK、stop-handoff-knowhow-gate.sh は HANDOFF_LIFECYCLE と KNOWHOW_CHECK）。hook ごとに分けて書くと誤読が減る"
+      },
+      {
+        "criterion_id": "D3",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:228",
+        "comment": "対象が書かれていない『セットアップして』への対応が『1 回だけ聞き返す』で、リポジトリ CLAUDE.md の『発火させず通常の作業支援として扱う』と少し食い違う（以前からある記述。CR-52 で起票済み）"
+      }
+    ]
+  }
+}

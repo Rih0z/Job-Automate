@@ -4,7 +4,7 @@ description: 任意のプロジェクトに対し、Anthropic 公式 Best Practi
 when_to_use: 「CLAUDE.md を作って」「`/init` の代わりに公式準拠で生成して」「既存の CLAUDE.md を公式 Best Practices で書き直して」「CLAUDE.md が肥大化したので剪定して」「(この repo の) 仕組みを別プロジェクト 対象 にも入れて」「このリポジトリのノウハウで 対象ディレクトリ をセットアップして」等。別プロジェクトへのセットアップ・移植は、**対象(このリポジトリ以外の別ディレクトリ/別リポジトリ) が明示された**依頼に限る (リポジトリ CLAUDE.md「他プロジェクトのセットアップ依頼への対応」と同じ条件)。このリポジトリ自身の CLAUDE.md の生成・剪定も対象。対象が明示されない曖昧な「セットアップして」は対象外
 metadata:
   provenance: mixed
-  version: 1.6.1
+  version: 1.6.2
 ---
 
 # CLAUDE.md 生成 harness
@@ -79,6 +79,7 @@ URL 表（`best-practices` / `memory` / `skills` / `hooks` / `sub-agents` / `per
 | この repo の `.claude/settings.json` に登録された Stop hook / SessionStart hook | state 更新は省略してよい。Step 9 の機械検査（`provenance-check.sh --target`）と突合レビューを手動で実行し、結果を最終報告に載せる |
 | `harness-setup-review` skill・`skills-audit` skill・`_shared/anthropic-best-practices.json` | 無い場合は別エージェントに `criteria/porting-reconciliation.json` と `rubric.md` を渡して同じ観点で突合させ、公式 URL は WebFetch で直接確認する |
 | 移植元 clone の置き場 `.setup-automate/` と handoff 用 `.tmp/` | 実際に使った置き場を対象の `.gitignore` に追記する |
+| このリポジトリの `.claude/hooks/*.sh`（skill の外。commit 前・Stop・handoff を書く前の検査）と、issue-lifecycle-tracking の `scripts/issue_tracker.py` | hook を持ち込まない移植先では、Step 9 の「hook を持ち込まない時」のとおり手で検査を実行する。`issue_tracker.py` は issue-lifecycle-tracking の `scripts/` から取る。issue-lifecycle-tracking を選ばない移植先でも、JSON の finding 台帳（json_findings の source）だけで `issue-tracker` を使える（台帳の note） |
 | 動作する python（`python3` / `python` / `py` のいずれか。`scripts/` の検査と state 管理、`handoff_lifecycle.py` が使う） | 代替は無い。`provenance-check.sh` は「動作する python が見つからない」で FAIL するので、python を入れてから Step 0 を始める |
 
 ---
@@ -209,8 +210,13 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 
 - `knowhow-ledger`: `scripts/knowhow_check.py` と `scripts/knowhow.schema.json` をコピーし、対象で決めた決まりだけで `.claude/knowhow.json` を作る（移植元の KH を写さない。移植元の file を写した時は、中にある `<!-- KH-xxxx -->` の形のアンカーと json の `knowhow` 配列を消すか、対象の KH に付け替える。残すと対象の検査で孤立したアンカーになる）。
 - `issue-tracker`: issue-lifecycle-tracking skill の `scripts/issue_tracker.py` をコピーし、対象の issue の置き場に合わせて `.claude/issue-tracker.json` を書く（例は issue-lifecycle-tracking の `references/issue-tracker-config.md`）。
-- 機械で止める hook も持ち込む時: このリポジトリの `.claude/hooks/pre-git-ledger-gate.sh`（commit 前。`issue-tracker` か `knowhow-ledger` を選んだ時）と `.claude/hooks/stop-handoff-knowhow-gate.sh`（Stop。`handoff-management` か `knowhow-ledger` を選んだ時）を対象の `.claude/hooks/` にコピーする。各 hook の先頭にある script の完全パスの変数（`ISSUE_TRACKER`・`KNOWHOW_CHECK`・`HANDOFF_LIFECYCLE`）だけを `"$HERE/../scripts/<file 名>"` に書き換え、PreToolUse（matcher `Bash`）と Stop に登録する。Stop の handoff の判定は session の開始時刻を要るので、`scripts/hook-session-start-setup.sh` の開始時刻の記録の部分も SessionStart に入れる（`.tmp/` を追跡する repo は `.tmp/session-start/` を gitignore する）。
-- hook を持ち込まない時: commit の前に `check-new` と `knowhow_check.py` を手で実行する運用だと最終報告に書く（operational-knowhow.md の「commit の前に止める」「Stop で 1 回止める」は働かない）。
+- 機械で止める hook も持ち込む時（移植元の repo の `.claude/hooks/` から対象の `.claude/hooks/` にコピーし、対象の settings.json に登録する。skill 単体には hook は入っていない）:
+  - `.claude/hooks/pre-git-ledger-gate.sh`（commit 前。`issue-tracker` か `knowhow-ledger` を選んだ時）: PreToolUse の matcher `Bash` に登録する。
+  - `.claude/hooks/stop-handoff-knowhow-gate.sh`（`handoff-management` か `knowhow-ledger` を選んだ時）: Stop に登録する。
+  - 上の 2 つは、先頭にある script の完全パスの変数（`ISSUE_TRACKER`・`KNOWHOW_CHECK`・`HANDOFF_LIFECYCLE`）だけを `"$HERE/../scripts/<file 名>"` に書き換える。
+  - `.claude/hooks/pre-handoff-discovery-gate.sh`（handoff を書く前。`handoff-management` と `claude-md-response-rules` を両方選んだ時）: PreToolUse の matcher `Write|Edit|MultiEdit` に登録する。script のパスの変数は無い。handoff や discovery-log の置き場が違う時だけ、先頭の `HANDOFF_DIR`・`DISCOVERY_LOG` を書き換える。
+  - Stop の handoff の判定は session の開始時刻を要るので、`scripts/hook-session-start-setup.sh` の開始時刻の記録の部分も SessionStart に入れる（`.tmp/` を追跡する repo は `.tmp/session-start/` を gitignore する）。
+- hook を持ち込まない時: commit の前に `check-new` と `knowhow_check.py` を手で実行する運用だと最終報告に書く（operational-knowhow.md の起票前の関連確認と knowhow の台帳の段落にある、commit の前と Stop で止める仕組みは働かない）。
 
 ## 使用例
 
@@ -237,6 +243,7 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 - 1.1.0: 本文を supporting files へ分離（公式取得先・索引・Step 7〜9 の詳細）、前提節（repo 固有の依存と代替）を追加
 - 2026-09-01: when_to_use を「対象が明示された別プロジェクトのセットアップ依頼」へ拡張
 - 2026-11-05: 由来台帳 `provenance.json` に要素 `slide-creation-kit`（スライド系 3 skill と `docs/slide-creation-kit.md`）を追加し、スライド系 2 skill を `domain-skills-group` から移した。description に代表的な依頼の言い回しを足した。最終報告の見出しと順序を固定し、既存 CLAUDE.md がある対象の使用例を足した。未登録だった `select-slop-viewpoints` を `domain-skills-group` に登録した。台帳の 1 要素の説明文から、特定組織の記事名を一般的な表現に置き換えた
+- 2026-11-12 (1.6.2): handoff を書く前に discovery-log の queued を止める PreToolUse hook（`.claude/hooks/pre-handoff-discovery-gate.sh`）を hooks-reference.md と由来台帳の `claude-md-response-rules` に足し、Step 8 の hook の持ち込み方を hook ごとの箇条（条件・matcher・書き換える変数）に分けた。前提の表に skill の外の hook と `issue_tracker.py` への依存を足した
 - 2026-11-12 (1.6.1): 由来台帳の要素 `issue-tracker` の summary に、棚卸しの `triage`（issue-lifecycle-tracking 1.5.0）を足した。台帳の `updated` を 2026-11-12 にした
 - 2026-11-11 (1.6.0): `handoff_lifecycle.py` に、閉じた issue の handoff を片付ける `release --issue`（候補は issue の handoff 欄と frontmatter の `issue:` の一致だけ。別 repo のパス・参照されているもの・作業中・受領済みは残し、`git_tracked` なら削除を stage、それ以外は `.tmp/archive/handoffs/released/` へ移す。closed の名前は `.claude/issue-tracker.json` か config の `release.closed_dirs`）、Stop hook 用の `remind --received-since`、frontmatter の `issue:` 欄の警告と「issue 未記載」の表示を足した。参照の検査は、退避の候補がある時だけ候補の名前に絞って行うようにした（大きな repo で remind が時間切れになる問題への対応。試験 H1〜H7・V18）。`hook-session-start-setup.sh` が session の開始時刻を `.tmp/session-start/` に書く。ノウハウの台帳の検査 `scripts/knowhow_check.py`（形 `scripts/knowhow.schema.json`、試験 `scripts/test_knowhow_check.py`）を追加し、由来台帳に要素 `issue-tracker`・`knowhow-ledger`・`claude-md-user-request-rule`（いずれも author-preference）を足した。operational-knowhow.md に起票前の関連 issue の確認とノウハウの台帳の節、KH のアンカーを足し、hooks-reference.md に Stop と commit 前の 2 hook を足した
 - 2026-11-11 (1.5.0): `handoff_lifecycle.py` に repo ごとの config（`.claude/handoff-lifecycle.json`。相対パスは `.claude/` の親が基準）、issue から参照されている handoff の除外（`--keep-referenced`。語を集合で引く方式で、remind は 10 秒で打ち切る）、`work_status: in_progress` の除外、sweep のロック、worktree の中で通知しない `--only-main-worktree`、git で追跡している handoff を rename / 削除として stage する `git_tracked` を足した（試験 V1〜V17）。レビューの指摘で、日本語が直に続く参照の照合、ロックを取ってから一覧を作る、案内文のパスの引用と CLI 指定の併記、receive の `--config`、`handoff-remind.sh` が config を渡すことを足した（試験 W1〜W7・H4）
