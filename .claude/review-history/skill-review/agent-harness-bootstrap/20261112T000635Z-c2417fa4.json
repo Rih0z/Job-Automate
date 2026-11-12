@@ -1,0 +1,191 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "agent-harness-bootstrap",
+  "reviewed_at": "2026-11-12T00:06:35Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "34885f1eef854f2410f9b1c324693483610eb25a05824383b33cd2ac8e5a1eb6"
+      },
+      {
+        "path": "criteria/porting-reconciliation.json",
+        "sha256": "4971685379d9078d5e950a2a14d83d465680bb7d168154ff8c97489476acc1a7"
+      },
+      {
+        "path": "hooks-reference.md",
+        "sha256": "dc8e907ae4bd4abb0ea5035d9bee41faeb7ffcf5561cc7b133cd6195f73703b2"
+      },
+      {
+        "path": "maintainer-checklist.md",
+        "sha256": "3aa8da23402ca0b25cdbc5f91dad90af928ad4a68352b8aaa723ed6eee4487f7"
+      },
+      {
+        "path": "official-sources.md",
+        "sha256": "29b46a9bda8fce000fa511cb1dced303bf11e6d77dff5320fcd8758f5d3c83ea"
+      },
+      {
+        "path": "operational-knowhow-index.md",
+        "sha256": "7b485685d74a8edb147cc1f8e06d5492bb4f8987f4a5e14b4c96b92648db66e1"
+      },
+      {
+        "path": "operational-knowhow.md",
+        "sha256": "6ba9e25ede187666a75a13d97b202f5924f8be3e71e51e611085864b0de26040"
+      },
+      {
+        "path": "provenance.json",
+        "sha256": "991ff9ad9b902f0b3bba0fb7a0b030cb2666545ee292f18778c4614e92536fe0"
+      },
+      {
+        "path": "rubric.md",
+        "sha256": "812d52545467404f3f0c0dc51d5d547f673359c04737d658bece19a93a37f071"
+      },
+      {
+        "path": "scripts/contract-selfcheck.sh",
+        "sha256": "27acfd7a3b7de0d77204974f144a9bd6105810af697460a62b2083298f471819"
+      },
+      {
+        "path": "scripts/handoff-remind.sh",
+        "sha256": "d5e1f3f5ab6bdde22de68a7cb6762e0c43396024a7da8602903d47a36fb4307c"
+      },
+      {
+        "path": "scripts/handoff-remind.test.sh",
+        "sha256": "dc2443aa97abe8902b475e493ae63bd4f4ee105ecf5ebf67dfcdee23e87aa701"
+      },
+      {
+        "path": "scripts/handoff_lifecycle.py",
+        "sha256": "4791db11ecaf76504dc39a738ccea8963c938364b45e33f45ec010c03d2ed5ae"
+      },
+      {
+        "path": "scripts/harness-setup-state.sh",
+        "sha256": "2027b6845a07a89d7a6c547a6fa44adf1b8587e0ae67f8fa817b0dcc36e69ff8"
+      },
+      {
+        "path": "scripts/hook-session-start-setup.sh",
+        "sha256": "7cd66ec7c45339900acc3c9d534579f3ee777706584c40339801a17167ff8c1f"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.sh",
+        "sha256": "fb79fed4e778270c0606707197cee91044bc1a223fe7538b6c62ef530de90783"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.test.sh",
+        "sha256": "fe50edb26d5784d0fa1f3506e0dfcd0d6df6c190907ab191eda7eec83d49ef23"
+      },
+      {
+        "path": "scripts/provenance-check.sh",
+        "sha256": "43362629085f70fb5abb0e23ddbe9d7504e36085bc48b13c58efaea5d16294b9"
+      },
+      {
+        "path": "scripts/provenance-check.test.sh",
+        "sha256": "3de57de058613ca2a48bc9c59f56ba9598b847ec490350dc0657a98ca0f91331"
+      },
+      {
+        "path": "scripts/test_handoff_lifecycle.py",
+        "sha256": "4e0ba9c1aefc77a14825204e368f3e729c4ac749680a54e1b73d27bf99b01e29"
+      },
+      {
+        "path": "selection-flow.md",
+        "sha256": "13b9bb086de7c78447b7b0da6ad7a8094bc176b50f55bf183f6228b444ea4f96"
+      },
+      {
+        "path": "step7-reviewer-procedure.md",
+        "sha256": "29ff05a014db51ba7146eeb437f9333fd071eab18a276d17cb339e1d73503d05"
+      },
+      {
+        "path": "step8-step9-output-and-verify.md",
+        "sha256": "05b3d966da4436cc75f1bece9f52ac0cbd07532cf201f9e7114e4529edb8f1a2"
+      },
+      {
+        "path": "template.md",
+        "sha256": "8dd1e9bd45a23821572a4106f9a06b86e8401b73a3bf09d17b60adab7fe9a9c9"
+      }
+    ],
+    "content_hash": "d50f844f48cd5727b355b6065407ce53232254905c23a94a1d36c28c5d2675e5"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a3e66043479f83963",
+    "model": "claude-opus-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 16
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 89,
+    "verdict": "FAIL",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "medium",
+        "location": ".claude/skills/agent-harness-bootstrap/scripts/handoff-remind.sh:24",
+        "comment": "同梱の SessionStart hook と hooks-reference の例が --config / --only-main-worktree を渡さず、除外の無い sweep --apply を案内してしまう"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "medium",
+        "location": ".claude/skills/agent-harness-bootstrap/scripts/handoff_lifecycle.py:510-529",
+        "comment": "sweep が候補の列挙後にロックを取り、消えたファイルで FileNotFoundError の traceback（exit 1）"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/scripts/handoff_lifecycle.py:395-405",
+        "comment": "案内文のパスを引用符で囲まない"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/scripts/handoff_lifecycle.py:397-401",
+        "comment": "config と --keep-referenced の併用時に CLI 側が案内文から落ちる"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/scripts/handoff_lifecycle.py:234-235",
+        "comment": "参照語の抽出の既知の限界が文書に無い"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/hooks-reference.md:57",
+        "comment": "--only-main-worktree と config の項目が docstring にしか無い"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/scripts/handoff_lifecycle.py:547-551",
+        "comment": "receive が --config を受け付けない"
+      }
+    ]
+  }
+}

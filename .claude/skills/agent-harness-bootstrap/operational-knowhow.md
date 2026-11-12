@@ -141,7 +141,7 @@ handoff は **user の明示指示でのみ受領**する（① user が chat �
 
 SessionStart hook は**本文を注入せず、ポインタと verdict のみ通知する**: 中断作業の一覧（issue タイトル + handoff ファイル名のみ）と並走 4 軸 verdict（clean / 痕跡あり）を提示し「どれを再開しますか？」と問う。**本文 Read は user が再開対象を選択した後にその 1 件だけ**行う。
 
-**stale handoff 誤受領防止**: 提示する handoff のうち **7 日以上前 / 既に「## 完了」marker 済 / 「次 session 不要」明記**のものは "stale" と注記する。**archive ローテーション**: 未受領のまま 30 日（既定）を超えた handoff は、SessionStart の通知に出たら利用者に確かめずに `handoff_lifecycle.py sweep --apply` を実行して `.tmp/archive/handoffs/` に退避し、context 肥大化を防ぐ（`--apply` を付けない時は一覧だけ。退避は移動なので戻せる。判定は更新日時だけなので、issue から参照される進行中の handoff でも 30 日経てば移る。台帳が壊れていると exit 2 で止まるので、その時は退避せず利用者に報告する）。
+**stale handoff 誤受領防止**: 提示する handoff のうち **7 日以上前 / 既に「## 完了」marker 済 / 「次 session 不要」明記**のものは "stale" と注記する。**archive ローテーション**: 未受領のまま 30 日（既定）を超えた handoff は、SessionStart の通知に出たら利用者に確かめずに `handoff_lifecycle.py sweep --apply` を実行して `.tmp/archive/handoffs/` に退避し、context 肥大化を防ぐ（`--apply` を付けない時は一覧だけ。退避は移動なので戻せる。issue から参照されている handoff を残すには、`.claude/handoff-lifecycle.json` の `keep_referenced` に active な issue のディレクトリを書き、`--config` で呼ぶ。参照の判定はファイル名か拡張子なしの名前の出現で、大文字・小文字は区別しない。先頭 60 行に `work_status: in_progress` があるものも移らない。handoff を git で追跡している repo は config に `git_tracked: true` を書くと、移したものを rename として stage し `staged:` 行に出すので、そのパスだけを commit する。台帳が壊れている・参照先が無い・別の sweep が実行中の時は exit 2 で止まるので、その時は退避せず利用者に報告する。退避先に同名があると `-1` が付き、ファイル名で archive を探す仕組みとは合わなくなる。参照の照合の限界: 空白を含む handoff 名は参照されていても一致しない、`work_status: "in_progress"` のように引用符で囲んだ値は除外されない、拡張子なしの名前が一般的な語〈例: plan〉だとどこかに出てくるだけで残り続ける）。
 
 ### 独自運用: 並走 agent 痕跡 4 軸 recheck（並走衝突防止）
 

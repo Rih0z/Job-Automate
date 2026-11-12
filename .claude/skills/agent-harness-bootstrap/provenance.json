@@ -871,7 +871,7 @@
         "issue-lifecycle"
       ],
       "note": "issue-lifecycle 非採用時は issue 紐付けなしの命名 [YYYY-MM-DD]-[識別単語].md のみを使う",
-      "history": "2026-11-11: 受領は利用者が貼った・指定したものだけ、完了時に done で削除する方式にした。同日、未受領で 30 日を超えたものは確認なしで sweep --apply により archive へ退避する標準動作にした（sweep の既定を 90 日から 30 日へ。hook は通知だけ）。",
+      "history": "2026-11-11: 受領は利用者が貼った・指定したものだけ、完了時に done で削除する方式にした。同日、未受領で 30 日を超えたものは確認なしで sweep --apply により archive へ退避する標準動作にした（sweep の既定を 90 日から 30 日へ。hook は通知だけ）。同日、repo ごとの config、issue から参照されているものの除外、git で追跡している handoff の stage を足した（別 repo へ入れる時の前提）。",
       "target_contract": {
         "when_selected": [
           {

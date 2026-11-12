@@ -21,5 +21,11 @@ for cand in python3 python py; do
 done
 [[ -n "$PYTHON" ]] || exit 0
 export PYTHONUTF8=1
-"$PYTHON" "$HERE/handoff_lifecycle.py" remind --dir "$ROOT/.tmp/handoffs" || true
+CFG="$ROOT/.claude/handoff-lifecycle.json"
+if [[ -f "$CFG" ]]; then
+  # config があれば除外（keep_referenced）と追跡の扱いを渡す。worktree の中では通知しない
+  "$PYTHON" "$HERE/handoff_lifecycle.py" remind --config "$CFG" --only-main-worktree || true
+else
+  "$PYTHON" "$HERE/handoff_lifecycle.py" remind --dir "$ROOT/.tmp/handoffs" --only-main-worktree || true
+fi
 exit 0

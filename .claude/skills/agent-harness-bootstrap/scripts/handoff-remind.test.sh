@@ -3,6 +3,7 @@
 #   H1 未受領で古い handoff があれば名前が出て exit 0
 #   H2 .tmp/handoffs が無ければ出力なしで exit 0
 #   H3 python が見つからなければ出力なしで exit 0
+#   H4 .claude/handoff-lifecycle.json があれば --config を渡し、案内にも入る
 set -uo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 HOOK="$HERE/handoff-remind.sh"
@@ -27,6 +28,15 @@ t "H2 出力なし" "" "$out"
 out="$(PATH="/nonexistent" CLAUDE_PROJECT_DIR="$FIX/p1" "$BASH_BIN" "$HOOK" 2>&1)"; rc=$?
 t "H3 exit 0" 0 "$rc"
 t "H3 出力なし" "" "$out"
+
+mkdir -p "$FIX/p4/.tmp/handoffs" "$FIX/p4/.claude" "$FIX/p4/issues"
+printf '# old
+' > "$FIX/p4/.tmp/handoffs/old-four.md"
+touch -d '40 days ago' "$FIX/p4/.tmp/handoffs/old-four.md"
+printf '{"handoffs_dir": ".tmp/handoffs", "keep_referenced": ["issues"]}' > "$FIX/p4/.claude/handoff-lifecycle.json"
+out="$(CLAUDE_PROJECT_DIR="$FIX/p4" "$BASH_BIN" "$HOOK" 2>/dev/null)"; rc=$?
+t "H4 exit 0" 0 "$rc"
+t "H4 config があれば案内に --config が入る" 1 "$(grep -c 'sweep --config' <<<"$out")"
 
 echo "---"
 echo "PASS=$PASS FAIL=$FAIL"

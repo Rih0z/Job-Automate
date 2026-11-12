@@ -4,7 +4,7 @@ description: 任意のプロジェクトに対し、Anthropic 公式 Best Practi
 when_to_use: 「CLAUDE.md を作って」「`/init` の代わりに公式準拠で生成して」「既存の CLAUDE.md を公式 Best Practices で書き直して」「CLAUDE.md が肥大化したので剪定して」「(この repo の) 仕組みを別プロジェクト 対象 にも入れて」「このリポジトリのノウハウで 対象ディレクトリ をセットアップして」等、**対象(このリポジトリ以外の別ディレクトリ/別リポジトリ) が明示された**依頼全般 (2026-09-01 拡張、リポジトリ CLAUDE.md「他プロジェクトのセットアップ依頼への対応」と同期。対象が明示されない曖昧な「セットアップして」は対象外)
 metadata:
   provenance: mixed
-  version: 1.4.1
+  version: 1.5.0
 ---
 
 # CLAUDE.md 生成 harness
@@ -228,6 +228,7 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 - 1.1.0: 本文を supporting files へ分離（公式取得先・索引・Step 7〜9 の詳細）、前提節（repo 固有の依存と代替）を追加
 - 2026-09-01: when_to_use を「対象が明示された別プロジェクトのセットアップ依頼」へ拡張
 - 2026-11-05: 由来台帳 `provenance.json` に要素 `slide-creation-kit`（スライド系 3 skill と `docs/slide-creation-kit.md`）を追加し、スライド系 2 skill を `domain-skills-group` から移した。description に代表的な依頼の言い回しを足した。最終報告の見出しと順序を固定し、既存 CLAUDE.md がある対象の使用例を足した。未登録だった `select-slop-viewpoints` を `domain-skills-group` に登録した。台帳の 1 要素の説明文から、特定組織の記事名を一般的な表現に置き換えた
+- 2026-11-11 (1.5.0): `handoff_lifecycle.py` に repo ごとの config（`.claude/handoff-lifecycle.json`。相対パスは `.claude/` の親が基準）、issue から参照されている handoff の除外（`--keep-referenced`。語を集合で引く方式で、remind は 10 秒で打ち切る）、`work_status: in_progress` の除外、sweep のロック、worktree の中で通知しない `--only-main-worktree`、git で追跡している handoff を rename / 削除として stage する `git_tracked` を足した（試験 V1〜V17）。レビューの指摘で、日本語が直に続く参照の照合、ロックを取ってから一覧を作る、案内文のパスの引用と CLI 指定の併記、receive の `--config`、`handoff-remind.sh` が config を渡すことを足した（試験 W1〜W7・H4）
 - 2026-11-11 (1.4.1): 未受領で 30 日を超えた handoff は、SessionStart の通知を見たエージェントが確認なしで `sweep --apply` で archive へ退避する標準動作にした。`sweep --days` の既定を 90 から 30 にし、remind の案内を `sweep --apply` に変えた（試験 U16・U24・U29）
 - 2026-11-11 (1.4.0): handoff の受領を台帳（`.tmp/handoff-ledger.json`）に記録し、使い終わったら消す script `scripts/handoff_lifecycle.py`（receive / done / remind / sweep。試験 `scripts/test_handoff_lifecycle.py`）と SessionStart の通知 `scripts/handoff-remind.sh`（試験 `scripts/handoff-remind.test.sh`）を追加した。受領は利用者が貼った・指定したものだけを確認なしで行い、作業の完了時に `done` で削除する。rubric 10・template・maintainer-checklist・hooks-reference の「次 handoff 作成まで保持」「作業中マーカー」の記述をこの方式にそろえ、Step 8 の handoff 保存を session-boundary の判定に従う形にした
 - 2026-11-11 (1.3.0): 由来台帳に要素 `session-boundary-policy`（official-derived、`.claude/session-boundary.json`。セッションの区切りと引継ぎメモの判定表、`soft_depends_on: handoff-management`）を追加し、`--target` の試験 T65〜T68 を足した。台帳の `updated` を 2026-11-11 にした

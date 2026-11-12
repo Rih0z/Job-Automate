@@ -347,5 +347,326 @@ class TestRemindSweep(Base):
         self.assertIn("中断の疑い", out)
 
 
+GIT = shutil.which("git")
+
+
+def git(cwd, *args, check=True):
+    p = subprocess.run(["git", "-c", "user.name=t", "-c", "user.email=t@example.invalid", *args],
+                       cwd=cwd, capture_output=True, text=True, encoding="utf-8")
+    if check and p.returncode != 0:
+        raise AssertionError(f"git {args}: {p.stderr}")
+    return p.stdout
+
+
+class TestReferencedAndConfig(Base):
+    """V: issue から参照されている handoff を退避しない・repo ごとの config・案内文。"""
+
+    def issue(self, rel, text):
+        f = self.root / rel
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(text, encoding="utf-8")
+        return f
+
+    def test_V1_referenced_by_full_path_is_kept(self):
+        kept = self.mk("2026-09-01-a.md", age_days=60)
+        gone = self.mk("2026-09-01-b.md", age_days=60)
+        self.issue("issues/open/0001.md", f"最新 handoff: {kept}\n")
+        rc, out, err = self.run_cli("sweep", "--apply", "--keep-referenced", "issues", "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertTrue(kept.exists())
+        self.assertFalse(gone.exists())
+
+    def test_V2_name_stem_case_and_nested_references_are_kept(self):
+        a = self.mk("20260901_handoff_alpha.md", age_days=60)
+        b = self.mk("20260901_handoff_beta.md", age_days=60)
+        c = self.mk("20260901_handoff_gamma.md", age_days=60)
+        d = self.mk("20260901_handoff_delta.md", age_days=60)
+        self.issue("issues/open/x.md", "see 20260901_handoff_alpha.md.\n")
+        self.issue("issues/open/sub/fromX/y.yaml", "latest_handoff: .tmp\\handoffs\\20260901_handoff_beta\n")
+        self.issue("issues/open/z.json", '{"h": "20260901_HANDOFF_GAMMA.MD"}')
+        rc, out, err = self.run_cli("sweep", "--apply", "--keep-referenced", "issues", "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertTrue(a.exists()); self.assertTrue(b.exists()); self.assertTrue(c.exists())
+        self.assertFalse(d.exists())
+
+    def test_V3_missing_keep_dir(self):
+        f = self.mk("a.md", age_days=60)
+        rc, out, err = self.run_cli("sweep", "--apply", "--keep-referenced", "nope", "--now", NOW_S)
+        self.assertEqual(rc, 2)
+        self.assertTrue(f.exists())
+        rc, out, err = self.run_cli("remind", "--keep-referenced", "nope", "--now", NOW_S)
+        self.assertEqual(rc, 0)
+        self.assertIn("nope", err)
+
+    def mk_config(self, base, **kw):
+        cfg = base / ".claude" / "handoff-lifecycle.json"
+        cfg.parent.mkdir(parents=True, exist_ok=True)
+        cfg.write_text(json.dumps(kw), encoding="utf-8")
+        return cfg
+
+    def test_V4_config_paths_are_relative_to_parent_of_dot_claude(self):
+        base = self.root / "repo" / "docs" / "sub"
+        hd = base / ".tmp" / "handoffs"; hd.mkdir(parents=True)
+        kept = hd / "k.md"; kept.write_text(body(), encoding="utf-8")
+        gone = hd / "g.md"; gone.write_text(body(), encoding="utf-8")
+        t = (NOW - timedelta(days=60)).timestamp()
+        for p in (kept, gone):
+            os.utime(p, (t, t))
+        (base / "1_issue").mkdir(); (base / "1_issue" / "i.md").write_text("k.md", encoding="utf-8")
+        cfg = self.mk_config(base, handoffs_dir=".tmp/handoffs",
+                             keep_referenced=[{"path": "1_issue", "required": True}])
+        rc, out, err = self.run_cli("sweep", "--apply", "--config", str(cfg), "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertTrue(kept.exists()); self.assertFalse(gone.exists())
+
+    def test_V5_optional_missing_warns_and_string_means_required(self):
+        f = self.mk("a.md", age_days=60)
+        cfg = self.mk_config(self.root, handoffs_dir=".tmp/handoffs",
+                             keep_referenced=[{"path": "other/1_issue", "required": False}])
+        rc, out, err = self.run_cli("sweep", "--config", str(cfg), "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertIn("other", err)
+        cfg2 = self.mk_config(self.root, handoffs_dir=".tmp/handoffs", keep_referenced=["nope"])
+        rc, out, err = self.run_cli("sweep", "--apply", "--config", str(cfg2), "--now", NOW_S)
+        self.assertEqual(rc, 2)
+        self.assertTrue(f.exists())
+
+    def test_V6_cli_days_overrides_config(self):
+        self.mk("d40.md", age_days=40)
+        cfg = self.mk_config(self.root, handoffs_dir=".tmp/handoffs", days=60)
+        rc, out, err = self.run_cli("sweep", "--config", str(cfg), "--now", NOW_S)
+        self.assertNotIn("d40.md", out)
+        rc, out, err = self.run_cli("sweep", "--config", str(cfg), "--days", "30", "--now", NOW_S)
+        self.assertIn("d40.md", out)
+
+    def test_V7_remind_with_config_names_config_and_excludes_referenced(self):
+        self.mk("ref.md", age_days=60); self.mk("free.md", age_days=60)
+        self.issue("issues/open/i.md", "ref.md")
+        cfg = self.mk_config(self.root, handoffs_dir=".tmp/handoffs", keep_referenced=["issues"])
+        rc, out, err = self.run_cli("remind", "--config", str(cfg), "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertIn(f"sweep --config {cfg} --apply", out)
+        self.assertIn(": 1 件", out)
+        self.assertNotIn("ref.md", out)
+
+    def test_V8_remind_without_config_repeats_keep_referenced(self):
+        self.mk("free.md", age_days=60)
+        self.issue("issues/open/i.md", "x")
+        rc, out, err = self.run_cli("remind", "--keep-referenced", "issues", "--now", NOW_S)
+        self.assertIn("sweep --keep-referenced issues --apply", out)
+
+    def test_V9_in_progress_is_kept(self):
+        f = self.mk("w.md", text="---\nwork_status: in_progress\n---\n" + body(), age_days=60)
+        rc, out, err = self.run_cli("sweep", "--apply", "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertTrue(f.exists())
+
+    def test_V10_lock(self):
+        f = self.mk("a.md", age_days=60)
+        lock = self.root / ".tmp" / "handoff-sweep.lock"
+        lock.write_text("x", encoding="utf-8")
+        rc, out, err = self.run_cli("sweep", "--apply", "--now", NOW_S)
+        self.assertEqual(rc, 2)
+        self.assertTrue(f.exists())
+        old = time.time() - 20 * 60
+        os.utime(lock, (old, old))
+        rc, out, err = self.run_cli("sweep", "--apply", "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(f.exists())
+        self.assertFalse(lock.exists())
+
+    def test_V15_remind_reference_timeout_message(self):
+        self.mk("a.md", age_days=60)
+        self.issue("issues/open/i.md", "x")
+        rc, out, err = self.run_cli("remind", "--keep-referenced", "issues", "--ref-timeout", "0", "--now", NOW_S)
+        self.assertEqual(rc, 0)
+        self.assertIn("時間内に終わらなかった", out)
+
+    def test_V16_remind_is_fast_on_large_issue_text(self):
+        for i in range(500):
+            self.mk(f"20260801_handoff_n{i:03d}.md", age_days=60)
+        chunk = ("lorem ipsum 20260801_handoff_n001.md " * 30000)[:1000000]
+        for j in range(30):
+            self.issue(f"issues/open/big{j}.md", chunk)
+        t0 = time.time()
+        rc, out, err = self.run_cli("remind", "--keep-referenced", "issues", "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertLess(time.time() - t0, 10)
+        self.assertIn(": 499 件", out)
+
+    def test_V17_sweep_reads_large_files_remind_skips(self):
+        f = self.mk("big-ref.md", age_days=60)
+        self.issue("issues/open/huge.log.txt", "x" * (3 * 1024 * 1024) + " big-ref.md")
+        rc, out, err = self.run_cli("remind", "--keep-referenced", "issues", "--now", NOW_S)
+        self.assertIn("huge.log.txt", err)
+        rc, out, err = self.run_cli("sweep", "--apply", "--keep-referenced", "issues", "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertTrue(f.exists())
+
+
+class TestReviewFixes(Base):
+    """W: 成果物レビュー・review-skill の指摘への対応。"""
+
+    def issue(self, rel, text):
+        f = self.root / rel
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(text, encoding="utf-8")
+        return f
+
+    def test_W1_reference_adjacent_to_japanese_is_kept(self):
+        a = self.mk("2026-09-01-a.md", age_days=60)
+        b = self.mk("20260901_handoff_beta.md", age_days=60)
+        c = self.mk("2026-09-01-c.md", age_days=60)
+        self.issue("issues/open/i.md", "最新は2026-09-01-a.mdを参照。20260901_handoff_betaの続き\n")
+        rc, out, err = self.run_cli("sweep", "--apply", "--keep-referenced", "issues", "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertTrue(a.exists()); self.assertTrue(b.exists()); self.assertFalse(c.exists())
+
+    def test_W2_candidate_vanishing_before_lock_is_skipped(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("hl", SCRIPT)
+        hl = importlib.util.module_from_spec(spec); spec.loader.exec_module(hl)
+        gone = self.mk("a.md", age_days=60); other = self.mk("b.md", age_days=60)
+        real = hl._acquire_lock
+
+        def racing(lock):
+            gone.unlink()  # 別の sweep が先に動かした状況
+            real(lock)
+        hl._acquire_lock = racing
+        cwd = os.getcwd(); os.chdir(self.root)
+        try:
+            rc = hl.main(["sweep", "--apply", "--now", NOW_S])
+        finally:
+            os.chdir(cwd)
+        self.assertEqual(rc, 0)
+        self.assertFalse(other.exists())
+        self.assertTrue((self.root / ".tmp" / "archive" / "handoffs" / "b.md").exists())
+
+    def test_W3_paths_with_spaces_are_quoted_in_message(self):
+        self.mk("a.md", age_days=60)
+        base = self.root
+        cfgdir = base / ".claude"; cfgdir.mkdir()
+        cfg = cfgdir / "handoff lifecycle.json"
+        cfg.write_text(json.dumps({"handoffs_dir": ".tmp/handoffs"}), encoding="utf-8")
+        rc, out, err = self.run_cli("remind", "--config", str(cfg), "--now", NOW_S)
+        self.assertIn(f'sweep --config "{cfg}" --apply', out)
+
+    def test_W4_config_and_cli_keep_both_in_message(self):
+        self.mk("a.md", age_days=60)
+        self.issue("issues/open/i.md", "x"); self.issue("more/i.md", "x")
+        cfgdir = self.root / ".claude"; cfgdir.mkdir()
+        cfg = cfgdir / "handoff-lifecycle.json"
+        cfg.write_text(json.dumps({"handoffs_dir": ".tmp/handoffs", "keep_referenced": ["issues"]}), encoding="utf-8")
+        rc, out, err = self.run_cli("remind", "--config", str(cfg), "--keep-referenced", "more", "--now", NOW_S)
+        self.assertIn(f"sweep --config {cfg} --keep-referenced more --apply", out)
+
+    def test_W5_receive_title_uses_config_handoffs_dir(self):
+        base = self.root / "sub"
+        hd = base / ".tmp" / "handoffs"; hd.mkdir(parents=True)
+        (hd / "t.md").write_text(body("見出しW5"), encoding="utf-8")
+        cfgdir = base / ".claude"; cfgdir.mkdir()
+        cfg = cfgdir / "handoff-lifecycle.json"
+        cfg.write_text(json.dumps({"handoffs_dir": ".tmp/handoffs"}), encoding="utf-8")
+        rc, out, err = self.run_cli("receive", "--title", "見出しW5", "--config", str(cfg), "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertIn("t.md", out)
+
+    def test_W6_bool_days_in_config_is_ignored(self):
+        self.mk("d40.md", age_days=40)
+        cfgdir = self.root / ".claude"; cfgdir.mkdir()
+        cfg = cfgdir / "handoff-lifecycle.json"
+        cfg.write_text(json.dumps({"handoffs_dir": ".tmp/handoffs", "days": True}), encoding="utf-8")
+        rc, out, err = self.run_cli("sweep", "--config", str(cfg), "--now", NOW_S)
+        self.assertIn("30 日超", out)
+        self.assertIn("d40.md", out)
+
+    def test_W7_in_progress_after_line_60_is_not_excluded(self):
+        f = self.mk("late.md", text=body() + "\n" * 70 + "work_status: in_progress\n", age_days=60)
+        rc, out, err = self.run_cli("sweep", "--apply", "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(f.exists())
+
+
+@unittest.skipUnless(GIT, "git が無い")
+class TestGit(Base):
+    def setUp(self):
+        super().setUp()
+        git(self.root, "init", "-q")
+        (self.root / ".gitignore").write_text(".tmp/\n", encoding="utf-8")
+
+    def cfg(self, **kw):
+        c = self.root / ".claude" / "handoff-lifecycle.json"
+        c.parent.mkdir(exist_ok=True)
+        c.write_text(json.dumps(dict(handoffs_dir=".tmp/handoffs", git_tracked=True, **kw)), encoding="utf-8")
+        return c
+
+    def test_V11_only_main_worktree(self):
+        self.mk("a.md", age_days=60)
+        git(self.root, "add", "-f", ".gitignore", ".tmp/handoffs/a.md"); git(self.root, "commit", "-qm", "x")
+        rc, out, err = self.run_cli("remind", "--only-main-worktree", "--now", NOW_S)
+        self.assertIn("a.md", out)
+        sub = self.root / "docs" / "sub"; (sub / ".tmp" / "handoffs").mkdir(parents=True)
+        f = sub / ".tmp" / "handoffs" / "s.md"; f.write_text(body(), encoding="utf-8")
+        t = (NOW - timedelta(days=60)).timestamp(); os.utime(f, (t, t))
+        env = dict(os.environ, PYTHONUTF8="1")
+        p = subprocess.run([sys.executable, str(SCRIPT), "remind", "--only-main-worktree", "--now", NOW_S],
+                           cwd=sub, capture_output=True, text=True, encoding="utf-8", env=env)
+        self.assertIn("s.md", p.stdout)
+        wt = Path(tempfile.mkdtemp()) / "wt"
+        git(self.root, "worktree", "add", "-q", str(wt))
+        try:
+            (wt / ".tmp" / "handoffs").mkdir(parents=True, exist_ok=True)
+            g = wt / ".tmp" / "handoffs" / "w.md"; g.write_text(body(), encoding="utf-8"); os.utime(g, (t, t))
+            p = subprocess.run([sys.executable, str(SCRIPT), "remind", "--only-main-worktree", "--now", NOW_S],
+                               cwd=wt, capture_output=True, text=True, encoding="utf-8", env=env)
+            self.assertEqual(p.stdout, "")
+        finally:
+            git(self.root, "worktree", "remove", "--force", str(wt), check=False)
+        outside = Path(tempfile.mkdtemp())
+        try:
+            (outside / ".tmp" / "handoffs").mkdir(parents=True)
+            h = outside / ".tmp" / "handoffs" / "o.md"; h.write_text(body(), encoding="utf-8"); os.utime(h, (t, t))
+            p = subprocess.run([sys.executable, str(SCRIPT), "remind", "--only-main-worktree", "--now", NOW_S],
+                               cwd=outside, capture_output=True, text=True, encoding="utf-8",
+                               env=dict(env, GIT_CEILING_DIRECTORIES=str(outside.parent)))
+            self.assertIn("o.md", p.stdout)
+        finally:
+            shutil.rmtree(outside, ignore_errors=True)
+
+    def test_V12_sweep_stages_tracked_as_rename_and_commit_works(self):
+        tr = self.mk("tracked.md", age_days=60)
+        un = self.mk("untracked.md", age_days=60)
+        git(self.root, "add", "-f", ".gitignore", ".tmp/handoffs/tracked.md"); git(self.root, "commit", "-qm", "x")
+        c = self.cfg()
+        rc, out, err = self.run_cli("sweep", "--apply", "--config", str(c), "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        staged = [l.split(" ", 1)[1] for l in out.splitlines() if l.startswith("staged: ")]
+        self.assertEqual(len(staged), 2, out)
+        st = git(self.root, "status", "--porcelain")
+        self.assertRegex(st, r"(?m)^R  .tmp/handoffs/tracked.md -> .tmp/archive/handoffs/tracked.md$")
+        self.assertNotIn("untracked.md", st)
+        git(self.root, "commit", "-qm", "sweep", "--", *staged)
+        self.assertIn(".tmp/archive/handoffs/tracked.md", git(self.root, "ls-files"))
+
+    def test_V13_done_stages_deletion_of_tracked(self):
+        f = self.mk("a.md")
+        git(self.root, "add", "-f", ".gitignore", ".tmp/handoffs/a.md"); git(self.root, "commit", "-qm", "x")
+        c = self.cfg()
+        self.receive_at(f, 1)
+        rc, out, err = self.run_cli("done", str(f), "--config", str(c))
+        self.assertEqual(rc, 0, err)
+        self.assertIn("staged: ", out)
+        self.assertRegex(git(self.root, "status", "--porcelain"), r"(?m)^D  .tmp/handoffs/a.md$")
+
+    def test_V14_git_failure_still_moves(self):
+        shutil.rmtree(self.root / ".git")
+        f = self.mk("a.md", age_days=60)
+        c = self.cfg()
+        rc, out, err = self.run_cli("sweep", "--apply", "--config", str(c), "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(f.exists())
+        self.assertIn("警告", err)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

@@ -92,7 +92,7 @@ Windows（PowerShell）の例:
       "hooks": [{ "type": "command", "shell": "powershell", "timeout": 30,
         "command": "pwsh -NoProfile -File \"$env:CLAUDE_PROJECT_DIR/.claude/scripts/hook-session-start.ps1\"" },
         { "type": "command", "shell": "powershell", "timeout": 30,
-        "command": "python \"$env:CLAUDE_PROJECT_DIR/.claude/scripts/handoff_lifecycle.py\" remind --dir \"$env:CLAUDE_PROJECT_DIR/.tmp/handoffs\"" }] }],
+        "command": "python \"$env:CLAUDE_PROJECT_DIR/.claude/scripts/handoff_lifecycle.py\" remind --config \"$env:CLAUDE_PROJECT_DIR/.claude/handoff-lifecycle.json\" --only-main-worktree" }] }],
     "UserPromptSubmit": [{ "hooks": [{ "type": "command", "shell": "powershell", "timeout": 20,
       "command": "pwsh -NoProfile -File \"$env:CLAUDE_PROJECT_DIR/.claude/scripts/hook-user-prompt-submit.ps1\"" }] }],
     "PreToolUse": [{ "matcher": "Write",
@@ -130,7 +130,8 @@ Mac / Linux（bash）の例 — 各 command を bash script 呼び出しに置�
 役割は言語共通:
 
 - `hook-session-start` — ポインタ（handoff ファイル名 + `issues/processing/*.md` のタイトル）と並走 4 軸 verdict のみ注入（**本文は Read/注入しない**）。検出時は (a)hold+確認 (b)引継ぎ切替 (c)scope 弁別 (d)handoff 明示を促す。本文は user 選択後にその 1 件のみ Read（PC 再起動復元 + 並走衝突防止 + context 汚染防止）
-- `handoff-remind.sh`（bash）— `handoff_lifecycle.py remind` を呼び、残っている handoff のファイル名だけを出す（ファイルは動かさない。未受領で 30 日超のものの退避は、通知を見たエージェントが確認なしで `sweep --apply` を実行する）。python が無い時と `.tmp/handoffs` が無い時は何も出さない（WindowsApps の python stub は避ける）。PowerShell で組む時は wrapper を作らず、上の Windows の例のように `python .../handoff_lifecycle.py remind --dir ...` を直接登録する。どちらも python 3 が要る
+- `handoff-remind.sh`（bash）— `.claude/handoff-lifecycle.json` があれば `handoff_lifecycle.py remind --config <それ> --only-main-worktree`、無ければ `remind --dir .tmp/handoffs --only-main-worktree` を呼び、残っている handoff のファイル名だけを出す（ファイルは動かさない。未受領で 30 日超のものの退避は、通知を見たエージェントが確認なしで `sweep --apply` を実行する）。python が無い時と `.tmp/handoffs` が無い時は何も出さない（WindowsApps の python stub は避ける）。PowerShell で組む時は wrapper を作らず、上の Windows の例のように `python .../handoff_lifecycle.py remind --dir ...` を直接登録する。どちらも python 3 が要る。PowerShell から呼ぶ時は、日本語が化けないよう hook の先頭で `[Console]::OutputEncoding` と `$OutputEncoding` を UTF-8 にし、`$env:PYTHONUTF8 = '1'` を設定する
+- `.claude/handoff-lifecycle.json`（repo ごとの設定）— `script`（script の置き場）、`source` と `source_sha256`（正本と複製時の hash）、`handoffs_dir`、`keep_referenced`（`[{"path": "<active な issue のディレクトリ>", "required": true}]`。文字列だけなら required。無くても止めない参照先は `required: false`）、`days`、`git_tracked`（handoff を git で追跡している repo は true。sweep / done が rename・削除を stage して `staged:` 行に出す）。相対パスは `.claude/` の親が基準。`--only-main-worktree` は git の worktree の中では何も出さない
 - `hook-user-prompt-submit` — `docs/*.md` 直近 3 ファイルを context 注入
 - `hook-pre-tool-use-handoff` — handoff 命名規約 `[YYYY-MM-DD]-issue-[ID]-[kebab].md` 検証、違反なら `exit 2` + stderr で reject
 - `hook-post-tool-use` — CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 編集時に `hookSpecificOutput.additionalContext` JSON で公式 WebFetch レビュー reminder
