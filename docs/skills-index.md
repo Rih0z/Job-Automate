@@ -2,7 +2,7 @@
 
 [← README.md](../README.md)
 
-このリポジトリをクローンして Claude Code で開くだけで、リポジトリ直下の `.claude/` が自動検出されて使える。全 skill が判定基準として参照する公式ベストプラクティスの構造化データは [anthropic-best-practices.json](../.claude/skills/_shared/anthropic-best-practices.json)（34原則・取得日と再取得条件付き）。
+このリポジトリをクローンして Claude Code で開くだけで、リポジトリ直下の `.claude/` が自動検出されて使える。全 skill が判定基準として参照する公式ベストプラクティスの構造化データは [anthropic-best-practices.json](../.claude/skills/_shared/anthropic-best-practices.json)（原則は同ファイルの `principles`、取得日と再取得条件は `fetched` と `refetch_when`）。
 
 ## 主要スラッシュコマンド
 
@@ -38,7 +38,7 @@ cp -r .claude/skills/review-changes .claude/skills/review-implementation .claude
 | research-intelligence | `craft-beer-news-research` / `it-tech-news-research` / `general-news-research` / `investment-portfolio-analysis` / `seo-keyword-article-planner` / `blog-seo-growth-planner` / `research-deliverable-review` / `source-verification-scan` / `staged-investigation-workflow` |
 | software-development (design/mcp/その他) | `ui-design-guidelines` / `ibm-carbon-design-system` / `avoid-ai-generated-design-look` / `customer-persona-design` / `review-persona-analysis` / `playwright-mcp-e2e-testing` / `mcp-server-setup` / `model-cost-optimization-routing` / `three-agent-tdd-workflow`（単一セッション版は `single-session-tdd`） |
 
-上表は用途別の索引であり、移植時の採否を表すものではない。「汎用ガバナンス」のうち `agent-harness-bootstrap` / `harness-setup-review` / `harness-compliance-audit` / `skills-audit` / `skill-authoring-guide` / `review-gate` は公式由来として既定で移植される。それ以外（TDD運用の各流儀・`repo-hygiene-patrol` 等の著者嗜好、`workflow-coverage-and-structure` のような本リポジトリ固有のもの、および business-planning / content-creation / research-intelligence / ops-management / customer-support と software-development 内デザイン系の業務ドメインプロンプト）は既定では移植されない**サンプル**である。このリポジトリの実運用から生まれた実例として同梱しているだけで、[provenance.json](../.claude/skills/agent-harness-bootstrap/provenance.json) の由来台帳に従いユーザーが選んだものだけ採用される。汎用的な harness 基盤だけが目的なら無視してよい。
+上表は用途別の索引であり、移植時の採否を表すものではない。「汎用ガバナンス」のうち `harness-compliance-audit` / `skills-audit` / `skill-authoring-guide` / `review-gate` は公式原則の具体化（`official-derived`）で、移植時は推奨として事前に選ばれ、外すこともできる。`agent-harness-bootstrap` と `harness-setup-review` は移植元の clone で実行する skill で、移植先にはコピーしない。それ以外（TDD運用の各流儀・`repo-hygiene-patrol` 等の著者嗜好、`workflow-coverage-and-structure` のような本リポジトリ固有のもの、および business-planning / content-creation / research-intelligence / ops-management / customer-support と software-development 内デザイン系の業務ドメインプロンプト）は既定では移植されない**サンプル**である。このリポジトリの実運用から生まれた実例として同梱しているだけで、[provenance.json](../.claude/skills/agent-harness-bootstrap/provenance.json) の由来台帳に従いユーザーが選んだものだけ採用される。汎用的な harness 基盤だけが目的なら無視してよい。
 
 既知の公式ベストプラクティス逸脱・改善バックログ（公式原則ごとの採用状況と CR-xx）は構造化データ [.claude/skills/_shared/compliance-status.json](../.claude/skills/_shared/compliance-status.json)、再監査手順は [.claude/skills/_shared/compliance-roadmap.md](../.claude/skills/_shared/compliance-roadmap.md) を参照。subagent 定義は [.claude/agents/readonly-reviewer.md](../.claude/agents/readonly-reviewer.md)（レビュアー・論者用。書き込み系ツールを持たない）。
 

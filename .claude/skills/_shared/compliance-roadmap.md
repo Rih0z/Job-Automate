@@ -1,6 +1,6 @@
 # Job-Automate — Anthropic 公式ベストプラクティス準拠ロードマップ
 
-> Job-Automate 自身（このリポジトリ）の公式ベストプラクティス逸脱・改善バックログを追跡する living document。`.claude/skills/_shared/anthropic-best-practices.json`（公式原則。2026-09-25 時点 85 件）を判定基準の SoT とする。**原則ごとの採用状況・findings（CR-xx）・監査ログは構造化データ `.claude/skills/_shared/compliance-status.json` が SoT**（2026-09-25 に本ファイルの表から移設。本ファイルには手順だけを置き、表を重複して持たない）。ported プロジェクトはこのファイルの中身を持ち込まず、自分自身の監査を実行して自分の roadmap を作る（`provenance.json` の `shared-compliance-roadmap` 要素は `portable: false`）。
+> Job-Automate 自身（このリポジトリ）の公式ベストプラクティス逸脱・改善バックログを追跡する living document。`.claude/skills/_shared/anthropic-best-practices.json`（公式原則は同ファイルの `principles`）を判定基準の SoT とする。**原則ごとの採用状況・findings（CR-xx）・監査ログは構造化データ `.claude/skills/_shared/compliance-status.json` が SoT**（2026-09-25 に本ファイルの表から移設。本ファイルには手順だけを置き、表を重複して持たない）。ported プロジェクトはこのファイルの中身を持ち込まず、自分自身の監査を実行して自分の roadmap を作る（`provenance.json` の `shared-compliance-roadmap` 要素は `portable: false`）。
 
 ## 再監査手順
 

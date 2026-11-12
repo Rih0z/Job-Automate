@@ -1,0 +1,119 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "harness-compliance-audit",
+  "reviewed_at": "2026-11-12T03:56:49Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "89481f0a7c689b3248860a8d8bf98c389b85e19430bd0b03d1eb9ddc524a1a19"
+      },
+      {
+        "path": "reference/checks.json",
+        "sha256": "a61e18c280eaa8c369217c30f46e72974d123189c672a4fce9b65d30679c5c1a"
+      },
+      {
+        "path": "reference/checks.md",
+        "sha256": "3112796f5da3cd9b28e81b27959bb44a6e63de57e10d572f4ff3f2eee889bf84"
+      },
+      {
+        "path": "scripts/harness_check.sh",
+        "sha256": "a9ed67a824000e7a6b8db8850e2950fdf23c551b0464baa56168dac2fc6bca4b"
+      },
+      {
+        "path": "scripts/test_fm_get.sh",
+        "sha256": "97e4d4ce30b412a22d4520078eaa65c9a552c729104b13e642b550075a018d3e"
+      },
+      {
+        "path": "scripts/test_new_checks.sh",
+        "sha256": "7b74b6f594c120b8798a32718788ae0f8ecf5edc628d8bae9a8d3c68814bac31"
+      }
+    ],
+    "content_hash": "4c055d8b271ee15e4c96caaf427ac05ecb5f954a219bf1a848adb0a479382590"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a188b5cc37423be54",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 17
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 16
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "medium",
+        "location": ".claude/skills/harness-compliance-audit/SKILL.md:74",
+        "comment": "「3 回連続 FAIL で中断し、残る指摘を issue/課題として起票する」と、:75 の「Write は、この報告ファイルの保存にだけ使う」が両立しない。起票は呼び出し元に依頼するか、起票ファイルにも Write を許すかを明記する。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "medium",
+        "location": ".claude/skills/harness-compliance-audit/scripts/test_fm_get.sh:202",
+        "comment": "テストが同じ repo の他 skill (review-ops, year-end-adjustment-csv, mcp-server-setup, skill-authoring-guide, agent-harness-bootstrap) の実ファイルに依存する (:8, :202-221)。ほかのプロジェクトに写すと FAIL し、SKILL.md もこの依存に触れていない。"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": ".claude/skills/harness-compliance-audit/SKILL.md:33",
+        "comment": "機械検査が FAIL のとき手順 2 に進むのかが曖昧 (:81 は FAIL のまま reviewer を動かす前提)。進むかどうかを 1 文で明記するとよい。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/harness-compliance-audit/SKILL.md:47",
+        "comment": "種別の一覧 (sub-agents 等) が checks.json の principle id の頭 (subagents./rules./settings./authoring.) と揃っていない。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/harness-compliance-audit/scripts/harness_check.sh:87",
+        "comment": "C02 は行頭の @import しか拾わず、行の途中の @path の実在は検査されない。"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": ".claude/skills/harness-compliance-audit/scripts/test_new_checks.sh:96",
+        "comment": "python が無いと B15 が飛ばす扱いではなく FAIL になり、原因が分かりにくい。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/harness-compliance-audit/scripts/harness_check.sh:23",
+        "comment": "commit が 1 つしかない repo では HEAD~1 が無く、直近の commit 分の変更が黙って対象から抜ける。"
+      }
+    ]
+  }
+}

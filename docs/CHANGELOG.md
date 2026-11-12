@@ -8,6 +8,7 @@ Anthropic 公式ベストプラクティスへの逸脱・改善バックログ�
 
 ## 2026-11
 
+- **11-11**: 説明の食い違いを実装と台帳に揃えた。公式原則の件数は散文に書かず `anthropic-best-practices.json` の `principles` を参照する。`official` 要素は必ず採用し外せない（C11）ことを README・docs・台帳の `provenance_levels` に揃え、スケール調整でも落とさないと明記した。WebFetch に失敗した時の扱い（`fetched` が `max_age_days` 以内なら突合未実施と明記して続行）を `agent-harness-bootstrap` の SKILL.md と Step 7 に揃えた。rubric の件数を「全項目」にした。`harness-compliance-audit` の、実在しない skill への参照と、`checks.json` の S03・S04 の原則の対応を直し、実行に要る環境（python・UTF-8 のロケール）と BSD の `date` での BP02 の動作を書いた。macOS で失敗していた `handoff-remind.test.sh` と、実ファイルの全文を写していた `test_fm_get.sh` を直した。移植契約の見直し（CR-41・CR-44）、BP02 の日付（CR-45）、件数の機械検査（CR-46）、レビューに残った指摘（CR-47・CR-48）、macOS での test_hook.py の前提（CR-49）は backlog
 - **11-11**: 由来台帳の要素 `changelog-practice` の `--target` 契約を、`CHANGELOG.md` の有無ではなく、harness の変更エントリ（`CLAUDE.md` か `.claude/` を含む行）の有無で判定するようにした。非選択では harness の変更エントリが無いこと（`grep_absent`）、選択ではあること（`grep`）を確かめる。製品の変更履歴だけを持つ `CHANGELOG.md` は非選択でも違反にならない。Step 8 の種エントリの例と変更履歴運用の説明を、この判定に合わせた。試験 `provenance-check.test.sh` に 4 件を追加した。
 - **11-11**: `handoff_lifecycle.py` を別の repo でも安全に使えるようにした。repo ごとの config（`.claude/handoff-lifecycle.json`）、issue から参照されている handoff と作業中の handoff を退避しない除外、同時実行のロック、worktree の中で通知しない指定、git で追跡している handoff を rename として stage する指定を足した。
 - **11-11**: 未受領で 30 日を超えた handoff の退避を標準動作にした。session 開始時の通知に出たら、エージェントが利用者に確かめずに `handoff_lifecycle.py sweep --apply` で `.tmp/archive/handoffs/` へ移す（削除ではないので戻せる）。`sweep` の既定を 90 日から 30 日にし、通知と同じ日数にそろえた。

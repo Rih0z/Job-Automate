@@ -1,0 +1,173 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "agent-harness-bootstrap",
+  "reviewed_at": "2026-11-12T03:56:09Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "5560863faf6e2f63692031523b87435a18544ca96b8fed97ff8b6cd1b61c632b"
+      },
+      {
+        "path": "criteria/porting-reconciliation.json",
+        "sha256": "b5ef06d5d42a2adcc9596484c06162be04e77c11c25914f44508cfadf761feeb"
+      },
+      {
+        "path": "hooks-reference.md",
+        "sha256": "e9f97d2126f697741d60401932716c43327bddf2fffc0dae21c7d811741b2605"
+      },
+      {
+        "path": "maintainer-checklist.md",
+        "sha256": "3aa8da23402ca0b25cdbc5f91dad90af928ad4a68352b8aaa723ed6eee4487f7"
+      },
+      {
+        "path": "official-sources.md",
+        "sha256": "29b46a9bda8fce000fa511cb1dced303bf11e6d77dff5320fcd8758f5d3c83ea"
+      },
+      {
+        "path": "operational-knowhow-index.md",
+        "sha256": "7b485685d74a8edb147cc1f8e06d5492bb4f8987f4a5e14b4c96b92648db66e1"
+      },
+      {
+        "path": "operational-knowhow.md",
+        "sha256": "a9722c99aa9c638aa88283611eee8c4a412f4314f4fc56acfb77ea280dca10ad"
+      },
+      {
+        "path": "provenance.json",
+        "sha256": "d43495b25db2070b826d616ea088a585f0b0220e33e2ef13d7d2be4ac0f918ca"
+      },
+      {
+        "path": "rubric.md",
+        "sha256": "80dacaffef39b2b6a024b692fe62a48a8529c2eb4aaf567615c7279f8206bd86"
+      },
+      {
+        "path": "scripts/contract-selfcheck.sh",
+        "sha256": "27acfd7a3b7de0d77204974f144a9bd6105810af697460a62b2083298f471819"
+      },
+      {
+        "path": "scripts/handoff-remind.sh",
+        "sha256": "62c68a358ea1443256bb9f1aad15d7d54271b147875982f12b3614392afd4566"
+      },
+      {
+        "path": "scripts/handoff-remind.test.sh",
+        "sha256": "ae3c5305c0e289d971a61774c49ad73aeacc7a164f40c5715deb662495830dbe"
+      },
+      {
+        "path": "scripts/handoff_lifecycle.py",
+        "sha256": "eba5fa9fa233c1f6a9a66af6b6ca9e3fd6ede73aa825e1a097e976a44512d000"
+      },
+      {
+        "path": "scripts/harness-setup-state.sh",
+        "sha256": "2027b6845a07a89d7a6c547a6fa44adf1b8587e0ae67f8fa817b0dcc36e69ff8"
+      },
+      {
+        "path": "scripts/hook-session-start-setup.sh",
+        "sha256": "7cd66ec7c45339900acc3c9d534579f3ee777706584c40339801a17167ff8c1f"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.sh",
+        "sha256": "fb79fed4e778270c0606707197cee91044bc1a223fe7538b6c62ef530de90783"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.test.sh",
+        "sha256": "fe50edb26d5784d0fa1f3506e0dfcd0d6df6c190907ab191eda7eec83d49ef23"
+      },
+      {
+        "path": "scripts/provenance-check.sh",
+        "sha256": "43362629085f70fb5abb0e23ddbe9d7504e36085bc48b13c58efaea5d16294b9"
+      },
+      {
+        "path": "scripts/provenance-check.test.sh",
+        "sha256": "2cd0d2a2b3fd87929591b8862ecd2f0fece1358ccdc6a8380618bae8742f10f6"
+      },
+      {
+        "path": "scripts/test_handoff_lifecycle.py",
+        "sha256": "effb550f320624f546f98a49a3f400abeb5643680c2ebdfb720eb074de730cb2"
+      },
+      {
+        "path": "selection-flow.md",
+        "sha256": "3718be6511d805a597c6fee4408b3d6209ded2003673abc6b5ae3473e6cadceb"
+      },
+      {
+        "path": "step7-reviewer-procedure.md",
+        "sha256": "bcb0ac59a36f0e2d7604169e0aca39ee26300848cfa2ddff4b6398332090e1b4"
+      },
+      {
+        "path": "step8-step9-output-and-verify.md",
+        "sha256": "81ffde7c6dce3285db8e58fb7ed8a393d6b0305d2fc695899b4dbe95be2a97e1"
+      },
+      {
+        "path": "template.md",
+        "sha256": "8dd1e9bd45a23821572a4106f9a06b86e8401b73a3bf09d17b60adab7fe9a9c9"
+      }
+    ],
+    "content_hash": "a370bb81bb93fe9e0782918e6bd9d1b50a28ebc47531ce8e73173bbea1ce6256"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "ac9aadedfe35ed098",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 92,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "medium",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:99,110",
+        "comment": "Step 0 の見出しは「対象が別プロジェクトの時」に限定しているが、110 行目は「Step 0 は省略しない。唯一の例外はこのリポジトリ自身の CLAUDE.md 剪定」としている。when_to_use にある「このリポジトリ自身の CLAUDE.md の生成・書き直し」で Step 0 と harness-selection.json が要るのかが 2 通りに読める。どちらかに統一する。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:229-236",
+        "comment": "更新履歴が古い順の項目と新しい順の項目で混在し、2026-09-01 と 2026-11-05 には版番号がない。並びを一方向に揃え、全項目に版番号を付けると読みやすい。"
+      },
+      {
+        "criterion_id": "S3",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:227-237",
+        "comment": "更新履歴が長く、1 行が数百字に及ぶものもある。maintainer-checklist.md か CHANGELOG に移すと本体が軽くなる。"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:182-184",
+        "comment": "レビュアに根拠の引用 (ファイル:行) を求める規定が本体では step7-reviewer-procedure.md に委ねられている。1 行だけでも本体に明記すると、SKILL.md だけで読める。"
+      }
+    ]
+  }
+}

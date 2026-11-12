@@ -188,6 +188,16 @@ assert_eq "block scalar(>-)でも本文を収集する（indicator 6種の網羅
   "$(fm_get "$TMPDIR/folded-strip.md" description)" \
   "Folded line one. Folded line two."
 
+cat > "$TMPDIR/quoted-oneline.md" <<'EOF'
+---
+name: quoted-oneline
+description: "Alpha 'quoted' value: with colon."
+---
+EOF
+assert_eq "引用符つきの 1 行の description は引用符を外した全文を返す" \
+  "$(fm_get "$TMPDIR/quoted-oneline.md" description)" \
+  "Alpha 'quoted' value: with colon."
+
 echo "== 実ファイル回帰 =="
 D_REVIEW_OPS="$(fm_get "$ROOT/.claude/skills/review-ops/SKILL.md" description)"
 assert_contains "review-ops: description(block, コロン含有)の先頭が取れる" "$D_REVIEW_OPS" "運用スクリプト・サーバー初期設定・自動化構成・標準化手順"
@@ -198,23 +208,21 @@ assert_contains "year-end-adjustment-csv: description(block, インデント幅�
 assert_contains "year-end-adjustment-csv: description(block)の末尾が取れる" "$D_NENMATSU" "'year-end adjustment csv'."
 
 D_MCP="$(fm_get "$ROOT/.claude/skills/mcp-server-setup/SKILL.md" description)"
-assert_eq "mcp-server-setup: description(quoted 1行)は従来どおり返す（回帰）" "$D_MCP" \
-  "Adds Serena MCP (semantic codebase analysis via uvx) or a Windows build-server MCP (node-based, for allowed build paths and dev commands) to a project's .mcp.json. Use when the user asks to 'Serena MCPをセットアップして', 'Windowsビルドサーバーmcpを設定して', '.mcp.jsonにMCPサーバーを追加して', or references serena.md / windows-setup.md."
+assert_contains "mcp-server-setup: description(quoted 1行)の先頭が取れる" "$D_MCP" "Adds Serena MCP (semantic codebase analysis via uvx)"
+assert_contains "mcp-server-setup: description(quoted 1行)の末尾が取れる（本文欠落なし）" "$D_MCP" "既存サーバーの不具合修正。"
 
 D_SKILLGUIDE="$(fm_get "$ROOT/.claude/skills/skill-authoring-guide/SKILL.md" description)"
 assert_contains "skill-authoring-guide: description(quoted 1行)は従来どおり返す（回帰）" "$D_SKILLGUIDE" "Reference manual (based on Anthropic's official 'The Complete Guide to Building Skills for Claude')"
 
-# 注意: このテストは fm_get() 単体を直接呼んでおり、harness_check.sh:82 の旧 when_to_use
-# 専用awk（`next` で1行値を欠落させる既知バグ）の経路は通らない。その旧経路をfm_get()呼び出しに
-# 一本化した後、本番コードパス(S05判定)でも同じ値が得られることは実装フェーズでの
-# harness_check.sh 全体diff確認（手動）で担保する（このテストは fm_get() 側の前提条件のみ検証する）。
+# 注意: このテストは fm_get() 単体を直接呼ぶ。harness_check.sh の S05 判定は description と
+# when_to_use をどちらも同じ fm_get() で取るので、ここで確かめた値がそのまま S05 に使われる。
 W_BOOTSTRAP="$(fm_get "$ROOT/.claude/skills/agent-harness-bootstrap/SKILL.md" when_to_use)"
 assert_contains "agent-harness-bootstrap: fm_get が when_to_use の1行値の先頭を返す（line82一本化後の前提）" "$W_BOOTSTRAP" "CLAUDE.md を作って"
 assert_contains "agent-harness-bootstrap: fm_get が when_to_use の1行値の末尾まで欠落させない（line82一本化後の前提）" "$W_BOOTSTRAP" "対象が明示されない曖昧な「セットアップして」は対象外"
 
 W_AUDIT="$(fm_get "$ROOT/.claude/skills/harness-compliance-audit/SKILL.md" when_to_use)"
 assert_contains "harness-compliance-audit: when_to_use(block >)の先頭が取れる" "$W_AUDIT" "skill を新しく作った直後"
-assert_contains "harness-compliance-audit: when_to_use(block >)の末尾が取れる" "$W_AUDIT" "PostToolUse hook が公式レビューを促したとき。"
+assert_contains "harness-compliance-audit: when_to_use(block >)の末尾が取れる" "$W_AUDIT" "その hook が促したとき。"
 
 echo "SUMMARY PASS=$PASS FAIL=$FAIL"
 [ "$FAIL" -gt 0 ] && exit 1 || exit 0

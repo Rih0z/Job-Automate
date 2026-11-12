@@ -67,7 +67,7 @@ SKILL.md 本体の生成手順 Step 0 から参照する supporting file。対�
 - `template.md` の各ブロックには対応する要素 id が `<!-- id: ... -->` で付いている。非選択 id のブロック（複数 id の行はその断片）は削除する。
 - `rubric.md` の各項目には要素 id 列がある。**id 列の全要素が非選択の項目**は「opt-out 宣言済み」として Y 扱い。1 つでも選択されていれば、選択された id の観点で Y/N を判定する。Step 7 のレビュアにも `harness-selection.json` の完全パスを渡し、同じ基準で判定させる。
 - skills / commands のコピー: 各要素の `skills[]` / `commands[]` を対象の `.claude/skills/` / `.claude/commands/` へコピーする（`skill-group` は選択記録の `skills[]` に列挙したものだけ）。`files[]` は**同じ相対パス**へコピーする（参照元の SKILL.md / command がそのパスで Read するため。対象に `workflows/software-development/` 等が生まれるが、台帳登録済みの付随物であり突合レビューの「混入」判定からは除外される）。台帳の summary / note で「対象固有に調整する」とある要素（例: `skill-review-gate` の criteria JSON）は対象固有に調整する。`third-party` は無改変で LICENSE と作者表記を保つ。
-- Step 8 の最終報告に「選択記録の完全パス」「群 C で採用した要素の一覧」「群 A・B で外した要素と理由」「`decided_by: scale` で落とした要素」を含める。
+- Step 8 の最終報告に「選択記録の完全パス」「群 C で採用した要素の一覧」「群 B で外した要素と理由」「`decided_by: scale` で落とした要素」を含める。
 
 ## 0-6. 再セットアップ・同期時
 

@@ -2,15 +2,15 @@
 
 [← README.md](../README.md)
 
-このリポジトリの `CLAUDE.md`・`.claude/skills/` の仕組み（レビュー基準・エージェント分離・harness設計）を、別のプロジェクトにも使いたい場合の手順。**Anthropic 公式由来の要素はデフォルトで入り、著者の運用嗜好（issue フォルダ管理・handoff 規約・並走 recheck 等）はあなたが選んだものだけ入る**。
+このリポジトリの `CLAUDE.md`・`.claude/skills/` の仕組み（レビュー基準・エージェント分離・harness設計）を、別のプロジェクトにも使いたい場合の手順。**Anthropic 公式由来の要素は必ず入り（外せない）、著者の運用嗜好（issue フォルダ管理・handoff 規約・並走 recheck 等）はあなたが選んだものだけ入る**。
 
 ## 品質の保証範囲
 
-公式ベストプラクティスは取得日・再取得条件付きの構造化データ [anthropic-best-practices.json](../.claude/skills/_shared/anthropic-best-practices.json)（34原則）として保持されており、これが検証の一次ソースである。WebFetch は「毎回」ではなく、このデータが古くなった時・食い違いの疑いが出た時・公式更新を確認した時・新しい対象プロジェクトへ初めて適用する時にだけ、公式ドキュメントの現行版で裏取りして更新する（条件は同ファイルの `refetch_when` に定義）。
+公式ベストプラクティスは取得日・再取得条件付きの構造化データ [anthropic-best-practices.json](../.claude/skills/_shared/anthropic-best-practices.json)（原則は同ファイルの `principles`）として保持されており、これが検証の一次ソースである。WebFetch は「毎回」ではなく、このデータが古くなった時・食い違いの疑いが出た時・公式更新を確認した時・新しい対象プロジェクトへ初めて適用する時にだけ、公式ドキュメントの現行版で裏取りして更新する（条件は同ファイルの `refetch_when` に定義）。
 
 | 揃うもの | 仕組み |
 |---|---|
-| 公式基準への準拠 | 構造化データを判定基準に、別エージェントが `rubric.md` の36項目ルーブリックを全 Y になるまで判定する（`agent-harness-bootstrap` Step 7） |
+| 公式基準への準拠 | 構造化データを判定基準に、別エージェントが `rubric.md` のルーブリックの全項目を Y になるまで判定する（`agent-harness-bootstrap` Step 7） |
 | 構成（何が入り、何が入らないか） | 台帳の各要素が持つ契約（選択時に必ず現れる語句・ファイル・`@import`・`paths:` / 非選択時に現れてはならないもの）を `provenance-check.sh --target` が**決定的に**検査し、別エージェントの突合レビューで「選択済みの抜けゼロ・非選択の混入ゼロ」を must_pass 判定する。両方 PASS するまで `harness-setup-review` が完了を認めず、Stop hook が終了を block する |
 | 既存 skills の公式準拠 | setup 前から対象にある skills を `skills-audit` が構造化データ基準で監査し tier を報告する |
 | 台帳と実体の整合 | `provenance-check.sh` の 11 検査 + regression test |

@@ -1,6 +1,6 @@
-# 自己評価ルーブリック（36 項目）
+# 自己評価ルーブリック
 
-生成手順 Step 5 で使う。各項目を Y/N 評価する。N が 1 つでも残れば書き直して再評価する。「削除したら Claude が間違えるか」の基準に合格しない行は削る。**採用しなかった要素は、対象の `harness-selection.json` に `selected: false`（`decided_by: "scale"` または `"user"`）で記録済みであれば Y**（口頭・報告文だけの「不要宣言」では Y にしない。記録に載らない除外を作らないため）。Step 7 の別エージェントレビューでも本 36 項目全 Y を合格基準に含める（Step 5 と Step 7 で同一基準）。
+生成手順 Step 5 で使う。各項目を Y/N 評価する。N が 1 つでも残れば書き直して再評価する。「削除したら Claude が間違えるか」の基準に合格しない行は削る。**採用しなかった要素は、対象の `harness-selection.json` に `selected: false`（`decided_by: "scale"` または `"user"`）で記録済みであれば Y**（口頭・報告文だけの「不要宣言」では Y にしない。記録に載らない除外を作らないため）。Step 7 の別エージェントレビューでも本ルーブリックの全項目 Y を合格基準に含める（Step 5 と Step 7 で同一基準）。
 
 **要素 id 列と opt-out**: 各項目は `provenance.json` の要素 id に紐づく。Step 0（`selection-flow.md`）で対象の `harness-selection.json` に記録された選択だけを根拠に判定する:
 

@@ -96,7 +96,7 @@
       "target": "SKILL.md",
       "check": "name が kebab-case",
       "principles": [
-        "skills.body-length-guideline"
+        "skills.frontmatter-fields"
       ]
     },
     {
@@ -104,7 +104,7 @@
       "target": "SKILL.md",
       "check": "name に claude / anthropic を含まない",
       "principles": [
-        "skills.body-length-guideline"
+        "skills.reserved-names"
       ]
     },
     {

@@ -1,6 +1,6 @@
 {
   "schema": "compliance-status/v1",
-  "updated": "2026-10-28",
+  "updated": "2026-11-11",
   "description": "Job-Automate 自身の、公式原則（anthropic-best-practices.json の principle id）ごとの採用状況・findings（CR-xx）・監査ログ。観点の SoT は anthropic-best-practices.json、本ファイルはその採用状況だけを持つ（repo-specific・移植不可）。整合は scripts/check_compliance_status.py が検査する（全単射・evidence 実在・enum・backlog/partial の cr 必須）。",
   "enums": {
     "principle_status": [
@@ -786,7 +786,7 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "移設前の表記: 優先度「Low / long-term」/ 状態「open / backlog」/ 原則列「（SKILL.md 500行ルールは非該当。structured lookup data）」。`provenance-check.test.sh`（52 tests）がこのファイルの厳密な構造に依存するため、再構成は「意味を変えずに分割する」計画と再テストが前提。今は着手しない"
+      "note": "移設前の表記: 優先度「Low / long-term」/ 状態「open / backlog」/ 原則列「（SKILL.md 500行ルールは非該当。structured lookup data）」。`provenance-check.test.sh` がこのファイルの厳密な構造に依存するため、再構成は「意味を変えずに分割する」計画と再テストが前提。今は着手しない"
     },
     {
       "id": "CR-06",
@@ -1212,7 +1212,7 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "直すと agent-harness-bootstrap の再レビューが要る。テストの単独ケース（選択済みで参照が無い → 1 件）や、T68 が note の文面を手で写している点と一緒に直すとよい"
+      "note": "直すと agent-harness-bootstrap の再レビューが要る。テストの単独ケース（選択済みで参照が無い → 1 件）や、T68 が note の文面を手で写している点と一緒に直すとよい。CR-44 と同じく C12 の契約を直すので、まとめて直す"
     },
     {
       "id": "CR-42",
@@ -1239,7 +1239,52 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "契約を config（.claude/handoff-lifecycle.json の script・git_tracked）で判定する形と、deny の表記の同値（./.env と **/.env）を認める形に直す。移植先では選択記録の note に例外として記録して回避している"
+      "note": "契約を config（.claude/handoff-lifecycle.json の script・git_tracked）で判定する形と、deny の表記の同値（./.env と **/.env）を認める形に直す。移植先では選択記録の note に例外として記録して回避している。直す時に一緒に決めること: permissions-deny-sensitive は settings.json 全体の grep をやめ deny 配列だけを照合する（allow に Read(./.env) がある設定を誤って合格にしない）。session-restore-hook の handoff-remind.sh は自分と同じディレクトリの handoff_lifecycle.py を呼ぶので、同じ config で配置を判定する。config の値（空文字・文字列以外・対象ルートの外を指すパス）は既定値に倒さず違反にする。git_tracked の真偽は handoff_lifecycle.py と同じ bool() で解釈する。config の handoffs_dir を移した repo では dir_absent .tmp/handoffs と gitignore .tmp/ が既定の配置を前提にしたままになる。設計とテスト戦略は別エージェントの design ゲートを 3 回通らず、実装は保留している"
+    },
+    {
+      "id": "CR-45",
+      "date": "2026-11-11",
+      "finding": "harness_check.sh の BP02（公式原則キャッシュの鮮度）が GNU の date -d に依存し、BSD の date では fetched を読めず、常に『読めない』の WARN になって鮮度を判定しない",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "BSD の date -j -f は時刻を指定しないと現在の時分秒で埋め、不正な日付も正規化して受け入れる。両方の日付を同じ時刻で変換し、書き戻して入力と一致するかを確かめ、夏時間の ±1 時間を丸めで吸収する。テストのために今日の日付を外から渡せるようにすると、境界（max_age_days ちょうど・1 日超過）を固定の日付で試せる。設計は別エージェントの design ゲートを通っておらず、実装は保留している"
+    },
+    {
+      "id": "CR-46",
+      "date": "2026-11-11",
+      "finding": "公式原則の件数を散文に固定して書く行を機械で止める検査が無い。anthropic-best-practices.json の principles が増えた時、docs と _shared の文書に古い件数が残った",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "件数を書いていた 3 行は principles を参照する書き方に直した。check_compliance_status.py に、同じ行に anthropic-best-practices と『数字 + 原則 / principle』または『原則 … 数字 + 件』がある行を違反にする検査を足す案がある。CHANGELOG.md・archive/・.tmp/・review-history は除く。『一覧が 0 件』のような原則と無関係な件数を誤検出しないことを実データで確かめ、規則とテストの入力例を揃えてから実装する"
+    },
+    {
+      "id": "CR-47",
+      "date": "2026-11-11",
+      "finding": "agent-harness-bootstrap の Step 0 の適用範囲が 2 通りに読める。見出しは『対象が別プロジェクトの時』に限るが、SKILL.md の『Step 0 は省略しない』の段落は、例外をこのリポジトリ自身の CLAUDE.md の剪定だけにしている。このリポジトリ自身の CLAUDE.md の生成・書き直しで Step 0 と harness-selection.json が要るのかが決まらない",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "review-skill の 3 回目（PASS）に残った medium。どちらに揃えるかを決め、見出しか段落の一方を直す。直すと agent-harness-bootstrap の再レビューが要る"
+    },
+    {
+      "id": "CR-48",
+      "date": "2026-11-11",
+      "finding": "harness-compliance-audit の SKILL.md が、3 回連続 FAIL で残る指摘を起票すると指示する一方、Write は報告ファイルの保存にだけ使うと制限していて両立しない。また test_fm_get.sh が同じ repo の他の skill の SKILL.md を読むので、他の repo に写すと FAIL し、SKILL.md もこの依存に触れていない",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "review-skill の 3 回目（PASS）に残った medium 2 件。起票は呼び出し元に依頼すると書くか、起票ファイルへの Write を許す。実ファイルの回帰ケースは fixture に移すか、写す時は外すと SKILL.md に書く。直すと harness-compliance-audit の再レビューが要る"
+    },
+    {
+      "id": "CR-49",
+      "date": "2026-11-11",
+      "finding": "review-skill の test_hook.py の test_hook_reports_when_python_is_unavailable が macOS で FAIL する。python の無い PATH を作るために bash の 2 階層上の usr/bin を PATH に戻すが、macOS ではそれが /usr/bin で、/usr/bin/python3 があるため前提（python が見つからない）が崩れる",
+      "principles": [],
+      "severity": "Low",
+      "status": "backlog",
+      "note": "Windows の Git Bash の配置を前提にした作り方。bash と hook が使う coreutils だけを置いた一時ディレクトリを PATH にするなど、OS に依存しない作り方を決めてから直す。直すと review-skill の再レビューが要る"
     }
   ],
   "audit_log": [

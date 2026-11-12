@@ -6,7 +6,7 @@
     "official": {
       "label": "公式由来",
       "default_selection": "include",
-      "description": "Anthropic 公式ドキュメント（best-practices / memory / skills / sub-agents / hooks / settings / permissions / skill authoring）に根拠がある要素。文言は焼き込まず、生成時に WebFetch で現行版を取得する。デフォルト採用。外す場合はユーザーが明示する。"
+      "description": "Anthropic 公式ドキュメント（best-practices / memory / skills / sub-agents / hooks / settings / permissions / skill authoring）に根拠がある要素。文言は焼き込まず、生成時に WebFetch で現行版を取得する。必ず採用し、外せない（provenance-check.sh C11 が selected:false を違反にする）。"
     },
     "official-derived": {
       "label": "公式原則の具体化",
@@ -35,7 +35,7 @@
     }
   },
   "selection_values": {
-    "include": "デフォルト採用。ユーザーが明示的に外した時のみ除外",
+    "include": "必ず採用。外せない（selected:false は C11 の違反）",
     "recommend": "推奨。提示時に事前チェック済み。ユーザーが外せる",
     "ask": "デフォルト非採用。ユーザーが明示的に選んだ時のみ採用",
     "exclude": "採用不可。提示のみ"

@@ -68,7 +68,7 @@
       "weight": 10,
       "must_pass": false,
       "checks": [
-        "最終報告に harness-selection.json の完全パス・群 C で採用した要素の一覧・群 A / B で外した要素と理由が含まれている",
+        "最終報告に harness-selection.json の完全パス・群 C で採用した要素の一覧・群 B で外した要素と理由が含まれている",
         "対話不可で default のみ採用した場合、その旨と『harness-selection.json を編集して再実行できる』案内が報告冒頭にある",
         "スケール調整で落とした要素が decided_by:\"scale\" として記録され、報告の『意図的に落とした要素』と一致している"
       ]

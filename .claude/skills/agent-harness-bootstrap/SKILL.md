@@ -1,7 +1,7 @@
 ---
 name: agent-harness-bootstrap
 description: 任意のプロジェクトに対し、Anthropic 公式 Best Practices（"Write an effective CLAUDE.md"）に準拠した CLAUDE.md と、それを支える運用 harness（rules ファイル群 + hooks）を生成・剪定する。公式準拠の核と、独自の運用ノウハウをラベル分離して適用する。要素ごとの由来（公式 / 著者嗜好）を provenance.json で分け、別プロジェクトへ適用する時は著者嗜好をデフォルト非採用にしてユーザーが取捨選択する。「CLAUDE.md を作って」「親ディレクトリをセットアップして」「この仕組みを別プロジェクトに入れて」等の依頼で使う。単発の SKILL.md 作成・採点、コード実装、README 執筆には使わない（skill-authoring-guide / review-skill 等を使う）。
-when_to_use: 「CLAUDE.md を作って」「`/init` の代わりに公式準拠で生成して」「既存の CLAUDE.md を公式 Best Practices で書き直して」「CLAUDE.md が肥大化したので剪定して」「(この repo の) 仕組みを別プロジェクト 対象 にも入れて」「このリポジトリのノウハウで 対象ディレクトリ をセットアップして」等、**対象(このリポジトリ以外の別ディレクトリ/別リポジトリ) が明示された**依頼全般 (2026-09-01 拡張、リポジトリ CLAUDE.md「他プロジェクトのセットアップ依頼への対応」と同期。対象が明示されない曖昧な「セットアップして」は対象外)
+when_to_use: 「CLAUDE.md を作って」「`/init` の代わりに公式準拠で生成して」「既存の CLAUDE.md を公式 Best Practices で書き直して」「CLAUDE.md が肥大化したので剪定して」「(この repo の) 仕組みを別プロジェクト 対象 にも入れて」「このリポジトリのノウハウで 対象ディレクトリ をセットアップして」等。別プロジェクトへのセットアップ・移植は、**対象(このリポジトリ以外の別ディレクトリ/別リポジトリ) が明示された**依頼に限る (リポジトリ CLAUDE.md「他プロジェクトのセットアップ依頼への対応」と同じ条件)。このリポジトリ自身の CLAUDE.md の生成・剪定も対象。対象が明示されない曖昧な「セットアップして」は対象外
 metadata:
   provenance: mixed
   version: 1.5.0
@@ -32,7 +32,7 @@ metadata:
 | `scripts/harness-setup-state.sh` | 別プロジェクト setup の進行状態（selecting → generated → verified → done）。Stop hook の block 根拠 | Step 0 / Step 8 / Step 9 |
 | `scripts/hook-stop-setup-gate.sh` / `scripts/hook-session-start-setup.sh` | このリポジトリの `.claude/settings.json` に登録された hook。検証前の終了を block / 進行中 setup のポインタ通知 | 自動 |
 | `template.md` | CLAUDE.md 本体の出力テンプレート（雛形・ブロックごとに要素 id マーカー付き） | Step 4 |
-| `rubric.md` | 自己評価ルーブリック 36 項目（Y/N・要素 id 列付き。非選択要素の項目は opt-out 宣言で Y） | Step 5 / Step 7 |
+| `rubric.md` | 自己評価ルーブリック（Y/N・要素 id 列付き。非選択要素の項目は opt-out 宣言で Y） | Step 5 / Step 7 |
 | `hooks-reference.md` | hooks 化判断・参考 6 hook 構成・settings.json 例・hook script 雛形（PowerShell / bash） | Step 8-3 |
 | `operational-knowhow.md` | 本スキル独自の運用ノウハウの詳細本文（スケール調整・標準セット・governance.md 項目群・handoff/issue 運用・レビューサイクル等、下記索引の全項目） | Step 1〜8 全般。索引だけで足りない時に参照 |
 | `official-sources.md` | 公式 URL ごとの確認項目表と構造化データの再取得条件 | 公式準拠の核 |
@@ -45,7 +45,7 @@ metadata:
 
 ## 公式準拠の核（実行時 WebFetch 必須・本スキルに焼き込まない）
 
-> Anthropic 公式は随時更新される。**公式の文言・テーブル・数値・API 契約を本スキルに転記（焼き込み）しない**。生成・レビュー開始時に下記を WebFetch で取得し、その時点の現行版で判定する（記憶・過去の引用で代替しない。WebFetch 失敗時は焼き込み版で代替せず、取得できるまで生成を中断する）。
+> Anthropic 公式は随時更新される。**公式の文言・テーブル・数値・API 契約を本スキルに転記（焼き込み）しない**。生成・レビュー開始時に下記を WebFetch で取得し、その時点の現行版で判定する（記憶・過去の引用で代替しない。WebFetch に失敗した時の扱いは次の段落と「エラー時の対処」の表のとおり）。
 >
 > 焼き込み禁止の根拠は公式 Exclude 項目「Information that changes frequently」と同根。過去に転記した Include/Exclude テーブルが現行公式とドリフトした実例があり、転記は腐る。
 
@@ -78,6 +78,7 @@ URL 表（`best-practices` / `memory` / `skills` / `hooks` / `sub-agents` / `per
 | この repo の `.claude/settings.json` に登録された Stop hook / SessionStart hook | state 更新は省略してよい。Step 9 の機械検査（`provenance-check.sh --target`）と突合レビューを手動で実行し、結果を最終報告に載せる |
 | `harness-setup-review` skill・`skills-audit` skill・`_shared/anthropic-best-practices.json` | 無い場合は別エージェントに `criteria/porting-reconciliation.json` と `rubric.md` を渡して同じ観点で突合させ、公式 URL は WebFetch で直接確認する |
 | 移植元 clone の置き場 `.setup-automate/` と handoff 用 `.tmp/` | 実際に使った置き場を対象の `.gitignore` に追記する |
+| 動作する python（`python3` / `python` / `py` のいずれか。`scripts/` の検査と state 管理、`handoff_lifecycle.py` が使う） | 代替は無い。`provenance-check.sh` は「動作する python が見つからない」で FAIL するので、python を入れてから Step 0 を始める |
 
 ---
 
@@ -93,7 +94,7 @@ URL 表（`best-practices` / `memory` / `skills` / `hooks` / `sub-agents` / `per
 
 ## 生成手順
 
-Step 0 で由来別の選択を確定し、次に**選択済み要素の範囲内で**「規模に応じたスケール調整」を行い（フル装備を上限に、該当条文の無い rules・毎回実行したい規律の無い hooks・採用判定を通らないオプションを落とす。落とした要素は `harness-selection.json` に `selected: false, decided_by: "scale"` で追記し、選択記録と生成物を一致させる）、Step 1〜8 で生成し、Step 9 の検証を PASS させて完了とする。対象が別プロジェクトの時、Step 0 の冒頭で `bash <本スキル dir>/scripts/harness-setup-state.sh start <対象の絶対パス>` を実行して state を作る（この clone の Stop hook が、Step 9 を PASS するまで終了を block する）。
+Step 0 で由来別の選択を確定し、次に**選択済み要素の範囲内で**「規模に応じたスケール調整」を行い（フル装備を上限に、該当条文の無い rules・毎回実行したい規律の無い hooks・採用判定を通らないオプションを落とす。落とした要素は `harness-selection.json` に `selected: false, decided_by: "scale"` で追記し、選択記録と生成物を一致させる。`official` の要素は落とさない）、Step 1〜8 で生成し、Step 9 の検証を PASS させて完了とする。対象が別プロジェクトの時、Step 0 の冒頭で `bash <本スキル dir>/scripts/harness-setup-state.sh start <対象の絶対パス>` を実行して state を作る（この clone の Stop hook が、Step 9 を PASS するまで終了を block する）。
 
 ### Step 0: 由来別の取捨選択（対象が別プロジェクトの時）
 
@@ -170,7 +171,7 @@ rules の frontmatter で Claude Code が読むのは `paths` だけ（`name` / 
 
 ### Step 5: 自己評価ルーブリック
 
-`rubric.md` の 36 項目で Y/N 評価する。N が 1 つでもあれば書き直す。opt-out の根拠は対象の `harness-selection.json` だけに置く: 要素 id 列の**全要素**が `selected: false`（`decided_by` は `user` か `scale`）の項目は「opt-out 記録済み」として Y、1 つでも選択済みならその id の観点で判定する（rubric.md 冒頭の規則）。スケール調整で落とした hooks / execution-routing.md / docs-management.md 等も `decided_by: "scale"` で記録してから Y にする（口頭の「不要宣言」では Y にしない）。逆に非選択要素が生成物に現れていれば、その項目は N（混入）。
+`rubric.md` の全項目で Y/N 評価する。N が 1 つでもあれば書き直す。opt-out の根拠は対象の `harness-selection.json` だけに置く: 要素 id 列の**全要素**が `selected: false`（`decided_by` は `user` か `scale`）の項目は「opt-out 記録済み」として Y、1 つでも選択済みならその id の観点で判定する（rubric.md 冒頭の規則）。スケール調整で落とした hooks / execution-routing.md / docs-management.md 等も `decided_by: "scale"` で記録してから Y にする（口頭の「不要宣言」では Y にしない）。逆に非選択要素が生成物に現れていれば、その項目は N（混入）。
 
 ### Step 6: サイズ確認
 
@@ -220,7 +221,7 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 | `provenance-check.sh` が FAIL | 出力された検査 id の指摘（台帳と実体の不整合）を直して再実行。台帳を書き換えて通すのは、実体が正しいと確認できた場合のみ |
 | `--selection` / `--target` 検証が FAIL | 非選択要素の混入か選択要素の欠落。`harness-selection.json` と生成物を突き合わせて修正し再検証 |
 | 対話不可で `AskUserQuestion` が使えない | `default_selection` のみ採用し、最終報告の冒頭に明記（好みを推測で補わない） |
-| Step 7 / Step 9 のレビューが 3 回 FAIL | 中断してユーザーに報告（Step 7 末尾の起票条件に従う） |
+| Step 7 / Step 9 のレビューが 3 回 FAIL | 中断してユーザーに報告（起票の条件は `step7-reviewer-procedure.md` の「不合格時」に従う） |
 | Stop hook が終了を block | `harness-setup-state.sh` の現在 phase を確認し、Step 9 を PASS させて `done` にする |
 
 ## 更新履歴
