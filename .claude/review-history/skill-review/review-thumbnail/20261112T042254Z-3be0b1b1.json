@@ -1,0 +1,93 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "review-thumbnail",
+  "reviewed_at": "2026-11-12T04:22:54Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "3bb240d44d1c07c28bb4bafc2d77973c022586096e719be56f9b7447c6857266"
+      }
+    ],
+    "content_hash": "e093981382564e6464e679ac287fb0cc710a4f80a8893184662ef9755bf60374"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a26f5dd12c875727a",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P1",
+        "severity": "medium",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:40",
+        "comment": "「スクリプトは実行しない(allowed-tools は Read のみ)」および 87 行「(allowed-tools は Read のみ)」は、allowed-tools が他ツールの使用を制限するかのような記述。allowed-tools は事前承認であり制限ではない (principle skills.allowed-tools-is-preapproval)。禁止自体は明文化されているため挙動上の害は無いが、根拠の記述が不正確。理由付けを外し禁止のみを書く形に直すことを推奨。"
+      },
+      {
+        "criterion_id": "O2",
+        "severity": "low",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:48",
+        "comment": "照合不可時の判定ルールが A に限定されており、40 行で許容される B5 などの B 側の照合不可を、B の 4/5 判定の分母から除くのか非クリアとして数えるのかが明記されていない (21 行・81 行から非クリア扱いと推測はできる)。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:46",
+        "comment": "「該当ラウンドから再生成」とあるが、A のどの項目がどの Round に戻るかの対応が無く、戻り先の決め方が書かれていない。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:93",
+        "comment": "B の 4 件が該当する例で、次のアクションが 2 件 (見出し語数・文字サイズ) だけになっており、視覚要素数と表情の改善が抜けている。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:67",
+        "comment": "出力テンプレートの C 節に表や項目の形式指定が無く、A・B 節に比べて記述がばらつきやすい。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:95",
+        "comment": "`workflows/content-creation/thumbnail-generation.md` などリポジトリ固有の相対パスが残る (23 行も同様)。原本は任意とされ、31 行にコピー時の注意があるため影響は小さい。"
+      }
+    ]
+  }
+}

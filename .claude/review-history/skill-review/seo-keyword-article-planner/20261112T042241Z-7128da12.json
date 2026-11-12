@@ -1,0 +1,107 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "seo-keyword-article-planner",
+  "reviewed_at": "2026-11-12T04:22:41Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "14d2fe3cad9764f29db4e489e5319766edba595fa81e4d67bc091e73473fa3ea"
+      },
+      {
+        "path": "references/article-outline-template.md",
+        "sha256": "e5f048f0a4ca337ec1950727355e8c51c1eefd4e0bce2742bf5ae308673c0e9f"
+      },
+      {
+        "path": "references/outline-scorecard.md",
+        "sha256": "083456ec20464386a150ff32526c8942394a627b32d2394d11e2efb50bf6f123"
+      }
+    ],
+    "content_hash": "0494487ac7bfe50039cec61251f2365ff9cdbf935a25c5b05ede446469e7eebf"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a577bfe2b58d76586",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 17
+      },
+      {
+        "id": "output",
+        "score": 17
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 89,
+    "verdict": "FAIL",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "O2",
+        "severity": "medium",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:44",
+        "comment": "使用例2 と SKILL.md:148 はキーワード 1 つの指定でステップ2以降を実行するが、成功基準 (SKILL.md:145「3つ揃い」)・ステップ2 (SKILL.md:83)・出力形式 (SKILL.md:102-115【記事構成1〜3】【実装優先順位】3記事)・SKILL.md:130「この順序の節だけ」は 3 キーワード前提で、使用例2 は成功基準を満たせず出力構造も決まらない。【キーワード分析結果】の採否表の扱いも未定義。指定数だけ【記事構成N】を出す等の規定が要る。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "medium",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:148",
+        "comment": "選定済みキーワード指定時のフォールバックが選定ゲート (SKILL.md:75) と成功基準 (SKILL.md:145) の扱いを定めておらず、手順として完結しない (上記 O2 と同根)。"
+      },
+      {
+        "criterion_id": "D3",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:8",
+        "comment": "description の「続けて(ステップ3)」が毎回続けて実行すると読め、本文の「ユーザーが求めたときだけ」(SKILL.md:38, 152) と食い違う。トリガー SKILL.md:11 から始まった場合にステップ1〜2から実行するかも未記載。"
+      },
+      {
+        "criterion_id": "S3",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/references/outline-scorecard.md:24",
+        "comment": "D の○条件は「全ての H2」、テンプレート article-outline-template.md:39 は「各H2・H3」で対象範囲が揃っていない。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:71",
+        "comment": "「マネタイズ可能性（CVRの高さ予想）」に判断基準が無い。推定の根拠 (検索意図の段階・比較/購入語の有無等) を示すとばらつきが減る。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/references/article-outline-template.md:56",
+        "comment": "構造化データの例に FAQ・HowTo。レビュアーの認識では検索エンジン側で HowTo のリッチリザルトの扱いが変わった可能性があるが、本レビューでは一次情報で未確認。表示条件を確かめる旨の注記を推奨。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:13",
+        "comment": "参照先 skill (blog-seo-growth-planner / review-blog) の実在と CLAUDE.md・README への反映は、渡された 2 パスの範囲で確認できず、証拠不足として低い側で採点した。"
+      }
+    ]
+  }
+}

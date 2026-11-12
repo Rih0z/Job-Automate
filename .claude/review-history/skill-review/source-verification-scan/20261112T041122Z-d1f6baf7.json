@@ -1,0 +1,97 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "source-verification-scan",
+  "reviewed_at": "2026-11-12T04:11:22Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "ceceabfeebac38c0708a5a18f3ee4b7a1298a5275985739983e54ad76722d1d7"
+      },
+      {
+        "path": "criteria/categories.json",
+        "sha256": "18d8519beb1b5a40acbc382cd0143e5c654ff511528fa33e5f57e895f32e3795"
+      }
+    ],
+    "content_hash": "9b9ae449f02d29e652899cc25f748a6eaec38678125d606f764c7438e57b4fe4"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a512576b45ea915a9",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 17
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 16
+      }
+    ],
+    "score": 89,
+    "verdict": "FAIL",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "P3",
+        "severity": "medium",
+        "location": ".claude/skills/source-verification-scan/SKILL.md:40",
+        "comment": "前提条件 (SKILL.md:24) は Python 3 だが、コマンドは `python` を呼ぶ (40 行目と 62 行目)。python3 しか無い環境ではそのままでは動かない。python3 に揃える。"
+      },
+      {
+        "criterion_id": "P1",
+        "severity": "medium",
+        "location": ".claude/skills/source-verification-scan/SKILL.md:5",
+        "comment": "allowed-tools に Bash (スクリプトの実行) と Write (一時 JSON の保存) が無い。手順では両方が必要で、事前許可が無いと実行のたびに許可を求められ止まる。前提条件にも記載が無い。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/source-verification-scan/SKILL.md:37",
+        "comment": "29 行目の『パスのみ渡す』と、37 行目の『前回の BLOCKER をプロンプトに含める』が食い違って読める。過去記録は例外だと明記する。"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": ".claude/skills/source-verification-scan/SKILL.md:79",
+        "comment": "対応アクションの節が最終報告の節より後ろにあり、処置を行う順序と逆になっている。"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": ".claude/skills/source-verification-scan/SKILL.md:43",
+        "comment": "BLOCKER 0 件まで繰り返す再検査に回数の上限が無く、上限に達したときの抜け方も無い。"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": ".claude/skills/source-verification-scan/SKILL.md:43",
+        "comment": "検査エージェントは読むだけでファイルを変えない、という制約が明記されていない。"
+      }
+    ]
+  }
+}

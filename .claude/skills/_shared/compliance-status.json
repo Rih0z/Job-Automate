@@ -1284,7 +1284,7 @@
       "principles": [],
       "severity": "Low",
       "status": "backlog",
-      "note": "Windows の Git Bash の配置を前提にした作り方。bash と hook が使う coreutils だけを置いた一時ディレクトリを PATH にするなど、OS に依存しない作り方を決めてから直す。直すと review-skill の再レビューが要る"
+      "note": "Windows の Git Bash の配置を前提にした作り方。同じ作り方の `.claude/hooks/test_pre_git_skill_review_gate.py` の test_H15_python_missing_passes_with_notice_for_push も、同じ理由で macOS では errors=1 になる。bash と hook が使う coreutils だけを置いた一時ディレクトリを PATH にするなど、OS に依存しない作り方を決めてから直す。直すと review-skill の再レビューが要る"
     }
   ],
   "audit_log": [

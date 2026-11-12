@@ -1,0 +1,93 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "review-blog",
+  "reviewed_at": "2026-11-12T04:19:07Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "a110e44e3b8baef0016cd3ef3831286f82cebad102c9a9e792aa089eebb53086"
+      },
+      {
+        "path": "references/fact-check-patterns.md",
+        "sha256": "b9444b8179b4bdef97bd46280b01662ee41d450c2983004f8a7ee95ba57e2be9"
+      },
+      {
+        "path": "references/output-format.md",
+        "sha256": "2a16a6a91bb277fee17e790ac71ae9b1ef243ebcc05e4f26b54f8c0f64c8e8ed"
+      },
+      {
+        "path": "references/rubric.md",
+        "sha256": "69a914e344e380cd16ab12c987c4867c4414e5902b1a7b21c53a70964016d124"
+      }
+    ],
+    "content_hash": "1d752b11fc6184ebd6cfd02775c93dcb3cac50c4b7f684276748dea03884a6aa"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a3e4de22ea55cd117",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I4",
+        "severity": "medium",
+        "location": ".claude/skills/review-blog/references/rubric.md:133",
+        "comment": "絵文字が1件でもあればポリシーが『制限なし』でない限り0-gate違反で判定Dとするが、:32 は0-gateを『投稿不能・表示崩れが起きる掲載先固有の技術制約違反』と定義し、:99-100 は note と Qiita の絵文字を『可』としている。原本の設定欄には『プラットフォーム制約に従う』『装飾系のみ可』の選択肢もあり (workflows/content-creation/review-blog.md:21)、note の記事で判定が D と通過に割れる。ポリシーの選択肢ごとに判定を書き分け、rubric.md:21 に選択肢を書き写す。"
+      },
+      {
+        "criterion_id": "D3",
+        "severity": "low",
+        "location": ".claude/skills/review-blog/SKILL.md:13",
+        "comment": "disable-model-invocation: true のため、:9-10 のトリガーフレーズは自動発火に使われない。手動起動専用である旨を description に書くと意図が伝わりやすい。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/review-blog/SKILL.md:95",
+        "comment": "評価基準ファイルのパスがリポジトリ内の .claude/skills/review-blog/ を前提にした相対パスで、ユーザー単位の skills 配置では解決しない。ステップ1で skill ディレクトリの絶対パスを確かめて埋め込むとよい。"
+      },
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": ".claude/skills/review-blog/references/fact-check-patterns.md:84-120",
+        "comment": "第8節は数値や市場データを扱う記事にだけ当てるので、別ファイルに分けると常に読ませる分量が減る。"
+      }
+    ]
+  }
+}

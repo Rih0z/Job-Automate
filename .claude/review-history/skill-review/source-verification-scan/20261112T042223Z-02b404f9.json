@@ -1,0 +1,97 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "source-verification-scan",
+  "reviewed_at": "2026-11-12T04:22:23Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "b8ffa11e636855ccc3aef998c73d3221668d9c3e6837a35300f6ef90e526c2b4"
+      },
+      {
+        "path": "criteria/categories.json",
+        "sha256": "074f64555b4324ebebb402a09a0571667730fa1020075bafc3c177a520871343"
+      }
+    ],
+    "content_hash": "d69008ea51a90d2c7677e92ed83fd7216bea12133356e0f620bf15a3837502e1"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a68cccc0418cdbe78",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I2",
+        "severity": "medium",
+        "location": ".claude/skills/source-verification-scan/SKILL.md:49",
+        "comment": "手順5は3回の再検査後もBLOCKERが残ると『最終報告に書いて止める』とし、手順6(永続化)を行うかが不明。66行はverdict FAILの記録を保存する前提で、FAILの記録が残らないおそれがある。手順5に『止める前に手順6でFAILの記録を保存する』を明記すべき。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": ".claude/skills/source-verification-scan/criteria/categories.json:45",
+        "comment": "per_hitは項目名の列挙のみで、JSONのキーの形が未定義。SKILL.md:59は出力にJSONがあることを前提としているので、キーの形を例で示すと出力が揃う。"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": ".claude/skills/source-verification-scan/criteria/categories.json:48",
+        "comment": "persisted_recordが検査エージェント自身に保存を指示しているように読める。検査エージェントは読み取り専用(SKILL.md:46)で、保存は呼び出し元が行う(SKILL.md:66)。主語を書き分けるとよい。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": ".claude/skills/source-verification-scan/criteria/categories.json:45",
+        "comment": "推奨処置の『出典URL追加』とSKILL.md:77の『公開出典への置換』で用語が揃っていない。"
+      },
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": ".claude/skills/source-verification-scan/SKILL.md:3",
+        "comment": "対象のファイル形式(Markdown等)がdescriptionに書かれていない。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/source-verification-scan/SKILL.md:94",
+        "comment": "CLAUDE.mdやREADMEへの記載は渡された範囲で確認できないため低い側で採点した。"
+      }
+    ]
+  }
+}

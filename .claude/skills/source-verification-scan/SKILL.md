@@ -1,12 +1,12 @@
 ---
 name: source-verification-scan
-description: "調査・レポート・記事の成果物に、非公開情報・裏取り不能な伝聞・実在しない参照先(捏造ナビゲーション)・未確認のフレーミング(位置付け)が混入していないかをゼロ・トレランスで検査する。research-deliverable-review / general-news-research / it-tech-news-research / review-blog 等、外部公開する調査系成果物の確定前に使う。Use when the user asks to 'ソース検証して', '非公開情報が混ざっていないか確認', '出典スキャン', 'source verification scan', '公開前チェック'. 内部限定の文書、品質全般の採点(research-deliverable-review を使う)、文章表現の推敲には使わない。"
+description: "調査・レポート・記事の成果物に、非公開情報・裏取り不能な伝聞・実在しない参照先(捏造ナビゲーション)・未確認のフレーミング(位置付け)が混入していないかをゼロ・トレランスで検査し、PASS/FAIL の判定と hit(行番号・原文の引用・カテゴリ・推奨処置)の一覧を返して、結果を review-record として保存する。research-deliverable-review / general-news-research / it-tech-news-research / review-blog 等、外部公開する調査系成果物の確定前に使う。Use when the user asks to 'ソース検証して', '非公開情報が混ざっていないか確認', '出典スキャン', 'source verification scan', '公開前チェック'. 内部限定の文書、品質全般の採点(research-deliverable-review を使う)、文章表現の推敲には使わない。"
 disable-model-invocation: true
-allowed-tools: Read Grep Glob WebFetch Agent
-argument-hint: "<検査対象ファイルのパス(複数可)>"
+allowed-tools: Read, Grep, Glob, WebFetch, Agent, Write, Bash(python .claude/skills/_shared/scripts/list_review_records.py:*), Bash(python .claude/skills/_shared/scripts/append_review_record.py:*), Bash(python3 .claude/skills/_shared/scripts/list_review_records.py:*), Bash(python3 .claude/skills/_shared/scripts/append_review_record.py:*)
+argument-hint: "[検査対象ファイルのパス(複数可)]"
 metadata:
   provenance: author-preference
-  version: "1.0"
+  version: "1.1"
 ---
 
 # ソース検証スキャン(非公開情報・伝聞・捏造導線チェック)
@@ -23,6 +23,7 @@ metadata:
 
 - Python 3 が実行できること。本 skill は同一リポジトリの `.claude/skills/_shared/scripts/`(`list_review_records.py` / `append_review_record.py`)と `.claude/skills/_shared/review-record.schema.json` に依存する。他リポジトリへ移す場合は `_shared` も一緒に配置する。`_shared` が無い環境では、過去記録の検索と永続化を省き、その旨を最終報告に書く(検査そのものは `criteria/categories.json` だけで行える)
 - 検査対象はローカルのファイル。URL の裏取りには WebFetch を使う
+- コマンド例の `python` は Python 3 を指す。`python` が無く `python3` だけがある環境(macOS の標準など)では `python3` に置き換えて実行する。2 つのスクリプトの実行(Bash)と一時 JSON の保存(Write)は `allowed-tools` で事前に許可している
 
 ## 禁止対象カテゴリ
 
@@ -34,13 +35,19 @@ metadata:
 
 ## スキャン手順(別エージェント実行)
 
-**過去レビュー記録の参照**: スキャン起動前に以下を実行し、同一対象の過去レビュー記録（このskillに限らず research-deliverable-review 等の記録も含む）を検索する。ヒットした場合は該当ファイルを Read し、前回の BLOCKER/指摘内容を検査エージェントへのプロンプトに含める。
+コマンドはリポジトリ直下をカレントディレクトリにして実行する。
 
-```bash
-python .claude/skills/_shared/scripts/list_review_records.py --target "<対象ファイル名またはタイトルの一部>"
-```
+1. 過去記録を検索する: 同一対象の過去レビュー記録(このskillに限らず research-deliverable-review 等の記録も含む)を検索する。ヒットした場合は該当ファイルを Read し、前回の BLOCKER と指摘を控える。
 
-呼び出し元セッションの意図・執筆過程は渡さず、対象ファイルのパスと `criteria/categories.json` のパスのみを渡して別エージェントに検査させる(自己レビュー禁止)。出力形式(hit単位のフォーマット・converged BLOCKER要件)は同 JSON の `output_format` を参照。BLOCKERが0件になるまで公開しない。
+   ```bash
+   python .claude/skills/_shared/scripts/list_review_records.py --target "<対象ファイル名またはタイトルの一部>"
+   ```
+
+2. 検査を別エージェントに任せる: 対象ファイルのパスと `criteria/categories.json` のパスだけを渡す(自己レビュー禁止)。呼び出し元セッションの意図・執筆過程は渡さない。例外は 1 で控えた前回の BLOCKER と指摘で、これだけはプロンプトに含めてよい。検査エージェントは読むだけで、対象ファイルを作成・変更・削除しない(書き込み系ツールを持たない `readonly-reviewer` があればそれで起動する)。出力形式は同 JSON の `output_format` に従わせる。
+3. 判定を読む: BLOCKER は、`per_hit` の判定が「非公開NG」になった hit を指す(`output_format.blocker_definition`)。BLOCKER が 0 件なら 6 へ進む。
+4. 処置する: 下の「対応アクション」で、BLOCKER ごとに削除、公開出典への置換、表現の中立化のどれかを行う。
+5. 再検査する: 処置後のファイルで 2 と 3 をやり直す。処置と再検査を 3 回繰り返しても BLOCKER が残る場合は、公開せず、残った hit の一覧を最終報告に書いて止める。
+6. 記録を残して報告する: 下の「永続化」で記録を保存し、「最終報告の形式」で報告する。BLOCKER が 0 件になるまで公開しない。
 
 ## 使用例
 
@@ -56,7 +63,7 @@ python .claude/skills/_shared/scripts/list_review_records.py --target "<対象�
 
 ## 永続化
 
-検査エージェントには `output_format.persisted_record` が指す review-record/v1 JSON（`skill: "source-verification-scan"`, `verdict`: BLOCKER 0件なら `"PASS"`、1件以上残るなら `"FAIL"`, `criteria` にカテゴリA-Gごとのhit有無を記録）も出力させる。受け取ったJSONを一時ファイルに保存し、以下を実行して永続化する:
+検査エージェントには `output_format.persisted_record` が指す review-record/v1 JSON（`skill: "source-verification-scan"`, `verdict`: BLOCKER 0件なら `"PASS"`、1件以上残るなら `"FAIL"`, `criteria` にカテゴリA-Gごとのhit有無を記録）も出力させる。受け取ったJSONを `.tmp/` 配下の一時ファイルに UTF-8 で保存し、以下を実行して永続化する:
 
 ```bash
 python .claude/skills/_shared/scripts/append_review_record.py <一時JSONファイルのパス>
@@ -64,9 +71,15 @@ python .claude/skills/_shared/scripts/append_review_record.py <一時JSONファ�
 
 このスクリプトが成功するまで公開判断（BLOCKER 0件の確定報告）を完了として扱わない。検証エラー時はエラー内容に従いJSONを修正して再実行する（強制の限界: プロンプト指示による実行そのものは確率的だが、スクリプト自体のスキーマ検証は決定的）。
 
+## 対応アクション
+
+- **行ごと削除**: 裏付けが取れないものはそのまま消す(訂正注記を残して保持しない)
+- **公開出典への置換**: 同内容が公開一次情報で確認できる場合はURLに置換
+- **表現の中立化**: 自組織の内部情報は削除し、業界一般化した表現に置き換える
+
 ## 最終報告の形式(ユーザーへ返す内容)
 
-検査エージェントの出力を受けて、呼び出し元は次の順で報告する。LLM が判定した内容と、スクリプトが出力した内容(記録の保存結果)を区別して書く。
+検査エージェントの出力を受けて、呼び出し元は次の順で報告する。LLM が判定した内容と、スクリプトが出力した内容(記録の保存結果)を区別して書く。次の 5 項目以外(執筆の意図、BLOCKER でない所感、検査の経過の逐一)は書かない。
 
 1. 判定: PASS(BLOCKER 0 件)または FAIL(BLOCKER 1 件以上)
 2. BLOCKER 一覧: hit ごとに「行番号 + 原文の引用 / カテゴリ A-G / 推奨処置」(`categories.json` の `per_hit` のとおり)。0 件なら「なし」
@@ -76,12 +89,6 @@ python .claude/skills/_shared/scripts/append_review_record.py <一時JSONファ�
 
 対応アクションの選び方: 同内容が公開一次情報で確認できれば置換、確認できなければ削除、自組織の内部情報なら中立化する。
 
-## 対応アクション
-
-- **行ごと削除**: 裏付けが取れないものはそのまま消す(訂正注記を残して保持しない)
-- **公開出典への置換**: 同内容が公開一次情報で確認できる場合はURLに置換
-- **表現の中立化**: 自組織の内部情報は削除し、業界一般化した表現に置き換える
-
 ---
 
-*作成: 2026-09-01(非公開情報スキャナの設計から汎用パターンを抽出)。更新履歴: 1.0 = 初版。以降の変更は version を上げた時点でここに追記する。*
+*作成: 2026-09-01(非公開情報スキャナの設計から汎用パターンを抽出)。更新履歴: 1.0 = 初版。1.1 = `criteria/categories.json` のカテゴリ C（噂、伝聞、匿名 SNS 投稿）、D（一次に届かない二次解説だけの情報）、F（原文で確かめていない数値、日付、引用と、実在しない参照先）、G（位置付けや分類が公開情報で確かめられない記述）の検査方法に、報道に帰属させた因果の文の確認、転載ページの署名と同じ原データの再報道、要約や抽出ツールの出力を根拠にしないこと、不在の主張の探索範囲、範囲から点への言い換え、データ系列の題名の確認を加えた。前提条件に python の読み替えと事前許可のツールを書き、再検査の上限(3 回)と検査エージェントの読み取り専用を明記し、対応アクションの節を最終報告の前に移した。BLOCKER の定義を `categories.json` に置き、スキャン手順を番号付きの 6 段階にし、description に成果物、最終報告に書かないものを書いた。argument-hint の山括弧を角括弧に変えた。以降の変更は version を上げた時点でここに追記する。*

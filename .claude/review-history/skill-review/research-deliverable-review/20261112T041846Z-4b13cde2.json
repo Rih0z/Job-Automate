@@ -1,0 +1,97 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "research-deliverable-review",
+  "reviewed_at": "2026-11-12T04:18:46Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "5a57c413fd5280aaa10c30c2fdd9ecdeb986033b1a9b187812e9cc2f3499e2a7"
+      },
+      {
+        "path": "references/criteria.md",
+        "sha256": "706caec4b3ad044628ea2f7c8632fdc546b65ee39145ac8e1aa648a84170da0d"
+      }
+    ],
+    "content_hash": "809a6438c7569b846e27c9bec353f5a0be04026db2287f8d87be9f486983d2e3"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a454f6af952ca1947",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 91,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": ".claude/skills/research-deliverable-review/SKILL.md:63",
+        "comment": "過去レビュー記録をレビューエージェントへのプロンプトに渡すよう指示しているが、78-142 行のプロンプトテンプレートにはそれを埋め込む節が無い。"
+      },
+      {
+        "criterion_id": "I4",
+        "severity": "low",
+        "location": ".claude/skills/research-deliverable-review/SKILL.md:26",
+        "comment": "_shared が無い環境の代わりの手順はあるが、テンプレートの 96・99 行は review-rubrics.yaml を Read する指示のままで、差し替える方法が書かれていない。"
+      },
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": ".claude/skills/research-deliverable-review/SKILL.md:7-8",
+        "comment": "トリガーフレーズは 5 つあるが、口語の言い換え (例: ニュースまとめの品質チェック) が少ない。"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": ".claude/skills/research-deliverable-review/SKILL.md:78-99",
+        "comment": "プロンプトテンプレートの本文に、ファイルを変更しないよう求める一文が無く、共有の原則 non_destructive と readonly-reviewer に任せている。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/research-deliverable-review/SKILL.md:21,47-48,60,195",
+        "comment": "workflows/research-intelligence/ と .claude/skills/_shared/ がリポジトリからの相対パスで決め打ちされている。移すときの注意は 26 行にあるが、そのまま別のプロジェクトにコピーしても動かない。"
+      },
+      {
+        "criterion_id": "S3",
+        "severity": "low",
+        "location": ".claude/skills/research-deliverable-review/SKILL.md:78-142",
+        "comment": "# の見出しを含む出力フォーマットが、1 つのコードブロックにテンプレートと一緒に収まっていて、読みにくい。"
+      }
+    ]
+  }
+}

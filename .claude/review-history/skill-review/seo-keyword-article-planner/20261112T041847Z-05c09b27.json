@@ -1,0 +1,107 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "seo-keyword-article-planner",
+  "reviewed_at": "2026-11-12T04:18:47Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "16e61a1593b1c910dc9fb3f1154327a0c0d61b1f8a802731cc1e20242aa91502"
+      },
+      {
+        "path": "references/article-outline-template.md",
+        "sha256": "78348ec4a3d4ba2bc0bfe05bbb33504b2a69c0c5e70b09467b2343b21ed46614"
+      },
+      {
+        "path": "references/outline-scorecard.md",
+        "sha256": "083456ec20464386a150ff32526c8942394a627b32d2394d11e2efb50bf6f123"
+      }
+    ],
+    "content_hash": "d53d8512361491bfc2cec8df2f26513f2dbcb413ae7fcad6ff0f72a74f608279"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a53c03adf357d6a21",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 16
+      },
+      {
+        "id": "output",
+        "score": 16
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 87,
+    "verdict": "FAIL",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "O1",
+        "severity": "medium",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:124",
+        "comment": "「出力はこの順序の節だけにし、節の外に前置きや感想を足さない」と定めているが、SKILL.md:133 の効果測定の提案、SKILL.md:141・SKILL.md:48・references/outline-scorecard.md:32 の手動確認の依頼一覧、SKILL.md:182 の実行時のコツを置く節が出力形式 (SKILL.md:99-123) に無く、矛盾している。出力に何が含まれるかが実行ごとにぶれる。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "medium",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:133",
+        "comment": "効果測定の提案を求めているが、出力のどの節に書くかと、何を含めるか (指標・期間など) が決まっていないため、実行できる指示になっていない。"
+      },
+      {
+        "criterion_id": "S3",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:25",
+        "comment": "ステップ1〜3・出力形式・特別指示がすべて『## 前提・使い方』の下の ### に入っており、手順が前提の一部に見える。ステップを ## に上げると階層が論理的になる。"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:96",
+        "comment": "不合格なら直してから出力するとあるが、直しても合格しない場合に何回まで直すか、最終的にどう出力するかの決まりが無い。"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:126",
+        "comment": "数値を作らない原則はあるが、ファイルを書かない、公開しないといった禁止事項が本文に無い (allowed-tools の限定で実質は守られている)。"
+      },
+      {
+        "criterion_id": "D3",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:29",
+        "comment": "テーマの指定が無いとき既定の例を使うか確認するとあり、description の『テーマが決まっていない相談には使わない』(SKILL.md:14) との線引きが少しあいまい。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/references/article-outline-template.md:8",
+        "comment": "想定文字数が 4,000-6,000 で固定されており、テーマを一般化した方針と比べて自由が利かない。『目安』とし、テーマに応じて変えてよいと書くとよい。"
+      }
+    ]
+  }
+}

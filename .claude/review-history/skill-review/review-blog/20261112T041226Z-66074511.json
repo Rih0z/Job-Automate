@@ -1,0 +1,99 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "review-blog",
+  "reviewed_at": "2026-11-12T04:12:26Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "01b8b5b613fb6aab39aafd9364e7ec70250c8032cb027c5a9099de4c4df736a0"
+      },
+      {
+        "path": "references/fact-check-patterns.md",
+        "sha256": "c24a6e8a41eada4d9dff7cabe4eb377f5dcf0496f6bbf8d9b5257f26cf5dcde3"
+      },
+      {
+        "path": "references/output-format.md",
+        "sha256": "2a16a6a91bb277fee17e790ac71ae9b1ef243ebcc05e4f26b54f8c0f64c8e8ed"
+      },
+      {
+        "path": "references/rubric.md",
+        "sha256": "6ed842ea4a871d369114cd9731c019892c5cefaa3703056fdc3564ac0c4fd4dd"
+      }
+    ],
+    "content_hash": "c3c08322f1345b1a89fcc5372f16fda9e6651e188c4b62c0edafa6705b7c4e42"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a02e60f5448c423ef",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 16
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 88,
+    "verdict": "FAIL",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "medium",
+        "location": ".claude/skills/review-blog/SKILL.md:32",
+        "comment": "SKILL.md:31 は採点構造が原本の有無に関わらず references で決まると書くが、:32 は点数帯と 0/4/9-gate 即D判定の唯一の SoT を原本としており食い違う。:58/:64/:73/:149 も原本だけを参照先にしていて、原本が無い環境では手順が曖昧になる"
+      },
+      {
+        "criterion_id": "O2",
+        "severity": "medium",
+        "location": ".claude/skills/review-blog/SKILL.md:130",
+        "comment": "「出力フォーマットの本体は原本が SoT」とあるが、references/output-format.md:3 は原本の有無に関わらず自ファイルの節構成で出力すると定めており、出力構造の正本が 2 つある"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "medium",
+        "location": ".claude/skills/review-blog/references/rubric.md:122",
+        "comment": "grep -nP は macOS 標準の BSD grep では使えず、0-gate の必須の検出手順が動かない。GNU grep または rg が要ることと UTF-8 ロケールの前提が書かれていない"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/review-blog/SKILL.md:96",
+        "comment": "原本を呼び出し元の作業ディレクトリ基準で解決させているが、テンプレートに絶対パスを埋め込む欄がない。ステップ1で絶対パスを確かめて渡すと確実になる"
+      },
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": ".claude/skills/review-blog/SKILL.md:3",
+        "comment": "description に対象のファイル形式 (MD / HTML) が書かれていない"
+      }
+    ]
+  }
+}

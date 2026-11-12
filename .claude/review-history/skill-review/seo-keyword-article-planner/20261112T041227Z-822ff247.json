@@ -1,0 +1,119 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "seo-keyword-article-planner",
+  "reviewed_at": "2026-11-12T04:12:27Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "2927963267d2a41b92a36bba3512c65e4534abc7156ba1e0854802eaf4d993e8"
+      },
+      {
+        "path": "references/article-outline-template.md",
+        "sha256": "1193f58415b7b060ee62d706fea34c8dd0f9628cb600a696d4e5cf66becc6aed"
+      },
+      {
+        "path": "references/outline-scorecard.md",
+        "sha256": "9800921933f7f037736dd5f2b67e6383218547cc46002620c53d0f883d33ea90"
+      }
+    ],
+    "content_hash": "e0bb74fd0be7be5a5a9f988a6f084f9570371b3cce24a9b8688aee4fbbe6b3eb"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "aad3cd80e7121c53e",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 17
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 16
+      },
+      {
+        "id": "output",
+        "score": 16
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 86,
+    "verdict": "FAIL",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "S3",
+        "severity": "medium",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:23,52,79,96,122,133,140",
+        "comment": "ステップ1・2・出力形式・特別指示・判定基準は『## 前提・使い方』配下の ### なのに、ステップ3だけが ## で、見出し階層が非対称。更新履歴 1.2.0（SKILL.md:171）の『見出し階層をステップ1〜3の順に整理』とも矛盾する。ステップ1〜3を同じ ## に揃えるべき。"
+      },
+      {
+        "criterion_id": "O2",
+        "severity": "medium",
+        "location": ".claude/skills/seo-keyword-article-planner/references/outline-scorecard.md:13,30 / SKILL.md:135",
+        "comment": "× の定義に『未確認のまま放置』を含める一方、直せない項目は『×のままにせず未確認と理由を書き条件付き』とする。理由つき未確認の点数と、条件付き合格に必要な条件（A・C・D ○ が要るか等）が未定義で、SKILL.md:135 は条件付きを成功扱いにしているため判定がぶれる。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "medium",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:140-158",
+        "comment": "ステップ3（競合分析深掘り）に分析項目と戦略の観点はあるが、出力テンプレート（節の順序・表形式）が無く、ステップ1〜2と違って出力構造が実行ごとに変わりうる。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:127-128",
+        "comment": "『初心者にも分かりやすい構成を心がける』『収益化を最大化する導線設計』は判定可能な基準を伴わない曖昧な指示。採点表の条件に結び付けるか削るとよい。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:160-165",
+        "comment": "『実行時のコツ』2〜4 はユーザー向けの使い方の助言（具体的に指示する・別途キーワードプランナーで確認する）で、Claude の手順として読めない。ユーザーへの案内として出力に含めるのか、削るのかを明確にするとよい。"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:33-34,126,130",
+        "comment": "数値を作らない・推定と区別するという最重要の規則が前提と特別指示に分散しており、冒頭の Important 節にまとまっていない。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:94,104-110",
+        "comment": "SKILL.md:94 は『各【記事構成N】の末尾に1行表』とするが、出力形式では【記事構成1】にだけ『(末尾に採点表の結果)』があり、2・3 には無い。また不要な情報を含めない制約が無い。"
+      },
+      {
+        "criterion_id": "P2",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/references/article-outline-template.md:63",
+        "comment": "『E-A-T』は Google の現行表記では E-E-A-T（Experience を追加）。内容（実体験の織り込み）は含まれているので表記の更新のみ。"
+      },
+      {
+        "criterion_id": "D3",
+        "severity": "low",
+        "location": ".claude/skills/seo-keyword-article-planner/SKILL.md:14,27",
+        "comment": "description はテーマ未定の相談を対象外とする一方、入力欄はテーマ未指定時に既定例を使うか確認するとしており、境界がやや曖昧。"
+      }
+    ]
+  }
+}

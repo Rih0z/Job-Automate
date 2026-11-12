@@ -1,0 +1,111 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "general-news-research",
+  "reviewed_at": "2026-11-12T04:12:26Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "abf59f9bc86d8facd76dfc1142278517d5a37c89e6b9cd7ee814483f2b6167c5"
+      }
+    ],
+    "content_hash": "f204cd09c0ac24e5b194995229c26e5cfbceca55427479bdbcb6e6ec218da613"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "ab2580714acec3ec9",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 18
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 16
+      },
+      {
+        "id": "output",
+        "score": 16
+      },
+      {
+        "id": "practicality",
+        "score": 17
+      }
+    ],
+    "score": 85,
+    "verdict": "FAIL",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "medium",
+        "location": ".claude/skills/general-news-research/SKILL.md:60",
+        "comment": "「Generated at {UTC 時刻 ISO-8601}」を必須にしているが、allowed-tools は WebSearch と WebFetch のみ (11行) で、現在の UTC 時刻をどう取得するかの記載が無い。時刻を作り出す余地が残る。取得方法を書くか、日付だけにするか、時刻が取れないときの書き方を決める必要がある。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "medium",
+        "location": ".claude/skills/general-news-research/SKILL.md:42",
+        "comment": "「該当なし」をどう表に書くか (日付・見出し・ソース列に何を入れるか) が定義されていない。73行の『載せた全行に日付・URL がある』とも食い違い、毎回の形がそろわない。"
+      },
+      {
+        "criterion_id": "O2",
+        "severity": "medium",
+        "location": ".claude/skills/general-news-research/SKILL.md:64",
+        "comment": "手順2は新しい順に並べるが、表 (52行) は1つの地域表にカテゴリ列を持つ。カテゴリごとにまとめるのか、日付順に混ぜるのかが決まっておらず、同じ入力でも行の順が変わりうる。"
+      },
+      {
+        "criterion_id": "O3",
+        "severity": "medium",
+        "location": ".claude/skills/general-news-research/SKILL.md:79",
+        "comment": "『すべての出力は日本語』と、60行の英語の締め行「Generated at ...」が食い違う。見出しは76行で例外とされているが、締め行は例外として書かれていない。"
+      },
+      {
+        "criterion_id": "D3",
+        "severity": "low",
+        "location": ".claude/skills/general-news-research/SKILL.md:9",
+        "comment": "investment-portfolio-analysis との境界はあるが、同じリポジトリの it-tech-news-research / craft-beer-news-research との境界 (テック企業のマーケットのニュースなど) が書かれていない。"
+      },
+      {
+        "criterion_id": "S3",
+        "severity": "low",
+        "location": ".claude/skills/general-news-research/SKILL.md:51",
+        "comment": "出力テンプレートの ### 見出しがコードブロックの外にあり、skill 本文の見出しとして描画される。テンプレートはコードブロックに入れると分かりやすい。"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": ".claude/skills/general-news-research/SKILL.md:63",
+        "comment": "出力前に各行の日付・期間・URL を確かめ直す手順が無い。前提 (22行) も Important 等の節としては示されていない。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "low",
+        "location": ".claude/skills/general-news-research/SKILL.md:57",
+        "comment": "70字の要約 (52行) に出来事・影響・今後の見通しの3点を求めており、入りきらないときにどれを優先するかの指示が無い。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/general-news-research/SKILL.md:44",
+        "comment": "検索語句例の AND / OR は検索ツールがブール演算子に対応している前提で書かれている。対応していない場合の書き方が無い。"
+      }
+    ]
+  }
+}

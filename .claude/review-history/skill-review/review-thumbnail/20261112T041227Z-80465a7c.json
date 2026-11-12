@@ -1,0 +1,99 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "review-thumbnail",
+  "reviewed_at": "2026-11-12T04:12:27Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "b1cbceb5438f46ed666ab0c9f58dc90fde69ed312ae9cddec90844aab1b78d45"
+      }
+    ],
+    "content_hash": "db59a95463f547a5fbaca9d45778453096ce1cd45eaffc7327a5ff70ce8df5a2"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a0863f82aa076b078",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 17
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 16
+      },
+      {
+        "id": "output",
+        "score": 16
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 86,
+    "verdict": "FAIL",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "O2",
+        "severity": "medium",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:26-27,42-43,79",
+        "comment": "「照合不可」の項目が「A 全クリア」の判定にどう効くかが決まっていない。本文は「合格扱いにしない」、使用例は「残りの項目で判定する」と書いており、参照画像が無い場合に PASS にできるかどうかの読み方が分かれる。"
+      },
+      {
+        "criterion_id": "I1",
+        "severity": "medium",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:36",
+        "comment": "A 項目に望ましい状態の書き方 (例: 表情・ポーズのバリエーション、最重要語が最も目立つ) と違反の書き方 (例: 架空要素の描き足し) が混ざっているため、「該当 → REGENERATE」の当てはめがぶれる。全項目を違反の形に揃えるべき。"
+      },
+      {
+        "criterion_id": "O1",
+        "severity": "medium",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:38,56",
+        "comment": "手順の「C. 補助確認(Read のみで実施)」は毎回行う前提だが、出力テンプレートでは「C. 機械チェック(実施した場合のみ)」になっており、名前も実施条件も合わない。"
+      },
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:3-11",
+        "comment": "対象のファイル形式 (PNG/JPEG) が description に無く、本文 SKILL.md:25 にだけある。"
+      },
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:21,36-38",
+        "comment": "判定基準を本文に直接書いており、原本 workflows/content-creation/review-thumbnail.md との二重管理になる。Progressive Disclosure は部分的。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:25",
+        "comment": "画像を読める Read ツールが必要という環境依存が明記されていない。"
+      },
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": ".claude/skills/review-thumbnail/SKILL.md:19-29",
+        "comment": "冒頭に Important / Critical 節が無い。「照合不可は合格扱いにしない」などの重要な制約を冒頭に置くとよい。"
+      }
+    ]
+  }
+}
