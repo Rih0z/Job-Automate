@@ -1,0 +1,99 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "review-blog",
+  "reviewed_at": "2026-11-12T04:30:17Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "a110e44e3b8baef0016cd3ef3831286f82cebad102c9a9e792aa089eebb53086"
+      },
+      {
+        "path": "references/fact-check-patterns.md",
+        "sha256": "64f7af8ab4030aad1800c993fd6eb5a75343292cdf67bf4a28301686d9d3c11a"
+      },
+      {
+        "path": "references/output-format.md",
+        "sha256": "2a16a6a91bb277fee17e790ac71ae9b1ef243ebcc05e4f26b54f8c0f64c8e8ed"
+      },
+      {
+        "path": "references/rubric.md",
+        "sha256": "69a914e344e380cd16ab12c987c4867c4414e5902b1a7b21c53a70964016d124"
+      }
+    ],
+    "content_hash": "ee24c82173916dc7dbc241c5f75048204542a34f97b81b9a2841b6e3c3cd05a2"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a3fb40361bc1f97e9",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 16
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "medium",
+        "location": ".claude/skills/review-blog/SKILL.md:115",
+        "comment": "テンプレートは記事本文の埋め込みだけで記事ファイルの絶対パスを渡さない。絵文字検出コマンド (rubric.md:124 は対象ファイルが引数) と行番号付きの修正箇所 (output-format.md:22) が元の原稿に対して実行・対応付けできない。ステップ1の収集対象 (SKILL.md:70) とテンプレートに絶対パスを追加すべき"
+      },
+      {
+        "criterion_id": "D2",
+        "severity": "low",
+        "location": ".claude/skills/review-blog/SKILL.md:13",
+        "comment": "disable-model-invocation: true のためトリガーフレーズは自動起動に効かない。手動起動の skill だと明記するとよい"
+      },
+      {
+        "criterion_id": "O2",
+        "severity": "low",
+        "location": ".claude/skills/review-blog/SKILL.md:141",
+        "comment": "同じエージェントへの再出力依頼の手段が allowed-tools (Read Glob Grep Agent) からは定まらない。新しく起動し直すのかを含め手順を書くとよい"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/review-blog/SKILL.md:95",
+        "comment": "references のパスがリポジトリルート前提の相対パスで固定されており、~/.claude/skills へ置くと解決できない。ステップ1で絶対パスを確かめて埋め込む形が移植しやすい"
+      },
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": ".claude/skills/review-blog/SKILL.md:31",
+        "comment": "『採点構造は references で決まる』と『食い違う細部は原本優先』(SKILL.md:146, rubric.md:3) の境界が定義されていない"
+      }
+    ]
+  }
+}
