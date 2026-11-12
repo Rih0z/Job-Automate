@@ -1288,8 +1288,8 @@
       "finding": "home の Stop hook hook-stop.ps1 (a) が、最新 handoff が 1 時間より古いと毎回『/clear 前に handoff を更新・作成して』と促し、session-boundary.json の判定（作るのは利用者が頼んだ時・別の人や別の PC が引き取る時などだけ）と食い違う",
       "principles": [],
       "severity": "Low",
-      "status": "backlog",
-      "note": "hook-stop.ps1 は home（git 管理外）にあり、dump repo の運用にも効く。文言を session-boundary の基準に合わせるか、(a) を外すかを運用者が決める",
+      "status": "done",
+      "note": "hook-stop.ps1 は home（git 管理外）にあり、dump repo の運用にも効く。文言を session-boundary の基準に合わせるか、(a) を外すかを運用者が決める 2026-11-12 の棚卸しで、home の hook-stop.ps1:2-4 に『(a) removed 2026-11-11 … decided by each repo's .claude/session-boundary.json』とあり、(a) の促しが削除済みであることを確かめたので done にした（home 側の変更で解消。この repo の変更は無い）。",
       "priority": "P3",
       "reviewed": "2026-11-12",
       "premise": [
@@ -1485,6 +1485,37 @@
           "contains": "対象ディレクトリを 1 回だけ聞き返す"
         }
       ]
+    },
+    {
+      "id": "CR-53",
+      "date": "2026-11-12",
+      "finding": "issue 管理の仕組みとルールが公式ベストプラクティスと食い違っていた: commit 前の check-new が読めない・BOM 付きの台帳を黙って通し、hook が長い入力で起動に失敗しても黙って通し、handoff 作成前の discovery-log の gate が文章だけで、CLAUDE.md に drain の複数手順の本文があり、issue-lifecycle-tracking の SKILL.md は script を repo 相対で呼び、同じ規則の重複と本題外の節を常時読み込んでいた",
+      "principles": [
+        "hooks.pretooluse-block-exit2",
+        "hooks.exit0-stderr-debug-only",
+        "hooks.deterministic-zero-exceptions",
+        "claude-md.move-procedures-out",
+        "skills.dynamic-context-and-arguments",
+        "authoring.concise",
+        "skills.progressive-disclosure",
+        "authoring.solve-dont-defer"
+      ],
+      "severity": "Medium",
+      "status": "done",
+      "priority": "P1",
+      "reviewed": "2026-11-12",
+      "related": [
+        "CR-51",
+        "CR-32",
+        "CR-27"
+      ],
+      "requests": [
+        {
+          "at": "2026-11-12T00:00:00-08:00",
+          "text": "sikumi, rule wo anrhtoipc no besuto purakutelisu ni awasete tyousei site totonoete"
+        }
+      ],
+      "note": "2026-11-12 harness-compliance-audit の別エージェント照合 3 本（SKILL.md PASS 69 / CLAUDE.md PASS 74 / script・hook FAIL 61、blocker 1）を受けて直した。check-new は stage・base の台帳を読めない時に exit 2、BOM を外して読む。hook は入力を stdin で渡し、python の失敗を systemMessage で知らせる。handoff を書く前の queued は pre-handoff-discovery-gate.sh が止める。CLAUDE.md は起動条件と書式だけを残し、手順は issue-lifecycle-tracking 1.6.0 の節へ移した。skill の評価シナリオ（authoring.evaluations-first）は CR-27 に含めて見送り。計画は .tmp/plans/2026-11-12-issue-bp-alignment.md（追跡外）"
     }
   ],
   "audit_log": [

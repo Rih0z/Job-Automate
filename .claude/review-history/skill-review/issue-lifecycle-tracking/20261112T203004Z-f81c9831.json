@@ -1,0 +1,99 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "issue-lifecycle-tracking",
+  "reviewed_at": "2026-11-12T20:30:04Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "9620ed4910cd98f393be631a1452bf564dab8b469e63a1501ee9a5ea8f456096"
+      },
+      {
+        "path": "references/changelog.md",
+        "sha256": "0394ee9688a49301eedfb67a5e362d26e809ea0cb8b848e6b5045eec8173cee6"
+      },
+      {
+        "path": "references/issue-template.md",
+        "sha256": "cc45e612f9d51e60dc3e1117a00c72f2fa0b9cfa67fe8a8602581f5a569ea70d"
+      },
+      {
+        "path": "references/issue-tracker-config.md",
+        "sha256": "fbf713024e167e9f998d336849e19ef60f2a86d071cb95e12bf69115db16954f"
+      },
+      {
+        "path": "references/related-practices.md",
+        "sha256": "40663771027c466f21a7ae084af9c81f56e14d05dd89c91071f9fabad993f057"
+      },
+      {
+        "path": "scripts/issue_tracker.py",
+        "sha256": "01878c34f441b5dc75e2f4831ab4cf0b69010eb58b0fd3cf41a8dddf05e94283"
+      },
+      {
+        "path": "scripts/test_issue_tracker.py",
+        "sha256": "671c56b9dc81d38010d7fe86b284e2af9cf10a69302290ee52787f61d59aaea0"
+      }
+    ],
+    "content_hash": "b283e468ab6ec092dbbcd65bfd35a360759be2139c160116665b8b64887d9c5b"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a7f4bdfbba54817c7",
+    "model": "claude-opus-5-5"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 19
+      },
+      {
+        "id": "description",
+        "score": 19
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 18
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 92,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I1",
+        "severity": "low",
+        "location": ".claude/skills/issue-lifecycle-tracking/SKILL.md:91",
+        "comment": "close の例が issues/processing/ からの git mv に固定されている。L48 は pending からの close も認めるので、移動元を『processing（または pending）』とするとよい。"
+      },
+      {
+        "criterion_id": "I3",
+        "severity": "low",
+        "location": ".claude/skills/issue-lifecycle-tracking/SKILL.md:87-94",
+        "comment": "triage の結果から obsolete / withdrawn に倒すまでの、発言 → 操作 → 結果の例が無い。"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/issue-lifecycle-tracking/SKILL.md:94",
+        "comment": "handoff の release の呼び出しが別 skill の script のパスに固定されている。条件付きで、L24 に読み飛ばせると明記されているので動作上の問題はない。"
+      }
+    ]
+  }
+}

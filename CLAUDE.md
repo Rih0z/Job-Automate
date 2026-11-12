@@ -25,21 +25,16 @@ Claude Code でプロンプトを開発・改善するときのガイドです�
 
 判断が必要な項目の扱い（運用者の好み）: 基本は人間に聞かず、一時しのぎ（暫定回避・互換層・先送り）を避け、他エージェントのレビュー（複数の観点で）に相談しながら、長期的に最適な案を選んで進める。人間の判断が本当に必要なもの（破壊的・不可逆な操作／認証情報／金銭が発生する外部コスト／見た目や文言などの純粋な好み／機密・顧客への影響／方針の大転換／レビューが収束しない場合）だけを、完全パスの一覧の後ろ、応答の**最後**に独立したブロック「判断をお願いする項目」として出す。各項目は、本文や他の資料を見なくても判断できるよう、①何の話か ②選択肢と、選んだ時に起きること ③推奨案と理由 ④上の7種のうち該当する名称、を自己完結で書く。完了報告で該当が無い時だけ「判断項目なし」と書く。
 
-利用者の新しい要望の扱い <!-- KH-0006 -->: 作業中に利用者が新しい要望・好み・やり方の指定を述べたら、(1) 関係する issue を `issue_tracker.py related --text "<要旨>"` で探し、`issue_tracker.py request <issue> --text "<原文>"` で原文を残す（このリポジトリの issue は `compliance-status.json` の CR。script は `.claude/skills/issue-lifecycle-tracking/scripts/`）。(2) 今後も守る決まりなら、`.claude/knowhow.json` に KH として入れ、反映先に書いてアンカー（`<!-- KH-xxxx -->` の形）を置いてから `reflected` にする。(3) この作業だけの 1 回きりの指示で、関係する issue も無いなら記録しない（issue を乱立させない）。(4) 完了報告に「要望の反映先」（issue のパス・KH-ID・なし）を書く。
+利用者の新しい要望の扱い <!-- KH-0006 -->: 作業中に利用者が新しい要望・好み・やり方の指定を述べたら、関係する issue（このリポジトリでは `compliance-status.json` の CR）に原文を残し、今後も守る決まりなら `.claude/knowhow.json` に KH として入れて反映する（手順は issue-lifecycle-tracking の「起票の前に関連 issue を確かめる」節。knowhow の反映は commit 前の hook が確かめる）。この作業だけの 1 回きりの指示で関係する issue も無いなら記録しない。完了報告に「要望の反映先」（issue のパス・KH-ID・なし）を書く。
 
 バグ修正時: エラーメッセージが修正箇所を明確に示している単純な修正はそのまま直接修正する。依存関係や他ファイルとの整合確認が必要な修正は、着手前に対象が依存する workflow・skill・設定ファイルを洗い出し、その旨を明示する。複数ファイルにまたがる変更や設計判断を伴う複雑な修正は、実装に入る前に Plan Mode で依存関係の洗い出しと計画・レビューを行ってから着手する。洗い出した依存関係は、関連する `workflows/<name>/README.md` に一言残し、後から参照できるようにする。
 
-作業中に本題と別件の問題・改善点（バグ・逸脱・想定外の挙動を含む）に気づいた場合、上記「AIが作業中に別の問題を見つけても、その場で勝手に修正させない」原則（[README.md「ハーネスを組むループ」](README.md#ハーネスを組むループ--作成プロンプトも人間は書かない)）どおり、その場で修正に着手せず、まず「何を見つけたか」の事実だけをその応答内で一言報告する。加えて `.tmp/discovery-log.md` へ気づいた記録を残す（詳細な書式・drain 手順は下記）。
+作業中に本題と別件の問題・改善点（バグ・逸脱・想定外の挙動を含む）に気づいたら、[README.md「ハーネスを組むループ」](README.md#ハーネスを組むループ--作成プロンプトも人間は書かない)の原則どおりその場で修正せず、何を見つけたかを応答で一言報告し、その場で `.tmp/discovery-log.md` に 1 行足す（後回しにすると長い作業の中で埋もれる）。
 
-**discovery-log の書式と扱い**（2026-09-15 改訂: 自由文 1 行から JSON 構造化へ）:
-
-- **いつ書くか**: 気づいた**その瞬間**（口頭報告や自由文の1行では長い作業の中で読み手・書き手双方の記憶から埋もれるため、その場で必ず追記する）。
-- **書式**: 自由文ではなく **JSON Lines（1オブジェクト1行）**。後から grep/jq 等で機械的に拾い漏れを検知できるようにするため。
-  `{"ts": "<ISO8601日時>", "summary": "<気づいた内容を1文で>", "location": "<手がかりとなるファイル:行 または文脈>", "status": "queued"}`
-- **位置づけ**: 正式なタスク化・修正の代わりではなく、人間が直すかどうか・いつ直すかを判断するまでの一時的な備忘バッファ。
-- **見返し（drain）のタイミング**: イテレーション完了時、`/compact` 実行前、session の区切り（`/clear`・新しい session・後日の `--resume`）を提案する時、**引継ぎ資料 (`.tmp/handoffs/`) を作成する時点を含む**。
-- **drain の判断**: `status` を `"done"`（対応済み）に更新するか、本リポジトリの Issue 相当物である `.claude/skills/_shared/compliance-status.json` の `findings` へ CR-xx として追加し `status` を `"issued"` にした上で発行した CR-id を併記するか、今後も守る決まりなら `.claude/knowhow.json` に KH として登録して `status` を `"knowhow"` にした上で KH-ID を併記するかを決めてから当該行を消す（残したまま「完了」と報告しない）。CR を追加する時は、先に `issue_tracker.py related` で近い CR を確かめ、新しい finding に `related`（確かめた関連 CR の id の配列。無ければ `[]`）を書く。drain の時と、起票で active な CR が増えた時には、`issue_tracker.py triage` で CR の棚卸し（前提が崩れた候補・重複・priority の付け直し）も行う（手順は issue-lifecycle-tracking の「棚卸し」節）。 <!-- KH-0008 -->
-- **引継ぎ資料作成時の gate**: 作成前に `status: "queued"` のまま残っているエントリが無いことを確認する（残っていれば先に `"done"`/`"issued"`/`"knowhow"` のいずれかへ倒してから作成する）。
+- **書式**: 1 行 1 つの JSON。パスは `/` 区切りで書く（`\` は JSON のエスケープになり、行を読めなくする）。
+  `{"ts": "<ISO8601日時>", "summary": "<気づいた内容を1文で>", "location": "<ファイル:行 または文脈>", "status": "queued"}`
+- **見返し（drain）**: イテレーション完了時・`/compact` の前・session の区切りを提案する時・引継ぎ資料を作る前に、`queued` の行を `done` / `issued`（CR を起票し `"cr"` を併記）/ `knowhow`（KH を登録し `"kh"` を併記）のどれかにする（手順は issue-lifecycle-tracking の「作業中に別件に気づいた時」節）。drain の時と、起票で active な CR が増えた時は、`issue_tracker.py triage` で CR の棚卸しもする。 <!-- KH-0008 -->
+- **引継ぎ資料作成時の gate**: `queued` を残したまま完了と報告せず、引継ぎ資料も作らない（hook〈`.claude/hooks/pre-handoff-discovery-gate.sh`〉が止めるのは Write・Edit による `.tmp/handoffs/` への書き込みだけで、Bash で書く経路と完了報告は見ない）。
 
 コード・スクリプトを書く・直す作業は **設計 → テスト設計 → テスト実装(Red) → 実装(Green→Refactor)** の順で行う（テスト設計 = 検証ケース・テスト名・期待値の導出・自動化しない範囲を決める工程。成果物は設計書の「テスト戦略」の節）。各工程は別エージェントのレビューで終え、PASS するまで次工程に着手しない（設計とテスト設計は 1 回のゲートでまとめて審査する。テストを書く前に実装コードを書かない・Red を確認していないテストは後付け扱い・自己レビューで通過扱いにしない）。手順とテスト設計の中身は [single-session-tdd](.claude/skills/single-session-tdd/SKILL.md) skill、工程別の観点は [review-gate](.claude/skills/review-gate/SKILL.md) skill の `criteria/*.json`、3ターミナル分離で回す場合は [three-agent-tdd-workflow](.claude/skills/three-agent-tdd-workflow/SKILL.md) skill。
 
@@ -72,7 +67,7 @@ Claude Code 環境で使えるレビュー系コマンド／Skills の全一覧�
 
 - **対象**: `.claude/skills/<name>/` 配下（SKILL.md・scripts・criteria・references・サンプル）を作成・変更・削除したとき、毎回。誤字の修正でも、内容（改行を正規化した後のバイト列）が変われば記録は失効して再レビューが要る。`_shared/` を変えて skill の動作が変わるときは、影響を受ける skill も同じ手順で再レビューする（記録の hash は `_shared/` を含まないので、gate は検出しない。自分で洗い出す）。
 - **手順**: [review-skill](.claude/skills/review-skill/SKILL.md) skill で、別エージェント（`readonly-reviewer`）に採点させ、PASS の記録を `.claude/review-history/skill-review/` に保存する（`skill_review_gate.py --hash` で得た content_hash を `--expected-hash` に付ける）。作成者本人は採点しない・採点を代行しない。FAIL なら直して再レビューする（回数で止めない）。
-- **作業を終える前に**: PASS の記録が保存されるまで、完了報告・コミット・push をしない。push の前に `python .claude/skills/review-skill/scripts/skill_review_gate.py --all --strict` が exit 0 であることを確かめる（Stop hook は未レビューの skill があると 1 turn に最大 3 回まで終了を止め、上限に達すると通す。`git push` と、`.claude/skills/` の変更を含む `git commit` は、PreToolUse hook〈`.claude/hooks/pre-git-skill-review-gate.sh`〉が gate の失敗時に止める。こちらに回数の上限は無く、gate が通るまで止まる。どちらの hook も、評価できない時〈python が無い・時間切れ〉は通し、git の別名・変数・スクリプト経由の push は見ないので、hook が通したことを「レビュー済み」と読まない。逆に、コマンド文字列の照合なので、引用符の中の `git push` や、別のリポジトリへの push でも、このリポジトリの gate が失敗していれば止まる。この登録を外すのは人の判断であり、エージェントが回避しない）。`git commit` は、別の PreToolUse hook〈`.claude/hooks/pre-git-ledger-gate.sh`〉も止める。新しい CR に `related` が無い時と、`.claude/knowhow.json` に `queued` や反映の欠けがある時で、止めた理由は skill のレビューと分けて出る。
+- **作業を終える前に**: PASS の記録が保存されるまで、完了報告・コミット・push をしない。push の前に `python .claude/skills/review-skill/scripts/skill_review_gate.py --all --strict` が exit 0 であることを確かめる。未レビューの skill があると Stop hook が終了を止め、`git push` と `.claude/skills/` を含む `git commit` は PreToolUse hook が止める。`git commit` は台帳の欠け（新しい CR の `related`・knowhow の未反映）でも別の hook が止める。hook が通したことをレビュー済みと読まない（評価できない時、別名・スクリプト経由の git、Stop hook が 1 turn に 3 回止めた後は通す）。hook の登録を外すのは人の判断であり、エージェントが回避しない（skill レビューの hook の限界は `.claude/hooks/pre-git-skill-review-gate.sh` と `.claude/skills/review-skill/scripts/hook-skill-review-gate.sh` の先頭のコメント、台帳と handoff の hook は agent-harness-bootstrap の hooks-reference.md）。
 - **完了報告**には、レビューした skill 名・点数・記録のパスを書く。レビューを省いた場合は省いたと明記する（省いたまま完了とは報告しない）。
 
 ## 新しいワークフロー・スキルを追加するルール

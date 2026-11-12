@@ -37,7 +37,9 @@
               "id": "id", "title": "finding", "status": "status", "closed_values": ["done"]}]}
 ```
 
-任意の `created` は起票日のキー名（既定 `created`。例えば `"created": "date"`）。終端に `obsolete` を使うなら `closed_values` に入れる。
+JSON source の path が無い時、`check-new` は警告を出して飛ばす（台帳をまだ作っていない repo で毎回の commit を止めないため。md の root が無い時と同じ）。BOM 付きの台帳も読み書きでき、書き換えは BOM と改行の形を保つ。
+
+任意の `created` は起票日のキー名（既定 `created`。例えば `"created": "date"`）。終端に使う値（`done`・`false-positive`・`obsolete` など）はすべて `closed_values` に入れる（入れ忘れた値の issue は related や triage で active として出続ける）。
 
 `triage` は JSON の要素の `priority`・`reviewed`・`premise`（`[{"path", "contains"?}]`、path はリポジトリ相対か `~/` 始まり）・`related` を読む。md の issue は `premise` を読まず、本文に backtick で書いたパスを見る。
 
@@ -45,7 +47,7 @@
 
 ## 終了コード
 
-0 正常 / 1 `check-new` で欠けがある / 2 引数・設定・対象が不正（何も変えない。例外は `merge` の「統合済みだが統合元が残った」で、統合先と移動先は書き終えている。統合元を手で消し、git で追跡していれば手で stage する）
+0 正常 / 1 `check-new` で欠けがある / 2 引数・設定・対象が不正、`check-new`・`request` で台帳の JSON を読めない（stage した版・base の版を含む）、想定外の例外（何も変えない。例外は `merge` の「統合済みだが統合元が残った」で、統合先と移動先は書き終えている。統合元を手で消し、git で追跡していれば手で stage する）
 
 ## `triage` の出力例
 
