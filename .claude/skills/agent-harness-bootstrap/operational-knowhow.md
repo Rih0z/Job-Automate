@@ -337,4 +337,4 @@ CLAUDE.md に書いた規約は advisory なので Claude が長文中で見落�
 
 > provenance: author-preference · id: changelog-practice
 
-harness（CLAUDE.md / rules / skills）への変更を、日付付きの短い1行エントリとして `CHANGELOG.md`（対象リポジトリルート）に追記する運用。本文中に「(2026-09-XX 追加)」のような日付注記を散在させる代わりに、変更履歴を1箇所に集約する。**Anthropic 公式ベストプラクティスに直接の根拠はない**、著者の運用嗜好（他の多くの要素と異なり `depends_on` は無し・単独で採否を決められる）。既存の `CHANGELOG.md` がある対象では新規作成せず追記運用に合流する。`docs-management`（`docs/` 配下の運用）とは独立しており、`docs/` の有無に関わらずルートに置く。
+harness（CLAUDE.md / rules / skills）への変更を、日付付きの短い1行エントリとして `CHANGELOG.md`（対象リポジトリルート）に追記する運用。本文中に「(2026-09-XX 追加)」のような日付注記を散在させる代わりに、変更履歴を1箇所に集約する。**Anthropic 公式ベストプラクティスに直接の根拠はない**、著者の運用嗜好（他の多くの要素と異なり `depends_on` は無し・単独で採否を決められる）。既存の `CHANGELOG.md` がある対象では新規作成せず追記運用に合流する。`docs-management`（`docs/` 配下の運用）とは独立しており、`docs/` の有無に関わらずルートに置く。各エントリには変更した harness のパス（`CLAUDE.md` か `.claude/` 配下）を書く。採否の検査はファイルの有無ではなくこのパスの記述で判定するため、製品の変更履歴として置かれた `CHANGELOG.md` は非採用の対象でもそのまま残してよい。

@@ -8,6 +8,7 @@ Anthropic 公式ベストプラクティスへの逸脱・改善バックログ�
 
 ## 2026-11
 
+- **11-11**: 由来台帳の要素 `changelog-practice` の `--target` 契約を、`CHANGELOG.md` の有無ではなく、harness の変更エントリ（`CLAUDE.md` か `.claude/` を含む行）の有無で判定するようにした。非選択では harness の変更エントリが無いこと（`grep_absent`）、選択ではあること（`grep`）を確かめる。製品の変更履歴だけを持つ `CHANGELOG.md` は非選択でも違反にならない。Step 8 の種エントリの例と変更履歴運用の説明を、この判定に合わせた。試験 `provenance-check.test.sh` に 4 件を追加した。
 - **11-11**: `handoff_lifecycle.py` を別の repo でも安全に使えるようにした。repo ごとの config（`.claude/handoff-lifecycle.json`）、issue から参照されている handoff と作業中の handoff を退避しない除外、同時実行のロック、worktree の中で通知しない指定、git で追跡している handoff を rename として stage する指定を足した。
 - **11-11**: 未受領で 30 日を超えた handoff の退避を標準動作にした。session 開始時の通知に出たら、エージェントが利用者に確かめずに `handoff_lifecycle.py sweep --apply` で `.tmp/archive/handoffs/` へ移す（削除ではないので戻せる）。`sweep` の既定を 90 日から 30 日にし、通知と同じ日数にそろえた。
 - **11-11**: handoff を利用者が貼った・指定した時だけ受領し、使い終わったら消す仕組みを足した。`agent-harness-bootstrap` の `scripts/handoff_lifecycle.py` が受領を台帳 `.tmp/handoff-ledger.json` に記録し（本体は書き換えない）、`done` で受領済みのものだけを削除し、`remind` で残りをファイル名だけ知らせ、`sweep --apply` で未受領の古いものを `.tmp/archive/handoffs/` へ退避する。SessionStart hook に `handoff-remind.sh` を足した。

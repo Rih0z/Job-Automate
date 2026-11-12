@@ -393,6 +393,19 @@ printf '{}\n' > hm/.claude/settings.json
 gen_real_sel hm/.claude/harness-selection.json "" handoff-management,session-restore-hook
 t "T72 handoff-management と session-restore-hook を選ばないのに script を持ち込むと、それぞれ違反 1 件" 2 "$(( $(runid handoff-management --target hm) + $(runid session-restore-hook --target hm) ))"
 
+# 実台帳の changelog-practice の --target 契約（ファイルの有無ではなく、harness の変更エントリの有無で判定する）
+rm -rf cl && mkdir -p cl/.claude
+printf '# CLAUDE.md\n' > cl/CLAUDE.md
+printf '# Changelog\n\nThe format is based on Keep a Changelog.\n\n## [Unreleased]\n\n### Added\n- 料金プランページ\n' > cl/CHANGELOG.md
+gen_real_sel cl/.claude/harness-selection.json "" changelog-practice
+t "T73 changelog-practice を選ばず、harness の記述が無い製品の CHANGELOG.md があっても違反は出ない" 0 "$(runid changelog-practice --target cl)"
+printf '# CHANGELOG\n\n- **11-01**: `CLAUDE.md` に応答ルールの節を足した。\n' > cl/CHANGELOG.md
+t "T74 changelog-practice を選ばずに harness の変更エントリがある CHANGELOG.md を持ち込むと違反 1 件" 1 "$(runid changelog-practice --target cl)"
+gen_real_sel cl/.claude/harness-selection.json changelog-practice ""
+t "T75 changelog-practice を選び、CHANGELOG.md に harness の変更エントリがあれば違反は出ない" 0 "$(runid changelog-practice --target cl)"
+printf '# Changelog\n\n## [Unreleased]\n- 料金プランページ\n' > cl/CHANGELOG.md
+t "T76 changelog-practice を選んだのに CHANGELOG.md に harness の変更エントリが無ければ違反 1 件" 1 "$(runid changelog-practice --target cl)"
+
 echo "---"
 echo "PASS=$PASS FAIL=$FAIL"
 [[ $FAIL -eq 0 ]]

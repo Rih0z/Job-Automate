@@ -459,13 +459,14 @@
           {
             "type": "grep",
             "path": "CHANGELOG.md",
-            "pattern": "^#"
+            "pattern": "CLAUDE\\.md|\\.claude/"
           }
         ],
         "when_unselected": [
           {
-            "type": "file_absent",
-            "path": "CHANGELOG.md"
+            "type": "grep_absent",
+            "path": "CHANGELOG.md",
+            "pattern": "CLAUDE\\.md|\\.claude/"
           }
         ]
       }

@@ -32,7 +32,7 @@ SKILL.md の Step 8・Step 9 の詳細。Step 7 合格後に参照する。
 
 **4. `.claude/skills/_shared/harness-compliance-roadmap.md`**（**選択依存**: `harness-compliance-roadmap-seed`） — セットアップ完了直後に、対象自身の `.claude/harness-selection.json` を読み、`selected: true` の選択依存ファイル生成要素（`governance-multi-aspect` / `agent-design-*` 3件 / `issue-lifecycle` 系 3件 / `review-cycle-parameters` / `execution-routing` / `docs-management` 等）を1行ずつ拾い、各要素自身の `target_contract.when_selected` の grep パターンをそのまま「再検証すべき契約語句」列に転記した findings 表を生成する（新しい語彙は作らない）。冒頭に二段 cadence（軽量 `harness_check.sh` 全ファイルスイープ / 四半期 `skills-audit`・`harness-compliance-audit` フル判定）を明記し、末尾に setup 完了日 + `provenance-check.sh --target PASS`（Step 9）の1行を監査ログの初期エントリとして入れる。**生成先ファイル名は、このリポジトリ自身の `.claude/skills/_shared/compliance-roadmap.md` とは意図的に別名にする**（同名だと非選択の `shared-compliance-roadmap` 要素側で C12 が「非選択要素の混入」を誤検知するため）。非採用時はファイルを作らない。
 
-**5. `CHANGELOG.md`**（**選択依存**: `changelog-practice`） — 対象の**リポジトリルート**に生成する（`docs/` を採用しているかに依存させない）。ヘッダー1行 + setup 完了日を種として1エントリ（例:「<日付>: harness セットアップ完了」）を記す。既存の `CHANGELOG.md` があれば新規作成せずそこへ追記する運用に合流する。非採用時はファイルを作らない。
+**5. `CHANGELOG.md`**（**選択依存**: `changelog-practice`） — 対象の**リポジトリルート**に生成する（`docs/` を採用しているかに依存させない）。ヘッダー1行 + setup 完了日を種として1エントリ（例:「<日付>: harness をセットアップした（`CLAUDE.md`・`.claude/rules/`）」）を記す。エントリには変更した harness のパス（`CLAUDE.md` か `.claude/` 配下）を書く。`--target` の契約は、このパスの有無で harness の変更エントリかどうかを判定する（製品の変更履歴だけの `CHANGELOG.md` は、非採用でも違反にならない）。既存の `CHANGELOG.md` があれば新規作成せずそこへ追記する運用に合流する。非採用時はファイルを作らない。
 
 **ユーザーへの最終報告**:
 - **プロジェクト概要**（プロジェクト未読の第三者が読んでも理解できるレベルで書く。Step 1 で収集した事実のみを使い推測・捏造はしない）:
