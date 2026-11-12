@@ -3,11 +3,30 @@
 #
 # 発火: この移植元 clone での SessionStart（startup / resume / clear / compact）。
 # 出力: state.json の target / phase / 次の手順を 1〜3 行（本文は注入しない）。state が無ければ何も出さない。
+# session の開始時刻（1.6.0）: stdin の session_id ごとに <project>/.tmp/session-start/<session_id>.json へ
+#   {"session_id", "started_at"} を書く。file が既にあれば書かない（resume・clear・compact でも同じ session_id で
+#   発火するので、最初の時刻を保つ）。7 日を超えた file は消す。Stop hook（stop-handoff-knowhow-gate.sh）が
+#   「この session の開始後に受領した handoff」を見分けるのに使う。session_id は英数字・_・-・. だけを受け付ける。
+#   <project> は CLAUDE_PROJECT_DIR、無ければ ROOT。.tmp/ を git で追跡する移植先では .tmp/session-start/ を .gitignore に足す。
 
 set -uo pipefail
 SKILL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ROOT="${PROVENANCE_ROOT:-$(cd "$SKILL_DIR/../../.." && pwd)}"
 STATE="${HARNESS_SETUP_STATE_DIR:-$ROOT/.tmp/harness-setup}/state.json"
+INPUT="$(cat 2>/dev/null || true)"
+if [[ "$INPUT" =~ \"session_id\"[[:space:]]*:[[:space:]]*\"([A-Za-z0-9_.-]{1,128})\" ]]; then
+  SID="${BASH_REMATCH[1]}"
+  SS_DIR="${CLAUDE_PROJECT_DIR:-$ROOT}/.tmp/session-start"
+  if [[ "$SID" != *..* ]] && mkdir -p "$SS_DIR" 2>/dev/null; then
+    find "$SS_DIR" -maxdepth 1 -type f -name '*.json' -mtime +7 -delete 2>/dev/null
+    SF="$SS_DIR/$SID.json"
+    if [[ ! -e "$SF" ]]; then
+      printf '{"session_id": "%s", "started_at": "%s"}\n' "$SID" "$(date +%Y-%m-%dT%H:%M:%S%z | sed -E 's/([+-][0-9]{2})([0-9]{2})$/\1:\2/')" > "$SF.tmp.$$" \
+        && mv -n "$SF.tmp.$$" "$SF" 2>/dev/null
+      rm -f "$SF.tmp.$$" 2>/dev/null
+    fi
+  fi
+fi
 [[ -f "$STATE" ]] || exit 0
 # python3 という名前の実行ファイルが PATH にあっても動作するとは限らない（Windows の
 # Microsoft Store App Execution Alias スタブ等、実行自体がハングし `timeout` でも kill

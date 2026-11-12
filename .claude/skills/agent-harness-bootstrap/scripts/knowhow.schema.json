@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "knowhow/v1",
+  "title": "knowhow 台帳（.claude/knowhow.json）",
+  "description": "repo ごとの決まり（ノウハウ）を 1 件 1 文で持ち、反映先の file と ID のアンカーで結ぶ。検査は knowhow_check.py（標準ライブラリだけで同じ規則を確かめる。この schema は形の説明の正本）。",
+  "type": "object",
+  "required": ["schema", "entries"],
+  "properties": {
+    "schema": {"const": "knowhow/v1"},
+    "updated": {"type": "string"},
+    "description": {"type": "string"},
+    "entries": {"type": "array", "items": {"$ref": "#/$defs/entry"}}
+  },
+  "$defs": {
+    "entry": {
+      "type": "object",
+      "required": ["id", "added", "source", "statement", "why", "reflect_to", "status", "retired_reason"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^KH-\\d{4}$", "description": "台帳の中で一意。反映先には md なら <!-- KH-0001 -->、json なら \"knowhow\" 配列の値として置く"},
+        "added": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+        "source": {"enum": ["user", "review", "incident"], "description": "user = 利用者の要望 / review = レビューの指摘 / incident = 失敗の経験"},
+        "statement": {"type": "string", "minLength": 1, "description": "決まりを 1 文で"},
+        "why": {"type": "string", "minLength": 1, "description": "理由を 1 文で"},
+        "reflect_to": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["path"],
+            "properties": {
+              "path": {"type": "string", "minLength": 1, "description": "repo のルート（.claude/ の親）からの相対パス。外へ出るパス・絶対パスは不可"},
+              "must_contain": {"type": "string", "description": "任意。反映先に含まれていなければならない語句"}
+            }
+          }
+        },
+        "status": {"enum": ["queued", "reflected", "retired"], "description": "queued = 未反映（commit の前に反映する）/ reflected = 反映済み / retired = 廃止（検査しない）"},
+        "retired_reason": {"type": ["string", "null"], "description": "retired の時は廃止の理由を必須で書く"}
+      }
+    }
+  }
+}

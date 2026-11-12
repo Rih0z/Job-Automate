@@ -4,7 +4,7 @@ description: 任意のプロジェクトに対し、Anthropic 公式 Best Practi
 when_to_use: 「CLAUDE.md を作って」「`/init` の代わりに公式準拠で生成して」「既存の CLAUDE.md を公式 Best Practices で書き直して」「CLAUDE.md が肥大化したので剪定して」「(この repo の) 仕組みを別プロジェクト 対象 にも入れて」「このリポジトリのノウハウで 対象ディレクトリ をセットアップして」等。別プロジェクトへのセットアップ・移植は、**対象(このリポジトリ以外の別ディレクトリ/別リポジトリ) が明示された**依頼に限る (リポジトリ CLAUDE.md「他プロジェクトのセットアップ依頼への対応」と同じ条件)。このリポジトリ自身の CLAUDE.md の生成・剪定も対象。対象が明示されない曖昧な「セットアップして」は対象外
 metadata:
   provenance: mixed
-  version: 1.5.0
+  version: 1.6.0
 ---
 
 # CLAUDE.md 生成 harness
@@ -30,7 +30,8 @@ metadata:
 | `criteria/porting-reconciliation.json` | 移植完了後の突合レビュー観点（review-gate 形式: 記録の完全性 / 抜けゼロ / 混入ゼロ / 依存整合 / 報告の開示） | Step 9（`harness-setup-review`） |
 | `../_shared/anthropic-best-practices.json` | Anthropic 公式ベストプラクティスの構造化データ（取得日 + 再取得条件付き。全 skill 共通の判定基準 SoT） | 公式準拠の核 / Step 2 / Step 7 |
 | `scripts/harness-setup-state.sh` | 別プロジェクト setup の進行状態（selecting → generated → verified → done）。Stop hook の block 根拠 | Step 0 / Step 8 / Step 9 |
-| `scripts/hook-stop-setup-gate.sh` / `scripts/hook-session-start-setup.sh` | このリポジトリの `.claude/settings.json` に登録された hook。検証前の終了を block / 進行中 setup のポインタ通知 | 自動 |
+| `scripts/hook-stop-setup-gate.sh` / `scripts/hook-session-start-setup.sh` | このリポジトリの `.claude/settings.json` に登録された hook。検証前の終了を block / 進行中 setup のポインタ通知と、session の開始時刻の記録（`.tmp/session-start/<session_id>.json`。Stop の handoff の片付けの判定に使う） | 自動 |
+| `scripts/handoff_lifecycle.py` / `scripts/knowhow_check.py`（形は `scripts/knowhow.schema.json`） | handoff の受領・done・remind・sweep・release（閉じた issue の handoff の片付け）と、ノウハウの台帳 `.claude/knowhow.json` の反映の検査。試験は同じディレクトリの `test_*.py` | Step 8（`handoff-management` / `knowhow-ledger` を選んだ時に対象の `.claude/scripts/` へコピー） |
 | `template.md` | CLAUDE.md 本体の出力テンプレート（雛形・ブロックごとに要素 id マーカー付き） | Step 4 |
 | `rubric.md` | 自己評価ルーブリック（Y/N・要素 id 列付き。非選択要素の項目は opt-out 宣言で Y） | Step 5 / Step 7 |
 | `hooks-reference.md` | hooks 化判断・参考 6 hook 構成・settings.json 例・hook script 雛形（PowerShell / bash） | Step 8-3 |
@@ -179,7 +180,7 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 
 ### Step 7: 別エージェント公式準拠レビュー
 
-生成物（CLAUDE.md + 採用 rules + settings.json hooks + hook scripts）を別エージェントに渡してレビューを受ける。渡すのは**対象の完全パスとレビュー用 skill / コマンドの 2 点のみ**。
+生成物（CLAUDE.md + 採用 rules + settings.json hooks + hook scripts）を別エージェントに渡してレビューを受ける。レビュアには判定ごとに根拠（ファイル:行の引用）を出させる。渡すのは**対象の完全パスとレビュー用 skill / コマンドの 2 点のみ**。
 
 レビュアの実施事項（WebFetch 取得・公式項目との突合・rules 実在確認・該当箇所の並置）、レビュアに渡す 2 点、合格基準（公式項目全 Y かつ `rubric.md` 全 Y）、不合格時の扱い（3 回 FAIL で中断・ユーザーに報告）は `step7-reviewer-procedure.md`。
 
@@ -203,6 +204,13 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 生成後は `bash <本スキル dir>/scripts/harness-setup-state.sh phase generated` を実行し、`harness-setup-review` skill で機械検査（`provenance-check.sh --target`）と別エージェントの突合レビューを両方 PASS させてから `done` にする（3 回 FAIL で中断してユーザーに報告）。詳細手順と最終報告への記載事項は `step8-step9-output-and-verify.md`。
 
 大タスク完了のため `/clear` を促す。対象で `handoff-management` が選択済みなら、`scripts/handoff_lifecycle.py` を対象の `.claude/scripts/` にコピーし（`session-restore-hook` も選択済みなら `scripts/handoff-remind.sh` も同じディレクトリにコピーして SessionStart に登録する）、`session-boundary-policy` の判定（別の人や別の PC が続きを引き取る時など）に当たる時だけ `/clear` 前に handoff を保存する（規約本体は「独自運用: handoff 管理」）。非選択なら handoff は作らず、最終報告を引継ぎとする。
+
+記録と検査の script・hook の移植（選んだ要素の分だけ。script のコピー先はどれも対象の `.claude/scripts/`）:
+
+- `knowhow-ledger`: `scripts/knowhow_check.py` と `scripts/knowhow.schema.json` をコピーし、対象で決めた決まりだけで `.claude/knowhow.json` を作る（移植元の KH を写さない。移植元の file を写した時は、中にある `<!-- KH-xxxx -->` の形のアンカーと json の `knowhow` 配列を消すか、対象の KH に付け替える。残すと対象の検査で孤立したアンカーになる）。
+- `issue-tracker`: issue-lifecycle-tracking skill の `scripts/issue_tracker.py` をコピーし、対象の issue の置き場に合わせて `.claude/issue-tracker.json` を書く（例は issue-lifecycle-tracking の `references/issue-tracker-config.md`）。
+- 機械で止める hook も持ち込む時: このリポジトリの `.claude/hooks/pre-git-ledger-gate.sh`（commit 前。`issue-tracker` か `knowhow-ledger` を選んだ時）と `.claude/hooks/stop-handoff-knowhow-gate.sh`（Stop。`handoff-management` か `knowhow-ledger` を選んだ時）を対象の `.claude/hooks/` にコピーする。各 hook の先頭にある script の完全パスの変数（`ISSUE_TRACKER`・`KNOWHOW_CHECK`・`HANDOFF_LIFECYCLE`）だけを `"$HERE/../scripts/<file 名>"` に書き換え、PreToolUse（matcher `Bash`）と Stop に登録する。Stop の handoff の判定は session の開始時刻を要るので、`scripts/hook-session-start-setup.sh` の開始時刻の記録の部分も SessionStart に入れる（`.tmp/` を追跡する repo は `.tmp/session-start/` を gitignore する）。
+- hook を持ち込まない時: commit の前に `check-new` と `knowhow_check.py` を手で実行する運用だと最終報告に書く（operational-knowhow.md の「commit の前に止める」「Stop で 1 回止める」は働かない）。
 
 ## 使用例
 
@@ -229,6 +237,7 @@ PowerShell では `(Get-Content <path>).Count` と `(Get-Item <path>).Length`、
 - 1.1.0: 本文を supporting files へ分離（公式取得先・索引・Step 7〜9 の詳細）、前提節（repo 固有の依存と代替）を追加
 - 2026-09-01: when_to_use を「対象が明示された別プロジェクトのセットアップ依頼」へ拡張
 - 2026-11-05: 由来台帳 `provenance.json` に要素 `slide-creation-kit`（スライド系 3 skill と `docs/slide-creation-kit.md`）を追加し、スライド系 2 skill を `domain-skills-group` から移した。description に代表的な依頼の言い回しを足した。最終報告の見出しと順序を固定し、既存 CLAUDE.md がある対象の使用例を足した。未登録だった `select-slop-viewpoints` を `domain-skills-group` に登録した。台帳の 1 要素の説明文から、特定組織の記事名を一般的な表現に置き換えた
+- 2026-11-11 (1.6.0): `handoff_lifecycle.py` に、閉じた issue の handoff を片付ける `release --issue`（候補は issue の handoff 欄と frontmatter の `issue:` の一致だけ。別 repo のパス・参照されているもの・作業中・受領済みは残し、`git_tracked` なら削除を stage、それ以外は `.tmp/archive/handoffs/released/` へ移す。closed の名前は `.claude/issue-tracker.json` か config の `release.closed_dirs`）、Stop hook 用の `remind --received-since`、frontmatter の `issue:` 欄の警告と「issue 未記載」の表示を足した。参照の検査は、退避の候補がある時だけ候補の名前に絞って行うようにした（大きな repo で remind が時間切れになる問題への対応。試験 H1〜H7・V18）。`hook-session-start-setup.sh` が session の開始時刻を `.tmp/session-start/` に書く。ノウハウの台帳の検査 `scripts/knowhow_check.py`（形 `scripts/knowhow.schema.json`、試験 `scripts/test_knowhow_check.py`）を追加し、由来台帳に要素 `issue-tracker`・`knowhow-ledger`・`claude-md-user-request-rule`（いずれも author-preference）を足した。operational-knowhow.md に起票前の関連 issue の確認とノウハウの台帳の節、KH のアンカーを足し、hooks-reference.md に Stop と commit 前の 2 hook を足した
 - 2026-11-11 (1.5.0): `handoff_lifecycle.py` に repo ごとの config（`.claude/handoff-lifecycle.json`。相対パスは `.claude/` の親が基準）、issue から参照されている handoff の除外（`--keep-referenced`。語を集合で引く方式で、remind は 10 秒で打ち切る）、`work_status: in_progress` の除外、sweep のロック、worktree の中で通知しない `--only-main-worktree`、git で追跡している handoff を rename / 削除として stage する `git_tracked` を足した（試験 V1〜V17）。レビューの指摘で、日本語が直に続く参照の照合、ロックを取ってから一覧を作る、案内文のパスの引用と CLI 指定の併記、receive の `--config`、`handoff-remind.sh` が config を渡すことを足した（試験 W1〜W7・H4）
 - 2026-11-11 (1.4.1): 未受領で 30 日を超えた handoff は、SessionStart の通知を見たエージェントが確認なしで `sweep --apply` で archive へ退避する標準動作にした。`sweep --days` の既定を 90 から 30 にし、remind の案内を `sweep --apply` に変えた（試験 U16・U24・U29）
 - 2026-11-11 (1.4.0): handoff の受領を台帳（`.tmp/handoff-ledger.json`）に記録し、使い終わったら消す script `scripts/handoff_lifecycle.py`（receive / done / remind / sweep。試験 `scripts/test_handoff_lifecycle.py`）と SessionStart の通知 `scripts/handoff-remind.sh`（試験 `scripts/handoff-remind.test.sh`）を追加した。受領は利用者が貼った・指定したものだけを確認なしで行い、作業の完了時に `done` で削除する。rubric 10・template・maintainer-checklist・hooks-reference の「次 handoff 作成まで保持」「作業中マーカー」の記述をこの方式にそろえ、Step 8 の handoff 保存を session-boundary の判定に従う形にした

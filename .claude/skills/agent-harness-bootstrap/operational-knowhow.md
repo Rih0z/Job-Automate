@@ -15,6 +15,7 @@ SKILL.md 本体「本スキル独自の運用ノウハウ」の索引から参�
 - [handoff 受領](#独自運用-handoff-受領user-明示指示駆動本文は自動-read-しない) / [並走 agent 痕跡 4 軸 recheck](#独自運用-並走-agent-痕跡-4-軸-recheck並走衝突防止)
 - [issue ライフサイクル管理](#独自運用-issue-ライフサイクル管理open--processing--closed)
 - [PC 再起動・session 復元の自動化](#独自運用-pc-再起動session-復元の自動化) / [handoff 管理](#独自運用-handoff-管理命名保持issue-連携)
+- [起票前の関連 issue の確認と「関連:」欄](#独自運用-起票前の関連-issue-の確認と関連欄) / [ノウハウの台帳（knowhow.json）](#独自運用-ノウハウの台帳knowhowjson)
 - [規約の hooks 化判断](#独自運用-規約の-hooks-化判断advisory--deterministic-昇格) / [自作 skill / MCP ツールの品質基準の継承](#独自運用-自作-skill--mcp-ツールの品質基準の継承該当時のみ)
 - [別エージェントレビューサイクル](#独自運用-別エージェントレビューサイクル) / [収束型自律前進](#独自運用-収束型自律前進採用時のみオプション)
 - [成果物の生成主体明示](#独自運用-成果物の生成主体明示誤認防止) / [マルチエージェント / subagent 設計原則](#独自運用-マルチエージェント--subagent-設計原則該当時のみ) / [変更履歴運用](#独自運用-変更履歴運用該当時のみ)
@@ -137,11 +138,13 @@ Claude はタスク開始時に関連 docs を最低 1 つ読み、**宣言の�
 
 > provenance: author-preference · id: handoff-management
 
-handoff は **user の明示指示でのみ受領**する（① user が chat に paste、または ② 「handoff X を読んで」と指示）。貼られたもの・指定されたものは確認を挟まずに読んで受領する。**最新 handoff の本文を session 開始時に自動 Read しない**（無関係な最新 handoff の誤受領と、本文の毎 session 注入による context 汚染を防ぐ）。受領後は役割のみ実施・scope creep を避け、関連気付きは別 Issue 起票する。
+handoff は **user の明示指示でのみ受領**する（① user が chat に paste、または ② 「handoff X を読んで」と指示）。貼られたもの・指定されたものは確認を挟まずに読んで受領する。**最新 handoff の本文を session 開始時に自動 Read しない**（無関係な最新 handoff の誤受領と、本文の毎 session 注入による context 汚染を防ぐ）。受領後は役割のみ実施・scope creep を避け、関連気付きは別 Issue 起票する。 <!-- KH-0001 -->
 
 SessionStart hook は**本文を注入せず、ポインタと verdict のみ通知する**: 中断作業の一覧（issue タイトル + handoff ファイル名のみ）と並走 4 軸 verdict（clean / 痕跡あり）を提示し「どれを再開しますか？」と問う。**本文 Read は user が再開対象を選択した後にその 1 件だけ**行う。
 
-**stale handoff 誤受領防止**: 提示する handoff のうち **7 日以上前 / 既に「## 完了」marker 済 / 「次 session 不要」明記**のものは "stale" と注記する。**archive ローテーション**: 未受領のまま 30 日（既定）を超えた handoff は、SessionStart の通知に出たら利用者に確かめずに `handoff_lifecycle.py sweep --apply` を実行して `.tmp/archive/handoffs/` に退避し、context 肥大化を防ぐ（`--apply` を付けない時は一覧だけ。退避は移動なので戻せる。issue から参照されている handoff を残すには、`.claude/handoff-lifecycle.json` の `keep_referenced` に active な issue のディレクトリを書き、`--config` で呼ぶ。参照の判定はファイル名か拡張子なしの名前の出現で、大文字・小文字は区別しない。先頭 60 行に `work_status: in_progress` があるものも移らない。handoff を git で追跡している repo は config に `git_tracked: true` を書くと、移したものを rename として stage し `staged:` 行に出すので、そのパスだけを commit する。台帳が壊れている・参照先が無い・別の sweep が実行中の時は exit 2 で止まるので、その時は退避せず利用者に報告する。退避先に同名があると `-1` が付き、ファイル名で archive を探す仕組みとは合わなくなる。参照の照合の限界: 空白を含む handoff 名は参照されていても一致しない、`work_status: "in_progress"` のように引用符で囲んだ値は除外されない、拡張子なしの名前が一般的な語〈例: plan〉だとどこかに出てくるだけで残り続ける）。
+**stale handoff 誤受領防止**: 提示する handoff のうち **7 日以上前 / 既に「## 完了」marker 済 / 「次 session 不要」明記**のものは "stale" と注記する。**archive ローテーション**: 未受領のまま 30 日（既定）を超えた handoff は、SessionStart の通知に出たら利用者に確かめずに `handoff_lifecycle.py sweep --apply` を実行して `.tmp/archive/handoffs/` に退避し、context 肥大化を防ぐ（`--apply` を付けない時は一覧だけ。退避は移動なので戻せる。issue から参照されている handoff を残すには、`.claude/handoff-lifecycle.json` の `keep_referenced` に active な issue のディレクトリを書き、`--config` で呼ぶ。参照の判定はファイル名か拡張子なしの名前の出現で、大文字・小文字は区別しない。先頭 60 行に `work_status: in_progress` があるものも移らない。handoff を git で追跡している repo は config に `git_tracked: true` を書くと、移したものを rename として stage し `staged:` 行に出すので、そのパスだけを commit する。台帳が壊れている・参照先が無い・別の sweep が実行中の時は exit 2 で止まるので、その時は退避せず利用者に報告する。退避先に同名があると `-1` が付き、ファイル名で archive を探す仕組みとは合わなくなる。参照の照合の限界: 空白を含む handoff 名は参照されていても一致しない、`work_status: "in_progress"` のように引用符で囲んだ値は除外されない、拡張子なしの名前が一般的な語〈例: plan〉だとどこかに出てくるだけで残り続ける。参照先は、退避の候補がある時だけ、候補の名前に絞って読む）。 <!-- KH-0002 -->
+
+**受領したまま終わらせない**: SessionStart hook（`hook-session-start-setup.sh`）が `.tmp/session-start/<session_id>.json` に session の開始時刻を書き（既にあれば書かない）、Stop hook（`stop-handoff-knowhow-gate.sh`）が `remind --received-since <開始時刻>` で「この session で受領して done していない」handoff を見つけたら、1 回だけ終了を止める。使い終わったなら `done`、続くなら issue の次の一手に書いてから `done` する。同じ repo で並行する session の受領は時刻でしか分けられないので混じることがあり、その時は自分の受領でないと判断して終えてよい。
 
 ### 独自運用: 並走 agent 痕跡 4 軸 recheck（並走衝突防止）
 
@@ -232,9 +235,23 @@ PC 再起動 / session 切断後に進行中タスクを自動検出し、User �
 - 同期: `.tmp/handoffs/` は `.gitignore` で除外せず追跡対象にし、作成したら当日中に commit して push する（未 commit の handoff は GitHub に上がらず、別 PC・別 session から見えない）。Stop hook で未 commit の handoff を検出して終了を block すると忘れない
 - 受領の記録: handoff の本体は書き換えず、受領側は着手時に `handoff_lifecycle.py receive <パス>`（パスが無ければ `--title "<最初の見出し>"`）で台帳 `.tmp/handoff-ledger.json` に受領日時と sha256 を記録する。受領から閾値（既定 4 時間）を超えて残る handoff と、未受領で 30 日を超えた handoff は、SessionStart hook（`handoff-remind.sh`）が**ファイル名のみ**通知する（本文は注入しない）。未受領で 30 日超の通知を見たら、確認なしで `sweep --apply` で archive へ退避する（hook は通知だけで、ファイルは動かさない）。作業中に本体を更新したら receive をやり直す（`done` は受領後の変更を exit 7 で止める）。見出しで特定したものは `done --confirmed` の前に利用者に確かめる。作成者は最初の見出しの直後に `このファイル: <完全パス>` を書く
 - script: 本スキルの `scripts/handoff_lifecycle.py`（Python 標準ライブラリのみ、試験は `scripts/test_handoff_lifecycle.py`）。移植先では Step 8 で `.claude/scripts/handoff_lifecycle.py` にコピーする。台帳 `.tmp/handoff-ledger.json` は PC ごとの絶対パスを持つので git で追跡しない（`.tmp/handoffs/` を追跡する運用でも、台帳は gitignore する。`.gitignore` が `.tmp/` を除外している時は、`!.tmp/handoffs/` の否定行で handoffs だけを追跡に戻す。台帳 `.tmp/handoff-ledger.json` は除外のまま）。台帳の項目が壊れていると台帳全体が `handoff-ledger.json.bak-<時刻>` に退避されて空から作り直されるので、受領済みの記録を戻したい時は `.bak` から手で戻す。追跡している handoff を `done` で消した時は、削除を commit する
-- issue 連携: `issues/open|processing/[ID].md` 本文冒頭に「進行中 handoff: [完全パス]」を記載。handoff 更新時は issue 側も同期更新する
+- issue 連携: `issues/open|processing/[ID].md` 本文冒頭に「進行中 handoff: [完全パス]」を記載。handoff 更新時は issue 側も同期更新する。handoff の frontmatter には `issue: <issue のパス>` か `issue: none` を書く（無いと `receive` が警告し、`remind` の一覧に「issue 未記載」と付く）
+- 進捗の置き場: 長時間の作業の進捗と次の一手は、対象の issue があればその issue の「次の一手」節に書き、引継ぎメモ（handoff）は作らない。handoff を作るのは、issue が無い作業と、別の人・別の PC が引き取る時だけ（session-boundary.json の R1〜R3） <!-- KH-0007 -->
+- issue を閉じた時の片付け: issue を close・取り下げ・統合したら `handoff_lifecycle.py release --issue <閉じた issue のパス> --config .claude/handoff-lifecycle.json` を実行する。候補は issue の handoff 欄（「最新 handoff:」・`latest_handoff:`。正規表現は config の `release.handoff_field_regex` で変えられる）に書かれたパスと、frontmatter の `issue:` がその issue と一致する handoff だけ。この repo の handoffs_dir の直下に無いもの（別 repo 等）は触らない。別の active な issue から参照されている・`work_status: in_progress`・受領済みで未 done のものは理由を出して残す。closed の名前は `.claude/issue-tracker.json` の所属 source の `closed`・`merged_dir`（無い repo は config の `release.closed_dirs`）から読み、issue がそこに無ければ exit 2 で何もしない。`git_tracked: true` で追跡中なら削除を stage し、それ以外は `.tmp/archive/handoffs/released/` へ移す
 - 受領: handoff は user 明示指示でのみ受領し、本文は再開対象に選ばれた 1 件のみ Read する
 - 構成: ゴール / 完了したこと / 残課題 / 関連ファイル（path:line）/ 落とし穴
+
+### 独自運用: 起票前の関連 issue の確認と「関連:」欄
+
+> provenance: author-preference · id: issue-tracker
+
+起票の前に `issue_tracker.py related --text "<題名や要約>"`（issue-lifecycle-tracking skill の `scripts/`。設定は `.claude/issue-tracker.json`）で近い issue を探す。近いものがあれば新規にせず `request` で利用者の要望を追記するか `merge` で統合する。新規にする時は本文に「関連: <候補のパス>（別にした理由）」か「関連: なし（related 確認済み）」を書く（JSON の issue なら `related: [<id>...]`）。git commit の前に `check-new` が新規の issue だけを見て、欄が無ければ止める（PreToolUse hook `pre-git-ledger-gate.sh`）。一覧は判断材料で採点はしないので、担保は欄の有無の機械検査で取る。
+
+### 独自運用: ノウハウの台帳（knowhow.json）
+
+> provenance: author-preference · id: knowhow-ledger
+
+今後も守る決まり（利用者の要望・レビューの指摘・失敗の経験から決めたもの）は `.claude/knowhow.json` に 1 件 1 文で入れ、反映先の file に ID のアンカー（md は `<!-- KH-xxxx -->` の形、json は `"knowhow"` 配列の値）を置いてから `status: reflected` にする。`knowhow_check.py`（本スキルの `scripts/`。形は `knowhow.schema.json`）が、queued が残っていない・反映先が repo の中に実在してアンカーを含む・反映先にあるアンカーが台帳にある（双方向）を確かめる。git commit の前は全件（`pre-git-ledger-gate.sh`）、Stop では HEAD と比べて増えた queued だけで 1 回止める（前からある queued は知らせるだけ）。説明文は本ファイルなどに残し、決まりに当たる節にアンカーを置く。
 
 ### 独自運用: 規約の hooks 化判断（advisory → deterministic 昇格）
 

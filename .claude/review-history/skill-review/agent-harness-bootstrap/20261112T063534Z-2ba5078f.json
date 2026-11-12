@@ -1,0 +1,185 @@
+{
+  "schema": "skill-review-record/v1",
+  "skill": "agent-harness-bootstrap",
+  "reviewed_at": "2026-11-12T06:35:34Z",
+  "target": {
+    "files": [
+      {
+        "path": "SKILL.md",
+        "sha256": "5e11414d16b5adccba115ded8129b10f4ed61407246c297233e305adace2db86"
+      },
+      {
+        "path": "criteria/porting-reconciliation.json",
+        "sha256": "4971685379d9078d5e950a2a14d83d465680bb7d168154ff8c97489476acc1a7"
+      },
+      {
+        "path": "hooks-reference.md",
+        "sha256": "ebeb6dd6a914fd99bb23b79afe0f3088954c463f866f8c97ecf1fcf9e8e3c763"
+      },
+      {
+        "path": "maintainer-checklist.md",
+        "sha256": "3aa8da23402ca0b25cdbc5f91dad90af928ad4a68352b8aaa723ed6eee4487f7"
+      },
+      {
+        "path": "official-sources.md",
+        "sha256": "29b46a9bda8fce000fa511cb1dced303bf11e6d77dff5320fcd8758f5d3c83ea"
+      },
+      {
+        "path": "operational-knowhow-index.md",
+        "sha256": "0ad4b3e931ff5e37df313f291f88b89b814e88cafc8080d896781d4019211545"
+      },
+      {
+        "path": "operational-knowhow.md",
+        "sha256": "92e065c964dcf694b36eecd0f21dff41a291af47c88881b9cd78f3af329bd6e5"
+      },
+      {
+        "path": "provenance.json",
+        "sha256": "d1b5501d504990c38b17ee63c157048b644ea1ec9b27dbfe46e7276a84959134"
+      },
+      {
+        "path": "rubric.md",
+        "sha256": "812d52545467404f3f0c0dc51d5d547f673359c04737d658bece19a93a37f071"
+      },
+      {
+        "path": "scripts/contract-selfcheck.sh",
+        "sha256": "27acfd7a3b7de0d77204974f144a9bd6105810af697460a62b2083298f471819"
+      },
+      {
+        "path": "scripts/handoff-remind.sh",
+        "sha256": "62c68a358ea1443256bb9f1aad15d7d54271b147875982f12b3614392afd4566"
+      },
+      {
+        "path": "scripts/handoff-remind.test.sh",
+        "sha256": "d7b52b69886d989925535f89da7e57ec824fcc1a8f502cb6d67734e50cee6b99"
+      },
+      {
+        "path": "scripts/handoff_lifecycle.py",
+        "sha256": "83fdcf265c055e7854c562dfdf32222b15f55fa2ce32982eda3b5962f354002b"
+      },
+      {
+        "path": "scripts/harness-setup-state.sh",
+        "sha256": "2027b6845a07a89d7a6c547a6fa44adf1b8587e0ae67f8fa817b0dcc36e69ff8"
+      },
+      {
+        "path": "scripts/hook-session-start-setup.sh",
+        "sha256": "fb813c613653d4be8e982ae89503bc5410e9309abe6c7a97012c30afddcf6485"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.sh",
+        "sha256": "fb79fed4e778270c0606707197cee91044bc1a223fe7538b6c62ef530de90783"
+      },
+      {
+        "path": "scripts/hook-stop-setup-gate.test.sh",
+        "sha256": "fe50edb26d5784d0fa1f3506e0dfcd0d6df6c190907ab191eda7eec83d49ef23"
+      },
+      {
+        "path": "scripts/knowhow.schema.json",
+        "sha256": "16940a31ce7be38de26420f4b7bce437bfcc3935e1c3980ccf062b5ce5d6edbc"
+      },
+      {
+        "path": "scripts/knowhow_check.py",
+        "sha256": "fc5a95f407497af8243a9b348e196ff4c95ed69e691795f443d1efb76c50a35b"
+      },
+      {
+        "path": "scripts/provenance-check.sh",
+        "sha256": "43362629085f70fb5abb0e23ddbe9d7504e36085bc48b13c58efaea5d16294b9"
+      },
+      {
+        "path": "scripts/provenance-check.test.sh",
+        "sha256": "3de57de058613ca2a48bc9c59f56ba9598b847ec490350dc0657a98ca0f91331"
+      },
+      {
+        "path": "scripts/test_handoff_lifecycle.py",
+        "sha256": "ce170c1d31f49725d3c98f57a213e0fd86fa0f3a4b89468e96c0077ea04bdeed"
+      },
+      {
+        "path": "scripts/test_knowhow_check.py",
+        "sha256": "967a83ac6f23c0d37e13b7577ab91bc1d23fec3945dbf1357a5dc2c8cc1b1bb6"
+      },
+      {
+        "path": "selection-flow.md",
+        "sha256": "13b9bb086de7c78447b7b0da6ad7a8094bc176b50f55bf183f6228b444ea4f96"
+      },
+      {
+        "path": "step7-reviewer-procedure.md",
+        "sha256": "29ff05a014db51ba7146eeb437f9333fd071eab18a276d17cb339e1d73503d05"
+      },
+      {
+        "path": "step8-step9-output-and-verify.md",
+        "sha256": "05b3d966da4436cc75f1bece9f52ac0cbd07532cf201f9e7114e4529edb8f1a2"
+      },
+      {
+        "path": "template.md",
+        "sha256": "8dd1e9bd45a23821572a4106f9a06b86e8401b73a3bf09d17b60adab7fe9a9c9"
+      }
+    ],
+    "content_hash": "b381375de8e70bd71c24caa0968b6d396da7effc176ed0ee41977bafd125d010"
+  },
+  "criteria": {
+    "file": ".claude/skills/review-skill/criteria/skill-quality.json",
+    "sha256": "58ca5348fd0c2d07f382ab4ffb5d3b6d546f756d638d1df6c01b2192afa32efb"
+  },
+  "best_practices_snapshot": {
+    "fetched": "2026-10-27",
+    "max_age_days": 30
+  },
+  "reviewer": {
+    "kind": "subagent",
+    "subagent_type": "readonly-reviewer",
+    "agent_id": "a7f5c841b20de8c9a",
+    "model": "opus"
+  },
+  "result": {
+    "axes": [
+      {
+        "id": "structure",
+        "score": 17
+      },
+      {
+        "id": "description",
+        "score": 18
+      },
+      {
+        "id": "instructions",
+        "score": 18
+      },
+      {
+        "id": "output",
+        "score": 19
+      },
+      {
+        "id": "practicality",
+        "score": 18
+      }
+    ],
+    "score": 90,
+    "verdict": "PASS",
+    "must_pass_failures": [],
+    "findings": [
+      {
+        "criterion_id": "I2",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:34",
+        "comment": "参照表では handoff_lifecycle.py / knowhow_check.py のコピーを Step 8 としているが、手順本文 (SKILL.md:205-212) は Step 9 見出しの下にあり、step8-step9-output-and-verify.md にも knowhow-ledger / issue-tracker の移植記述が無い。Step の帰属を揃えるとよい"
+      },
+      {
+        "criterion_id": "P3",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:211",
+        "comment": "『hook-session-start-setup.sh の開始時刻の記録の部分も SessionStart に入れる』の切り出し範囲が未指定。script は ROOT を $SKILL_DIR/../../.. から計算するため (scripts/hook-session-start-setup.sh:14-20)、.claude/scripts/ に置くと CLAUDE_PROJECT_DIR 未設定時に ROOT がずれる。コピー範囲か書き換え方の明記を推奨"
+      },
+      {
+        "criterion_id": "S1",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/provenance.json:959",
+        "comment": "knowhow-ledger / claude-md-user-request-rule は選ぶと CLAUDE.md に『knowhow.json』『要望の反映先』が必須だが、template.md に該当 id ブロックが無い。Step 0-5 の一般規則で担保されるが、雛形が無いと文面がぶれやすい（ほかの claude-md-* 要素にも以前から無い）"
+      },
+      {
+        "criterion_id": "S3",
+        "severity": "low",
+        "location": ".claude/skills/agent-harness-bootstrap/SKILL.md:234",
+        "comment": "本体が約 36KB / 260 行。更新履歴 (234-245) を maintainer-checklist.md 等へ移すと本体が軽くなる"
+      }
+    ]
+  }
+}

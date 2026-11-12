@@ -668,5 +668,339 @@ class TestGit(Base):
         self.assertIn("警告", err)
 
 
+def hbody(issue=None, title="引継ぎ: テスト用", extra=""):
+    fm = f"---\nissue: {issue}\n---\n" if issue is not None else ""
+    return fm + body(title, extra)
+
+
+class ReleaseBase(Base):
+    """H: release --issue（1.6.0）。計画 2026-11-11-issue-handoff-knowhow-redesign.md r3 の D2.2。"""
+
+    def setUp(self):
+        super().setUp()
+        self.env_extra = {"GIT_CEILING_DIRECTORIES": str(self.root.parent)}
+        self.cfg = self.mk_cfg()
+
+    def run_cli(self, *args, cwd=None):
+        env = dict(os.environ, PYTHONUTF8="1", **self.env_extra)
+        p = subprocess.run([sys.executable, str(SCRIPT), *args], cwd=cwd or self.root,
+                           capture_output=True, text=True, encoding="utf-8", env=env)
+        return p.returncode, p.stdout, p.stderr
+
+    def mk_cfg(self, base=None, **kw):
+        base = base or self.root
+        d = dict(handoffs_dir=".tmp/handoffs", keep_referenced=[{"path": "issues/open", "required": False}],
+                 release={"closed_dirs": ["closed", "withdrawn"]})
+        d.update(kw)
+        c = base / ".claude" / "handoff-lifecycle.json"
+        c.parent.mkdir(parents=True, exist_ok=True)
+        c.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
+        return c
+
+    def issue(self, rel, text):
+        f = self.root / rel
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_text(text, encoding="utf-8")
+        return f
+
+    def release(self, issue_rel, *extra):
+        return self.run_cli("release", "--issue", issue_rel, "--config", str(self.cfg), *extra)
+
+    @property
+    def released_dir(self):
+        return self.root / ".tmp" / "archive" / "handoffs" / "released"
+
+
+class TestReleaseCandidates(ReleaseBase):
+    def test_H1_candidates_from_handoff_field_and_issue_frontmatter_only(self):
+        a = self.mk("a.md")
+        b = self.mk("b.md")
+        c = self.mk("c.md", hbody(issue="issues/closed/0001.md"))
+        d = self.mk("d.md", hbody(issue="0001.md"))
+        e = self.mk("e.md", body(extra="issue 0001 の続き。0001.md を参照\n"))
+        self.issue("issues/closed/0001.md",
+                   f"---\nlatest_handoff: .tmp/handoffs/b.md\n---\n# Issue 0001\n\n"
+                   f"**最新 handoff**: {a}\n\n本文で e.md に触れる\n")
+        rc, out, err = self.release("issues/closed/0001.md")
+        self.assertEqual(rc, 0, err)
+        for f in (a, b, c, d):
+            self.assertFalse(f.exists(), f.name)
+            self.assertTrue((self.released_dir / f.name).exists(), f.name)
+        self.assertTrue(e.exists())
+        self.assertFalse((self.released_dir / "e.md").exists())
+
+    def test_H1b_other_repo_path_is_not_candidate_and_quoted_paths_are_parsed(self):
+        other = Path(tempfile.mkdtemp())
+        try:
+            ohd = other / ".tmp" / "handoffs"; ohd.mkdir(parents=True)
+            ox = ohd / "x.md"; ox.write_text(body(), encoding="utf-8")
+            sp = self.mk("with space.md")
+            bt = self.mk("bt.md")
+            qt = self.mk("qt.md")
+            self.issue("issues/closed/0002.md",
+                       f"# Issue 0002\n\n最新 handoff: {ox}\n最新 handoff（前回）: <.tmp/handoffs/with space.md>\n"
+                       f"最新 handoff: `.tmp/handoffs/bt.md`\n最新 handoff: \".tmp/handoffs/qt.md\"\n")
+            rc, out, err = self.release("issues/closed/0002.md")
+            self.assertEqual(rc, 0, err)
+            self.assertTrue(ox.exists())
+            self.assertIn("別 repo", out)
+            self.assertFalse(sp.exists())
+            self.assertFalse(bt.exists())
+            self.assertFalse(qt.exists())
+            self.assertTrue((self.released_dir / "with space.md").exists())
+        finally:
+            shutil.rmtree(other, ignore_errors=True)
+
+    def test_H1c_bare_file_name_in_handoff_field_is_resolved_in_handoffs_dir(self):
+        h = self.mk("2026-11-01-x.md")
+        self.issue("issues/closed/0012.md", "# x\n\n最新 handoff: 2026-11-01-x.md\n")
+        rc, out, err = self.release("issues/closed/0012.md")
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(h.exists())
+        self.assertNotIn("対象外", out)
+
+    def test_H2_referenced_in_progress_and_received_are_kept_with_reason(self):
+        r = self.mk("ref.md")
+        w = self.mk("wip.md", "---\nwork_status: in_progress\n---\n" + body())
+        g = self.mk("got.md")
+        self.receive_at(g, 1)
+        self.issue("issues/open/0005.md", "# 別の active な issue\n\n最新 handoff: .tmp/handoffs/ref.md\n")
+        self.issue("issues/closed/0003.md",
+                   "# Issue 0003\n\n最新 handoff: .tmp/handoffs/ref.md\n最新 handoff: .tmp/handoffs/wip.md\n"
+                   "最新 handoff: .tmp/handoffs/got.md\n")
+        rc, out, err = self.release("issues/closed/0003.md")
+        self.assertEqual(rc, 0, err)
+        for f in (r, w, g):
+            self.assertTrue(f.exists(), f.name)
+        kept = {n: [l for l in out.splitlines() if l.startswith("残す") and l.endswith(": " + n)]
+                for n in ("ref.md", "wip.md", "got.md")}
+        self.assertEqual(kept["ref.md"], ["残す（別の active な issue から参照されている）: ref.md"], out)
+        self.assertEqual(kept["wip.md"], ["残す（work_status: in_progress）: wip.md"], out)
+        self.assertEqual(kept["got.md"], [f"残す（受領済みで done していない。使い終わったなら done {g.resolve()} を実行する）: got.md"], out)
+        self.assertFalse(self.released_dir.exists())
+
+    def test_H3_issue_must_be_in_closed_dirs(self):
+        h = self.mk("a.md")
+        self.issue("issues/open/0004.md", "# open\n\n最新 handoff: .tmp/handoffs/a.md\n")
+        rc, out, err = self.release("issues/open/0004.md")
+        self.assertEqual(rc, 2)
+        self.assertTrue(h.exists())
+        self.assertFalse(self.released_dir.exists())
+
+    def test_H3b_closed_dir_name_comes_from_config(self):
+        self.cfg = self.mk_cfg(release={"closed_dirs": ["close"]})
+        h = self.mk("a.md")
+        self.issue("issues/closed/0006.md", "# x\n\n最新 handoff: .tmp/handoffs/a.md\n")
+        rc, out, err = self.release("issues/closed/0006.md")
+        self.assertEqual(rc, 2)
+        self.assertTrue(h.exists())
+        self.issue("issues/close/0006.md", "# x\n\n最新 handoff: .tmp/handoffs/a.md\n")
+        rc, out, err = self.release("issues/close/0006.md")
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(h.exists())
+
+    def test_H4_untracked_goes_to_released_with_unique_name(self):
+        h = self.mk("a.md")
+        self.released_dir.mkdir(parents=True)
+        (self.released_dir / "a.md").write_text("先にあった", encoding="utf-8")
+        self.issue("issues/closed/0007.md", "# x\n\n最新 handoff: .tmp/handoffs/a.md\n")
+        rc, out, err = self.release("issues/closed/0007.md")
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(h.exists())
+        self.assertEqual((self.released_dir / "a.md").read_text(encoding="utf-8"), "先にあった")
+        self.assertEqual((self.released_dir / "a-1.md").read_text(encoding="utf-8"), body())
+
+    @unittest.skipUnless(GIT, "git が無い")
+    def test_H4b_git_tracked_is_deleted_and_staged(self):
+        self.cfg = self.mk_cfg(git_tracked=True)
+        git(self.root, "init", "-q")
+        (self.root / ".gitignore").write_text(".tmp/handoff-ledger.json\n", encoding="utf-8")
+        h = self.mk("a.md")
+        self.issue("issues/closed/0008.md", "# x\n\n最新 handoff: .tmp/handoffs/a.md\n")
+        git(self.root, "add", "-A"); git(self.root, "commit", "-qm", "x")
+        rc, out, err = self.release("issues/closed/0008.md")
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(h.exists())
+        self.assertRegex(git(self.root, "status", "--porcelain"), r"(?m)^D  .tmp/handoffs/a.md$")
+        self.assertIn("staged:", out)
+
+    def test_H4c_git_unavailable_with_git_tracked_still_moves(self):
+        self.cfg = self.mk_cfg(git_tracked=True)
+        h = self.mk("a.md")
+        self.issue("issues/closed/0009.md", "# x\n\n最新 handoff: .tmp/handoffs/a.md\n")
+        rc, out, err = self.release("issues/closed/0009.md")
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(h.exists())
+        self.assertTrue((self.released_dir / "a.md").exists())
+        self.assertIn("警告", err)
+
+    def test_H3c_missing_issue_is_exit_2(self):
+        rc, out, err = self.release("issues/closed/nope.md")
+        self.assertEqual(rc, 2)
+
+    def write_tracker(self, sources):
+        t = self.root / ".claude" / "issue-tracker.json"
+        t.write_text(json.dumps({"sources": sources}, ensure_ascii=False), encoding="utf-8")
+
+    def test_H7_closed_names_come_from_issue_tracker_when_present(self):
+        self.cfg = self.mk_cfg(release={"closed_dirs": ["closed"]})
+        self.write_tracker([{"type": "md_dirs", "root": "issues", "active": ["open"], "closed": ["close"],
+                             "merged_dir": "withdrawn"}])
+        h = self.mk("a.md")
+        self.issue("issues/closed/0010.md", "# x\n\n最新 handoff: .tmp/handoffs/a.md\n")
+        rc, out, err = self.release("issues/closed/0010.md")
+        self.assertEqual(rc, 2, "issue-tracker.json があれば release.closed_dirs は使わない")
+        self.assertTrue(h.exists())
+        self.issue("issues/withdrawn/0011.md", "# x\n\n最新 handoff: .tmp/handoffs/a.md\n")
+        rc, out, err = self.release("issues/withdrawn/0011.md")
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(h.exists())
+
+    def test_H7b_two_sources_are_judged_by_the_owning_source(self):
+        self.write_tracker([
+            {"type": "md_dirs", "root": "issuesA", "active": ["open"], "closed": ["closed"]},
+            {"type": "md_dirs", "root": "issuesB", "active": ["open"], "closed": ["done"]},
+        ])
+        h = self.mk("a.md")
+        for rel in ("issuesB/closed/x.md", "issuesA/done/z.md"):
+            self.issue(rel, "# x\n\n最新 handoff: .tmp/handoffs/a.md\n")
+            rc, out, err = self.release(rel)
+            self.assertEqual(rc, 2, rel)
+            self.assertTrue(h.exists(), rel)
+        self.issue("issuesB/done/y.md", "# y\n\n最新 handoff: .tmp/handoffs/a.md\n")
+        rc, out, err = self.release("issuesB/done/y.md")
+        self.assertEqual(rc, 0, err)
+        self.assertFalse(h.exists())
+
+
+class TestSessionAndIssueField(ReleaseBase):
+    def test_H5_remind_received_since_lists_only_received_after_and_not_done(self):
+        a = self.mk("before.md", hbody(issue="none")); self.receive_at(a, 5)
+        b = self.mk("after.md", hbody(issue="none")); self.receive_at(b, 1)
+        self.mk("old-unreceived.md", age_days=40)
+        since = (NOW - timedelta(hours=2)).isoformat()
+        rc, out, err = self.run_cli("remind", "--received-since", since, "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        lines = [l for l in out.splitlines() if l.strip()]
+        self.assertEqual(len(lines), 1, out)
+        self.assertIn("after.md", lines[0])
+        self.assertIn("done", lines[0])
+        rc, out, err = self.run_cli("done", str(b))
+        rc, out, err = self.run_cli("remind", "--received-since", since, "--now", NOW_S)
+        self.assertEqual(out.strip(), "")
+
+    def test_H5b_received_since_boundary_and_timezone(self):
+        a = self.mk("same.md", hbody(issue="none")); self.receive_at(a, 2)
+        since_same = (NOW - timedelta(hours=2)).isoformat()
+        since_other_tz = (NOW - timedelta(hours=2)).astimezone(timezone(timedelta(hours=9))).isoformat()
+        since_after = (NOW - timedelta(hours=2) + timedelta(seconds=1)).isoformat()
+        for since, expect in ((since_same, 1), (since_other_tz, 1), (since_after, 0)):
+            rc, out, err = self.run_cli("remind", "--received-since", since, "--now", NOW_S)
+            self.assertEqual(rc, 0, err)
+            self.assertEqual(len([l for l in out.splitlines() if "same.md" in l]), expect, since)
+
+    def test_H6_receive_warns_without_issue_field_and_remind_marks_it(self):
+        n = self.mk("noissue.md")
+        rc, out, err = self.run_cli("receive", str(n), "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertIn("issue:", err)
+        y = self.mk("hasissue.md", hbody(issue="none"))
+        rc, out, err = self.run_cli("receive", str(y), "--now", NOW_S)
+        self.assertEqual(rc, 0, err)
+        self.assertNotIn("issue:", err)
+        rc, out, err = self.run_cli("remind", "--now", NOW_S)
+        ln = [l for l in out.splitlines() if "noissue.md" in l]
+        ly = [l for l in out.splitlines() if "hasissue.md" in l]
+        self.assertTrue(ln and "issue 未記載" in ln[0], out)
+        self.assertTrue(ly and "issue 未記載" not in ly[0], out)
+
+
+class TestReferenceIndexCost(Base):
+    """V18: 大きな repo で remind の参照検査が時間切れになる問題（discovery-log 2026-11-11T20:30）。
+    handoff 名を含まない file は語に分けない（読むだけ）ことを、語に分けた回数で確かめる。"""
+
+    def test_V18_files_without_candidate_names_are_not_tokenized(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("hl18", SCRIPT)
+        hl = importlib.util.module_from_spec(spec); spec.loader.exec_module(hl)
+        d = self.root / "issues" / "open"; d.mkdir(parents=True)
+        for i in range(200):
+            (d / f"{i:04d}.md").write_text("無関係な本文 lorem ipsum\n" * 50, encoding="utf-8")
+        (d / "hit.md").write_text("最新 handoff: .tmp/handoffs/20261101_handoff_x.md\n", encoding="utf-8")
+        calls = []
+
+        class Counting:
+            def __init__(self, pat):
+                self.pat = pat
+
+            def findall(self, text):
+                calls.append(1)
+                return self.pat.findall(text)
+        hl._TOKEN = Counting(hl._TOKEN)
+        hl._TOKEN_ASCII = Counting(hl._TOKEN_ASCII)
+        tokens = hl._referenced_tokens([d], names={"20261101_handoff_x.md", "20261101_handoff_x"})
+        self.assertTrue(hl._is_referenced(Path("20261101_handoff_x.md"), tokens))
+        self.assertLessEqual(len(calls), 2, "語に分けるのは名前を含む file だけ")
+
+    def test_V18d_prefilter_applies_up_to_32_names(self):
+        d = self.root / "issues" / "open"; d.mkdir(parents=True)
+        for i in range(5):
+            (d / f"{i}.md").write_text("無関係な本文\n", encoding="utf-8")
+        for n, expect_calls in ((32, 0), (33, 10)):
+            hl = self._load()
+            calls = []
+
+            class Counting:
+                def __init__(self, pat):
+                    self.pat = pat
+
+                def findall(self, text):
+                    calls.append(1)
+                    return self.pat.findall(text)
+            hl._TOKEN = Counting(hl._TOKEN)
+            hl._TOKEN_ASCII = Counting(hl._TOKEN_ASCII)
+            names = hl._names_of([Path(f"h{i:03d}.md") for i in range(n)])
+            hl._referenced_tokens([d], names=names)
+            self.assertEqual(len(calls), expect_calls, n)
+
+    def _load(self):
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("hl18b", SCRIPT)
+        hl = importlib.util.module_from_spec(spec); spec.loader.exec_module(hl)
+        return hl
+
+    def _remind_calls(self, hl):
+        calls = []
+        real = hl._referenced_tokens
+
+        def spy(dirs, *args, **kw):
+            calls.append(kw.get("names"))
+            return real(dirs, *args, **kw)
+        hl._referenced_tokens = spy
+        cwd = os.getcwd(); os.chdir(self.root)
+        try:
+            rc = hl.main(["remind", "--keep-referenced", "issues", "--now", NOW_S])
+        finally:
+            os.chdir(cwd)
+        return rc, calls
+
+    def test_V18b_remind_without_old_candidates_does_not_read_references(self):
+        d = self.root / "issues" / "open"; d.mkdir(parents=True)
+        (d / "i.md").write_text("x", encoding="utf-8")
+        self.mk("new.md", age_days=1)
+        hl = self._load()
+        rc, calls = self._remind_calls(hl)
+        self.assertEqual((rc, calls), (0, []))
+
+    def test_V18c_remind_looks_up_only_candidate_names(self):
+        d = self.root / "issues" / "open"; d.mkdir(parents=True)
+        (d / "i.md").write_text("old.md を参照", encoding="utf-8")
+        self.mk("old.md", age_days=60); self.mk("free.md", age_days=60); self.mk("new.md", age_days=1)
+        hl = self._load()
+        rc, calls = self._remind_calls(hl)
+        self.assertEqual(rc, 0)
+        self.assertEqual(calls, [{"old.md", "old", "free.md", "free"}])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

@@ -11,15 +11,28 @@ handoff の本体は書き換えない。受領の記録は .tmp/handoff-ledger.
   done <path> --config CFG                    config が git_tracked の時、追跡中なら削除を stage する（staged: 行）
   remind [--dir DIR] [--hours 4] [--days 30] [--now ISO] [--config CFG] [--keep-referenced DIR]...
          [--only-main-worktree]               受領済みの残りと、未受領で古いものをファイル名だけで出す
+         [--received-since ISO]               --received-since を付けると、その時刻以降に受領して done していない
+                                              ものだけを出す（Stop hook 用。未受領の古いものは見ない）
   sweep [--dir DIR] [--days 30] [--now ISO] [--apply] [--config CFG] [--keep-referenced DIR]...
                                               未受領で古いものを一覧する。--apply で .tmp/archive/handoffs/ へ退避する
                                               （退避は標準動作で確認は要らない。移動なので archive から戻せる）
+  release --issue <path> [--config CFG]       close・取り下げ・統合した issue の handoff を片付ける。候補は (i) issue の
+                                              handoff 欄（release.handoff_field_regex）に書かれたパスと (ii) frontmatter の
+                                              issue: がその issue のパスか file 名と一致する handoff だけ（本文の語の一致では
+                                              選ばない）。handoffs_dir の直下に無いもの（別 repo 等）は触らない。別の active な
+                                              issue からの参照・work_status: in_progress・受領済みで未 done のものは理由を出して
+                                              残す。git_tracked: true で追跡中なら削除を stage し、それ以外は .tmp/archive/handoffs/released/
+                                              へ移す（sweep・done と同じ扱い）。issue が closed の状態ディレクトリに無ければ exit 2 で何もしない。closed の
+                                              名前は .claude/issue-tracker.json（あれば。issue の所属する source の closed と
+                                              merged_dir）、無ければ config の release.closed_dirs から読む。
+receive は frontmatter に issue: <path> か issue: none が無ければ警告を出し、remind は「issue 未記載」と付ける。
 
 除外: --keep-referenced（または config の keep_referenced）の配下（再帰、.md .json .yaml .yml .txt）の本文に
       ファイル名か拡張子なしの名前が出てくるもの（大文字・小文字は区別しない）、先頭 60 行に
       work_status: in_progress があるもの、受領済みのもの。
 config（.claude/handoff-lifecycle.json）: script / source / source_sha256 / handoffs_dir /
-      keep_referenced [{"path", "required"}] / days / git_tracked。相対パスは config のある .claude/ の親が基準。
+      keep_referenced [{"path", "required"}] / days / git_tracked /
+      release {"closed_dirs": [...], "handoff_field_regex": [...]}。相対パスは config のある .claude/ の親が基準。
 git_tracked: true の時、sweep --apply と done は追跡中のファイルをその場で stage し（rename / 削除）、
       staged: 行にパスを出す。commit と push はしない（そのパスだけを利用者側で commit する）。
 
@@ -153,6 +166,33 @@ def md_files(d):
     return sorted(p for p in d.iterdir() if p.is_file() and p.suffix.casefold() == ".md")
 
 
+def frontmatter_field(path, key):
+    """先頭の --- で囲んだ frontmatter（60 行まで）から key: の値を返す。無ければ None。"""
+    try:
+        with path.open(encoding="utf-8-sig", errors="replace") as f:
+            head = [l.rstrip("\r\n") for _, l in zip(range(60), f)]
+    except OSError:
+        return None
+    if not head or head[0].strip() != "---":
+        return None
+    pat = re.compile(r"^" + re.escape(key) + r":\s*(.*)$")
+    for line in head[1:]:
+        if line.strip() == "---":
+            return None
+        m = pat.match(line)
+        if m:
+            return _clean_value(m.group(1))
+    return None
+
+
+def _clean_value(v):
+    """行末までの値から、囲みのバッククォート・山括弧・引用符を外す（空白を含むパスは切らない）。"""
+    v = v.strip()
+    while len(v) >= 2 and (v[0], v[-1]) in {("`", "`"), ("<", ">"), ('"', '"'), ("'", "'")}:
+        v = v[1:-1].strip()
+    return v
+
+
 def cmd_receive(a):
     load_config(a)  # --dir が無ければ config の handoffs_dir、それも無ければ .tmp/handoffs
     now = parse_now(a.now)
@@ -173,6 +213,9 @@ def cmd_receive(a):
         target, how = check_file(a.path), "path"
     else:
         raise CliError(2, "receive には <path> か --title が要る")
+    if frontmatter_field(target, "issue") in (None, ""):
+        print("警告: frontmatter に issue: が無い（作成者は issue: <issue のパス> か issue: none を書く。"
+              "remind では「issue 未記載」と出る）", file=sys.stderr)
     lp = ledger_path(target.parent)
     rec, _ = load_ledger(lp, backup=True)
     rec[key_of(target)] = {
@@ -232,6 +275,7 @@ def cmd_done(a):
 REF_SUFFIXES = {".md", ".json", ".yaml", ".yml", ".txt"}
 REF_MAX_BYTES = 2 * 1024 * 1024  # remind ではこれより大きいファイルを読まない（sweep は全部読む）
 LOCK_STALE_SECONDS = 600
+PREFILTER_MAX_NAMES = 32  # 参照の検査で、部分文字列による事前の絞り込みを使う名前の数の上限
 _TOKEN = re.compile(r"[\w.\-]+")
 _TOKEN_ASCII = re.compile(r"[\w.\-]+", re.ASCII)  # 日本語が直に続く「a.mdを参照」も拾う
 _IN_PROGRESS = re.compile(r"^\s*work_status:\s*in_progress\b")
@@ -288,9 +332,32 @@ def _check_keep_dirs(a, strict):
     return dirs
 
 
-def _referenced_tokens(dirs, max_bytes=None, deadline=None):
-    """参照先の本文から、handoff 名の形の語を集める（小文字、末尾の . を除く）。"""
+def _names_of(paths):
+    """handoff の file 名と拡張子なしの名前（小文字）の集合。"""
+    out = set()
+    for p in paths:
+        out.add(p.name.casefold())
+        out.add(p.stem.casefold())
+    return out
+
+
+def _referenced_tokens(dirs, max_bytes=None, deadline=None, names=None, exclude=None):
+    """参照先の本文から、handoff 名の形の語を集める（小文字、末尾の . を除く）。
+
+    names（handoff 名の集合）を渡すと、そのどれも部分文字列として含まない file は語に分けずに飛ばし、
+    返す語も names に入るものだけにする（大きな repo で remind が時間切れになるのを避ける。1.6.0）。
+    語は本文の部分文字列なので、部分文字列に無い名前が語として一致することはなく、判定は変わらない。
+    exclude（resolve 済みパスの集合）にある file は読まない。"""
     tokens = set()
+    wanted = {n.casefold() for n in names} if names is not None else None
+    if wanted is not None and not wanted:
+        return tokens
+    # 部分文字列での事前の絞り込みは名前が少ない時だけ行う（名前が多いと、語に分ける方が速い）
+    search = None
+    if wanted is not None:
+        search = sorted({n for n in wanted if not (n.endswith(".md") and n[:-3] in wanted)})
+        if len(search) > PREFILTER_MAX_NAMES:
+            search = None
     for d in dirs:
         for root, _, files in os.walk(d):
             for name in files:
@@ -299,6 +366,8 @@ def _referenced_tokens(dirs, max_bytes=None, deadline=None):
                 p = Path(root) / name
                 if p.suffix.casefold() not in REF_SUFFIXES:
                     continue
+                if exclude and key_of(p.resolve()) in exclude:
+                    continue
                 try:
                     if max_bytes is not None and p.stat().st_size > max_bytes:
                         print(f"警告: 大きいので参照の検査で読まない: {p}", file=sys.stderr)
@@ -306,9 +375,15 @@ def _referenced_tokens(dirs, max_bytes=None, deadline=None):
                     text = p.read_text(encoding="utf-8", errors="replace")
                 except OSError:
                     continue
+                if search is not None:
+                    low = text.casefold()
+                    if not any(n in low for n in search):
+                        continue
                 for pat in (_TOKEN, _TOKEN_ASCII):
                     for t in pat.findall(text):
-                        tokens.add(t.rstrip(".").casefold())
+                        t = t.rstrip(".").casefold()
+                        if wanted is None or t in wanted:
+                            tokens.add(t)
     return tokens
 
 
@@ -417,6 +492,31 @@ def _sweep_cmd(a, days_given):
     return " ".join(parts)
 
 
+def _remind_since(a, d, since_s):
+    """--received-since: その時刻以降に受領し、まだ done していないものだけを出す（Stop hook 用）。"""
+    try:
+        since = parse_now(since_s)
+    except CliError as e:
+        print(str(e), file=sys.stderr)
+        return 2
+    rec, _ = load_ledger(ledger_path(d))
+    for e in rec.values():
+        p = Path(e.get("path", ""))
+        if not p.is_file():
+            continue
+        try:
+            ra = datetime.fromisoformat(e["received_at"])
+        except (KeyError, ValueError, TypeError):
+            continue
+        if ra.tzinfo is None:
+            ra = ra.astimezone()
+        if ra < since:
+            continue
+        print(f"[handoff] この session で受領して done していない: {p.name}（使い終わったなら done {p}、"
+              "続くなら issue の次の一手に書いてから done する）")
+    return 0
+
+
 def cmd_remind(a):
     started = time.monotonic()
     days_given = a.days is not None and not getattr(a, "config", None) and a.days != DEFAULT_DAYS
@@ -437,6 +537,8 @@ def cmd_remind(a):
         return 2
     if not d.is_dir():
         return 0
+    if a.received_since:
+        return _remind_since(a, d, a.received_since)
     try:
         rec, _ = load_ledger(ledger_path(d))
         lines = []
@@ -452,21 +554,25 @@ def cmd_remind(a):
                 ra = ra.astimezone()
             hours = (now - ra).total_seconds() / 3600
             note = "・中断の疑い（作業が終わっていれば done で消す）" if hours > a.hours else ""
+            if frontmatter_field(p, "issue") in (None, ""):
+                note += "・issue 未記載"
             lines.append(f"[handoff] 受領済みで残っている: {p.name}（受領 {hours:.1f} 時間前{note}）")
         tokens = None
         timed_out = False
         dirs = _check_keep_dirs(a, strict=False)
-        if dirs:
+        # 参照の検査は、退避の候補（未受領で古いもの）がある時だけ、その名前に絞って行う（1.6.0）
+        pre = _old_unreceived(d, rec, now, a.days) if dirs else []
+        if dirs and pre:
             try:
                 tokens = _referenced_tokens(dirs, max_bytes=REF_MAX_BYTES,
-                                            deadline=started + a.ref_timeout)
+                                            deadline=started + a.ref_timeout, names=_names_of(pre))
             except _Timeout:
                 timed_out = True
         cmd = _sweep_cmd(a, days_given)
         if timed_out:
             lines.append(f"[handoff] 参照の検査が時間内に終わらなかった。{cmd.replace(' --apply', '')} で一覧を確かめてから --apply する")
         else:
-            old = _old_unreceived(d, rec, now, a.days, tokens)
+            old = _old_unreceived(d, rec, now, a.days, tokens) if pre or not dirs else []
             if old:
                 names = ", ".join(p.name for p in old[:REMIND_LIMIT])
                 more = " ほか" if len(old) > REMIND_LIMIT else ""
@@ -514,6 +620,15 @@ def _acquire_lock(lock):
     raise CliError(2, f"ロックを取れない: {lock}")
 
 
+def _sweep_candidates(d, rec, now, days, dirs):
+    """未受領で古いものから、参照されているもの・作業中のものを除く。参照は候補の名前に絞って調べる。"""
+    pre = _old_unreceived(d, rec, now, days)
+    if not dirs or not pre:
+        return pre
+    tokens = _referenced_tokens(dirs, names=_names_of(pre))
+    return [p for p in pre if not _is_referenced(p, tokens)]
+
+
 def cmd_sweep(a):
     load_config(a)
     now = parse_now(a.now)
@@ -523,8 +638,7 @@ def cmd_sweep(a):
     dirs = _check_keep_dirs(a, strict=True)
     if not a.apply:
         rec, _ = load_ledger(ledger_path(d))
-        tokens = _referenced_tokens(dirs) if dirs else None
-        old = _old_unreceived(d, rec, now, a.days, tokens)
+        old = _sweep_candidates(d, rec, now, a.days, dirs)
         print(f"退避の候補（未受領で {a.days} 日超）: {len(old)} 件")
         for p in old:
             print(f"  {p.name}")
@@ -535,8 +649,7 @@ def cmd_sweep(a):
         rec, ok = load_ledger(ledger_path(d))
         if not ok:
             raise CliError(2, "台帳が壊れているので退避しない（受領済みのものを動かすおそれがある）")
-        tokens = _referenced_tokens(dirs) if dirs else None
-        old = _old_unreceived(d, rec, now, a.days, tokens)
+        old = _sweep_candidates(d, rec, now, a.days, dirs)
         arch = d.parent / "archive" / "handoffs"
         arch.mkdir(parents=True, exist_ok=True)
         for p in old:
@@ -557,6 +670,148 @@ def cmd_sweep(a):
             lock.unlink()
         except OSError:
             pass
+    return 0
+
+
+DEFAULT_HANDOFF_FIELDS = [r"最新\s*handoff[^:：\n]*[:：]\s*(.+)$", r"^latest_handoff:\s*(.+)$"]
+
+
+def _closed_dirs_for(issue, base, cfg):
+    """issue が closed（close・取り下げ・統合）の状態にあるかを決める。名前の正本は .claude/issue-tracker.json の
+    closed と merged_dir で、issue のパスを各 source の root 配下で照合して所属する source の名前で判定する。
+    issue-tracker.json が無い repo だけ config の release.closed_dirs（親ディレクトリ名）を使う。"""
+    tracker = base / ".claude" / "issue-tracker.json"
+    if tracker.is_file():
+        try:
+            t = json.loads(tracker.read_text(encoding="utf-8-sig"))
+            sources = t["sources"]
+            if not isinstance(sources, list):
+                raise TypeError
+        except (OSError, ValueError, KeyError, TypeError) as ex:
+            raise CliError(2, f"issue-tracker.json を読めない: {tracker}（{ex}）")
+        for s in sources:
+            if not isinstance(s, dict) or s.get("type") != "md_dirs" or not isinstance(s.get("root"), str):
+                continue
+            root = (base / s["root"]).resolve()
+            try:
+                rel = issue.relative_to(root)
+            except ValueError:
+                continue
+            names = [x for x in (s.get("closed") or []) if isinstance(x, str)]
+            if isinstance(s.get("merged_dir"), str):
+                names.append(s["merged_dir"])
+            if len(rel.parts) == 2 and rel.parts[0] in names:
+                return
+            raise CliError(2, f"issue が closed の状態ディレクトリ（{', '.join(names) or 'なし'}）に無い: {issue}"
+                              f"（issue-tracker.json の source root: {s['root']}）。close・取り下げ・統合の後に実行する")
+        raise CliError(2, f"issue がどの md_dirs の source の root 配下にも無い: {issue}")
+    rel_cfg = cfg.get("release") if isinstance(cfg.get("release"), dict) else {}
+    names = rel_cfg.get("closed_dirs")
+    if not (isinstance(names, list) and names and all(isinstance(x, str) for x in names)):
+        raise CliError(2, "closed の名前が分からない（.claude/issue-tracker.json も config の release.closed_dirs も無い）")
+    if issue.parent.name not in names:
+        raise CliError(2, f"issue の親ディレクトリ（{issue.parent.name}）が release.closed_dirs（{', '.join(names)}）に無い: {issue}")
+
+
+def _field_patterns(cfg):
+    rel_cfg = cfg.get("release") if isinstance(cfg.get("release"), dict) else {}
+    pats = rel_cfg.get("handoff_field_regex") or DEFAULT_HANDOFF_FIELDS
+    out = []
+    for p in pats:
+        try:
+            out.append(re.compile(p, re.M | re.I))
+        except (re.error, TypeError) as ex:
+            raise CliError(2, f"release.handoff_field_regex が不正: {p}（{ex}）")
+    return out
+
+
+def _resolve_under(base, value, handoffs_dir=None):
+    """handoff 欄の値をパスにする。区切りの無い file 名だけの値は handoffs_dir を基準にする。"""
+    v = value.replace("\\", "/") if os.sep == "/" else value
+    p = Path(v)
+    if not p.is_absolute() and handoffs_dir is not None and "/" not in value and "\\" not in value:
+        return (handoffs_dir / p).resolve(strict=False)
+    return (p if p.is_absolute() else base / p).resolve(strict=False)
+
+
+def cmd_release(a):
+    cfg = load_config(a)
+    base = _abs(a.config).resolve().parent.parent if getattr(a, "config", None) else Path.cwd().resolve()
+    d = check_dir(a.dir)
+    ip = _abs(a.issue)
+    if not ip.is_absolute() or not ip.exists():
+        ip = base / a.issue
+    try:
+        issue = ip.resolve(strict=True)
+    except (FileNotFoundError, OSError):
+        raise CliError(2, f"issue のファイルが無い: {a.issue}")
+    if not issue.is_file():
+        raise CliError(2, f"issue が通常のファイルではない: {a.issue}")
+    _closed_dirs_for(issue, base, cfg)
+    text = issue.read_text(encoding="utf-8-sig", errors="replace")
+    found = []  # (表示用の値, resolve したパス)
+    for pat in _field_patterns(cfg):
+        for m in pat.finditer(text):
+            v = _clean_value(m.group(1) if m.groups() else m.group(0))
+            if v:
+                found.append((v, _resolve_under(base, v, d)))
+    if d.is_dir():
+        for p in md_files(d):
+            v = frontmatter_field(p, "issue")
+            if not v or v.casefold() == "none":
+                continue
+            target = _resolve_under(base, v)
+            if key_of(target) == key_of(issue) or Path(v.replace("\\", "/")).name == issue.name:
+                found.append((str(p), p.resolve()))
+    cands, seen = [], set()
+    dkey = key_of(d.resolve())
+    for v, p in found:
+        k = key_of(p)
+        if k in seen:
+            continue
+        seen.add(k)
+        if key_of(p.parent) != dkey or p.suffix.casefold() != ".md":
+            print(f"対象外（この repo の {d} 直下に無い。別 repo など）: {v}")
+            continue
+        if not p.is_file():
+            print(f"対象外（もう無い）: {v}")
+            continue
+        cands.append(p)
+    if not cands:
+        print(f"片付ける handoff は無い: {issue}")
+        return 0
+    rec, ok = load_ledger(ledger_path(d))
+    if not ok:
+        raise CliError(2, "台帳が壊れているので片付けない（受領済みのものを消すおそれがある）")
+    dirs = _check_keep_dirs(a, strict=True)
+    tokens = _referenced_tokens(dirs, names=_names_of(cands), exclude={key_of(issue)}) if dirs else set()
+    released_dir = d.parent / "archive" / "handoffs" / "released"
+    for p in cands:
+        if _is_referenced(p, tokens):
+            print(f"残す（別の active な issue から参照されている）: {p.name}")
+            continue
+        if _in_progress(p):
+            print(f"残す（work_status: in_progress）: {p.name}")
+            continue
+        if key_of(p) in rec:
+            print(f"残す（受領済みで done していない。使い終わったなら done {p} を実行する）: {p.name}")
+            continue
+        tracked = _git_tracked(p) if a.git_tracked else False
+        if a.git_tracked and tracked is None:
+            print("警告: git を呼べないので stage しない（released/ へ移す）", file=sys.stderr)
+        if tracked:
+            p.unlink()
+            r = _git(p.parent, "rm", "--cached", "-q", "--", p.name)
+            print(f"released: {p}（削除。commit 前なら git restore --staged --worktree で戻せる）")
+            if r.returncode == 0:
+                print(f"staged: {p}")
+            else:
+                print(f"警告: git で stage できなかった: {r.stderr.strip()}", file=sys.stderr)
+        else:
+            released_dir.mkdir(parents=True, exist_ok=True)
+            dest = _unique_dest(released_dir, p.name)
+            shutil.move(str(p), str(dest))
+            print(f"released: {p} -> {dest}")
     return 0
 
 
@@ -583,6 +838,7 @@ def build_parser():
     rm.add_argument("--keep-referenced", action="append")
     rm.add_argument("--only-main-worktree", action="store_true")
     rm.add_argument("--ref-timeout", type=float, default=10.0, help=argparse.SUPPRESS)
+    rm.add_argument("--received-since")
     sw = sub.add_parser("sweep")
     sw.add_argument("--dir", default=None)
     sw.add_argument("--days", type=int, default=None)
@@ -590,12 +846,18 @@ def build_parser():
     sw.add_argument("--apply", action="store_true")
     sw.add_argument("--config")
     sw.add_argument("--keep-referenced", action="append")
+    rl = sub.add_parser("release")
+    rl.add_argument("--issue", required=True)
+    rl.add_argument("--dir", default=None)
+    rl.add_argument("--config")
+    rl.add_argument("--keep-referenced", action="append")
     return ap
 
 
 def main(argv=None):
     a = build_parser().parse_args(argv)
-    fn = {"receive": cmd_receive, "done": cmd_done, "remind": cmd_remind, "sweep": cmd_sweep}[a.cmd]
+    fn = {"receive": cmd_receive, "done": cmd_done, "remind": cmd_remind, "sweep": cmd_sweep,
+          "release": cmd_release}[a.cmd]
     try:
         return fn(a)
     except CliError as e:

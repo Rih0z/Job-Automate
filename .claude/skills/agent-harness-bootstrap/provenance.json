@@ -858,6 +858,7 @@
       "applies_to": [
         "operational-knowhow.md handoff 受領 / handoff 管理",
         "scripts/handoff_lifecycle.py（受領の台帳・done・sweep）",
+        "scripts/handoff_lifecycle.py release（閉じた issue の handoff の片付け）・remind --received-since（Stop hook 用）",
         "template.md 起動時手順 4・5",
         "生成 rules issue-workflow.md"
       ],
@@ -872,7 +873,7 @@
         "issue-lifecycle"
       ],
       "note": "issue-lifecycle 非採用時は issue 紐付けなしの命名 [YYYY-MM-DD]-[識別単語].md のみを使う",
-      "history": "2026-11-11: 受領は利用者が貼った・指定したものだけ、完了時に done で削除する方式にした。同日、未受領で 30 日を超えたものは確認なしで sweep --apply により archive へ退避する標準動作にした（sweep の既定を 90 日から 30 日へ。hook は通知だけ）。同日、repo ごとの config、issue から参照されているものの除外、git で追跡している handoff の stage を足した（別 repo へ入れる時の前提）。",
+      "history": "2026-11-11: 受領は利用者が貼った・指定したものだけ、完了時に done で削除する方式にした。同日、未受領で 30 日を超えたものは確認なしで sweep --apply により archive へ退避する標準動作にした（sweep の既定を 90 日から 30 日へ。hook は通知だけ）。同日、repo ごとの config、issue から参照されているものの除外、git で追跡している handoff の stage を足した（別 repo へ入れる時の前提）。2026-11-11 (1.6.0): issue を閉じた時に handoff を片付ける release --issue（候補は issue の handoff 欄と frontmatter の issue: の一致だけ。別 repo のパス・参照されているもの・作業中・受領済みは残す）、handoff の frontmatter の issue: 欄（無ければ警告）、Stop hook 用の remind --received-since と session の開始時刻の記録、参照の検査を退避の候補がある時だけ候補の名前に絞って行う変更を足した。長時間の作業の進捗は issue があれば issue に書き、handoff を作らない（session-boundary.json R3）。",
       "target_contract": {
         "when_selected": [
           {
@@ -912,6 +913,117 @@
           {
             "type": "dir_absent",
             "path": ".tmp/handoffs"
+          }
+        ]
+      }
+    },
+    {
+      "id": "issue-tracker",
+      "kind": "asset",
+      "provenance": "author-preference",
+      "summary": "起票の前に関連 issue を探して重複を避ける issue_tracker.py（issue-lifecycle-tracking skill の scripts/）と設定 .claude/issue-tracker.json: related（題名 0.7・本文 0.3 の語の含有で並べる。gate しない）・request（利用者の要望の原文を issue に残す）・merge（重複を統合し merged_dir へ移す）・check-new（新規の issue に「関連:」欄、新規の JSON finding に related があるかを commit 前に検査）。",
+      "applies_to": [
+        "operational-knowhow.md 起票前の関連 issue の確認と「関連:」欄",
+        "issue-lifecycle-tracking SKILL.md 起票の手順",
+        ".claude/hooks/pre-git-ledger-gate.sh（check-new）"
+      ],
+      "files": [
+        ".claude/issue-tracker.json"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "soft_depends_on": [
+        "issue-lifecycle"
+      ],
+      "note": "md の issue ディレクトリが無い repo は json_findings の source だけにする。統合済みを closed に置く repo は merged_dir: closed と merged_state（例: closed（統合））を書く。",
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/issue-tracker.json"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/issue-tracker.json"
+          },
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "issue_tracker\\.py"
+          }
+        ]
+      }
+    },
+    {
+      "id": "knowhow-ledger",
+      "kind": "asset",
+      "provenance": "author-preference",
+      "summary": "repo ごとの決まりの台帳 .claude/knowhow.json（1 件 1 文。KH-xxxx の id・reflect_to・status queued/reflected/retired）と検査 scripts/knowhow_check.py（形は scripts/knowhow.schema.json）: 反映先の file に ID のアンカー（md は HTML コメント、json は knowhow 配列）があるか、queued が残っていないか、反映先のアンカーが台帳にあるか（双方向）を確かめる。commit 前は全件、Stop では増えた queued だけで 1 回止める。",
+      "applies_to": [
+        "operational-knowhow.md ノウハウの台帳（knowhow.json）",
+        ".claude/hooks/pre-git-ledger-gate.sh（knowhow_check）",
+        ".claude/hooks/stop-handoff-knowhow-gate.sh（--new-since HEAD）"
+      ],
+      "files": [
+        ".claude/knowhow.json"
+      ],
+      "rubric_items": [],
+      "depends_on": [],
+      "note": "初期エントリは移植先で決めた決まりだけを入れる（移植元の KH をそのまま写さない）。既存の運用ノウハウ文書は説明文として残し、決まりに当たる節にアンカーを置く。",
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "file_exists",
+            "path": ".claude/knowhow.json"
+          },
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "knowhow\\.json"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "file_absent",
+            "path": ".claude/knowhow.json"
+          },
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "knowhow\\.json"
+          }
+        ]
+      }
+    },
+    {
+      "id": "claude-md-user-request-rule",
+      "kind": "claude-md-section",
+      "provenance": "author-preference",
+      "summary": "CLAUDE.md『応答ルール』の要望の扱い: 作業中に利用者が新しい要望・好み・やり方の指定を述べたら、関係する issue に request で原文を残し、今後も守る決まりなら knowhow.json に入れて反映し、1 回きりで関係する issue も無ければ記録せず、完了報告に『要望の反映先』を書く。discovery-log の drain の 3 つ目（決まりとして KH に登録し status: knowhow）と、CR を足す時の related の確認もこの要素に含む。",
+      "applies_to": [
+        "CLAUDE.md 応答ルール（利用者の新しい要望の扱い・discovery-log の drain）"
+      ],
+      "rubric_items": [],
+      "depends_on": [
+        "knowhow-ledger",
+        "issue-tracker"
+      ],
+      "note": "claude-md-response-rules を選び、この要素を選ばない移植先では、drain の判断は done と issued の 2 つだけを書く（knowhow の 3 つ目を書かない）。",
+      "target_contract": {
+        "when_selected": [
+          {
+            "type": "grep",
+            "path": "CLAUDE.md",
+            "pattern": "要望の反映先"
+          }
+        ],
+        "when_unselected": [
+          {
+            "type": "grep_absent",
+            "path": "CLAUDE.md",
+            "pattern": "要望の反映先"
           }
         ]
       }

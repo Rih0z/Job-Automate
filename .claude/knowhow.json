@@ -1,0 +1,97 @@
+{
+  "schema": "knowhow/v1",
+  "updated": "2026-11-11",
+  "description": "このリポジトリで今後も守る決まりの台帳（1 件 1 文）。反映先の file に ID のアンカー（md は HTML コメントの KH-xxxx、json は knowhow 配列）を置き、knowhow_check.py（.claude/skills/agent-harness-bootstrap/scripts/）が反映を確かめる。git commit の前は .claude/hooks/pre-git-ledger-gate.sh が全件を、Stop では stop-handoff-knowhow-gate.sh が増えた queued を見る。形は knowhow.schema.json。",
+  "entries": [
+    {
+      "id": "KH-0001",
+      "added": "2026-11-11",
+      "source": "user",
+      "statement": "handoff は利用者が貼った・指定したものだけを確認なしで受領し、使い終わったら handoff_lifecycle.py done で消す。最新の handoff を session 開始時に自動で読まない。",
+      "why": "無関係な最新 handoff の誤受領と、本文の毎 session の注入による context の汚染を防ぐため。",
+      "reflect_to": [
+        {"path": ".claude/skills/agent-harness-bootstrap/operational-knowhow.md", "must_contain": "user の明示指示でのみ受領"}
+      ],
+      "status": "reflected",
+      "retired_reason": null
+    },
+    {
+      "id": "KH-0002",
+      "added": "2026-11-11",
+      "source": "user",
+      "statement": "未受領のまま 30 日を超えた handoff は、SessionStart の通知に出たら確認なしで sweep --apply により .tmp/archive/handoffs/ へ退避する。",
+      "why": "受領されない handoff が残り続けて、次の session の判断を乱すのを防ぐため（移動なので戻せる）。",
+      "reflect_to": [
+        {"path": ".claude/skills/agent-harness-bootstrap/operational-knowhow.md", "must_contain": "sweep --apply"}
+      ],
+      "status": "reflected",
+      "retired_reason": null
+    },
+    {
+      "id": "KH-0003",
+      "added": "2026-11-11",
+      "source": "user",
+      "statement": "同じ session で続けるか、区切るか、引継ぎメモを書くかは .claude/session-boundary.json の判定表を上から順に当てはめて決め、後始末や同じ作業の続きでは引継ぎメモを作らない。",
+      "why": "区切りの判定をせずに毎回引継ぎメモを作り、残ったメモが増えるのを防ぐため。",
+      "reflect_to": [
+        {"path": "CLAUDE.md", "must_contain": "session-boundary.json"},
+        {"path": ".claude/session-boundary.json"}
+      ],
+      "status": "reflected",
+      "retired_reason": null
+    },
+    {
+      "id": "KH-0004",
+      "added": "2026-11-11",
+      "source": "user",
+      "statement": "モデル・effort・advisor は .claude/model-selection.json と .claude/model-selection.operator.json に従って選び、subagent にはその判定のモデルを Agent の model 引数で渡す。",
+      "why": "作業ごとにモデルの選び方がぶれて、費用と品質が安定しないのを防ぐため。",
+      "reflect_to": [
+        {"path": "CLAUDE.md", "must_contain": "model-selection.operator.json"}
+      ],
+      "status": "reflected",
+      "retired_reason": null
+    },
+    {
+      "id": "KH-0005",
+      "added": "2026-11-11",
+      "source": "user",
+      "statement": "issue を起票する前に issue_tracker.py related で関連する issue を探し、近いものがあれば request か merge でまとめ、新規にする時は「関連:」欄（JSON の issue なら related）に確かめた結果を書く。",
+      "why": "同じ問題の issue が別々に起票され、対応が割れるのを防ぐため（欄の有無は commit 前に check-new が確かめる）。",
+      "reflect_to": [
+        {"path": ".claude/skills/issue-lifecycle-tracking/SKILL.md", "must_contain": "related"},
+        {"path": ".claude/issue-tracker.json"}
+      ],
+      "status": "reflected",
+      "retired_reason": null
+    },
+    {
+      "id": "KH-0006",
+      "added": "2026-11-11",
+      "source": "user",
+      "statement": "作業中に利用者が新しい要望を述べたら、関係する issue に request で原文を残し、今後も守る決まりなら knowhow.json に入れて反映し、完了報告に要望の反映先を書く。",
+      "why": "利用者の要望が会話の中だけに残って、次の作業に反映されないのを防ぐため。",
+      "reflect_to": [
+        {"path": "CLAUDE.md", "must_contain": "要望の反映先"},
+        {"path": ".claude/skills/issue-lifecycle-tracking/SKILL.md", "must_contain": "request"},
+        {"path": ".claude/issue-tracker.json"}
+      ],
+      "status": "reflected",
+      "retired_reason": null
+    },
+    {
+      "id": "KH-0007",
+      "added": "2026-11-11",
+      "source": "user",
+      "statement": "長時間の作業の進捗と次の一手は、対象の issue があればその issue に書き、handoff（引継ぎメモ）は作らない。",
+      "why": "進捗の置き場が handoff だと、issue が閉じても handoff を消せずに残るため。",
+      "reflect_to": [
+        {"path": "CLAUDE.md"},
+        {"path": ".claude/session-boundary.json"},
+        {"path": ".claude/skills/agent-harness-bootstrap/operational-knowhow.md"}
+      ],
+      "status": "reflected",
+      "retired_reason": null
+    }
+  ]
+}

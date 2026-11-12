@@ -16,6 +16,11 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-git-skill-review-gate.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/pre-git-ledger-gate.sh",
+            "timeout": 60
           }
         ]
       }
@@ -54,6 +59,11 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/skills/review-skill/scripts/hook-skill-review-gate.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/stop-handoff-knowhow-gate.sh",
+            "timeout": 60
           }
         ]
       }

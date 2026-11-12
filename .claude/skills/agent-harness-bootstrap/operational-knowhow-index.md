@@ -5,7 +5,7 @@ SKILL.md から分離した索引。各項目の詳細本文は `operational-kno
 ## 目次
 
 - 導入注記
-- 項目一覧（規模調整・サイズ・標準セット・routing・宣言・governance・handoff・並走 recheck・issue・hooks 化・品質基準・マルチエージェント・レビューサイクル・収束型自律前進・生成主体明示）
+- 項目一覧（規模調整・サイズ・標準セット・routing・宣言・governance・handoff・並走 recheck・issue・関連 issue の確認・ノウハウの台帳・hooks 化・品質基準・マルチエージェント・レビューサイクル・収束型自律前進・生成主体明示）
 
 ---
 
@@ -23,6 +23,8 @@ SKILL.md から分離した索引。各項目の詳細本文は `operational-kno
 - **issue ライフサイクル管理**（open → processing → closed）— close 前検証 4 段、問題発見即起票ルール、1 issue = 1 目的
 - **PC 再起動・session 復元の自動化** — SessionStart hook でポインタのみ通知、本文 Read は user 選択後
 - **handoff 管理** — 命名規約・保持・issue 連携
+- **起票前の関連 issue の確認** — `issue_tracker.py related` で近い issue を探し、新規には「関連:」欄を書く（commit 前に check-new が検査）
+- **ノウハウの台帳** — 決まりを `.claude/knowhow.json` に 1 件 1 文で持ち、反映先の ID アンカーを `knowhow_check.py` が確かめる
 - **規約の hooks 化判断** — advisory → deterministic 昇格の判断基準（詳細は `hooks-reference.md`）
 - **自作 skill / MCP ツールの品質基準の継承**（該当時のみ）— 対象プロジェクトが独自 skill / MCP ツールを新規作成する場合、`skill-authoring-guide`（few-shot 設計・決定的強制・個人カスタマイズ）/ `mcp-server-setup`（構造化エラー応答設計）の観点をレビュー基準に含める
 - **マルチエージェント/subagent 設計原則**（該当時のみ）— クラッシュ耐性 state manifest・コーディネーター中継のメタデータ保持・ツールスコープの限定（`agent-design.md`）。レビュー時の実装コンテキスト遮断・並列アンカリングは別エージェントレビューサイクル（`review.md`）側に属し重複させない

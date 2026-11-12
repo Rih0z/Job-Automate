@@ -60,6 +60,8 @@ SKILL.md 本体「独自運用: 規約の hooks 化判断」と生成手順 Step
 | `PostToolUse(Edit\|Write\|MultiEdit)` | CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 更新時に公式 WebFetch + 別エージェントレビューを促す | notify (additionalContext JSON) |
 | `PostToolUse(Edit\|Write\|MultiEdit)`（派生成果物の自動再生成） | 監視対象ファイル（例: CLAUDE.md）の編集を検知し、そこから派生する成果物（生成 README / 目次 / 索引等）を **advisory reminder ではなく hook 自身が再生成する**。複数 generator を実行する場合は各 exit code を実行直後に退避し OR 結合する（後発の成功が先発の失敗を隠さないようにする） | notify（再生成結果 or 失敗詳細を additionalContext に含める） |
 | `Stop` | 最新 handoff が 1 時間以上未更新なら更新リマインド。未 commit の handoff があれば終了を block して commit + push を促す | notify / block |
+| `Stop`（handoff と knowhow の片付け・`stop-handoff-knowhow-gate.sh`） | SessionStart（`hook-session-start-setup.sh`）が `.tmp/session-start/<session_id>.json` に書いた開始時刻を読み、`handoff_lifecycle.py remind --received-since <開始時刻>` で「この session で受領して done していない」handoff があれば止める。`.claude/knowhow.json` があれば `knowhow_check.py --new-since HEAD` で、この作業で増えた `queued` があれば止める（前からある `queued` だけなら systemMessage で知らせる）。`stop_hook_active` が true の turn では判定しないので、block は 1 turn に 1 回。限界: 同じ repo で並行する session の受領は時刻でしか分けられず混じることがあるので、Claude が自分の受領でないと判断して終えてよい | block（1 回）/ notify |
+| `PreToolUse(Bash)`（commit の前・`pre-git-ledger-gate.sh`） | `.claude/issue-tracker.json` があれば `issue_tracker.py check-new`（index で新しく足された issue の「関連:」欄・新しい JSON finding の `related`）、`.claude/knowhow.json` があれば `knowhow_check.py`（`queued` の残り・反映先のアンカー）を実行し、exit 1（欠け）か exit 2（台帳・設定が不正）なら deny する。python が無い・時間切れ・その他の終了コードは止めずに systemMessage で知らせる。skill のレビュー記録の gate とは別の hook にして止めた理由を分ける | reject（deny）/ notify |
 
 ## 外部規約のキャッシュ運用（任意・PostToolUse レビュー系 hook 向け）
 
@@ -137,5 +139,7 @@ Mac / Linux（bash）の例 — 各 command を bash script 呼び出しに置�
 - `hook-post-tool-use` — CLAUDE.md / `.claude/skills/**` / `.claude/commands/**` 編集時に `hookSpecificOutput.additionalContext` JSON で公式 WebFetch レビュー reminder
 - `hook-post-tool-use-regen`（**任意**・監視対象ファイルから派生成果物を生成している時のみ） — 監視対象の編集を検知し派生成果物を実際に再生成、各 generator の exit code を OR 結合して失敗を隠さず報告
 - `hook-stop` — 1 時間以上未更新 handoff があれば更新リマインド。`git status --porcelain --untracked-files=all -- .tmp/handoffs` に出る未 commit の handoff があれば block
+- `hook-session-start-setup.sh`（bash・本スキルの `scripts/`）— stdin の `session_id`（英数字・`_`・`-`・`.` だけ）ごとに `.tmp/session-start/<session_id>.json` へ開始時刻を書く。file が既にあれば書かない（resume・clear・compact でも同じ session_id で発火するため最初の時刻を保つ）。7 日を超えた file は消す。`.tmp/` を git で追跡する移植先では `.tmp/session-start/` を `.gitignore` に足す
+- `stop-handoff-knowhow-gate.sh` / `pre-git-ledger-gate.sh`（bash・`.claude/hooks/`）— 上の表の 2 行。データの置き場は `CLAUDE_PROJECT_DIR`、script は hook の先頭に書いた完全パス（`ISSUE_TRACKER`・`KNOWHOW_CHECK`・`HANDOFF_LIFECYCLE`。既定は hook の隣の `.claude/skills/` の中）から呼ぶ（移植先で script を `.claude/scripts/` に置いた時は、その変数だけを `"$HERE/../scripts/<file 名>"` に書き換える。script が見つからない時は止めずに systemMessage を出す）。commit gate の待ち時間は `LEDGER_GATE_TIMEOUT_SEC`（既定 20 秒）
 
 各 script 冒頭で標準入力の JSON から `tool_name` / `tool_input.file_path` を取り、エラー抑制は個別コマンド単位で局所化する（PowerShell: `[Console]::In.ReadToEnd() | ConvertFrom-Json` + `-ErrorAction SilentlyContinue` / bash: `input=$(cat)` + `jq` または `python3` で parse + 各コマンド `2>/dev/null`）。
