@@ -1347,6 +1347,30 @@ class RecordHashAndHistory(unittest.TestCase):
         self.assertEqual(run(FINALIZE, "--verify-latest", self.deck, "--write")[0], 2)
         self.assertEqual(run(FINALIZE, "--deck", self.deck)[0], 2)
 
+    def test_T145_default_write_without_utf8_mode(self):
+        """--history-root 無しの --write（append_review_record.py へ stdin で渡す経路）が、UTF-8 モードでない Python
+        （日本語版 Windows の既定）でも日本語を含む record を保存でき、--verify-latest がそれを見つける。"""
+        import shutil
+        repo = os.path.join(self.d, "repo")
+        for sub in ("slide-clarity-review", "_shared"):
+            shutil.copytree(os.path.join(SKILLS, sub), os.path.join(repo, ".claude", "skills", sub),
+                            ignore=shutil.ignore_patterns("__pycache__"))
+        fin = os.path.join(repo, ".claude", "skills", "slide-clarity-review", "scripts", "finalize_review.py")
+        rv = write_json(self.d, "r.json", {"axes": axes_of(90), "llm_results": llm_ok(), "fixes": [], "story_findings": []})
+        env = {k: v for k, v in os.environ.items() if k not in ("PYTHONUTF8", "PYTHONIOENCODING")}
+        env["PYTHONUTF8"] = "0"
+        p = subprocess.run([sys.executable, fin, "--deck", self.deck, "--auto", self.auto, "--review", rv,
+                            "--practices", self.practices, "--clarity", self.clarity,
+                            "--reviewed-at", "2026-11-06T10:00:00+09:00", "--write"],
+                           capture_output=True, text=True, encoding="utf-8", env=env)
+        out = (p.stdout or "") + (p.stderr or "")
+        self.assertEqual(p.returncode, 0, out)
+        self.assertIn("saved: ", out)
+        self.assertNotIn("REJECTED", out)
+        code, out = run(fin, "--verify-latest", self.deck)
+        self.assertEqual(code, 0, out)
+        self.assertIn("PASS record found", out)
+
     def test_T84_both_save_paths_reject_the_same_invalid_record(self):
         import append_review_record
         import finalize_review

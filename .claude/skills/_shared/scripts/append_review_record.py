@@ -22,6 +22,10 @@ if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 if hasattr(sys.stderr, "reconfigure"):
     sys.stderr.reconfigure(encoding="utf-8")
+# stdin も UTF-8 で読む（呼び出し側の finalize_review.py は UTF-8 で渡す。UTF-8 モードでない日本語版 Windows では
+# 既定が cp932 になり、日本語を含む record が文字化けして保存を拒否していた）
+if hasattr(sys.stdin, "reconfigure"):
+    sys.stdin.reconfigure(encoding="utf-8")
 
 SCHEMA_CONST = "review-record/v1"
 REQUIRED_TOP = ["schema", "skill", "reviewed_at", "target", "verdict", "summary"]
