@@ -9,7 +9,10 @@
   python finalize_review.py --verify-latest <deck.pptx> [--history-root <dir>]
       同じハッシュ（sha256）の PASS の record があれば終了コード 0、無ければ 1。
 
-reviewer.json: {"axes":[{id,score,citations}], "llm_results":[{practice_id,passed} | {practice_id,applicable:false,reason}], "fixes":[...]}
+reviewer.json: {"axes":[{id,score,citations}], "llm_results":[{practice_id,passed} | {practice_id,applicable:false,reason}], "fixes":[...],
+  "story_findings":[{slide,kind,problem,fix}]}
+  story_findings（話の流れの指摘。必須・空配列可。全ての --score-mode で検査）は点数・ゲートに入れず、record の
+  story_findings と summary の末尾「話の流れの指摘 N 件」に出す。形は gate.validate_story_findings。
   applicable:false（対象外）にできるのは applies_when.deck を持つ practice だけ。auto_trigger を持つ practice を
   対象外にするには --facts が要り、機械の条件が成り立つ資料では対象外にできない。
   citations の先頭に任意で [practice-id] を付けられる。対象外にした practice を接頭辞にした引用は不正。
@@ -208,6 +211,8 @@ def main(argv=None):
     if not errors:
         errors = gate.validate_not_applicable(llm_results, llm_practices, totals) + \
             gate.validate_axis_citations(axes, llm_results, set(practices))
+    story = review.get("story_findings")
+    errors += gate.validate_story_findings(story)
     if errors:
         print("reviewer 出力が不正です。再出力を依頼してください:", file=sys.stderr)
         for e in errors:
@@ -255,6 +260,8 @@ def main(argv=None):
             record["summary"] += " 点検員の点数が導出点より高い軸は、導出点を採用した: %s。" % ", ".join(raised)
     if record["not_applicable"]:
         record["summary"] += " 対象外: %s。" % ", ".join(n["practice_id"] for n in record["not_applicable"])
+    record["story_findings"] = story
+    record["summary"] += " 話の流れの指摘 %d 件" % len(story)
     print(json.dumps(record, ensure_ascii=False, indent=2))
     if args.write:
         if args.history_root:

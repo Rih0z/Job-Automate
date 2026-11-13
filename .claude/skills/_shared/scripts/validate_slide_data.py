@@ -370,10 +370,107 @@ def check_structure_v2(spec, slides, rep):
                     break
 
 
+def check_structure_v3(spec, slides, rep):
+    """設計図 v3 の検査（話の組み立て: 聞き手・持ち帰り・各スライドが支えるもの・つながり・同じ型の繰り返し・目次）。
+    出典の無い運用上の規則（2026-11、人の手直しの観察から）。括弧内は構造の id で practice id ではない。"""
+    raw = spec.get("sections")
+    secs = [x for x in (raw if isinstance(raw, list) else []) if isinstance(x, dict) and _nonempty(x.get("id"))]
+    if not secs:
+        rep.err("sections missing (sections-v3)")
+    kind_of = {x.get("id"): x.get("kind", "main") for x in secs}
+    main_ids = [x.get("id") for x in secs if x.get("kind", "main") == "main"]
+    nar = spec.get("narrative") if isinstance(spec.get("narrative"), dict) else {}
+    prof = nar.get("audience_profile") if isinstance(nar.get("audience_profile"), dict) else {}
+    if not _nonempty(prof.get("uses")):
+        rep.err("narrative.audience_profile.uses missing (audience-profile)")
+    tks = nar.get("takeaways") if isinstance(nar.get("takeaways"), list) else []
+    if not 1 <= len(tks) <= 3:
+        rep.err("takeaways: count %d not in 1..3 (takeaways)" % len(tks))
+    tk_ids = []
+    for t in tks:
+        tid = t.get("id") if isinstance(t, dict) else None
+        if not _nonempty(tid) or not _nonempty(t.get("text")):
+            rep.err("takeaways: id and text required (takeaways)")
+            continue
+        if tid in tk_ids:
+            rep.err("takeaways: duplicate id %s (takeaways)" % tid)
+        tk_ids.append(tid)
+    nos = [s.get("no") for s in slides]
+    supported, first_tk, premises, closing_at, ctas = set(), None, [], None, []
+    patterns, prev_section, seen_content, agenda_listed, agenda_seen = {}, None, False, set(), False
+    for idx, s in enumerate(slides):
+        no, role = s.get("no"), s.get("role")
+        if role in ("content", "closing", "appendix", "section") and not _nonempty(s.get("section")):
+            rep.err("slide %s: section missing (sections-v3)" % no)
+        if role == "section" and _nonempty(s.get("section")) and s["section"] in kind_of:
+            if s.get("kind", "main") != kind_of[s["section"]]:
+                rep.err("slide %s: section kind does not match sections[] (sections-v3)" % no)
+        if role == "closing" and closing_at is None:
+            closing_at = idx
+        sup = s.get("supports")
+        if role == "content":
+            if not isinstance(sup, list) or not sup:
+                rep.err("slide %s: supports missing (supports-takeaway)" % no)
+            elif any(x in ("premise", "cta") for x in sup) and len(sup) > 1:
+                rep.err("slide %s: supports mixes premise/cta with other values (supports-takeaway)" % no)
+            elif sup == ["premise"]:
+                premises.append((idx, no))
+            elif sup == ["cta"]:
+                ctas.append((idx, no))
+            else:
+                for x in sup:
+                    if x in tk_ids:
+                        supported.add(x)
+                        first_tk = idx if first_tk is None else first_tk
+                    else:
+                        rep.err("slide %s: supports unknown takeaway %s (supports-takeaway)" % (no, x))
+        elif role == "closing" and sup is not None:
+            if not isinstance(sup, list) or any(x not in tk_ids for x in sup):
+                rep.err("slide %s: closing supports must be takeaway ids (supports-takeaway)" % no)
+        if role == "content":
+            starts = seen_content and s.get("section") != prev_section
+            b = s.get("builds_on")
+            if "builds_on" in s and (isinstance(b, bool) or not isinstance(b, int) or b not in nos
+                                     or nos.index(b) >= idx):
+                rep.err("slide %s: builds_on must point to an earlier slide (bridge)" % no)
+            if (starts or "builds_on" in s) and not _nonempty(s.get("bridge")):
+                rep.err("slide %s: bridge missing (bridge)" % no)
+            prev_section, seen_content = s.get("section"), True
+            pat = s.get("repeat_pattern")
+            if _nonempty(pat):
+                patterns[pat] = patterns.get(pat, 0) + 1
+                if patterns[pat] >= 3 and not _nonempty(s.get("new_point")):
+                    rep.err("slide %s: new_point missing for 3rd+ use of pattern %s (pattern-repeat)" % (no, pat))
+        if role == "agenda":
+            agenda_seen = True
+            ids = s.get("agenda_sections")
+            if not isinstance(ids, list) or not ids:
+                rep.err("slide %s: agenda_sections missing (agenda-sections)" % no)
+                continue
+            for x in ids:
+                if not _nonempty(x) or x not in main_ids:
+                    rep.err("slide %s: agenda lists unknown or reference section %s (agenda-sections)" % (no, x))
+                    continue
+                agenda_listed.add(x)
+    for t in tk_ids:
+        if t not in supported:
+            rep.err("takeaways: %s not supported by any content slide (supports-takeaway)" % t)
+    for idx, no in premises:
+        if first_tk is not None and idx > first_tk:
+            rep.err("slide %s: premise after takeaway slides (supports-takeaway)" % no)
+    for idx, no in ctas:
+        if closing_at is not None and idx > closing_at:
+            rep.err("slide %s: cta after closing (cta-before-closing)" % no)
+    if agenda_seen:
+        for x in main_ids:
+            if x not in agenda_listed:
+                rep.err("agenda: main section %s not listed (agenda-sections)" % x)
+
+
 def check_deck_spec(spec, practices, rep):
     version = spec.get("spec_version", 1)
-    if version not in (1, 2) or isinstance(version, bool):
-        rep.err("invalid spec_version (1 or 2)")
+    if version not in (1, 2, 3) or isinstance(version, bool):
+        rep.err("invalid spec_version (1, 2 or 3)")
     for k in TOP_KEYS:
         if k not in spec:
             rep.err("missing key: %s" % k)
@@ -407,8 +504,10 @@ def check_deck_spec(spec, practices, rep):
     if any(RAW_COLOR.search(v) for k in TOP_KEYS[:4] for v in _strings(spec.get(k))):
         raw_color = True
         rep.err("raw color not allowed")
-    if version == 2:
+    if version in (2, 3):                              # 2.0 も 2 と同じに扱う（変更前と同じ）
         check_structure_v2(spec, valid_slides, rep)
+    if version == 3:
+        check_structure_v3(spec, valid_slides, rep)
 
     autos = [p for p in practices if p["check"].get("method") == "auto" and p["check"].get("scope") == "deck-spec"]
     for p in autos:

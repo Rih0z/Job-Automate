@@ -15,6 +15,10 @@ fixture を読む）で確かめる。旧版から text_blocks を足した。
   min_font_pt  明示指定された run のフォントサイズ(pt)の最小値。明示指定が無ければ null（継承値は取れない）
   image_count  画像（picture）シェイプ数（グループ内を再帰。プレースホルダ内の画像は数えない）
   has_notes    ノートに非空テキストがあるか
+  notes_text   ノートの本文（段落を改行で結合。無ければ ""）。点検員が「画面に無くノートにだけある前提」を判定する材料（2026-11）
+  notes_chars  notes_text の空白を除いた文字数
+  screen_chars 見出しと text_blocks 全体（表のセルを含む）の空白を除いた文字数
+  layout_name  スライドレイアウトの名前（無ければ ""）
   paragraphs   タイトル以外の非空段落のテキスト（表のセルは含まない。reviewer が内容を判定するための事実情報）
   text_blocks  タイトル以外の文面を、画面の位置順（上から下、左から右）に並べたもの。図形ごとの段落と、表のセル（行ごと）を含む。日本語点検が読む
   shapes       タイトル以外のトップレベル図形の kind / left / top / width / height（インチ, 小数 2 桁）と fill（明示された塗り色）。
@@ -282,15 +286,28 @@ def slide_background(root):
     return color_of(bg.find("p:bgPr", NS))
 
 
-def notes_nonempty(pkg, slide_path):
+def notes_text_of(pkg, slide_path):
+    """ノートの本文（本文プレースホルダーの段落を改行で結合し、前後の空白を除く）。無ければ ""。"""
     notes = pkg.related(slide_path, "notesSlide")
     if notes is None:
-        return False
+        return ""
     for sp in pkg.tree(notes).iter(P + "sp"):
         ph = ph_of(sp)
         if ph is not None and ph.get("type") == "body":
-            return bool(frame_text(sp.find(P + "txBody")).strip())
-    return False
+            return frame_text(sp.find(P + "txBody")).replace("\v", "\n").strip()
+    return ""
+
+
+def layout_name_of(pkg, slide_path):
+    layout = pkg.related(slide_path, "slideLayout")
+    if layout is None:
+        return ""
+    csld = pkg.tree(layout).find("p:cSld", NS)
+    return (csld.get("name") or "") if csld is not None else ""
+
+
+def visible_chars(text):
+    return len(re.sub(r"\s", "", text or ""))
 
 
 def has_text_sp(el):
@@ -521,7 +538,7 @@ def slide_facts(no, pkg, slide_path):
                        "fill": f[1] if f and f[0] == "rgb" else None})
         if kind in ("text", "picture", "table") and left is not None:
             edges.add(round(round(left / EDGE_STEP) * EDGE_STEP, 2))
-    notes = notes_nonempty(pkg, slide_path)
+    notes = notes_text_of(pkg, slide_path)
     text_blocks.sort(key=lambda b: (round((b["top"] or 0) / 0.3), b["left"] or 0))
     items, title_item = overlap_items(pkg, slide_path, sptree, title_el)
     pairs = partial_overlaps(items, title_item)
@@ -537,7 +554,9 @@ def slide_facts(no, pkg, slide_path):
                 tables.append(table_estimate(tbl, geo))
     return {"no": no, "title": title or None, "body_chars": body_chars, "bullet_count": bullets,
             "min_font_pt": number(min(sizes)) if sizes else None, "image_count": images,
-            "has_notes": bool(notes), "paragraphs": paragraphs, "text_blocks": text_blocks, "shapes": shapes,
+            "has_notes": bool(notes), "notes_text": notes, "notes_chars": visible_chars(notes),
+            "screen_chars": sum(visible_chars(x) for x in lines), "layout_name": layout_name_of(pkg, slide_path),
+            "paragraphs": paragraphs, "text_blocks": text_blocks, "shapes": shapes,
             "left_edge_count": len(edges) if sum(1 for s in shapes if s["kind"] in ("text", "picture", "table")) >= 2 else None,
             "distinct_colors": len(colors),
             "min_contrast": round(min(contrasts), 2) if contrasts else None,

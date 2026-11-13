@@ -14,12 +14,16 @@
   partial_overlap       文字・表・画像の図形が部分的に重なる（deck-facts の overlap_pairs。枠が重なるだけで見た目に
                         重ならないものが多い。2026-11 の実測で、点数に入れる精度に届かなかったため候補にした）
   table_overflow        表の推定の高さ（deck-facts の table_estimates）が、スライドの下端か、下にある図形の上端を 0.1 インチ超える
+  agenda_chapter_mismatch  目次（見出しに「目次」「アジェンダ」「Agenda」「Contents」、またはレイアウト名に agenda）の章番号と、
+                        目次以外のスライドの見出しの章番号が食い違う（only_in_agenda / only_in_body）。番号の無い章は拾えない
+  notes_only_context    ノートの文字数が 200 字以上かつ画面の文字数の 2 倍以上（前提がノートにしか無い可能性。暫定値）
 """
 import argparse
 import json
 import os
 import re
 import sys
+import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, "..", "..", "_shared", "scripts"))
@@ -136,9 +140,85 @@ def layout_candidates(facts):
     return out
 
 
+AGENDA_TITLE = ("目次", "アジェンダ", "agenda", "contents")
+KANJI_DIGITS = {"一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
+_NUM = r"(?:\d+|十[一二三四五六七八九]?|[一二三四五六七八九])"  # 漢数字は一〜十九だけ
+CHAPTER_JA = re.compile(r"第\s*(%s(?:\s*[・〜~\-]\s*%s)*)\s*章" % (_NUM, _NUM))
+MAX_RANGE = 50  # これより広い範囲（「第2026-11章」など）は章番号として扱わない
+CHAPTER_EN = re.compile(r"\bchapter\s+(\d+)\b", re.I)
+NOTES_MIN_CHARS, NOTES_RATIO = 200, 2  # 運用上の暫定値（2026-11）
+
+
+def _kanji_number(text):
+    if "十" not in text:
+        return KANJI_DIGITS.get(text)
+    return 10 + KANJI_DIGITS.get(text[1:], 0) if text[1:] else 10
+
+
+def _to_int(token):
+    return int(token) if token.isdigit() else _kanji_number(token)
+
+
+def chapter_numbers(text):
+    """「第N章」「第N・M章」「第N〜M章」「Chapter N」から章番号の集合を取り出す（NFKC で全角数字を半角に）。"""
+    text = unicodedata.normalize("NFKC", text or "")
+    found = set()
+    for m in CHAPTER_JA.finditer(text):
+        parts = re.split(r"\s*([・〜~\-])\s*", m.group(1))
+        nums, seps = parts[0::2], parts[1::2]
+        values = [_to_int(n) for n in nums]
+        if None in values or any(s in "〜~-" and not 0 < b - a <= MAX_RANGE
+                                 for s, a, b in zip(seps, values, values[1:])):
+            continue
+        found.update(values)
+        for sep, a, b in zip(seps, values, values[1:]):
+            if sep in "〜~-":
+                found.update(range(a, b + 1))
+    found.update(int(n) for n in CHAPTER_EN.findall(text))
+    return found
+
+
+def is_agenda(slide):
+    title = unicodedata.normalize("NFKC", slide.get("title") or "").casefold()
+    return any(w in title for w in AGENDA_TITLE) or "agenda" in (slide.get("layout_name") or "").casefold()
+
+
+def agenda_chapter_mismatch(facts):
+    slides = facts.get("slides", [])
+    agendas = [s for s in slides if is_agenda(s)]
+    if not agendas:
+        return []
+    listed = set()
+    for s in agendas:
+        for line in slide_lines(s)[1:]:
+            listed |= chapter_numbers(line)
+    if not listed:
+        return []
+    body = set()
+    for s in slides:
+        if not is_agenda(s):
+            body |= chapter_numbers(s.get("title"))
+    only_agenda, only_body = sorted(listed - body), sorted(body - listed)
+    if not only_agenda and not only_body:
+        return []
+    return [{"kind": "agenda_chapter_mismatch", "slide": agendas[0]["no"], "only_in_agenda": only_agenda,
+             "only_in_body": only_body,
+             "detail": "chapters only in agenda: %s / only in slide titles: %s" % (only_agenda, only_body)}]
+
+
+def notes_only_context(facts):
+    out = []
+    for s in facts.get("slides", []):
+        notes, screen = s.get("notes_chars") or 0, s.get("screen_chars") or 0
+        if notes >= NOTES_MIN_CHARS and notes >= NOTES_RATIO * screen:
+            out.append({"kind": "notes_only_context", "slide": s["no"],
+                        "detail": "notes %d chars vs on-screen %d chars" % (notes, screen)})
+    return out
+
+
 def candidates(facts):
     return (layout_candidates(facts) + repeated_topic_terms(facts) + orphan_citations(facts)
-            + table_overflow(facts))
+            + table_overflow(facts) + agenda_chapter_mismatch(facts) + notes_only_context(facts))
 
 
 def main(argv=None):

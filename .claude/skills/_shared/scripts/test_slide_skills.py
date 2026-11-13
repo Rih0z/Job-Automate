@@ -814,7 +814,7 @@ class Finalize(unittest.TestCase):
                    "--reviewed-at", "2026-10-30T10:00:00+09:00")
 
     def test_T51_pass(self):
-        code, out = self.finalize({"axes": axes_of(90), "llm_results": llm_ok(), "fixes": []})
+        code, out = self.finalize({"axes": axes_of(90), "llm_results": llm_ok(), "fixes": [], "story_findings": []})
         self.assertEqual(code, 0, out)
         rec = json.loads(out[out.index("{"):])
         self.assertEqual((rec["verdict"], rec["score"], rec["skill"]), ("PASS", 90, "slide-clarity-review"))
@@ -822,12 +822,12 @@ class Finalize(unittest.TestCase):
 
     def test_T52_fail_exit_1(self):
         llm = [{"practice_id": "fx-llm-must", "passed": False}, {"practice_id": "fx-llm-should", "passed": True}]
-        code, out = self.finalize({"axes": axes_of(90), "llm_results": llm, "fixes": []})
+        code, out = self.finalize({"axes": axes_of(90), "llm_results": llm, "fixes": [], "story_findings": []})
         self.assertEqual(code, 1, out)
         self.assertIn('"verdict": "FAIL"', out)
 
     def test_T53_invalid_reviewer_output_exit_3(self):
-        code, out = self.finalize({"axes": axes_of(90)[:4], "llm_results": llm_ok()[:1], "fixes": []})
+        code, out = self.finalize({"axes": axes_of(90)[:4], "llm_results": llm_ok()[:1], "fixes": [], "story_findings": []})
         self.assertEqual(code, 3, out)
         self.assertIn("axes mismatch: missing ax4", out)
         self.assertIn("llm_results missing: fx-llm-should", out)
@@ -901,7 +901,7 @@ class FinalizeScoreMode(unittest.TestCase):
         return [{"practice_id": "fx-llm-must", "passed": True}, {"practice_id": "fx-llm-should", "passed": False}]
 
     def test_T64_min_mode_caps_reviewer_score_at_derived(self):
-        code, out, rec = self.finalize({"axes": axes_of(95), "llm_results": self.llm_should_fail(), "fixes": []})
+        code, out, rec = self.finalize({"axes": axes_of(95), "llm_results": self.llm_should_fail(), "fixes": [], "story_findings": []})
         self.assertEqual(rec["score_mode"], "min")
         self.assertEqual(rec["derived_axis_scores"]["ax0"], 17)
         self.assertEqual(rec["reviewer_axis_scores"]["ax0"], 19)
@@ -911,13 +911,13 @@ class FinalizeScoreMode(unittest.TestCase):
         self.assertEqual(code, 0, out)
 
     def test_T65_min_mode_keeps_lower_reviewer_score(self):
-        code, out, rec = self.finalize({"axes": axes_of(69), "llm_results": self.llm_should_fail(), "fixes": []})
+        code, out, rec = self.finalize({"axes": axes_of(69), "llm_results": self.llm_should_fail(), "fixes": [], "story_findings": []})
         self.assertEqual(rec["score"], 69)
         self.assertNotIn("導出点を採用した", rec["summary"])
         self.assertEqual(code, 1, out)
 
     def test_T66_reviewer_mode_is_previous_behaviour(self):
-        code, out, rec = self.finalize({"axes": axes_of(95), "llm_results": self.llm_should_fail(), "fixes": []},
+        code, out, rec = self.finalize({"axes": axes_of(95), "llm_results": self.llm_should_fail(), "fixes": [], "story_findings": []},
                                        "--score-mode", "reviewer")
         self.assertEqual(rec["score"], 95)
         self.assertNotIn("axis_basis", rec)
@@ -1215,7 +1215,7 @@ class NotApplicable(unittest.TestCase):
         return {"practice_id": pid, "applicable": False, "reason": reason}
 
     def finalize(self, llm, *extra, axes=None):
-        rv = write_json(self.d, "r.json", {"axes": axes or axes_of(95), "llm_results": llm, "fixes": []})
+        rv = write_json(self.d, "r.json", {"axes": axes or axes_of(95), "llm_results": llm, "fixes": [], "story_findings": []})
         code, out = run(FINALIZE, "--deck", os.path.join(self.d, "none.pptx"), "--auto", self.auto, "--review", rv,
                         "--practices", self.practices, "--clarity", self.clarity,
                         "--reviewed-at", "2026-11-06T10:00:00+09:00", *extra)
@@ -1303,7 +1303,7 @@ class RecordHashAndHistory(unittest.TestCase):
         self.tmp.cleanup()
 
     def finalize(self, deck, llm, *extra):
-        rv = write_json(self.d, "r.json", {"axes": axes_of(90), "llm_results": llm, "fixes": []})
+        rv = write_json(self.d, "r.json", {"axes": axes_of(90), "llm_results": llm, "fixes": [], "story_findings": []})
         return run(FINALIZE, "--deck", deck, "--auto", self.auto, "--review", rv, "--practices", self.practices,
                    "--clarity", self.clarity, "--reviewed-at", "2026-11-06T10:00:00+09:00", *extra)
 
@@ -1400,8 +1400,8 @@ class DeckSpecV2(unittest.TestCase):
         s = good_spec()
         s["slides"][2]["content_source"] = ["https://example.com/a", "https://example.com/b"]
         self.assertEqual(self.spec(s)[0], 0)
-        s["spec_version"] = 3
-        self.assertIn("invalid spec_version", self.spec(s)[1])
+        s["spec_version"] = 4
+        self.assertIn("invalid spec_version (1, 2 or 3)", self.spec(s)[1])
 
     def test_T86_v2_intent_required_on_content_only(self):
         self.assertEqual(self.spec(self.v2())[0], 0)
@@ -1536,6 +1536,445 @@ class PublicRepoPolicy(unittest.TestCase):
         for p in self.files():
             with open(p, encoding="utf-8") as f:
                 self.assertIsNone(pat.search(f.read()), p)
+
+
+
+# ================================================================ 設計図 v3・話の流れ（2026-11 追加）
+def c3(no, section, supports, role="content", **kw):
+    """v3 の本文スライド（intent 付き）。"""
+    d = good_slide(no, role, section=section, intent="show what this slide is for")
+    if supports is not None:
+        d["supports"] = supports
+    d.update(kw)
+    return d
+
+
+def v3_spec(slides=None, sections=None, takeaways=None, uses="spreadsheet and team chat"):
+    s = good_spec()
+    s["spec_version"] = 3
+    s["sections"] = sections if sections is not None else [{"id": "s1", "theme": "Trial results"},
+                                                          {"id": "s2", "theme": "Rollout plan"}]
+    s["narrative"] = {"audience_profile": {"uses": uses},
+                      "takeaways": takeaways if takeaways is not None else
+                      [{"id": "t1", "text": "The trial cut manual work"}, {"id": "t2", "text": "Roll out next month"}]}
+    s["slides"] = slides if slides is not None else [
+        good_slide(1, "title", focal_element="title", evidence_type="opinion", content_source=None),
+        c3(2, "s1", ["t1"]),
+        c3(3, "s2", ["t2"], bridge="the trial numbers from chapter 1 set the rollout size"),
+        good_slide(4, "closing", evidence_type="proposal", content_source=None, focal_element="title", section="s2")]
+    return s
+
+
+def agenda_slide(no, ids):
+    d = good_slide(no, "agenda", evidence_type="list")
+    if ids is not None:
+        d["agenda_sections"] = ids
+    return d
+
+
+def renumber(slides):
+    for i, sl in enumerate(slides, 1):
+        sl["no"] = i
+    return slides
+
+
+class DeckSpecV3(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def spec(self, spec):
+        pp = write_json(self.d, "p.json", practices_doc(fx_deck_practices()))
+        code, out = run(VALIDATE, "deck-spec", write_json(self.d, "s.json", spec), "--practices", pp)
+        self.assertNotIn("invalid spec_version", out)
+        return code, out
+
+    def bad(self, spec, *messages):
+        code, out = self.spec(spec)
+        self.assertEqual(code, 1, out)
+        for m in messages:
+            self.assertIn(m, out)
+        return out
+
+    def ok(self, spec):
+        code, out = self.spec(spec)
+        self.assertEqual(code, 0, out)
+
+    def test_T120_valid_and_takeaway_count_bounds(self):
+        self.ok(v3_spec())
+        one = v3_spec(takeaways=[{"id": "t1", "text": "x"}])
+        one["slides"][2]["supports"] = ["t1"]
+        self.ok(one)
+        three = v3_spec(takeaways=[{"id": "t1", "text": "x"}, {"id": "t2", "text": "y"}, {"id": "t3", "text": "z"}])
+        three["slides"][2]["supports"] = ["t2", "t3"]
+        self.ok(three)
+
+    def test_T121_v2_checks_still_run(self):
+        s = v3_spec()
+        s["slides"][1]["intent"] = " "
+        self.bad(s, "slide 2: intent missing (purpose-and-premise)")
+
+    def test_T122_sections_required(self):
+        s = v3_spec()
+        del s["sections"]
+        for sl in s["slides"]:
+            sl.pop("section", None)
+        self.bad(s, "sections missing (sections-v3)")
+        self.bad(v3_spec(sections=[]), "sections missing (sections-v3)")
+        for idx in (1, 3):                                   # content と closing
+            s = v3_spec()
+            del s["slides"][idx]["section"]
+            self.bad(s, "slide %d: section missing (sections-v3)" % (idx + 1))
+
+    def test_T123_audience_profile(self):
+        self.bad(v3_spec(uses=" "), "narrative.audience_profile.uses missing (audience-profile)")
+        s = v3_spec()
+        s["narrative"]["audience_profile"].update({"knowledge": "", "question": ""})
+        self.ok(s)
+
+    def test_T124_takeaways(self):
+        self.bad(v3_spec(takeaways=[]), "takeaways: count 0 not in 1..3 (takeaways)")
+        four = [{"id": "t%d" % i, "text": "x"} for i in range(1, 5)]
+        self.bad(v3_spec(takeaways=four), "takeaways: count 4 not in 1..3 (takeaways)")
+        dup = [{"id": "t1", "text": "x"}, {"id": "t1", "text": "y"}]
+        self.bad(v3_spec(takeaways=dup), "takeaways: duplicate id t1 (takeaways)")
+
+    def test_T125_supports(self):
+        s = v3_spec()
+        del s["slides"][1]["supports"]
+        self.bad(s, "slide 2: supports missing (supports-takeaway)")
+        s = v3_spec()
+        s["slides"][2]["supports"] = ["t9"]
+        self.bad(s, "slide 3: supports unknown takeaway t9 (supports-takeaway)",
+                 "takeaways: t2 not supported by any content slide (supports-takeaway)")
+        # 脇道のスライド（どの takeaway も支えない）は本文に置けない。付録に移せば通る
+        base = v3_spec()["slides"]
+        s = v3_spec(slides=renumber(base[:3] + [c3(0, "s2", [], bridge="x"), base[3]]))
+        self.bad(s, "slide 4: supports missing (supports-takeaway)")
+        base = v3_spec()["slides"]
+        s = v3_spec(slides=renumber(base[:4] + [c3(0, "s2", None, role="appendix")]))
+        self.ok(s)
+        # premise は takeaway を支える最初のスライドより前だけ
+        base = v3_spec()["slides"]
+        s = v3_spec(slides=renumber(base[:3] + [c3(0, "s2", ["premise"]), base[3]]))
+        self.bad(s, "slide 4: premise after takeaway slides (supports-takeaway)")
+        base = v3_spec()["slides"]
+        s = v3_spec(slides=renumber(base[:1] + [c3(0, "s1", ["premise"])] + base[1:]))
+        self.ok(s)
+
+    def test_T126_supports_mixed_and_closing(self):
+        for mixed in (["t1", "cta"], ["premise", "cta"]):
+            s = v3_spec()
+            s["slides"][1]["supports"] = mixed
+            s["slides"][2]["supports"] = ["t1", "t2"]
+            self.bad(s, "slide 2: supports mixes premise/cta with other values (supports-takeaway)")
+        s = v3_spec()
+        s["slides"][3]["supports"] = ["premise"]
+        self.bad(s, "slide 4: closing supports must be takeaway ids (supports-takeaway)")
+        s = v3_spec()
+        s["slides"][3]["supports"] = ["t1"]
+        self.ok(s)
+        s = v3_spec()
+        s["slides"][3].pop("supports", None)
+        self.ok(s)
+
+    def test_T127_cta_before_closing(self):
+        base = v3_spec()["slides"]
+        s = v3_spec(slides=renumber(base[:4] + [c3(0, "s2", ["cta"], bridge="x")]))
+        self.bad(s, "slide 5: cta after closing (cta-before-closing)")
+        base = v3_spec()["slides"]
+        self.ok(v3_spec(slides=renumber(base[:3] + [c3(0, "s2", ["cta"]), base[3]])))
+
+    def test_T128_builds_on(self):
+        for target in (4, 3, 9, 0, "2"):              # 4 = 実在する後ろのスライド
+            s = v3_spec()
+            s["slides"][2]["builds_on"] = target
+            self.bad(s, "slide 3: builds_on must point to an earlier slide (bridge)")
+        s = v3_spec(sections=[{"id": "s1", "theme": "Trial results"}])
+        for sl in s["slides"]:
+            if "section" in sl:
+                sl["section"] = "s1"
+        s["slides"][2].pop("bridge")
+        self.ok(s)                                        # 同じ章の 2 枚目は bridge 不要
+        s["slides"][2]["builds_on"] = 2
+        self.bad(s, "slide 3: bridge missing (bridge)")
+        s["slides"][2]["bridge"] = "use the prompt made on slide 2"
+        self.ok(s)
+
+    def test_T129_section_start_bridge(self):
+        s = v3_spec()
+        s["slides"][2]["bridge"] = " "
+        self.bad(s, "slide 3: bridge missing (bridge)")
+        s = v3_spec()
+        s["slides"][1]["bridge"] = ""                      # 資料で最初の content は不要
+        self.ok(s)
+
+    def test_T130_pattern_repeat(self):
+        def deck(n, new_points=()):
+            base = v3_spec()["slides"]
+            why = [c3(0, "s2", ["t2"], repeat_pattern="why-it-works", bridge="x") for _ in range(n)]
+            for i, p in new_points:
+                why[i]["new_point"] = p
+            return v3_spec(slides=renumber(base[:2] + why + [base[3]]))
+        self.ok(deck(2))
+        self.bad(deck(3), "slide 5: new_point missing for 3rd+ use of pattern why-it-works (pattern-repeat)")
+        out = self.bad(deck(4, [(2, "narrowing the criteria")]),
+                       "slide 6: new_point missing for 3rd+ use of pattern why-it-works (pattern-repeat)")
+        self.assertNotIn("slide 5: new_point", out)
+
+    def test_T131_agenda(self):
+        def with_agenda(*agendas, sections=None):
+            base = v3_spec(sections=sections)["slides"]
+            return v3_spec(slides=renumber([base[0]] + list(agendas) + base[1:]), sections=sections)
+        self.ok(v3_spec())                                               # 目次なし
+        self.ok(with_agenda(agenda_slide(0, ["s1", "s2"])))
+        self.bad(with_agenda(agenda_slide(0, ["s1"])), "agenda: main section s2 not listed (agenda-sections)")
+        self.bad(with_agenda(agenda_slide(0, ["s1", "s2", "s8"])),
+                 "slide 2: agenda lists unknown or reference section s8 (agenda-sections)")
+        secs = [{"id": "s1", "theme": "a"}, {"id": "s2", "theme": "b"}, {"id": "r1", "theme": "c", "kind": "reference"}]
+        self.bad(with_agenda(agenda_slide(0, ["s1", "s2", "r1"]), sections=secs),
+                 "slide 2: agenda lists unknown or reference section r1 (agenda-sections)")
+        self.ok(with_agenda(agenda_slide(0, ["s1"]), agenda_slide(0, ["s2"])))   # 2 枚の和集合
+
+    def test_T132_agenda_sections_missing(self):
+        for ids in (None, []):
+            base = v3_spec()["slides"]
+            s = v3_spec(slides=renumber([base[0], agenda_slide(0, ids)] + base[1:]))
+            self.bad(s, "slide 2: agenda_sections missing (agenda-sections)")
+
+    def test_T142_unhashable_values_are_reported_not_crash(self):
+        s = v3_spec()
+        s["sections"][0]["id"] = ["s1"]
+        out = self.bad(s, "sections: id and theme required (one-topic-one-place)")
+        self.assertNotIn("Traceback", out)
+        s = v3_spec()
+        s["slides"].insert(3, good_slide(0, "section", evidence_type="opinion", content_source=None, section=["s2"]))
+        out = self.bad(v3_spec(slides=renumber(s["slides"])), "slide 4: unknown section ['s2'] (one-topic-one-place)")
+        self.assertNotIn("Traceback", out)
+        base = v3_spec()["slides"]
+        out = self.bad(v3_spec(slides=renumber([base[0], agenda_slide(0, ["s1", {"id": "s2"}])] + base[1:])),
+                       "slide 2: agenda lists unknown or reference section {'id': 's2'} (agenda-sections)")
+        self.assertNotIn("Traceback", out)
+
+    def test_T144_float_version_and_numeric_ids(self):
+        s = good_spec()
+        s["spec_version"] = 2.0
+        s["slides"][1]["intent"] = " "                     # v2 の検査は 2.0 でも動く（変更前と同じ）
+        self.bad(s, "slide 2: intent missing (purpose-and-premise)")
+        s = v3_spec(sections=[{"id": 1, "theme": "a"}, {"id": 2, "theme": "b"}])
+        for sl in s["slides"]:
+            if "section" in sl:
+                sl["section"] = 1 if sl["no"] == 2 else 2
+        base = s["slides"]
+        self.ok(v3_spec(slides=renumber([base[0], agenda_slide(0, [1, 2])] + base[1:]),
+                        sections=[{"id": 1, "theme": "a"}, {"id": 2, "theme": "b"}]))   # 数値の id は v2 と同じく受ける
+        s = v3_spec(sections=[{"id": ["s1"], "theme": "a"}])                   # 有効な要素が 0 個
+        self.bad(s, "sections missing (sections-v3)")
+        s = v3_spec(sections=[{"id": ["s1"], "theme": "a"}, {"id": "s2", "theme": "b"}])
+        self.assertNotIn("sections missing (sections-v3)", self.spec(s)[1])  # 有効な要素が 1 つでもあれば出ない
+
+    def test_T133_section_kind_match(self):
+        secs = [{"id": "s1", "theme": "a"}, {"id": "s2", "theme": "b"}, {"id": "r1", "theme": "c", "kind": "reference"}]
+
+        def deck(sec_slide_kind, sec_id):
+            base = v3_spec(sections=secs)["slides"]
+            sec = good_slide(0, "section", evidence_type="opinion", content_source=None, section=sec_id)
+            if sec_slide_kind:
+                sec["kind"] = sec_slide_kind
+            app = c3(0, sec_id, None, role="appendix")
+            return v3_spec(slides=renumber(base + [sec, app]), sections=secs)
+        self.ok(deck("reference", "r1"))
+        self.bad(deck("reference", "s2"), "slide 5: section kind does not match sections[] (sections-v3)")
+        self.bad(deck(None, "r1"), "slide 5: section kind does not match sections[] (sections-v3)")
+
+
+# ---------------------------------------------------------------- pptx: ノート・レイアウト・目次の章番号
+def build_story_pptx(path, slides):
+    """slides: [{"layout": "title_only"|"blank", "title": str, "body": str, "notes": str}]"""
+    from pptx import Presentation
+    from pptx.util import Inches
+    prs = Presentation()
+    layouts = {"title_only": prs.slide_layouts[5], "blank": prs.slide_layouts[6]}
+    for spec in slides:
+        s = prs.slides.add_slide(layouts[spec.get("layout", "title_only")])
+        if spec.get("title") is not None:
+            s.shapes.title.text = spec["title"]
+        if spec.get("body"):
+            s.shapes.add_textbox(Inches(1), Inches(2), Inches(6), Inches(2)).text_frame.text = spec["body"]
+        if spec.get("notes"):
+            s.notes_slide.notes_text_frame.text = spec["notes"]
+    prs.save(path)
+
+
+class StoryFacts(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+        self.pp = write_json(self.d, "p.json", practices_doc([auto("fx-title", "deck", "title", "required")]))
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def facts(self, slides):
+        pptx = os.path.join(self.d, "deck.pptx")
+        build_story_pptx(pptx, slides)
+        out = os.path.join(self.d, "facts.json")
+        code, text = run(EXTRACT, pptx, "-o", out)
+        self.assertEqual(code, 0, text)
+        with open(out, encoding="utf-8") as f:
+            return out, json.load(f)
+
+    def cands(self, slides, kind):
+        path, _ = self.facts(slides)
+        out = os.path.join(self.d, "auto.json")
+        self.last_code, _ = run(CHECK, path, "--practices", self.pp, "-o", out)
+        with open(out, encoding="utf-8") as f:
+            return [c for c in json.load(f)["candidates"] if c["kind"] == kind]
+
+    def test_T134_notes_and_layout_facts(self):
+        _, f = self.facts([{"title": "Ab c", "body": "de f", "notes": "first line\nsecond"},
+                           {"layout": "blank", "title": None}])
+        s1, s2 = f["slides"]
+        self.assertEqual(s1["notes_text"], "first line\nsecond")
+        self.assertEqual(s1["notes_chars"], 15)
+        self.assertEqual(s1["screen_chars"], 6)
+        self.assertEqual(s1["layout_name"], "Title Only")
+        self.assertEqual((s2["notes_text"], s2["notes_chars"], s2["screen_chars"], s2["layout_name"]),
+                         ("", 0, 0, "Blank"))
+
+    def test_T135_notes_only_context_bounds(self):
+        def deck(notes, screen):
+            if screen:
+                return [{"title": "あ" * screen, "notes": "い" * notes}]
+            return [{"layout": "blank", "title": None, "notes": "い" * notes}]
+        self.assertEqual(self.cands(deck(199, 50), "notes_only_context"), [])
+        self.assertEqual([c["slide"] for c in self.cands(deck(200, 100), "notes_only_context")], [1])
+        self.assertEqual(self.last_code, 0)                  # 候補は終了コードに影響しない（見出しありで違反なし）
+        self.assertEqual(self.cands(deck(200, 101), "notes_only_context"), [])
+        self.assertEqual([c["slide"] for c in self.cands(deck(200, 0), "notes_only_context")], [1])
+
+    def test_T136_agenda_chapter_mismatch_both_ways(self):
+        deck = [{"title": "目次", "body": "第1章 準備\n第2・3章 実演\n第4章 まとめ"},
+                {"title": "第1章 準備は短い"}, {"title": "第2章 実演の結果"}, {"title": "第3章 比べた結果"},
+                {"title": "第5章 補足の結果"}]
+        hit = self.cands(deck, "agenda_chapter_mismatch")
+        self.assertEqual(self.last_code, 0)                  # 候補が出ても終了コードは変わらない
+        self.assertEqual(len(hit), 1)
+        self.assertEqual((hit[0]["slide"], hit[0]["only_in_agenda"], hit[0]["only_in_body"]), (1, [4], [5]))
+        fixed = [{"title": "目次", "body": "第1章\n第2・3章\n第4章"}, {"title": "第1章 a"}, {"title": "第2章 b"},
+                 {"title": "第3章 c"}, {"title": "第4章 d"}]
+        self.assertEqual(self.cands(fixed, "agenda_chapter_mismatch"), [])
+        self.assertEqual(self.last_code, 0)
+
+    def test_T137_agenda_chapter_match_none_and_ranges(self):
+        match = [{"title": "Agenda", "body": "第3〜5章\nChapter 2"}, {"title": "Chapter 2 starts"},
+                 {"title": "第3章 a"}, {"title": "第4章 b"}, {"title": "第5章 c"}]
+        self.assertEqual(self.cands(match, "agenda_chapter_mismatch"), [])
+        no_agenda = [{"title": "第1章 a"}, {"title": "第9章 b"}]
+        self.assertEqual(self.cands(no_agenda, "agenda_chapter_mismatch"), [])
+        no_numbers = [{"title": "目次", "body": "準備\n実演\nまとめ"}, {"title": "第2章 a"}]
+        self.assertEqual(self.cands(no_numbers, "agenda_chapter_mismatch"), [])   # 目次に章番号が無い
+        for agenda_title in ("目次", "アジェンダ", "Contents", "AGENDA"):
+            short = [{"title": agenda_title, "body": "第3〜5章"}, {"title": "第3章 a"}]
+            hit = self.cands(short, "agenda_chapter_mismatch")
+            self.assertEqual(len(hit), 1, agenda_title)
+            self.assertEqual((hit[0]["slide"], hit[0]["only_in_agenda"], hit[0]["only_in_body"]), (1, [4, 5], []))
+        for dash in ("~", "-"):
+            hit = self.cands([{"title": "目次", "body": "第1%s2章" % dash}, {"title": "第1章 a"}],
+                             "agenda_chapter_mismatch")
+            self.assertEqual(len(hit), 1, dash)
+            self.assertEqual(hit[0]["only_in_agenda"], [2])
+
+    def test_T138_agenda_chapter_number_forms(self):
+        deck = [{"title": "目次", "body": "第８章\n第一章\n第十二章\n第十章\n第十九章"},
+                {"title": "第8章 a"}, {"title": "第1章 b"}, {"title": "第10章 c"}]
+        hit = self.cands(deck, "agenda_chapter_mismatch")
+        self.assertEqual(len(hit), 1)
+        self.assertEqual((hit[0]["only_in_agenda"], hit[0]["only_in_body"]), ([12, 19], []))
+
+    def test_T143_chapter_numbers_limited_to_spec(self):
+        import check_deck
+        self.assertEqual(check_deck.chapter_numbers("第二十三章 第十十章 第1、2章"), set())   # 十九より大きい漢数字・崩れた表記・「、」は数えない
+        self.assertEqual(check_deck.chapter_numbers("第1-30000000章"), set())                 # 50 を超える範囲は数えない
+        self.assertEqual(check_deck.chapter_numbers("第2-4章 第十九章"), {2, 3, 4, 19})
+        self.assertEqual(check_deck.chapter_numbers("第1-51章"), set(range(1, 52)))           # 幅 50 は数える
+        self.assertEqual(check_deck.chapter_numbers("第1-52章"), set())                       # 幅 51 は数えない
+        self.assertEqual(check_deck.chapter_numbers("第3-1章"), set())                        # 逆向きの範囲は表記ごと数えない
+
+
+# ---------------------------------------------------------------- 話の流れの指摘（story_findings）
+class StoryFindings(unittest.TestCase):
+    def test_T139_validate_story_findings(self):
+        import gate
+        ok = {"slide": 3, "kind": "tangent", "problem": "does not support the conclusion", "fix": "move to appendix"}
+        self.assertEqual(gate.validate_story_findings([]), [])
+        self.assertEqual(gate.validate_story_findings([ok]), [])
+        self.assertEqual(gate.validate_story_findings([dict(ok, slide=None, kind="agenda")]), [])
+        slide_err = "story_findings[0]: slide must be null or an integer >= 1"
+        kinds = ("tangent", "redundant", "counter-example", "missing-bridge", "notes-dependent", "order", "agenda")
+        cases = [(dict(ok, slide=0), slide_err), (dict(ok, slide="3"), slide_err), (dict(ok, slide=True), slide_err),
+                 ({k: v for k, v in ok.items() if k != "slide"}, slide_err),
+                 (dict(ok, kind="style"), "story_findings[0]: kind must be one of " + "/".join(kinds)),
+                 (dict(ok, problem="  "), "story_findings[0]: problem required"),
+                 ({k: v for k, v in ok.items() if k != "fix"}, "story_findings[0]: fix required"),
+                 ("text", "story_findings[0]: must be an object")]
+        for bad, msg in cases:
+            self.assertEqual(gate.validate_story_findings([bad]), [msg], bad)
+        self.assertEqual(gate.validate_story_findings([ok, dict(ok, fix="")]), ["story_findings[1]: fix required"])
+        for not_list in ({"slide": 1}, None):
+            self.assertEqual(gate.validate_story_findings(not_list), ["story_findings must be a list"])
+        for kind in ("tangent", "redundant", "counter-example", "missing-bridge", "notes-dependent", "order", "agenda"):
+            self.assertEqual(gate.validate_story_findings([dict(ok, kind=kind)]), [], kind)
+
+
+class FinalizeStory(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.d = self.tmp.name
+        self.practices = write_json(self.d, "p.json", practices_doc(
+            [practice("fx-llm-must", severity="must"), practice("fx-llm-should")]))
+        self.clarity = write_json(self.d, "c.json", {"axes": [
+            {"id": i, "weight": 20, "practice_ids": ["fx-llm-must", "fx-llm-should"]} for i in AXIS_IDS]})
+        self.auto = write_json(self.d, "a.json", {"violations": [], "limitations": []})
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def finalize(self, review, *extra):
+        rv = write_json(self.d, "r.json", review)
+        p = subprocess.run([sys.executable, FINALIZE, "--deck", os.path.join(self.d, "none.pptx"), "--auto", self.auto,
+                            "--review", rv, "--practices", self.practices, "--clarity", self.clarity,
+                            "--reviewed-at", "2026-11-12T10:00:00+09:00", *extra],
+                           capture_output=True, text=True, encoding="utf-8")
+        self.stdout = p.stdout or ""                       # 標準出力だけ（JSON であること）を別に持つ
+        return p.returncode, self.stdout + (p.stderr or "")
+
+    def test_T140_story_findings_required_in_every_score_mode(self):
+        for mode in ("min", "derived", "reviewer"):
+            code, out = self.finalize({"axes": axes_of(90), "llm_results": llm_ok(), "fixes": []}, "--score-mode", mode)
+            self.assertEqual(code, 3, (mode, out))
+            self.assertIn("story_findings must be a list", out)
+        bad = [{"slide": 2, "kind": "style", "problem": "p", "fix": "f"}]
+        code, out = self.finalize({"axes": axes_of(90), "llm_results": llm_ok(), "fixes": [], "story_findings": bad})
+        self.assertEqual(code, 3, out)
+        self.assertIn("story_findings[0]: kind must be one of", out)
+
+    def test_T141_story_findings_recorded_not_scored(self):
+        two = [{"slide": 4, "kind": "tangent", "problem": "p", "fix": "f"},
+               {"slide": None, "kind": "agenda", "problem": "p2", "fix": "f2"}]
+        code, out = self.finalize({"axes": axes_of(90), "llm_results": llm_ok(), "fixes": [], "story_findings": two})
+        self.assertEqual(code, 0, out)
+        rec = json.loads(self.stdout)                        # 標準出力全体が JSON（行を足さない）
+        self.assertEqual(rec["story_findings"], two)
+        self.assertTrue(rec["summary"].endswith("話の流れの指摘 2 件"), rec["summary"])
+        code0, out0 = self.finalize({"axes": axes_of(90), "llm_results": llm_ok(), "fixes": [], "story_findings": []})
+        self.assertEqual(code0, 0, out0)
+        rec0 = json.loads(self.stdout)
+        self.assertTrue(rec0["summary"].endswith("話の流れの指摘 0 件"), rec0["summary"])
+        self.assertEqual((rec["score"], rec["verdict"]), (rec0["score"], rec0["verdict"]))
 
 
 if __name__ == "__main__":

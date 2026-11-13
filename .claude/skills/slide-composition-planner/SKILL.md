@@ -5,7 +5,7 @@ allowed-tools: Read Write Glob Grep Bash
 argument-hint: "<元資料の絶対パス（任意）> [目的・聴衆・発表時間]"
 metadata:
   provenance: domain-prompt
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # スライド構成決定（pptx 生成の前段）
@@ -22,9 +22,9 @@ pptx 生成 skill に任せる前に、「誰に・何を・どの順で・ど�
 
 ## 手順
 
-1. **結論を決める**: 聴衆に持ち帰ってほしい 1 文を `key_message` にする（結論を先に）。
-2. **流れを決める**: 聴衆の課題を主役にし、現状と望ましい姿を対比させる（`storyline`）。本編の最後（参考の区切りより前）は、望ましい姿と次の行動で終える（`role: closing`）。補足・付録は参考の区切りの後ろに置く。章ごとの話題は 1 つにし、同じ話題を 2 つの章で説明しない（v2 の `sections`・`role: appendix`。下の「設計図 v2 の項目」）。
-3. **スライドに割り当てる**: 1 枚 1 要点。`action_title` は話題名でなく主張の一文にする。要点（`points`）は少数に絞る。本文のスライドには、そのスライドで何を示すかと前提を 1 文で書き（v2 の `intent`）、改善の前後を示す例・聴衆が使う素材・専門的な語は、下の「設計図 v2 の項目」の形で書く。
+1. **聴衆と結論を決める**: 聴衆が普段使う道具・環境（v3 の `narrative.audience_profile.uses`）、前提知識と持っている疑問（`knowledge`・`question`）を書く。持ち帰ってほしいことを 1〜3 個（`narrative.takeaways`）にし、その要約の 1 文を `key_message` にする（結論を先に）。
+2. **流れを決める**: 聴衆の課題を主役にし、現状と望ましい姿を対比させる（`storyline`）。本編の最後（参考の区切りより前）は、望ましい姿と次の行動で終える（`role: closing`。呼びかけ専用のスライドを置くなら closing より前）。補足・付録は参考の区切りの後ろに置く。章ごとの話題は 1 つにし、同じ話題を 2 つの章で説明しない（v2 の `sections`・`role: appendix`。下の「設計図 v2 の項目」）。**本編の各スライドが、どの持ち帰りを支えるかを決める**（v3 の `supports`）。どれも支えないスライドや章は、付録にするか削る。
+3. **スライドに割り当てる**: 1 枚 1 要点。`action_title` は話題名でなく主張の一文にする。要点（`points`）は少数に絞る。本文のスライドには、そのスライドで何を示すかと前提を 1 文で書き（v2 の `intent`）、改善の前後を示す例・聴衆が使う素材・専門的な語は、下の「設計図 v2 の項目」の形で書く。章の始めと、前のスライドの成果物を使うスライドには、前とのつながりを画面に載せる 1 文を書く（v3 の `bridge`・`builds_on`）。同じ型のスライドを 3 回以上使うなら、3 回目からはその回で新しく示す点を書く（v3 の `repeat_pattern`・`new_point`）。下の「設計図 v3 の項目」。
 4. **見せ方を決める**: `evidence_type`（図表で示せるものは文章にしない）、`layout_hint`、`focal_element`（最初に視線が向く要素）、`emphasis_role`、`text_size_class`。次の運用上の注意を守る（出典のない運用規則。2026-11 の実測で、作った資料にこの問題が出たため）。
    - **強調は、その見出しの主張の中心に向ける**: `emphasis_role: focus` を付けるとき、`key_message` に「どの要素を強調するか」を名指しで書く。順番や全体を主張するスライドで、最初の項目だけを強調しない。強調した要素には、色以外の手がかり（太字・番号・短い語）も添える
    - **図の型を、内容に合わせて変える**: 同じ見せ方（カード・表など）を 3 枚以上続けない。順序は図（シェブロン・時系列）、比較は表、数値は大数字、と使い分ける。順序や流れを、表で済ませない
@@ -38,7 +38,7 @@ pptx 生成 skill に任せる前に、「誰に・何を・どの順で・ど�
 
 ## deck-spec.json
 
-トップ: `audience`, `goal`, `key_message`, `storyline`, `slides[]`, `design`（任意: `palette_ref`, `accent_area_max_pct`, `functional_area_max_pct`）。任意: `spec_version`（1 か 2。無ければ 1）、`sections[]`（`id`・`theme`）、`exhibits[]`（`id`・`kind`・`full_text_at`）、`glossary[]`（`term`・`definition`・`first_slide`）。
+トップ: `audience`, `goal`, `key_message`, `storyline`, `slides[]`, `design`（任意: `palette_ref`, `accent_area_max_pct`, `functional_area_max_pct`）。任意: `spec_version`（1・2・3。無ければ 1。新しく作る設計図は 3）、`sections[]`（`id`・`theme`・v3 では任意の `kind`）、`narrative`（v3）、`exhibits[]`（`id`・`kind`・`full_text_at`）、`glossary[]`（`term`・`definition`・`first_slide`）。
 
 **設計図 v2**（`spec_version: 2`）: 本文のスライド（`role: content`）で `intent` を必須にし、書いた任意項目の整合を検査する（項目と検査は下の「設計図 v2 の項目」）。`spec_version` 1 の設計図は、従来どおりの検査だけを行う。
 
@@ -93,6 +93,53 @@ v2 の例（抜粋。前後の対と付録）:
 
 （例では各スライドの共通の項目 `action_title` 等を省いている。実際は全項目を書く）
 
+### 設計図 v3 の項目（話の組み立て）
+
+`spec_version: 3` = v2 の全検査 ＋ 下表。発表全体の筋（誰に・何を持ち帰らせ・各スライドがそのどれを支え・前とどうつながるか）を設計図に書かせ、スライドだけで話が通るようにする。出典の無い運用上の規則で（2026-11 に、AI が作った資料を人が手直しした差分から導いた）、`slide-best-practices.json` には入れず、点数にも入れない。検査は書き手が設計図を正直に書くことが前提で、脇道そのものを見つけるのではない。完成後のずれは `slide-clarity-review` の話の流れの指摘（`story_findings`）が拾う。
+
+章の扱い: v3 では `sections[]`（`id`・`theme`・任意の `kind`: main / reference。無ければ main）が 1 個以上必須。content・closing・appendix・section のスライドは `section` 必須。区切りスライドの `kind`（無ければ main）は、その章の `kind` と一致させる。「章の最初のスライド」は、直前の content と `section` が異なる content（資料で最初の content は除く）。
+
+| 項目 | 書くこと | 検査（括弧は構造の id） |
+|---|---|---|
+| `narrative.audience_profile.uses`（必須）・`knowledge`・`question`（任意） | 聴衆が普段使う道具・環境 / 前提知識 / 持っている疑問 | `uses` が空（audience-profile） |
+| `narrative.takeaways[]`（`id`・`text`）・`thread`（任意） | 持ち帰り 1〜3 個（`key_message` はその要約）/ 全体を通す題材 | 個数・id 重複（takeaways） |
+| `supports`（content で必須） | 支える takeaway の id の配列。導入・前提は `["premise"]`、呼びかけ専用のスライドは `["cta"]`（どちらも単独で） | 空・未知の id・どの content にも支えられない takeaway・premise が持ち帰りのスライドより後・混在（supports-takeaway）。closing の `supports` は任意で、書くなら takeaway の id。付録は検査しない |
+| `cta` の位置 | — | closing より後の呼びかけ（cta-before-closing） |
+| `builds_on`・`bridge`（content だけで検査） | 前のどのスライドの成果物を使うか（番号）/ 前とのつながりを画面に載せる 1 文 | 前を指さない builds_on。章の最初のスライドと builds_on を持つスライドで bridge が空（bridge） |
+| `repeat_pattern`・`new_point`（content だけで数える） | 同じ型のスライドの型名（`example.pattern` とは別物）/ その回で新しく示す点 | 同じ型の 3 枚目以降で new_point が空（pattern-repeat） |
+| 目次の `agenda_sections` | その目次に載せる章の id | 目次があるときだけ。空・未知や参考の章・本編の章の漏れ（agenda-sections）。目次の文言（`points`）は照合しない |
+
+`intent` と `bridge` の分担: `intent` はこのスライドで示すことと前提、`bridge` は前の章・前の成果物とのつながり。画面では 1 文にまとめてよい（例:「第 1 章で作った依頼文を使い、レビューを別の会話で行う」）。設計図には両方書く。
+
+運用上の注意（出典なし。手直しの差分から）:
+- 例の結果が章の主張と逆向きになるもの（但し書き・例外）は本編に置かず、ノートか付録に移し、本編には 1 行の注にとどめる
+- 依頼文などの「やること」を先に見せ、「なぜ効くか」はその後に置く
+- 例に出す道具の名前は `uses` から選ぶ（聴衆が普段使わない道具で例を示さない）
+- 前提・条件・つながりは画面に書く。ノートは補足だけにし、ノートを読まないと主張が成り立たない形にしない
+- スライドや章を削ったら、目次（`agenda_sections`）と冒頭の概要スライドも直す
+
+v3 の例（抜粋）:
+
+```json
+{
+  "spec_version": 3,
+  "narrative": {"audience_profile": {"uses": "表計算ソフトと社内のチャット", "knowledge": "AI チャットは使ったことがある", "question": "どう頼めば確かな答えが返るか"},
+                "takeaways": [{"id": "t1", "text": "依頼を決まった項目にする"}, {"id": "t2", "text": "別の会話でレビューする"}],
+                "thread": "出張先の店選び"},
+  "sections": [{"id": "s1", "theme": "依頼の形"}, {"id": "s2", "theme": "レビューの分け方"}, {"id": "r1", "theme": "参考", "kind": "reference"}],
+  "slides": [
+    {"no": 2, "role": "agenda", "agenda_sections": ["s1", "s2"]},
+    {"no": 3, "role": "content", "section": "s1", "supports": ["premise"], "intent": "題材と条件を示す"},
+    {"no": 4, "role": "content", "section": "s1", "supports": ["t1"], "intent": "依頼文を項目にした結果を示す", "repeat_pattern": "why-it-works"},
+    {"no": 5, "role": "content", "section": "s2", "supports": ["t2"], "builds_on": 4, "intent": "レビューの頼み方を示す",
+     "bridge": "第 1 章で作った依頼文を使い、レビューを別の会話で行う"},
+    {"no": 6, "role": "content", "section": "s2", "supports": ["cta"], "intent": "相談の窓口を示す"},
+    {"no": 7, "role": "closing", "section": "s2", "supports": ["t1", "t2"]},
+    {"no": 8, "role": "section", "section": "r1", "kind": "reference"}, {"no": 9, "role": "appendix", "section": "r1"}
+  ]
+}
+```
+
 ### 最小の例（2 枚抜粋。実際は全枚数を書く）
 
 ```json
@@ -136,7 +183,7 @@ python .claude/skills/_shared/scripts/validate_slide_data.py deck-spec <deck-spe
 python .claude/skills/_shared/scripts/validate_slide_data.py palette <palette.json>
 ```
 
-終了コード 0 で合格。1 は違反（`slide N: <practice id> violated (...)` の形で出る。設計図 v2 の構造の誤りは `slide 3: intent missing (purpose-and-premise)` のように、関係する観点の id を括弧で添えて出る）、2 は読込エラー。
+終了コード 0 で合格。1 は違反（`slide N: <practice id> violated (...)` の形で出る。設計図 v2・v3 の構造の誤りは `slide 3: intent missing (purpose-and-premise)`・`slide 5: bridge missing (bridge)` のように、関係する観点の id を括弧で添えて出る）、2 は読込エラー。
 
 ## 機械検査できない観点（作る側のセルフチェック）
 
@@ -151,7 +198,7 @@ python .claude/skills/_shared/scripts/validate_slide_data.py palette <palette.js
 - 元資料が読めない・空: 構成に入らず、パスの再指定を依頼する。
 - 検査が 2 周直しても通らない: 通らない項目と理由をユーザーに示し、基準側を変えるか構成を変えるかを聞く（`slide-best-practices.json` を黙って緩めない）。
 - `palette_ref` が無い: 役割名だけで出力し、色の決定は生成側に任せる（その旨を報告する）。
-- v2 の構造の誤り（`slide 3: intent missing (purpose-and-premise)` など）: 括弧の観点の id を手がかりに、その項目を書き足すか直す。例を含まない資料で `example` 等の誤りが出たら、項目自体を消す（書かなければ検査されない）。
+- v2・v3 の構造の誤り（`slide 3: intent missing (purpose-and-premise)`・`slide 4: supports missing (supports-takeaway)` など）: 括弧の観点の id を手がかりに、その項目を書き足すか直す。例を含まない資料で `example` 等の誤りが出たら、項目自体を消す（書かなければ検査されない）。`supports-takeaway` で落ちたスライドは、支える持ち帰りを書けないなら付録に移すか削る（持ち帰りを増やして通さない）。
 - 検査コマンドが実行できない（python が無い、スクリプトや `slide-best-practices.json` が無い、終了コード 2）: 検査を飛ばして先へ進まない。何が実行できなかったかを報告し、`deck-spec.json` は「未検査」と明記してユーザーに渡す。
 
 ## 使用例
@@ -160,5 +207,6 @@ python .claude/skills/_shared/scripts/validate_slide_data.py palette <palette.js
 
 ## 更新履歴
 
+- 1.3.0（2026-11-12）: 設計図 v3（聴衆の道具・持ち帰り 1〜3 個・各スライドが支える持ち帰り・前とのつながり・同じ型の繰り返し・目次と章の一致・呼びかけの位置）と、その構造の検査を追加。AI が作った資料を人が手直しした差分（脇道の章・逆向きの例・同じ型の 3 回目の削除、前の章の成果物を次の章で使う流れ、まとめを最後に）から導いた
 - 1.2.0（2026-11-06）: 設計図 v2（章立て・目的と前提・例の型・素材の置き場所・用語の一覧・付録の順序）と、その構造の検査を追加。本編の最後を「参考の区切りより前」とした。空の枠と表の高さの運用上の注意を追加
 - 1.1.0: このリポジトリに追加

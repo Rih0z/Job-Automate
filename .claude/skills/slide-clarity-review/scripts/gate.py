@@ -1,7 +1,7 @@
 """gate.py — 修正ループの合否判定と review-record の組み立て（純関数。ファイルには書かない）。
 
 呼び出し順: validate_axes → validate_llm_results → validate_not_applicable → validate_axis_citations
-          → compute_gate → build_record
+          → validate_story_findings → compute_gate → build_record
 - ランク: 総合点を review-rubrics.yaml の rank5_100（90/80/70/60）で S〜D に割り当てる
 - ゲート: must の auto 違反、llm の must 不合格、総合 80 点未満（ランク A 未満）のどれかで FAIL。
   ランクとゲートは別物（95 点でも must 違反があれば「ランク S・FAIL」）
@@ -159,6 +159,32 @@ def validate_not_applicable(llm_results, practices, totals):
         hit = sc.auto_trigger_holds(trig, totals)
         if hit:
             errors.append("%s cannot be not applicable (auto_trigger holds: %s)" % (pid, hit))
+    return errors
+
+
+STORY_KINDS = ("tangent", "redundant", "counter-example", "missing-bridge", "notes-dependent", "order", "agenda")
+
+
+def validate_story_findings(findings):
+    """話の流れの指摘（story_findings。点数・ゲートに入れない）の形を検査する（2026-11 追加）。
+    各要素 {"slide": 1 以上の整数か null, "kind": STORY_KINDS, "problem", "fix"}。要素ごとに最初の誤りを 1 件返す。"""
+    if not isinstance(findings, list):
+        return ["story_findings must be a list"]
+    errors = []
+    for i, f in enumerate(findings):
+        where = "story_findings[%d]" % i
+        if not isinstance(f, dict):
+            errors.append("%s: must be an object" % where)
+            continue
+        slide = f.get("slide", "missing")
+        if not (slide is None or (isinstance(slide, int) and not isinstance(slide, bool) and slide >= 1)):
+            errors.append("%s: slide must be null or an integer >= 1" % where)
+        elif f.get("kind") not in STORY_KINDS:
+            errors.append("%s: kind must be one of %s" % (where, "/".join(STORY_KINDS)))
+        elif not (isinstance(f.get("problem"), str) and f["problem"].strip()):
+            errors.append("%s: problem required" % where)
+        elif not (isinstance(f.get("fix"), str) and f["fix"].strip()):
+            errors.append("%s: fix required" % where)
     return errors
 
 
