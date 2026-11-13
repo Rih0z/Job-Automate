@@ -17,6 +17,8 @@ metadata:
 
 根拠データ: `.claude/skills/_shared/slide-best-practices.json`（出典 URL・著者・機関・原文の抜粋つき）。観点と配点: `criteria/clarity.json`（5 軸・各 20 点）。ランクの意味: `.claude/skills/_shared/review-rubrics.yaml` の `rank5_100`。行動原則（証拠主義・引用義務・非破壊）は同ファイルの `common_principles` を適用する。
 
+移植するときの前提: この skill は同じリポジトリの `.claude/skills/_shared/`（`slide-best-practices.json`・`slide-sources/`・`review-rubrics.yaml`・`review-record.schema.json`・`scripts/` の `slide_checks.py`・`append_review_record.py`）を使い、コマンドはリポジトリのルートから実行する前提で書いている。別のプロジェクトへ入れる時は、これらを同じ相対パスに置く（一覧は `docs/slide-creation-kit.md` の「手でコピーする」。その文書が無い環境では、この段落の一覧に従う）。点検員の定義 `readonly-reviewer` が無ければ `general-purpose` に「ファイルを作成・変更・削除しない」と明記して使う。試験は `python .claude/skills/_shared/scripts/test_slide_skills.py`。
+
 依存: 抽出（`extract_deck.py`）は標準ライブラリのみ。試験の fixture 作成には python-pptx（`pip install python-pptx`）。画像化（LibreOffice で PDF にし、poppler の pdftoppm で画像にする。PowerPoint がある環境では、PowerPoint で書き出した PDF・画像を代わりに渡してもよい）は、視覚設計と可読性の採点に必要。画像が無い場合は構造とテキストだけで点検し、結果の limitations に記録する。その場合、視覚設計と可読性の軸には満点を付けず、上限を 14 点とする（暫定値。2026-11 の実測で、画像なしの採点が、折り返しの不自然さ・空白・同じ見た目の連続・強調と主張の食い違いを見落としたため）。
 
 ## 手順（リポジトリのルートから実行）
@@ -37,6 +39,7 @@ metadata:
    - 返却形式: `{"axes":[{"id","score","citations":["[practice-id] slide 3: …"]}],"llm_results":[{"practice_id","passed"} | {"practice_id","applicable":false,"reason"}],"fixes":[{"slide","practice_id","problem","fix"}],"story_findings":[{"slide","kind","problem","fix"}]}`。`story_findings` は必須（無ければ空配列）。下の「話の流れの点検」。各軸 0〜20 点、citations は成果物内の記述の引用を最低 1 つ。引用の先頭に、理由にした観点の id を `[practice-id] ` の形で付けてよい（任意）。
    - **対象外と、判定できないの区別**: 適用条件（`applies_when.deck`）を持つ観点で、資料がその条件に当たらないときだけ `applicable: false` と理由を返す（減点も加点もしない）。適用条件の無い観点は対象外にできない。資料が条件に当たるのに判断材料が足りない観点は、対象外にせず passed を false にし、理由を fixes に書く。
    - 点検員への指示に「対象外にした観点を理由に、軸の点を下げない」と「構造の id（`bridge`・`supports-takeaway` など、practice でない id）を軸の引用の接頭辞に使わない」を含める。
+   - **画像を渡せない時**: 点検員への指示に「視覚設計（`ax-design`）と可読性（`ax-legibility`）は 14 点以下で返す」を含め、limitations に「描画未確認」と書かせる（上の「依存」の上限。`finalize_review.py` は導出点と点検員の点の低い方を取るので、上限はこの指示で掛ける）。返ってきた 2 軸が 14 点を超えていたら、出し直しを依頼する。
 4. **検査とゲート判定**: reviewer の JSON を保存し、`python .claude/skills/slide-clarity-review/scripts/finalize_review.py --deck <deck.pptx> --auto <作業dir>/auto-results.json --review <作業dir>/reviewer.json --practices .claude/skills/_shared/slide-best-practices.json --clarity .claude/skills/slide-clarity-review/criteria/clarity.json --facts <作業dir>/deck-facts.json --write`。
    - 終了コード 3: reviewer の出力が不正（軸の欠落・点数範囲外・citations 空・llm 観点の判定漏れ・対象外にできない観点の対象外・理由の無い対象外・機械の条件 `auto_trigger` と矛盾する対象外・対象外にした観点や存在しない id を接頭辞にした引用・`story_findings` の欠落と形の不正）。標準エラーの理由を添えて再出力を依頼する。`auto_trigger` を持つ観点を対象外にするには `--facts` が要る。
    - 0=PASS / 1=FAIL。`--write` で `.claude/review-history/slide-clarity-review/` に record が保存される。点検したのが別のリポジトリの資料なら、`--history-root <作業dir>/history` を付けて、この skill を置いたリポジトリに record を書かない。record には点検した .pptx の `target.sha256` と、対象外の一覧 `not_applicable` が入る。
@@ -58,6 +61,7 @@ metadata:
 - **文字の折り返しと空白**: 1〜2 文字だけ次の行に落ちる、語の途中で改行される、空白が大きく文字が小さい
 - **候補の確認**: `candidates` の空の枠・重なり・表のはみ出しが、画像で本当に見えるか
 - **運用上の注意（出典なし。点数に入れず、気づいた点を fixes に書く）**: 前のスライドからつながらないスライド（章の始め・例・数値）の冒頭に、目的と前提があるか。1 つの例に 2 つの対策が混ざっていないか。聴衆が使う素材（依頼文・設定・計算式など）の全文がどこか 1 か所にあり、説明のスライドで効く部分が対応付けられているか。例や結果が、書いた条件（対象の数・手順）と一致しているか（2026-11 の検証で、完成した資料でのこの 4 点の判定は点検員の間で割れたため、点数に入れない）
+
 LibreOffice など、実機の PowerPoint と違う描画ソフトを使った場合は、折り返しの指摘に「描画ソフトの差の可能性」を添える。
 
 ### 話の流れの点検（手順 3 の追加。点数・ゲートに入れない）
@@ -111,7 +115,21 @@ LibreOffice など、実機の PowerPoint と違う描画ソフトを使った�
 
 ## 出力
 
-ユーザーへの報告: ゲート結果とランク、軸別の得点、違反の一覧（スライド番号・practice id・出典 URL）、話の流れの指摘（`story_findings` の全件。点数とは別の区分）、対象外にした観点と理由（`not_applicable`）と手順 4 の事後確認の結果、候補の一覧、適用した修正、limitations。reviewer の結果を要約し直して緩めない。
+ユーザーへの報告は次の型で返す。reviewer の結果を要約し直して緩めない。
+
+```
+## 分かりやすさの点検: <PASS / FAIL>（<合計> 点・ランク <S〜D>・<n> 回目の点検）
+対象: <.pptx の絶対パス>（sha256 の先頭 12 桁）／ record: <保存した record のパス>
+| 軸 | 得点 | 導出点 | 主な根拠（[practice-id] slide N: 引用） |
+|---|---|---|---|
+| ax-message 〜 ax-legibility の 5 行 |
+違反: <スライド番号・practice id・出典 URL を 1 行ずつ。無ければ「なし」>
+対象外にした観点: <practice id と理由。手順 4 の事後確認の結果>
+候補: <種類と件数。画像で確かめた結果>
+話の流れの指摘（story_findings。点数とは別）: <slide・kind・problem・fix を 1 行ずつ全件。作る側が直すか、直さない理由を添える。無ければ「なし」>
+適用した修正: <スライド番号と内容。無ければ「なし」>
+limitations: <描画未確認・描画ソフトの差・検査できた割合>
+```
 
 ## エラー時
 
@@ -129,5 +147,6 @@ LibreOffice など、実機の PowerPoint と違う描画ソフトを使った�
 ## 更新履歴
 
 - 1.3.0（2026-11-12）: 話の流れの点検（`story_findings`。必須・点数外）と、候補 `agenda_chapter_mismatch`・`notes_only_context`、抽出の `notes_text`・`notes_chars`・`screen_chars`・`layout_name` を追加
+- 1.2.1（2026-11-12）: 画像を渡せない時の 2 軸の上限（14 点）を、手順 3 の点検員への指示で掛けることを明記した。ユーザーへの報告の型、移植するときの前提（`_shared/` の一覧・実行場所・試験の場所）を足した。`render_deck.py` の先頭に、`find_soffice` / `find_pdftoppm` を `sns-square-slides` が import する旨を 1 行足した
 - 1.2.0（2026-11-06）: 適用条件のある観点（当たらない資料では対象外）と、対象外の返却・検査（`--facts`・引用の接頭辞）を追加。軸の参照を 24 項目から 28 項目に（同じ話題は 1 か所・前後の順序・所在の明示・本編と参考の順序）。機械検査の候補、record のハッシュ、`--history-root`、確定前の `--verify-latest` を追加
 - 1.1.0: このリポジトリに追加

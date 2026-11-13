@@ -1520,6 +1520,27 @@
     {
       "id": "CR-54",
       "date": "2026-11-12",
+      "finding": "agent-harness-bootstrap の Step 5 の rubric 判定は、decided_by が user か scale の時だけを『opt-out 記録済み』として Y にする（SKILL.md の Step 5・rubric.md の冒頭）。非対話で C 群を非採用にした要素は selection-flow.md の規定で decided_by: default になるため Y にならず、『N が 1 つでもあれば書き直す』が終わらないか、既定で非採用の要素を持ち込むことになる",
+      "principles": [],
+      "severity": "Medium",
+      "status": "backlog",
+      "note": "2026-11-12 の review-skill（sns-square-slides を台帳に登録した変更のレビュー、90 点 PASS）で medium として指摘された。今回の変更の範囲外のため直していない。直す時は、opt-out として認める decided_by に default（と excluded）を加えるか、非対話で落とした要素の記録値を決め、rubric.md・SKILL.md・selection-flow.md をそろえる。provenance-check.test.sh に非対話の選択記録のケースを足し、同じ skill の CR-47・CR-52 と一緒に直して agent-harness-bootstrap の review-skill を通す",
+      "related": [
+        "CR-47",
+        "CR-52"
+      ],
+      "priority": "P2",
+      "reviewed": "2026-11-12",
+      "premise": [
+        {
+          "path": ".claude/skills/agent-harness-bootstrap/rubric.md",
+          "contains": "`decided_by: \"scale\"` または `\"user\"`"
+        }
+      ]
+    },
+    {
+      "id": "CR-55",
+      "date": "2026-11-12",
       "finding": "slide-composition-planner と slide-clarity-review が、発表全体の筋（聞き手・持ち帰り・各スライドが何を支えるか・前とのつながり）とスライド単体での完結を扱っていなかった。AI が作った資料を人が手直しした差分（脇道の章・章の主張と逆向きの例・同じ型の説明の 3 回目の削除、前の章の成果物を次の章で使う流れ、呼びかけの後にまとめ）と、手直し後も残った目次と章の食い違いを、設計図の検査でも完成後の点検でも捕まえられなかった",
       "principles": [
         "verification.give-a-check-and-show-evidence",

@@ -39,6 +39,8 @@ AI に資料を作らせると、見た目は整っていても「何を言い�
 | `slide-japanese-review` | スライドの文面の日本語の点検 | 視覚設計、散文の日本語 |
 | `stop-ai-slop-jp` | 散文の日本語の点検 | スライド |
 
+SNS の投稿に添える正方形の画像 4 枚は `sns-square-slides` で作ります（4 枚の役割と並びが決まっていて、章や付録を前提にした設計図と点検には乗せないため）。配色ファイルは同じ形式（`roles`）なので共用できます（ただし `focus` は暗い地のラベルにも使うため、明るい資料向けの濃い `focus` は明暗差の検査で落ちます。そのときは設定の `palette` で `focus` だけを明るい色に上書きします）。また、作った .pptx は段階 4 の `slide-japanese-review` に渡します。画像化の道具の探し方は `slide-clarity-review/scripts/render_deck.py` を使います。
+
 skill を目的ごとに分けているのは、ソフトウェア開発でいう「単一責任の原則」（1 つの部品は 1 つの理由でだけ変更する）と、Unix の「1 つのことをうまくやる小さな道具を組み合わせる」という考え方に沿うためです。分けておくと、基準の見直しが他の点検に波及せず、作成 skill だけを組織のものに差し替える、といった組み替えもしやすくなります。
 
 ## 4. 点数の決め方
@@ -85,7 +87,7 @@ skill を目的ごとに分けているのは、ソフトウェア開発でい�
 1. 入れたいプロジェクトの直下に、このリポジトリを `.setup-automate/` という名前で clone し、`.gitignore` に登録します（手順の詳細は [setup-guide.md](setup-guide.md)）
 2. `.setup-automate/` の中で Claude Code を起動し、「親ディレクトリに資料作成キットを入れて」のように依頼します
 3. 移植の手順（[setup-guide.md](setup-guide.md)）のうち、取り込む要素の選択で「資料作成キット」（由来台帳 `provenance.json` の `slide-creation-kit`）を選びます。次が対象に入ります
-   - `.claude/skills/` の `slide-composition-planner`・`slide-clarity-review`・`slide-japanese-review` と、共有のデータ・スクリプト
+   - `.claude/skills/` の `slide-composition-planner`・`slide-clarity-review`・`slide-japanese-review`・`sns-square-slides` と、共有のデータ・スクリプト
    - この文書（`docs/slide-creation-kit.md`）
    - 下の「そのまま貼れるルール」を、対象の `CLAUDE.md`（Claude Code が毎回読む指示ファイル）に貼ったもの
 
@@ -98,6 +100,7 @@ skill を目的ごとに分けているのは、ソフトウェア開発でい�
 | `.claude/skills/slide-composition-planner/` | 段階 1 |
 | `.claude/skills/slide-clarity-review/` | 段階 3（画像化のスクリプトを含む） |
 | `.claude/skills/slide-japanese-review/` | 段階 4 |
+| `.claude/skills/sns-square-slides/` | SNS 投稿用の正方形の画像 4 枚（`slide-clarity-review/scripts/render_deck.py` を使う） |
 | `.claude/skills/_shared/slide-best-practices.json` と `.claude/skills/_shared/slide-sources/` | 点検の根拠（出典付き） |
 | `.claude/skills/_shared/scripts/` の `slide_checks.py`・`validate_slide_data.py`・`append_review_record.py`（試験を回すなら `test_slide_skills.py` も） | 検査と記録 |
 | `.claude/skills/_shared/review-record.schema.json`・`.claude/skills/_shared/review-rubrics.yaml` | 記録の形式と点数ランクの定義 |

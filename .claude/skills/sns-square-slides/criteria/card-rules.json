@@ -1,0 +1,179 @@
+{
+  "schema": "sns-square-cards-rules/v3",
+  "_note": "SNS 投稿用の正方形カード 4 枚の数値と点検表の正本。make_square_cards.py と SKILL.md はここを参照し、数値を重ねて書かない。文字数の上限と目安は運用上の目安（出典なし）で、1080x1080・下の font_pt で折り返しが崩れない量から決めた。投稿文の数え方 x は出典のある規則（post_count.x.source）。",
+  "card_count": 4,
+  "cards_layout": [
+    {
+      "role": "hook",
+      "bg": "dark",
+      "doc": "1 枚目。流し見で手が止まる結論か数字を 1 つ。暗い地"
+    },
+    {
+      "role": "evidence",
+      "bg": "light",
+      "doc": "2 枚目。結論を支えるデータか比較を 1 つ。明るい地で読ませる"
+    },
+    {
+      "role": "evidence",
+      "bg": "light",
+      "doc": "3 枚目。2 枚目と別の角度のデータ（条件・反対側の数字・限界）を 1 つ"
+    },
+    {
+      "role": "close",
+      "bg": "dark",
+      "doc": "4 枚目。読み手が持ち帰る結論か次の行動。暗い地で 1 枚目と挟む"
+    }
+  ],
+  "limits": {
+    "title_max": 40,
+    "title_recommended": 24,
+    "title_max_lines": 3,
+    "body_max": 120,
+    "body_recommended": 60,
+    "body_max_lines": 5,
+    "note_max": 60,
+    "label_max": 20,
+    "count_rule": "Unicode の NFC に正規化し、改行を除いた code point の数。title と body は目安を超えると小さい方の文字サイズで描く"
+  },
+  "post_count": {
+    "default": "x",
+    "x": {
+      "max": 280,
+      "scale": 100,
+      "default_weight": 200,
+      "url_length": 23,
+      "ranges": [
+        [
+          0,
+          4351,
+          100
+        ],
+        [
+          8192,
+          8205,
+          100
+        ],
+        [
+          8208,
+          8223,
+          100
+        ],
+        [
+          8242,
+          8247,
+          100
+        ]
+      ],
+      "source": "https://github.com/twitter/twitter-text/blob/master/config/v3.json（2026-11-12 取得）",
+      "doc": "NFC に正規化し、code point ごとに ranges の重み（無ければ default_weight）を足して scale で割る。http:// か https:// で始まり ASCII の印字可能な文字が続く URL は 1 つ url_length（日本語の文字で URL は終わる）。全角はおおむね 2、半角英数は 1 に当たる。絵文字の合成（ZWJ など）は code point ごとに数えるので、X より多めに数える（安全側）"
+    },
+    "chars": {
+      "max": 140,
+      "doc": "NFC に正規化した code point の数（改行も 1）。X 以外で、文字数そのものが上限の媒体に使う"
+    }
+  },
+  "copy_min_chars": 10,
+  "min_contrast": 4.5,
+  "font_pt": {
+    "label": 18,
+    "title": 52,
+    "title_small": 40,
+    "body": 30,
+    "body_small": 24,
+    "note": 16,
+    "page_number": 14
+  },
+  "layout_in": {
+    "_note": "10in x 10in のスライドの上の枠（x, y, 幅, 高さ。単位 in）。行数の上限（limits の *_max_lines）はこの高さと font_pt と line_spacing から決めた",
+    "label": [
+      0.5,
+      0.4,
+      6.0,
+      0.6
+    ],
+    "title": [
+      0.6,
+      1.3,
+      8.8,
+      3.5
+    ],
+    "body": [
+      0.7,
+      5.0,
+      8.6,
+      3.2
+    ],
+    "note": [
+      0.7,
+      8.3,
+      8.6,
+      0.9
+    ],
+    "page_number": [
+      8.0,
+      9.3,
+      1.6,
+      0.5
+    ]
+  },
+  "line_spacing": 1.2,
+  "page_number_format": "{n} / {total}",
+  "default_font": {
+    "darwin": "Hiragino Sans",
+    "other": "Noto Sans CJK JP"
+  },
+  "palette_roles_used": {
+    "dark_bg": "text-primary",
+    "light_bg": "surface-1",
+    "text_on_dark": "surface-1",
+    "text_on_light": "text-primary",
+    "label_on_dark": "focus",
+    "label_on_light": "text-primary",
+    "note_on_light": "text-secondary",
+    "note_on_dark": "surface-2"
+  },
+  "default_palette": {
+    "_note": "汎用の配色。特定のブランド色は持たない。役割名は slide-composition-planner の palette と同じなので、同じ配色ファイルを palette_ref に渡せる（使わない役割は無視する）。",
+    "roles": {
+      "focus": "#8FB3FF",
+      "surface-1": "#F2F4F8",
+      "surface-2": "#C3CAD6",
+      "text-primary": "#1E2330",
+      "text-secondary": "#4A5060"
+    }
+  },
+  "review_checklist": [
+    {
+      "id": "R1",
+      "check": "1 枚目だけを見て、何の話で結論か数字が何かが分かる"
+    },
+    {
+      "id": "R2",
+      "check": "1 枚に要点は 1 つ。2・3 枚目は結論を支えるデータで、同じことを繰り返していない"
+    },
+    {
+      "id": "R3",
+      "check": "注記は、並べた計算・数値のどれに掛かるかを行単位で書いている（例: 2 つの計算のうち片方にしか当てはまらない注記を、両方に掛かるように置いていない）"
+    },
+    {
+      "id": "R4",
+      "check": "金額の換算や例は、対象（商品名・ファンド名・指標名など）を名指ししている。別の対象の数値を当てはめていない"
+    },
+    {
+      "id": "R5",
+      "check": "数値には時点か期間が付いている（『直近』だけで終わらない）"
+    },
+    {
+      "id": "R6",
+      "check": "投稿文はスライドの要約の写し（言い換えを含む）でなく、スライドに無い一次の補足を 1 つ含み、その所在が supplement_source にある"
+    },
+    {
+      "id": "R7",
+      "check": "文字がはみ出していない・不自然に折り返していない・地と文字の明暗差が足りている（画像で確かめる）"
+    },
+    {
+      "id": "R8",
+      "check": "4 枚目は結論か次の行動で終わり、『詳しくはこちら』だけで終わっていない（リンクは投稿文の側に置く）"
+    }
+  ]
+}

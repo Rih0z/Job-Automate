@@ -1659,14 +1659,15 @@
       "id": "slide-creation-kit",
       "kind": "skill",
       "provenance": "domain-prompt",
-      "summary": "資料作成キット: PowerPoint を「構成決定（slide-composition-planner）→ 作成（標準の pptx skill など、差し替え可）→ 分かりやすさの点検（slide-clarity-review）→ 日本語の点検（slide-japanese-review）→ 組織固有の検査（任意）」の順で作る。点検は別エージェントがスライドを画像にして行う。流れ・点数の決め方・CLAUDE.md に貼るルール断片は docs/slide-creation-kit.md。",
+      "summary": "資料作成キット: PowerPoint を「構成決定（slide-composition-planner）→ 作成（標準の pptx skill など、差し替え可）→ 分かりやすさの点検（slide-clarity-review）→ 日本語の点検（slide-japanese-review）→ 組織固有の検査（任意）」の順で作る。点検は別エージェントがスライドを画像にして行う。SNS の投稿に添える正方形の画像 4 枚（構成と投稿文の分担、1080x1080 の JPEG の生成）は sns-square-slides。流れ・点数の決め方・CLAUDE.md に貼るルール断片は docs/slide-creation-kit.md。",
       "applies_to": [
         "CLAUDE.md 資料（スライド）を作るとき（docs/slide-creation-kit.md の「そのまま貼れるルール」節が移植用の版）"
       ],
       "skills": [
         "slide-composition-planner",
         "slide-clarity-review",
-        "slide-japanese-review"
+        "slide-japanese-review",
+        "sns-square-slides"
       ],
       "files": [
         "docs/slide-creation-kit.md",
@@ -1683,7 +1684,7 @@
         "shared-review-rubrics",
         "skill-stop-ai-slop-jp"
       ],
-      "note": "選んだ時は、docs/slide-creation-kit.md の「そのまま貼れるルール」節を対象の CLAUDE.md に貼る。_shared/scripts/append_review_record.py と _shared/review-record.schema.json も一緒にコピーする（research-deliverable-review と共用のため files[] には載せない。載せると非選択時の不在検査が、それらを使う他の skill を選んだ対象で誤検知する）。散文の日本語の点検（stop-ai-slop-jp）は別要素。"
+      "note": "選んだ時は、docs/slide-creation-kit.md の「そのまま貼れるルール」節を対象の CLAUDE.md に貼る。_shared/scripts/append_review_record.py と _shared/review-record.schema.json も一緒にコピーする（research-deliverable-review と共用のため files[] には載せない。載せると非選択時の不在検査が、それらを使う他の skill を選んだ対象で誤検知する）。散文の日本語の点検（stop-ai-slop-jp）は別要素。sns-square-slides は同じ要素の slide-clarity-review/scripts/render_deck.py（道具の探し方）と slide-japanese-review を使うため、この要素に置く（2026-11-12 追加。この要素を既に選んで移植した対象は、再同期でこの skill を入れるまで C12 の selected skill の欠落になる）。"
     },
     {
       "id": "article-html-kit",
